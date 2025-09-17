@@ -99,15 +99,98 @@ The color palette combines custom brand colors with Apple's system colors to ens
 
 ---
 
-## 9. Empty States & Illustrations
+## 9. Live Meter Design
+
+- **Placement:** Fixed header above tab content, approximately 80pt height
+- **Background:** Subtle gradient from brand primary (#4A90E2) to lighter tint
+- **Animation:** Smooth numerical counting using NumberFormatter with locale support (no flip-style)
+- **Color Logic:**
+  - **Positive flow:** Green text (`Color.green`)
+  - **Negative flow:** Red text (`Color.red`)
+  - **Zero flow:** Neutral gray text (`Color.secondary`)
+- **Typography:** Large, bold numbers with tabular spacing for smooth animation
+- **Performance:** Updates without impacting scroll performance
+
+---
+
+## 10. Financial Category Icons (SF Symbols)
+
+### Expense Categories
+- **Food/Dining:** `fork.knife` or `takeoutbag.and.cup.and.straw`
+- **Transportation:** `car.fill` or `bus.fill`
+- **Rent/Housing:** `house.fill`
+- **Utilities:** `bolt.fill` or `lightbulb.fill`
+- **Healthcare:** `cross.fill` or `stethoscope`
+- **Entertainment:** `tv.fill` or `gamecontroller.fill`
+- **Shopping:** `bag.fill`
+
+### Income Categories
+- **Salary/Income:** `dollarsign.circle.fill`
+- **Freelance:** `briefcase.fill`
+- **Investment:** `chart.line.uptrend.xyaxis`
+
+### Implementation Notes
+- Use **SF Symbols 4+** with semantic colors
+- **Filled versions** for active/selected states
+- **Outlined versions** for inactive states
+- Ensure icons **scale with Dynamic Type**
+
+---
+
+## 11. Input Field Styling
+
+- **Keyboard Type:** `.decimalPad` exclusively for all monetary inputs
+- **Formatting Strategy:**
+  - Show **plain numbers** during input (no live formatting)
+  - Display **formatted currency** on blur using `NumberFormatter`
+  - Currency symbol as **prefix display only** (not in input field)
+- **Visual Style:**
+  - Rounded rectangle with subtle border
+  - Increase border width/color on focus using brand primary
+  - 44pt minimum touch target height
+- **Error States:**
+  - Red border with system red color
+  - Subtle shake animation for invalid input
+- **Accessibility:** Full VoiceOver support with descriptive labels
+
+---
+
+## 12. Tab Bar Design
+
+- **Icons (Active/Inactive):**
+  - **Expenses:** `minus.circle.fill` / `minus.circle`
+  - **Income:** `plus.circle.fill` / `plus.circle`  
+  - **Summary:** `chart.bar.fill` / `chart.bar`
+  - **Settings:** `gearshape.fill` / `gearshape` (if needed)
+- **Selection Style:**
+  - **Active:** Brand primary color (#4A90E2)
+  - **Inactive:** System gray colors
+- **Animation:** Subtle scale animation (1.0 to 1.1) on tap
+- **Labels:** Show text labels for accessibility compliance
+
+---
+
+## 13. Dark Mode Adaptations
+
+- **Brand Color Adjustments:**
+  - **Primary Brand:** #4A90E2 → #5BA3F5 (15-20% lighter)
+  - **Success Green:** #10B981 → #34D399 (slightly brighter)
+  - **Background:** Use `Color(uiColor: .systemBackground)` instead of fixed #FAFAFA
+- **Implementation:** Use adaptive colors with `UIColor { traitCollection in ... }`
+- **Accessibility:** Maintain minimum 4.5:1 contrast ratio
+- **Fallback:** Use system accent colors when brand colors don't meet contrast requirements
+
+---
+
+## 14. Empty States & Illustrations
 
 - **No Custom Illustrations:** Use SF Symbols exclusively for visual elements and empty states.
 - **Empty State Components:**
-  - **Icon:** Large SF Symbol (e.g., `tray`, `creditcard`, `chart.line.uptrend.xyaxis`)
+  - **Icon:** Large SF Symbol from category mapping above
   - **Message:** Short, encouraging text using secondary text color
   - **Action:** Optional primary button using brand color for next steps
 - **Examples:**
-  - Empty expenses: `creditcard` icon + "Add your first expense to get started!"
-  - Empty income: `dollarsign.circle` icon + "Add your income sources"
-  - Empty summary: `chart.line.uptrend.xyaxis` icon + "Enter your finances to see insights"
+  - Empty expenses: `minus.circle` icon + "Add your first expense to get started!"
+  - Empty income: `plus.circle` icon + "Add your income sources"  
+  - Empty summary: `chart.bar` icon + "Enter your finances to see insights"
 
