@@ -1,0 +1,93 @@
+# BudgetMeter iOS: General Rulebook
+
+**Version:** 1.0  
+**Purpose:** This document outlines the product philosophy, success criteria, and development constraints for the BudgetMeter iOS application. All team members must adhere to these guidelines.
+
+---
+
+## 1. Product Philosophy
+
+- **Steve Jobs/Apple Principle:** Our guiding philosophy is to **“focus and simplify.”** Build only what is essential. Features and flows must remain minimal so users can quickly understand and benefit from the app.
+- **Think Fast, Iterate Faster:** Progress is made by launching, learning, and improving. We value rapid, thoughtful iteration over endless design and planning.
+
+---
+
+## 2. Core App Principles
+
+- **Minimalism:** The app must be simple and focused. It does one job well: showing income, expenses, and net cash flow with a live meter. Avoid feature creep.
+- **Privacy-First:** The user's financial data is sensitive and private. The app **must not** use any third-party analytics, tracking services, or external servers. All data is to be stored exclusively on the user's device and within their private iCloud account.
+- **HIG-Compliant:** The app must feel like a native iOS application. All functionality, patterns, and user flows must adhere to Apple's Human Interface Guidelines.
+
+---
+
+## 3. Success Criteria for v1.0
+
+- **Core Functionality:** All calculations must match the web app within **0.01 precision**.
+- **Performance:** The app must launch in **under 2 seconds** on an iPhone 12 or newer device.
+- **Data Reliability:** There must be **zero data loss** during background/foreground transitions.
+- **App Store:** The app must fully comply with and pass all **App Store Review Guidelines**.
+- **User Experience:** Achieve an average session time of **more than 3 minutes** per user, indicating meaningful engagement.
+
+---
+
+## 4. Feature Scope (Version 1.0)
+
+### In Scope:
+- Input screens for recurring income and expenses.
+- A summary screen showing net cash flow (daily, monthly, yearly), a financial health score, and a savings goal calculator.
+- A "live meter" that continuously updates to show money flow since the app was last opened.
+- An empty state for first-time users, featuring a simple message and illustration.
+
+### Out of Scope (for v1):
+- **No Custom Categories:** Users can only use the predefined, fixed categories.
+- **No Data Portability:** No CSV/JSON export or import functionality.
+- **No Onboarding:** No multi-screen tutorial.
+- **No Advanced Features:** No charts, historical reports, notifications, or widgets.
+
+---
+
+## 5. Development Constraints
+
+- **Dependencies:** Use **zero third-party dependencies**; rely exclusively on official Apple frameworks.
+- **iOS Version:** Minimum supported version is **iOS 17.0** to enable the latest SwiftUI features.
+- **Testing:** All calculation functions must have **unit tests** before code submission.
+- **Code Review:** All code must pass Xcode static analysis cleanly, with **zero warnings**.
+
+---
+
+## 6. Data & Logic
+
+- **Identical Calculations:** All business logic and financial calculations must be **100% identical** to the formulas in the `budgetmeter.blueprint.mdx`.
+- **Data Persistence:** All persistent data must use **Core Data** with **CloudKit** sync enabled.
+- **Input Handling:** Monetary input fields must use the decimal pad. The app should parse the raw number and display the formatted currency value only after editing is complete.
+
+---
+
+## 7. Localization & Internationalization
+
+- **Language:** v1.0 supports **English only**. All strings must be in String Catalogs.
+- **Currency:** v1.0 supports **USD ($) only**. The codebase must use `NumberFormatter` to be future-proof.
+
+---
+
+## 8. Accessibility
+
+- **VoiceOver:** All UI elements must have descriptive accessibility labels.
+- **Dynamic Type:** All text must scale correctly with system settings.
+- **Color Contrast:** All colors must meet WCAG AA standards.
+
+---
+
+## 9. Potential Risks & Mitigations
+
+- **Risk: Over-Engineering.** When in doubt, choose the simpler implementation.
+- **Risk: Perfectionism Paralysis.** v1.0 **must ship within 30 days** of development start, regardless of any perceived imperfections.
+- **Risk: Scope Creep during Development.** Any feature not explicitly listed in "In Scope" is **forbidden for v1.0**.
+
+---
+
+## 10. Post-Launch Strategy
+
+- **User Feedback:** Proactively collect App Store reviews and support emails to inform planning for v2.
+- **Analytics:** Track only essential usage metrics via **App Store Connect**. Do not add third-party analytics.
+- **Iteration:** v2 features must be based on **real user behavior and feedback**, not assumptions.

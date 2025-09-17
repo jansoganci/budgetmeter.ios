@@ -1,0 +1,90 @@
+
+# BudgetMeter iOS: Design Rulebook
+
+**Version:** 1.0  
+**Purpose:** This document defines the visual identity, layout principles, and interaction patterns for the BudgetMeter iOS app. It ensures a consistent, minimalist, and HIG-compliant user experience.
+
+---
+
+## 1. Core Principles
+
+- **Clarity:** The UI must be clean, legible, and immediately understandable. Avoid visual clutter.
+- **Native Feel:** The app should look and feel like it was made by Apple. Use standard components, symbols, and patterns wherever possible.
+- **Consistency:** All design elements (colors, fonts, spacing) must be applied consistently across the entire application.
+
+---
+
+## 2. Color Palette
+
+The color palette uses standard system colors to ensure perfect adaptability for Light Mode, Dark Mode, and other accessibility settings.
+
+| Role          | Color Name          | UIKit Equivalent          | SwiftUI Equivalent      | Notes                                        |
+|---------------|---------------------|---------------------------|-------------------------|----------------------------------------------|
+| **Income**    | System Green        | `.systemGreen`            | `Color.green`           | For positive values, success states.         |
+| **Expense**   | System Red          | `.systemRed`              | `Color.red`             | For negative values, errors, delete actions. |
+| **Warning**   | System Orange       | `.systemOrange`           | `Color.orange`          | For warnings or neutral alerts.              |
+| **Accent**    | System Blue         | `.systemBlue`             | `Color.blue`            | For interactive elements like buttons, links.  |
+| **Background**| System Background   | `.systemBackground`       | `Color(uiColor: .systemBackground)` | Adapts to Light/Dark Mode. |
+| **Text**      | Label Color         | `.label`                  | `Color(uiColor: .label)`| Primary text color. Adapts automatically.    |
+| **Secondary Text** | Secondary Label | `.secondaryLabel`         | `Color(uiColor: .secondaryLabel)` | For less important text. |
+| **Card/Cell BG** | Secondary System BG | `.secondarySystemBackground` | `Color(uiColor: .secondarySystemBackground)` | For card and list cell backgrounds. |
+
+---
+
+## 3. Typography
+
+- **Font:** **SF Pro**. The app must use the standard system font. Do not bundle custom fonts.
+- **Weights:** Use **Regular** for body text and **Bold** or **Semibold** for titles and emphasis.
+- **Sizes:**
+    - **Body/Input:** 17pt (Standard)
+    - **Titles (Large):** 22pt (Bold)
+    - **Subheadings:** 16pt (Semibold)
+- **Rule:** All text must support **Dynamic Type**. Use built-in text styles like `.body`, `.headline`, `.subheadline` where possible.
+
+---
+
+## 4. Layout & Spacing
+
+- **Minimum Padding:** **16pt** for screen edges and around major content blocks.
+- **Standard Spacing:** **8pt** for spacing between related elements (e.g., items in a VStack, cards in a list).
+- **Corner Radius:** **12pt** for all cards and large buttons to maintain a soft, modern aesthetic.
+- **Touch Targets:** All interactive elements (buttons, list rows, inputs) must have a minimum touch target size of **44x44pt**.
+
+---
+
+## 5. Iconography
+
+- **Source:** **SF Symbols only.** Do not use custom PNG, SVG, or other image assets for icons.
+- **Implementation:** Icons should be treated like text—they should scale with Dynamic Type and adopt the surrounding text color unless a specific semantic color (e.g., `Color.red`) is required.
+
+---
+
+## 6. Components
+
+- **Buttons:** Use standard SwiftUI button styles (`.borderedProminent`, `.plain`). Ensure they meet the 44pt minimum touch target.
+- **Cards:** Use a container with a `.secondarySystemBackground` color and a 12pt corner radius.
+- **Form Inputs:** Use standard SwiftUI `TextField`s with the `.decimalPad` keyboard type.
+
+---
+
+## 7. Motion & Haptics
+
+- **Animations:** Keep animations minimal and purposeful. Use the default SwiftUI animations (`.animation(.default, value: ...)`).
+- **Haptics:** Use subtle haptics for confirmation of user actions.
+    - **Action:** Saving a value, deleting an item.
+    - **Feedback:** A single, light tap (`UIImpactFeedbackGenerator(style: .light)`).
+
+---
+
+## 8. App Icon & Splash Screen
+
+- **App Icon:** The design should be minimalist, flat, and modern. It should be recognizable and work well on a variety of wallpapers.
+- **Splash Screen (Launch Screen):** The launch screen storyboard must be simple: it should contain only the app icon centered on a solid background color that matches the app's theme. **No text or other graphics.**
+
+---
+
+## 9. Empty States
+
+- **Onboarding:** For v1, there is no onboarding. The app should launch directly into the main interface.
+- **Empty State UI:** When there is no data, the screen should display a simple, friendly illustration (using SF Symbols if possible) and a short, encouraging message (e.g., "Add your first expense to get started!").
+

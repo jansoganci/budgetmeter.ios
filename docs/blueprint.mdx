@@ -1,0 +1,194 @@
+
+# BudgetMeter iOS Application: Technical Blueprint
+
+**Document Version:** 1.0 (MVP)  
+**Date:** September 17, 2025  
+**Author:** Gemini, iOS Team Lead  
+**Target OS:** iOS 17.0+
+
+## 1. Core Principles & Project Goals
+
+This document outlines the technical blueprint for building the native iOS version of BudgetMeter. The primary goal is to create a minimalist, privacy-first, and highly polished personal finance application that is fully compliant with Apple's Human Interface Guidelines (HIG).
+
+- **Core Feature:** A "live meter" providing a real-time, continuous view of the user's financial flow since the app was last opened.
+- **Core Constraint:** All calculation logic must be **100% identical** to the existing JavaScript web application to ensure consistency.
+- **Architecture Philosophy:** Modular, scalable, and maintainable from day one, built exclusively on Apple's native frameworks.
+- **Privacy:** No custom backend, no third-party analytics, no external servers. All user data remains on-device and within their private iCloud account.
+
+---
+
+## 2. Architecture & Technology Stack
+
+| Component               | Technology / Pattern                                       | Rationale                                                                        |
+| ----------------------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| **UI Framework**        | **SwiftUI**                                                | Modern, declarative, and ideal for a clean, minimalist, and HIG-compliant UI.    |
+| **Architecture**        | **MVVM (Model-View-ViewModel)**                            | Enforces a strict separation of concerns, enhancing testability and modularity. |
+| **Data Persistence**    | **Core Data + CloudKit**                                   | Provides a robust on-device database with automatic, private iCloud sync.        |
+| **Concurrency**         | **Swift Concurrency (async/await)**                        | Ensures a responsive UI by performing data operations on background threads.     |
+| **Localization**        | **Xcode String Catalogs (.xcstrings)**                     | The standard, modern approach for full internationalization (i18n) support.      |
+| **Minimum Target OS**   | **iOS 17.0**                                               | Allows use of the latest stable SwiftUI and system framework features.           |
+| **Dependencies**        | **None**                                                   | Maximizes stability and performance by relying solely on Apple's frameworks.     |
+
+---
+
+## 3. Project & Module Structure
+
+A modular structure is critical for future expansion. The project will be organized into local Swift Packages for clear separation of responsibilities.
+
+```
+BudgetMeterApp/
+├── App/
+│   ├── BudgetMeterApp.swift      # Main app entry point
+│   └── MainView.swift            # Hosts the TabView and LiveMeterView
+│
+├── CoreKit/ (Local Swift Package)
+│   ├── Sources/
+│   │   ├── Models/               # Core Data model definitions
+│   │   ├── Persistence/          # PersistenceService (Core Data + CloudKit setup)
+│   │   ├── Engine/               # CalculationEngine.swift (ported JS logic)
+│   │   └── Utilities/            # Formatters, helpers
+│   └── Tests/
+│       └── CalculationEngineTests.swift # Unit tests to verify logic
+│
+└── Features/ (Group for Feature Packages)
+    ├── ExpensesFeature/
+    │   ├── Sources/
+    │   │   ├── View/ExpenseView.swift
+    │   │   └── ViewModel/ExpenseViewModel.swift
+    │
+    ├── IncomesFeature/
+    │   ├── Sources/
+    │   │   ├── View/IncomeView.swift
+    │   │   └── ViewModel/IncomeViewModel.swift
+    │
+    └── SummaryFeature/
+        ├── Sources/
+        │   ├── View/SummaryView.swift
+        │   └── ViewModel/SummaryViewModel.swift
+```
+
+---
+
+## 4. Data Model (Core Data)
+
+Data will be modeled using two primary entities, automatically synced via CloudKit.
+
+### Entity 1: `FinancialCategory`
+Stores the user-entered amount for each predefined category.
+
+| Attribute         | Type      | Description                                                              |
+| ----------------- | --------- | ------------------------------------------------------------------------ |
+| `id`              | `UUID`    | Unique identifier for the Core Data object.                              |
+| `uniqueID`        | `String`  | A stable string ID from the web app (e.g., "yemek", "kira") for mapping. |
+| `amount`          | `Decimal` | The monetary value entered by the user. **Crucially, use Decimal.**      |
+| `type`            | `String`  | Enum: `"income"` or `"expense"`.                                         |
+| `frequency`       | `String`  | Enum: `"daily"`, `"monthly"`, or `"yearly"`.                             |
+
+### Entity 2: `AppSettings`
+A singleton entity (only one object will exist) to store global app state.
+
+| Attribute                   | Type      | Description                                                              |
+| --------------------------- | --------- | ------------------------------------------------------------------------ |
+| `lastBackgroundedTimestamp` | `Date?`   | The exact timestamp when the app was last moved to the background.       |
+| `lastMeterValue`            | `Decimal` | The value of the live meter at the moment the app was backgrounded.      |
+| `savingsGoalAmount`         | `Decimal` | The user-defined savings goal.                                           |
+
+---
+
+## 5. Business Logic: The `CalculationEngine`
+
+This is the most critical component for ensuring consistency with the web app.
+
+- **Porting Strategy:** Create a `CalculationEngine.swift` file within `CoreKit`. This will be a pure, stateless utility with no dependencies on UI or data persistence. It will contain functions that are a **direct, line-for-line port** of the JavaScript calculation formulas.
+- **Data Types:** The engine's functions will accept `Decimal` values as input and return `Decimal` values to prevent floating-point precision errors.
+- **Testing (Mandatory):** A `CalculationEngineTests.swift` file must be created. It will contain a suite of unit tests with hardcoded inputs and expected outputs captured directly from the web application. This is non-negotiable and guarantees 100% parity.
+
+**Example of a ported function:**
+```swift
+// In CalculationEngine.swift
+
+struct CalculationEngine {
+    /// Calculates the total monthly expense based on the exact web app formula.
+    /// Formula: (dailyTotal * 30) + monthlyTotal + (yearlyTotal / 12)
+    static func totalMonthlyExpense(
+        dailyTotal: Decimal,
+        monthlyTotal: Decimal,
+        yearlyTotal: Decimal
+    ) -> Decimal {
+        return (dailyTotal * 30) + monthlyTotal + (yearlyTotal / 12)
+    }
+    
+    // ... other ported functions for net flow, health score, etc.
+}
+```
+
+---
+
+## 6. Screen-by-Screen Breakdown
+
+### A. Main View & Live Meter
+- **`MainView.swift`:** Contains a `TabView` to switch between the three primary screens.
+- **`LiveMeterView.swift`:** A header view, always visible, that displays the live counter.
+- **`LiveMeterViewModel.swift`:**
+    - On initialization, it records the session start `Date()`.
+    - It uses a `Timer` to frequently update the displayed value based on the elapsed session time and the `CalculationEngine`'s output.
+    - It implements the **"Save State and Recalculate"** logic for background/foreground transitions, using the `AppSettings` entity in Core Data.
+
+### B. Expenses & Incomes Screens
+- **`ExpenseView.swift` / `IncomeView.swift`:**
+    - A `List` or `ScrollView` containing the grid of predefined categories.
+    - Each category will be a subview that displays the icon, name, and an input field.
+- **`ExpenseViewModel.swift` / `IncomeViewModel.swift`:**
+    - Fetches the corresponding `FinancialCategory` objects from Core Data.
+    - Provides the data to the view.
+    - When the user enters an amount, it updates the `amount` on the `FinancialCategory` object and saves the change through the `PersistenceService`.
+- **UX Notes:**
+    - Use `.keyboardType(.decimalPad)` for all monetary inputs.
+    - The input field should accept a plain number. The formatted currency string (e.g., "₺1,250.00") should be displayed in a separate `Text` view or when the field is not focused. This avoids complex live-formatting logic.
+
+### C. Summary Screen
+- **`SummaryView.swift`:** A dashboard-style view composed of smaller, reusable card components.
+- **`SummaryViewModel.swift`:**
+    - Fetches all `FinancialCategory` and `AppSettings` data.
+    - Passes the totals and savings goal to the `CalculationEngine`.
+    - Publishes all calculated metrics (net flow, financial health score, time to goal) to the view.
+- **UX Notes:**
+    - Use system colors semantically (e.g., `Color.red` for negative flows, `Color.green` for positive flows).
+    - Ensure all text respects Dynamic Type and is legible in both Light and Dark Modes.
+
+---
+
+## 7. Core Tasks & Implementation Plan
+
+### Phase 1: Project Setup & Core Logic (1-2 days)
+- [ ] Initialize Xcode project, Git repository, and the modular folder structure.
+- [ ] Define the Core Data model (`FinancialCategory`, `AppSettings`) and enable CloudKit.
+- [ ] Implement `PersistenceService.swift` to manage the Core Data stack.
+- [ ] **Crucial:** Port `CalculationEngine.swift` and write `CalculationEngineTests.swift`. Validate all outputs against the web app.
+
+### Phase 2: First-Time Setup & Data Entry (2-3 days)
+- [ ] Implement the first-launch data seeding logic using a `UserDefaults` flag to populate the fixed categories.
+- [ ] Build the `ExpensesFeature` and `IncomesFeature` UI and ViewModels.
+- [ ] Connect the input fields to save data to Core Data. Verify data persistence and iCloud sync.
+
+### Phase 3: Summary & Live Meter (2-3 days)
+- [ ] Build the `SummaryFeature` UI and ViewModel.
+- [ ] Implement the `LiveMeterView` and its `LiveMeterViewModel`.
+- [ ] Implement and test the background/foreground recalculation logic.
+- [ ] Assemble the `MainView` with the `TabView` and integrate all features.
+
+### Phase 4: Polish & Compliance (1-2 days)
+- [ ] Add all localized strings for English and Turkish to the `.xcstrings` catalog.
+- [ ] Thoroughly test Dark Mode, ensuring proper color contrast.
+- [ ] Test and verify HIG compliance: Dynamic Type, VoiceOver labels, and touch target sizes.
+- [ ] Conduct on-device testing to profile performance and battery usage.
+
+---
+
+## 8. Pitfalls & Final Recommendations
+
+- **Pitfall: Data Seeding.** Remember to use a `UserDefaults` flag (`"didSeedInitialData"`) to ensure you populate the fixed categories **only once** on the very first launch.
+- **Pitfall: State Initialization.** Initialize session-specific data like the `sessionStartTime` in a `ViewModel`'s `init()` or as a `@State` property with a default value, not inside a `View`'s `body`.
+- **Recommendation: Simplicity.** For v1, stick to the plan. The biggest risk is scope creep. The modular architecture is designed to make adding features like custom categories, charts, and widgets easy in v2, so there is no need to over-engineer the MVP.
+
+This blueprint provides a clear and robust path to building a high-quality, maintainable, and compliant iOS application.

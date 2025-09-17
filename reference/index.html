@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="tr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- Primary Meta Tags -->
+    <title>Gidermetre - Sürekli Giderlerinizi Görün</title>
+    <meta name="title" content="Gidermetre - Sürekli Giderlerinizi Görün">
+    <meta name="description" content="Günlük, aylık ve yıllık masraflarınızı takip edin. Gerçek zamanlı gider hesaplama ile anlık giderinizi görün.">
+    <meta name="keywords" content="masraf takip, gider hesaplama, bütçe yönetimi, finansal takip, Türk Lirası, ücretsiz uygulama">
+    <meta name="author" content="Sezer İltekin">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="Turkish">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://gidermetre.com/">
+    <meta property="og:title" content="Gidermetre - Sürekli Giderlerinizi Görün">
+    <meta property="og:description" content="Günlük, aylık ve yıllık masraflarınızı takip edin. Gerçek zamanlı gider hesaplama ile anlık giderinizi görün.">
+    <meta property="og:image" content="https://gidermetre.com/images/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="Gidermetre">
+    <meta property="og:locale" content="tr_TR">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://gidermetre.com/">
+    <meta property="twitter:title" content="Gidermetre - Sürekli Giderlerinizi Görün">
+    <meta property="twitter:description" content="Günlük, aylık ve yıllık masraflarınızı takip edin. Gerçek zamanlı gider hesaplama ile anlık giderinizi görün.">
+    <meta property="twitter:image" content="https://gidermetre.com/images/og-image.png">
+    <meta property="twitter:creator" content="@sezeriltekin">
+    
+    <!-- Additional SEO -->
+    <meta name="theme-color" content="#6877df">
+    <meta name="msapplication-TileColor" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Gidermetre">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://gidermetre.com/">
+    
+    <!-- Preconnect for performance -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Gidermetre",
+        "description": "Günlük, aylık ve yıllık masraflarınızı takip edin. Gerçek zamanlı gider hesaplama ile paranızın nereye gittiğini görün.",
+        "url": "https://gidermetre.com/",
+        "applicationCategory": "FinanceApplication",
+        "operatingSystem": "Web Browser",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "TRY"
+        },
+        "author": {
+            "@type": "Person",
+            "name": "Sezer İltekin",
+            "url": "https://x.com/sezeriltekin"
+        },
+        "publisher": {
+            "@type": "Person",
+            "name": "Sezer İltekin"
+        },
+        "inLanguage": "tr",
+        "isAccessibleForFree": true,
+        "browserRequirements": "Requires JavaScript. Requires HTML5.",
+        "softwareVersion": "1.0",
+        "datePublished": "2024-12-19",
+        "dateModified": "2024-12-19"
+    }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#64748b',
+                        accent: '#f59e0b',
+                        success: '#10b981',
+                        danger: '#ef4444',
+                        warning: '#f59e0b',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'pulse-slow': 'pulse 3s infinite',
+                        'counter': 'counter 0.8s ease-out',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="favicon.png">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-CGZ0E8MQP7"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-CGZ0E8MQP7');
+    </script>
+
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <div id="app" class="flex flex-col min-h-screen">
+        <!-- Header -->
+        <header class="gradient-bg text-white shadow-2xl py-4 md:fixed md:top-0 md:left-0 md:right-0 z-50">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <!-- Branding -->
+                    <div class="flex flex-col items-center lg:items-start">
+                        <h1 class="text-3xl font-bold">💰 BütçeMetre</h1>
+                        <p class="text-blue-100 text-sm mt-1">Anlık bütçe takibi</p>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="flex flex-wrap justify-center lg:justify-end gap-2">
+                        <button @click="clearAllData" 
+                                class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center">
+                            🗑️ Sıfırla
+                        </button>
+                        <button @click="exportData" 
+                                class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center">
+                            📊 Dışa Aktar
+                        </button>
+                        <button @click="backupData" 
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center">
+                            💾 Yedekle
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="bg-white shadow-sm border-b sticky top-0 md:fixed md:top-[5.7rem] md:left-0 md:right-0 z-40">
+            <div class="container mx-auto px-4">
+                <div class="flex">
+                    <button @click="activeTab = 'expense'" 
+                            :class="activeTab === 'expense' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'"
+                            class="py-2 px-4 border-b-2 font-medium">
+                        💰 Giderler
+                    </button>
+                    <button @click="activeTab = 'income'" 
+                            :class="activeTab === 'income' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-500'"
+                            class="py-2 px-4 border-b-2 font-medium">
+                        💚 Gelirler
+                    </button>
+                    <button @click="activeTab = 'summary'" 
+                            :class="activeTab === 'summary' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500'"
+                            class="py-2 px-4 border-b-2 font-medium">
+                        📊 Özet
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Net Flow Live Counter -->
+        <div class="py-4 pt-4 shadow-lg sticky top-0 md:fixed md:top-[8.5rem] md:left-0 md:right-0 z-30"
+             :class="dynamicBarColorClass">
+            <div class="container mx-auto px-4 text-center">
+                <p class="text-xs mb-1" :class="dynamicTextColorClass">{{ dynamicSessionTime }}</p>
+                <div class="text-3xl font-bold tabular-nums" 
+                     :class="dynamicAmountColorClass"
+                     :key="liveCounterKey">
+                    {{ formatCurrency(dynamicAmountValue) }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Spacer for desktop fixed header -->
+        <div class="hidden md:block h-[8.5rem]"></div>
+
+        <div class="container mx-auto px-0 lg:px-4 py-4 md:pt-24 md:pb-12 flex-grow">
+
+            <!-- Expense Categories -->
+            <div v-if="activeTab === 'expense'" class="bg-white rounded-xl shadow-lg p-6">
+                
+                <!-- Günlük Masraflar -->
+                <div class="mb-8">
+                    <h4 class="text-lg font-semibold text-blue-600 mb-4 flex items-center">
+                        <span class="mr-2">📅</span> Günlük Masraflar
+                    </h4>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
+                        <!-- Predefined Daily Categories -->
+                        <div v-for="category in predefinedDaily" :key="category.id" 
+                             class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center relative">
+                            <button @click="removeExpense(category.id)" 
+                                    v-if="category.amount > 0"
+                                    class="absolute top-2 right-2 text-red-500 hover:text-red-700 text-xs">
+                                ✕
+                            </button>
+                            <div class="text-3xl mb-2">{{ category.icon }}</div>
+                            <div class="text-sm font-medium text-gray-700 mb-3">{{ category.name }}</div>
+                            <div class="relative">
+                                <input 
+                                    type="text" 
+                                    :value="formatInput(category.amount)"
+                                    inputmode="numeric"
+                                    @input="onAmountInput(category, $event.target.value)"
+                                    @focus="$event.target.select()"
+                                    placeholder="0"
+                                    class="w-full text-center border-2 border-gray-300 rounded-lg px-3 py-2 text-base font-medium focus:outline-none focus:border-blue-500 caret-transparent pr-8 expense-input"
+                                >
+                                <span class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm font-medium">₺</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Custom Daily Categories -->
+                        <div v-for="category in customDaily" :key="category.id" 
+                             class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-4 text-center relative">
+                            <button @click="removeCustomCategory(category.id)" 
+                                    class="absolute top-2 right-2 text-red-500 hover:text-red-700 text-xs">
+                                ✕
+                            </button>
+                            <div class="text-3xl mb-2">➕</div>
+                            <div class="text-sm font-medium text-gray-700 mb-3 h-5">
+                                <input 
+                                    type="text" 
+                                    v-model="category.name"
+                                    @blur="updateCustomCategory(category.id, category.name, category.amount)"
+                                    placeholder="İsim..."
+                                    class="w-full text-center bg-transparent border-none focus:outline-none text-sm font-medium text-gray-700"
+                                >
+                            </div>
+                            <div class="relative">
+                                <input 
+                                    type="text" 
+                                    :value="formatInput(category.amount)"
+                                    inputmode="numeric"
+                                    @input="onAmountInput(category, $event.target.value)"
+                                    @focus="$event.target.select()"
+                                    placeholder="0"
+                                    class="w-full text-center border-2 border-gray-300 rounded-lg px-3 py-2 text-base font-medium focus:outline-none focus:border-blue-500 caret-transparent pr-8 expense-input"
+                                >
+                                <span class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm font-medium">₺</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Add Custom Daily Button -->
+                        <div class="bg-gray-100 border-2 border-dashed border-gray-400 rounded-lg p-4 text-center hover:bg-gray-200 hover:border-blue-400 cursor-pointer transition-colors"
+                             @click="addCustomDaily">
+                            <div class="text-3xl mb-2 text-gray-400">➕</div>
+                            <div class="text-sm font-medium text-gray-600 mb-3">Yeni Masraf Kalemi</div>
+                            <div class="text-xs text-gray-500">Günlük masraf ekle</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aylık Masraflar -->
+                <div class="mb-8">
+                    <h4 class="text-lg font-semibold text-green-600 mb-4 flex items-center">
+                        <span class="mr-2">🗓️</span> Aylık Masraflar
+                    </h4>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
+                        <!-- Predefined Monthly Categories -->
+                        <div v-for="category in predefinedMonthly" :key="category.id" 
+                             class="bg-green-50 border border-green-200 rounded-lg p-4 text-center relative">
+                            <button @click="removeExpense(category.id)" 
+                                    v-if="category.amount > 0"
+                                    class="absolute top-2 right-2 text-red-500 hover:text-red-700 text-xs">
+                                ✕
+                            </button>
+                            <div class="text-3xl mb-2">{{ category.icon }}</div>
+                            <div class="text-sm font-medium text-gray-700 mb-3">{{ category.name }}</div>
+                            <div class="relative">
+                                <input 
+                                    type="text" 
+                                    :value="formatInput(category.amount)"
+                                    inputmode="numeric"
+                                    @input="onAmountInput(category, $event.target.value)"
+                                    @focus="$event.target.select()"
+                                    placeholder="0"
+                                    class="w-full text-center border-2 border-gray-300 rounded-lg px-3 py-2 text-base font-medium focus:outline-none focus:border-green-500 caret-transparent pr-8 expense-input"
+                                >
+                                <span class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm font-medium">₺</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Custom Monthly Categories -->
+                        <div v-for="category in customMonthly" :key="category.id" 
+                             class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-4 text-center relative">
+                            <button @click="removeCustomCategory(category.id)" 
+                                    class="absolute top-2 right-2 text-red-500 hover:text-red-700 text-xs">
+                                ✕
+                            </button>
+                            <div class="text-3xl mb-2">➕</div>
+                            <div class="text-sm font-medium text-gray-700 mb-3 h-5">
+                                <input 
+                                    type="text" 
+                                    v-model="category.name"
+                                    @blur="updateCustomCategory(category.id, category.name, category.amount)"
+                                    placeholder="İsim..."
+                                    class="w-full text-center bg-transparent border-none focus:outline-none text-sm font-medium text-gray-700"
+                                >
+                            </div>
+                            <div class="relative">
+                                <input 
+                                    type="text" 
+                                    :value="formatInput(category.amount)"
+                                    inputmode="numeric"
+                                    @input="onAmountInput(category, $event.target.value)"
+                                    @focus="$event.target.select()"
+                                    class="w-full text-center border-2 border-gray-300 rounded-lg px-3 py-2 text-base font-medium focus:outline-none focus:border-green-500 caret-transparent pr-8 expense-input"
+                                >
+                                <span class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm font-medium">₺</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Add Custom Monthly Button -->
+                        <div class="bg-gray-100 border-2 border-dashed border-gray-400 rounded-lg p-4 text-center hover:bg-gray-200 hover:border-green-400 cursor-pointer transition-colors"
+                             @click="addCustomMonthly">
+                            <div class="text-3xl mb-2 text-gray-400">➕</div>
+                            <div class="text-sm font-medium text-gray-600 mb-3">Yeni Masraf Kalemi</div>
+                            <div class="text-xs text-gray-500">Aylık masraf ekle</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Yıllık Masraflar -->
+                <div class="mb-8">
+                    <h4 class="text-lg font-semibold text-purple-600 mb-4 flex items-center">
+                        <span class="mr-2">📅</span> Yıllık Masraflar
+                    </h4>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
+                        <!-- Predefined Yearly Categories -->
+                        <div v-for="category in predefinedYearly" :key="category.id" 
+                             class="bg-purple-50 border border-purple-200 rounded-lg p-4 text-center relative">
+                            <button @click="removeExpense(category.id)" 
+                                    v-if="category.amount > 0"
+                                    class="absolute top-2 right-2 text-red-500 hover:text-red-700 text-xs">
+                                ✕
+                            </button>
+                            <div class="text-3xl mb-2">{{ category.icon }}</div>
+                            <div class="text-sm font-medium text-gray-700 mb-3">{{ category.name }}</div>
+                            <div class="relative">
+                                <input 
+                                    type="text" 
+                                    :value="formatInput(category.amount)"
+                                    inputmode="numeric"
+                                    @input="onAmountInput(category, $event.target.value)"
+                                    @focus="$event.target.select()"
+                                    placeholder="0"
+                                    class="w-full text-center border-2 border-gray-300 rounded-lg px-3 py-2 text-base font-medium focus:outline-none focus:border-purple-500 caret-transparent pr-8 expense-input"
+                                >
+                                <span class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm font-medium">₺</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Custom Yearly Categories -->
+                        <div v-for="category in customYearly" :key="category.id" 
+                             class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-4 text-center relative">
+                            <button @click="removeCustomCategory(category.id)" 
+                                    class="absolute top-2 right-2 text-red-500 hover:text-red-700 text-xs">
+                                ✕
+                            </button>
+                            <div class="text-3xl mb-2">➕</div>
+                            <div class="text-sm font-medium text-gray-700 mb-3 h-5">
+                                <input 
+                                    type="text" 
+                                    v-model="category.name"
+                                    @blur="updateCustomCategory(category.id, category.name, category.amount)"
+                                    placeholder="İsim..."
+                                    class="w-full text-center bg-transparent border-none focus:outline-none text-sm font-medium text-gray-700"
+                                >
+                            </div>
+                            <div class="relative">
+                                <input 
+                                    type="text" 
+                                    :value="formatInput(category.amount)"
+                                    inputmode="numeric"
+                                    @input="onAmountInput(category, $event.target.value)"
+                                    @focus="$event.target.select()"
+                                    placeholder="0"
+                                    class="w-full text-center border-2 border-gray-300 rounded-lg px-3 py-2 text-base font-medium focus:outline-none focus:border-purple-500 caret-transparent pr-8 expense-input"
+                                >
+                                <span class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm font-medium">₺</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Add Custom Yearly Button -->
+                        <div class="bg-gray-100 border-2 border-dashed border-gray-400 rounded-lg p-4 text-center hover:bg-gray-200 hover:border-purple-400 cursor-pointer transition-colors"
+                             @click="addCustomYearly">
+                            <div class="text-3xl mb-2 text-gray-400">➕</div>
+                            <div class="text-sm font-medium text-gray-600 mb-3">Yeni Masraf Kalemi</div>
+                            <div class="text-xs text-gray-500">Yıllık masraf ekle</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Income Categories -->
+            <div v-if="activeTab === 'income'" class="bg-white rounded-xl shadow-lg p-6">
+                
+                <!-- Günlük Gelirler -->
+                <div class="mb-8">
+                    <h4 class="text-lg font-semibold text-green-600 mb-4 flex items-center">
+                        <span class="mr-2">📅</span> Günlük Gelirler
+                    </h4>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
+                        <!-- Predefined Daily Income Categories -->
+                        <div v-for="category in predefinedDailyIncome" :key="category.id" 
+                             class="bg-green-50 border border-green-200 rounded-lg p-4 text-center relative">
+                            <button @click="removeIncome(category.id)" 
+                                    v-if="category.amount > 0"
+                                    class="absolute top-2 right-2 text-red-500 hover:text-red-700 text-xs">
+                                ✕
+                            </button>
+                            <div class="text-3xl mb-2">{{ category.icon }}</div>
+                            <div class="text-sm font-medium text-gray-700 mb-3">{{ category.name }}</div>
+                            <div class="relative">
+                                <input 
+                                    type="text" 
+                                    :value="formatInput(category.amount)"
+                                    inputmode="numeric"
+                                    @input="onIncomeInput(category, $event.target.value)"
+                                    @focus="$event.target.select()"
+                                    placeholder="0"
+                                    class="w-full text-center border-2 border-gray-300 rounded-lg px-3 py-2 text-base font-medium focus:outline-none focus:border-green-500 caret-transparent pr-8 expense-input"
+                                >
+                                <span class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm font-medium">₺</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Custom Daily Income Categories -->
+                        <div v-for="category in customDailyIncome" :key="category.id" 
+                             class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-4 text-center relative">
+                            <button @click="removeCustomIncomeCategory(category.id)" 
+                                    class="absolute top-2 right-2 text-red-500 hover:text-red-700 text-xs">
+                                ✕
+                            </button>
+                            <div class="text-3xl mb-2">➕</div>
+                            <div class="text-sm font-medium text-gray-700 mb-3 h-5">
+                                <input 
+                                    type="text" 
+                                    v-model="category.name"
+                                    @blur="updateCustomIncomeCategory(category.id, category.name, category.amount)"
+                                    placeholder="İsim..."
+                                    class="w-full text-center bg-transparent border-none focus:outline-none text-sm font-medium text-gray-700"
+                                >
+                            </div>
+                            <div class="relative">
+                                <input 
+                                    type="text" 
+                                    :value="formatInput(category.amount)"
+                                    inputmode="numeric"
+                                    @input="onIncomeInput(category, $event.target.value)"
+                                    @focus="$event.target.select()"
+                                    placeholder="0"
+                                    class="w-full text-center border-2 border-gray-300 rounded-lg px-3 py-2 text-base font-medium focus:outline-none focus:border-green-500 caret-transparent pr-8 expense-input"
+                                >
+                                <span class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm font-medium">₺</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Add Custom Daily Income Button -->
+                        <div class="bg-gray-100 border-2 border-dashed border-gray-400 rounded-lg p-4 text-center hover:bg-gray-200 hover:border-green-400 cursor-pointer transition-colors"
+                             @click="addCustomDailyIncome">
+                            <div class="text-3xl mb-2 text-gray-400">➕</div>
+                            <div class="text-sm font-medium text-gray-600 mb-3">Yeni Gelir Kalemi</div>
+                            <div class="text-xs text-gray-500">Günlük gelir ekle</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aylık Gelirler -->
+                <div class="mb-8">
+                    <h4 class="text-lg font-semibold text-green-600 mb-4 flex items-center">
+                        <span class="mr-2">🗓️</span> Aylık Gelirler
+                    </h4>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
+                        <!-- Predefined Monthly Income Categories -->
+                        <div v-for="category in predefinedMonthlyIncome" :key="category.id" 
+                             class="bg-green-50 border border-green-200 rounded-lg p-4 text-center relative">
+                            <button @click="removeIncome(category.id)" 
+                                    v-if="category.amount > 0"
+                                    class="absolute top-2 right-2 text-red-500 hover:text-red-700 text-xs">
+                                ✕
+                            </button>
+                            <div class="text-3xl mb-2">{{ category.icon }}</div>
+                            <div class="text-sm font-medium text-gray-700 mb-3">{{ category.name }}</div>
+                            <div class="relative">
+                                <input 
+                                    type="text" 
+                                    :value="formatInput(category.amount)"
+                                    inputmode="numeric"
+                                    @input="onIncomeInput(category, $event.target.value)"
+                                    @focus="$event.target.select()"
+                                    placeholder="0"
+                                    class="w-full text-center border-2 border-gray-300 rounded-lg px-3 py-2 text-base font-medium focus:outline-none focus:border-green-500 caret-transparent pr-8 expense-input"
+                                >
+                                <span class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm font-medium">₺</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Custom Monthly Income Categories -->
+                        <div v-for="category in customMonthlyIncome" :key="category.id" 
+                             class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-4 text-center relative">
+                            <button @click="removeCustomIncomeCategory(category.id)" 
+                                    class="absolute top-2 right-2 text-red-500 hover:text-red-700 text-xs">
+                                ✕
+                            </button>
+                            <div class="text-3xl mb-2">➕</div>
+                            <div class="text-sm font-medium text-gray-700 mb-3 h-5">
+                                <input 
+                                    type="text" 
+                                    v-model="category.name"
+                                    @blur="updateCustomIncomeCategory(category.id, category.name, category.amount)"
+                                    placeholder="İsim..."
+                                    class="w-full text-center bg-transparent border-none focus:outline-none text-sm font-medium text-gray-700"
+                                >
+                            </div>
+                            <div class="relative">
+                                <input 
+                                    type="text" 
+                                    :value="formatInput(category.amount)"
+                                    inputmode="numeric"
+                                    @input="onIncomeInput(category, $event.target.value)"
+                                    @focus="$event.target.select()"
+                                    class="w-full text-center border-2 border-gray-300 rounded-lg px-3 py-2 text-base font-medium focus:outline-none focus:border-green-500 caret-transparent pr-8 expense-input"
+                                >
+                                <span class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm font-medium">₺</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Add Custom Monthly Income Button -->
+                        <div class="bg-gray-100 border-2 border-dashed border-gray-400 rounded-lg p-4 text-center hover:bg-gray-200 hover:border-green-400 cursor-pointer transition-colors"
+                             @click="addCustomMonthlyIncome">
+                            <div class="text-3xl mb-2 text-gray-400">➕</div>
+                            <div class="text-sm font-medium text-gray-600 mb-3">Yeni Gelir Kalemi</div>
+                            <div class="text-xs text-gray-500">Aylık gelir ekle</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Yıllık Gelirler -->
+                <div class="mb-8">
+                    <h4 class="text-lg font-semibold text-green-600 mb-4 flex items-center">
+                        <span class="mr-2">📅</span> Yıllık Gelirler
+                    </h4>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
+                        <!-- Predefined Yearly Income Categories -->
+                        <div v-for="category in predefinedYearlyIncome" :key="category.id" 
+                             class="bg-green-50 border border-green-200 rounded-lg p-4 text-center relative">
+                            <button @click="removeIncome(category.id)" 
+                                    v-if="category.amount > 0"
+                                    class="absolute top-2 right-2 text-red-500 hover:text-red-700 text-xs">
+                                ✕
+                            </button>
+                            <div class="text-3xl mb-2">{{ category.icon }}</div>
+                            <div class="text-sm font-medium text-gray-700 mb-3">{{ category.name }}</div>
+                            <div class="relative">
+                                <input 
+                                    type="text" 
+                                    :value="formatInput(category.amount)"
+                                    inputmode="numeric"
+                                    @input="onIncomeInput(category, $event.target.value)"
+                                    @focus="$event.target.select()"
+                                    placeholder="0"
+                                    class="w-full text-center border-2 border-gray-300 rounded-lg px-3 py-2 text-base font-medium focus:outline-none focus:border-green-500 caret-transparent pr-8 expense-input"
+                                >
+                                <span class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm font-medium">₺</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Custom Yearly Income Categories -->
+                        <div v-for="category in customYearlyIncome" :key="category.id" 
+                             class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-4 text-center relative">
+                            <button @click="removeCustomIncomeCategory(category.id)" 
+                                    class="absolute top-2 right-2 text-red-500 hover:text-red-700 text-xs">
+                                ✕
+                            </button>
+                            <div class="text-3xl mb-2">➕</div>
+                            <div class="text-sm font-medium text-gray-700 mb-3 h-5">
+                                <input 
+                                    type="text" 
+                                    v-model="category.name"
+                                    @blur="updateCustomIncomeCategory(category.id, category.name, category.amount)"
+                                    placeholder="İsim..."
+                                    class="w-full text-center bg-transparent border-none focus:outline-none text-sm font-medium text-gray-700"
+                                >
+                            </div>
+                            <div class="relative">
+                                <input 
+                                    type="text" 
+                                    :value="formatInput(category.amount)"
+                                    inputmode="numeric"
+                                    @input="onIncomeInput(category, $event.target.value)"
+                                    @focus="$event.target.select()"
+                                    placeholder="0"
+                                    class="w-full text-center border-2 border-gray-300 rounded-lg px-3 py-2 text-base font-medium focus:outline-none focus:border-green-500 caret-transparent pr-8 expense-input"
+                                >
+                                <span class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm font-medium">₺</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Add Custom Yearly Income Button -->
+                        <div class="bg-gray-100 border-2 border-dashed border-gray-400 rounded-lg p-4 text-center hover:bg-gray-200 hover:border-green-400 cursor-pointer transition-colors"
+                             @click="addCustomYearlyIncome">
+                            <div class="text-3xl mb-2 text-gray-400">➕</div>
+                            <div class="text-sm font-medium text-gray-600 mb-3">Yeni Gelir Kalemi</div>
+                            <div class="text-xs text-gray-500">Yıllık gelir ekle</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Page -->
+            <div v-if="activeTab === 'summary'" class="bg-white rounded-xl shadow-lg p-6">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">📊 Finansal Özet</h2>
+                    <p class="text-gray-600">Gelir, gider ve net akış analizi</p>
+                </div>
+                
+                <!-- Financial Health Score -->
+                <div class="mb-8">
+                    <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6 border-2 border-gray-200">
+                        <div class="text-center">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">🏆 Finansal Sağlık Skoru</h3>
+                            <div class="flex items-center justify-center mb-4">
+                                <div class="text-4xl font-bold mr-4" :class="{
+                                    'text-green-600': financialHealthScore.color === 'green',
+                                    'text-blue-600': financialHealthScore.color === 'blue',
+                                    'text-yellow-600': financialHealthScore.color === 'yellow',
+                                    'text-orange-600': financialHealthScore.color === 'orange',
+                                    'text-red-600': financialHealthScore.color === 'red'
+                                }">
+                                    {{ financialHealthScore.score }}/10
+                                </div>
+                                <div>
+                                    <div class="text-xl font-bold" :class="{
+                                        'text-green-600': financialHealthScore.color === 'green',
+                                        'text-blue-600': financialHealthScore.color === 'blue',
+                                        'text-yellow-600': financialHealthScore.color === 'yellow',
+                                        'text-orange-600': financialHealthScore.color === 'orange',
+                                        'text-red-600': financialHealthScore.color === 'red'
+                                    }">
+                                        {{ financialHealthScore.text }}
+                                    </div>
+                                    <div class="text-sm text-gray-600">{{ financialHealthScore.description }}</div>
+                                </div>
+                            </div>
+                            <!-- Progress Bar -->
+                            <div class="w-full bg-gray-200 rounded-full h-3">
+                                <div class="h-3 rounded-full transition-all duration-500" 
+                                     :class="{
+                                         'bg-green-500': financialHealthScore.color === 'green',
+                                         'bg-blue-500': financialHealthScore.color === 'blue',
+                                         'bg-yellow-500': financialHealthScore.color === 'yellow',
+                                         'bg-orange-500': financialHealthScore.color === 'orange',
+                                         'bg-red-500': financialHealthScore.color === 'red'
+                                     }"
+                                     :style="{ width: (financialHealthScore.score * 10) + '%' }">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Giderler Summary -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-red-600 mb-4 flex items-center">
+                        <span class="mr-2">💰</span> Giderler
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                            <div class="text-xs text-red-600 mb-1">Saatlik</div>
+                            <div class="text-lg font-bold text-red-700">{{ formatCurrency(hourlyExpense) }}</div>
+                        </div>
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                            <div class="text-xs text-red-600 mb-1">Günlük</div>
+                            <div class="text-lg font-bold text-red-700">{{ formatCurrency(dailyExpenseTotal) }}</div>
+                        </div>
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                            <div class="text-xs text-red-600 mb-1">Haftalık</div>
+                            <div class="text-lg font-bold text-red-700">{{ formatCurrency(weeklyExpense) }}</div>
+                        </div>
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                            <div class="text-xs text-red-600 mb-1">Aylık</div>
+                            <div class="text-lg font-bold text-red-700">{{ formatCurrency(totalMonthlyExpense) }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Gelirler Summary -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-green-600 mb-4 flex items-center">
+                        <span class="mr-2">💚</span> Gelirler
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="text-xs text-green-600 mb-1">Saatlik</div>
+                            <div class="text-lg font-bold text-green-700">{{ formatCurrency(hourlyIncome) }}</div>
+                        </div>
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="text-xs text-green-600 mb-1">Günlük</div>
+                            <div class="text-lg font-bold text-green-700">{{ formatCurrency(dailyIncomeTotalConverted) }}</div>
+                        </div>
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="text-xs text-green-600 mb-1">Haftalık</div>
+                            <div class="text-lg font-bold text-green-700">{{ formatCurrency(weeklyIncome) }}</div>
+                        </div>
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="text-xs text-green-600 mb-1">Aylık</div>
+                            <div class="text-lg font-bold text-green-700">{{ formatCurrency(totalMonthlyIncome) }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Net Flow Summary -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-blue-600 mb-4 flex items-center">
+                        <span class="mr-2">⚖️</span> Net Akış
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="text-xs text-blue-600 mb-1">Saatlik Net</div>
+                            <div class="text-lg font-bold" :class="netHourlyFlow >= 0 ? 'text-green-700' : 'text-red-700'">{{ formatCurrency(netHourlyFlow) }}</div>
+                        </div>
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="text-xs text-blue-600 mb-1">Günlük Net</div>
+                            <div class="text-lg font-bold" :class="netDailyFlow >= 0 ? 'text-green-700' : 'text-red-700'">{{ formatCurrency(netDailyFlow) }}</div>
+                        </div>
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="text-xs text-blue-600 mb-1">Haftalık Net</div>
+                            <div class="text-lg font-bold" :class="netWeeklyFlow >= 0 ? 'text-green-700' : 'text-red-700'">{{ formatCurrency(netWeeklyFlow) }}</div>
+                        </div>
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="text-xs text-blue-600 mb-1">Aylık Net</div>
+                            <div class="text-lg font-bold" :class="netFlow >= 0 ? 'text-green-700' : 'text-red-700'">{{ formatCurrency(netFlow) }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Savings Goal -->
+                <div>
+                    <h3 class="text-lg font-semibold text-purple-600 mb-4 flex items-center">
+                        <span class="mr-2">🎯</span> Birikim Hedefi
+                    </h3>
+                    <div class="bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl p-6 border-2 border-purple-200">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-purple-700 mb-2">Hedef Miktar (₺)</label>
+                            <input v-model="targetAmount" 
+                                   type="number" 
+                                   placeholder="Örn: 100000"
+                                   class="w-full p-3 rounded-lg border-2 border-purple-300 focus:border-purple-500 focus:outline-none text-lg font-medium">
+                        </div>
+                        
+                        <div v-if="targetAmount > 0" class="mt-6">
+                            <div v-if="targetTime.message" class="text-center text-red-600 font-medium mb-4">
+                                {{ targetTime.message }}
+                            </div>
+                            <div v-else>
+                                <h4 class="text-lg font-semibold text-purple-800 mb-4 text-center">
+                                    Hedefinize {{ formatCurrency(targetAmount) }} ulaşma süresi:
+                                </h4>
+                                <div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-center">
+                                    <div class="bg-white rounded-lg p-4 border border-purple-200">
+                                        <div class="text-xs text-purple-600 mb-1">Saat</div>
+                                        <div class="text-xl font-bold text-purple-800">{{ targetTime.hours.toLocaleString() }}</div>
+                                    </div>
+                                    <div class="bg-white rounded-lg p-4 border border-purple-200">
+                                        <div class="text-xs text-purple-600 mb-1">Gün</div>
+                                        <div class="text-xl font-bold text-purple-800">{{ targetTime.days.toLocaleString() }}</div>
+                                    </div>
+                                    <div class="bg-white rounded-lg p-4 border border-purple-200">
+                                        <div class="text-xs text-purple-600 mb-1">Hafta</div>
+                                        <div class="text-xl font-bold text-purple-800">{{ targetTime.weeks.toLocaleString() }}</div>
+                                    </div>
+                                    <div class="bg-white rounded-lg p-4 border border-purple-200">
+                                        <div class="text-xs text-purple-600 mb-1">Ay</div>
+                                        <div class="text-xl font-bold text-purple-800">{{ targetTime.months.toLocaleString() }}</div>
+                                    </div>
+                                    <div class="bg-white rounded-lg p-4 border border-purple-200">
+                                        <div class="text-xs text-purple-600 mb-1">Yıl</div>
+                                        <div class="text-xl font-bold text-purple-800">{{ targetTime.years.toLocaleString() }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <footer class="bg-gray-800 text-white py-6 mt-auto">
+            <div class="container mx-auto px-4">
+                <!-- Two Column Layout -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 text-center md:text-left">
+                    <!-- Privacy & Security -->
+                    <div>
+                        <p class="text-green-400 text-sm font-medium mb-2">🔒 Gizlilik & Güvenlik</p>
+                        <p class="text-gray-300 text-xs mb-1">Bu uygulama hiçbir veriyi sunucularımızda depolamaz.</p>
+                        <p class="text-gray-300 text-xs mb-3">Tüm verileriniz sadece tarayıcınızda güvenle saklanır.</p>
+                        
+                        <!-- Clear Data Button -->
+                        <button @click="clearAllData" 
+                                class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs font-medium">
+                            🗑️ Tüm Verileri Temizle
+                        </button>
+                    </div>
+                    
+                    <!-- Open Source -->
+                    <div>
+                        <p class="text-blue-400 text-sm font-medium mb-2">🌟 Açık Kaynak</p>
+                        <p class="text-gray-300 text-xs mb-2">Bu proje tamamen açık kaynak kodludur.</p>
+                        <a href="https://github.com/iltekin/gidermetre" target="_blank" rel="noopener noreferrer" 
+                           class="text-blue-400 hover:text-blue-300 underline text-sm">
+                            📁 GitHub'da Görüntüle
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Developer Info -->
+                <div class="border-t border-gray-700 pt-4 text-center">
+                    <p class="text-gray-300 text-sm mb-2">© 2025 Gidermetre - Sürekli giderlerinizi görün</p>
+                    <p class="text-gray-400 text-xs">
+                        Geliştirici: 
+                        <a href="https://x.com/sezeriltekin" target="_blank" rel="noopener noreferrer" 
+                           class="text-blue-400 hover:text-blue-300 underline">
+                            @sezeriltekin
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
