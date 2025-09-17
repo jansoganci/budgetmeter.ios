@@ -80,7 +80,7 @@ Stores the user-entered amount for each predefined category.
 | ----------------- | --------- | ------------------------------------------------------------------------ |
 | `id`              | `UUID`    | Unique identifier for the Core Data object.                              |
 | `uniqueID`        | `String`  | A stable string ID from the web app (e.g., "yemek", "kira") for mapping. |
-| `amount`          | `Decimal` | The monetary value entered by the user. **Crucially, use Decimal.**      |
+| `amount`          | `Double` | The monetary value entered by the user. **Using Double for compatibility.**      |
 | `type`            | `String`  | Enum: `"income"` or `"expense"`.                                         |
 | `frequency`       | `String`  | Enum: `"daily"`, `"monthly"`, or `"yearly"`.                             |
 
@@ -90,8 +90,8 @@ A singleton entity (only one object will exist) to store global app state.
 | Attribute                   | Type      | Description                                                              |
 | --------------------------- | --------- | ------------------------------------------------------------------------ |
 | `lastBackgroundedTimestamp` | `Date?`   | The exact timestamp when the app was last moved to the background.       |
-| `lastMeterValue`            | `Decimal` | The value of the live meter at the moment the app was backgrounded.      |
-| `savingsGoalAmount`         | `Decimal` | The user-defined savings goal.                                           |
+| `lastMeterValue`            | `Double` | The value of the live meter at the moment the app was backgrounded.      |
+| `savingsGoalAmount`         | `Double` | The user-defined savings goal.                                           |
 
 ---
 
@@ -100,7 +100,7 @@ A singleton entity (only one object will exist) to store global app state.
 This is the most critical component for ensuring consistency with the web app.
 
 - **Porting Strategy:** Create a `CalculationEngine.swift` file within `CoreKit`. This will be a pure, stateless utility with no dependencies on UI or data persistence. It will contain functions that are a **direct, line-for-line port** of the JavaScript calculation formulas.
-- **Data Types:** The engine's functions will accept `Decimal` values as input and return `Decimal` values to prevent floating-point precision errors.
+- **Data Types:** The engine's functions will accept `Double` values as input and return `Double` values for compatibility with the current implementation.
 - **Testing (Mandatory):** A `CalculationEngineTests.swift` file must be created. It will contain a suite of unit tests with hardcoded inputs and expected outputs captured directly from the web application. This is non-negotiable and guarantees 100% parity.
 
 **Example of a ported function:**
@@ -111,10 +111,10 @@ struct CalculationEngine {
     /// Calculates the total monthly expense based on the exact web app formula.
     /// Formula: (dailyTotal * 30) + monthlyTotal + (yearlyTotal / 12)
     static func totalMonthlyExpense(
-        dailyTotal: Decimal,
-        monthlyTotal: Decimal,
-        yearlyTotal: Decimal
-    ) -> Decimal {
+        dailyTotal: Double,
+        monthlyTotal: Double,
+        yearlyTotal: Double
+    ) -> Double {
         return (dailyTotal * 30) + monthlyTotal + (yearlyTotal / 12)
     }
     

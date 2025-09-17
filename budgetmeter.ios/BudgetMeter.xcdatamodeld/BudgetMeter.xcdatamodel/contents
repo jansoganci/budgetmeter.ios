@@ -2,11 +2,11 @@
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22758" systemVersion="23F79" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="YES" userDefinedModelVersionIdentifier="">
     <entity name="AppSettings" representedClassName="AppSettings" syncable="YES" codeGenerationType="class">
         <attribute name="lastBackgroundedTimestamp" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
-        <attribute name="lastMeterValue" optional="YES" attributeType="Decimal" defaultValueString="0"/>
-        <attribute name="savingsGoalAmount" optional="YES" attributeType="Decimal" defaultValueString="0"/>
+        <attribute name="lastMeterValue" optional="YES" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="savingsGoalAmount" optional="YES" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
     </entity>
     <entity name="FinancialCategory" representedClassName="FinancialCategory" syncable="YES" codeGenerationType="class">
-        <attribute name="amount" optional="YES" attributeType="Decimal" defaultValueString="0"/>
+        <attribute name="amount" optional="YES" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="frequency" optional="YES" attributeType="String"/>
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="type" optional="YES" attributeType="String"/>

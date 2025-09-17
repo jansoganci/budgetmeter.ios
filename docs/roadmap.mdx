@@ -33,19 +33,19 @@ This phase establishes the architectural foundation of the application.
 
 This phase focuses on building the primary user interface for data input.
 
-- [ ] **Implement First-Launch Data Seeding:**
+- [x] **Implement First-Launch Data Seeding:**
     - **Description:** Create logic that uses a `UserDefaults` flag (`"didSeedInitialData"`) to populate the fixed `FinancialCategory` entities into Core Data on the app's first launch only.
-- [ ] **Build `IncomesFeature` Module:**
+- [x] **Build `IncomesFeature` Module:**
     - **Description:** Create the UI (`IncomeView.swift`) and logic (`IncomeViewModel.swift`) for the incomes screen. The view should display a list of income categories.
-- [ ] **Connect Income Inputs to Core Data:**
+- [x] **Connect Income Inputs to Core Data:**
     - **Description:** Implement functionality to allow users to input amounts for each income category. Ensure data is saved to Core Data via the `PersistenceService` and the UI updates accordingly. Use `.decimalPad` for keyboards.
-- [ ] **Build `ExpensesFeature` Module:**
+- [x] **Build `ExpensesFeature` Module:**
     - **Description:** Create the UI (`ExpenseView.swift`) and logic (`ExpenseViewModel.swift`) for the expenses screen, mirroring the structure of the `IncomesFeature`.
-- [ ] **Connect Expense Inputs to Core Data:**
+- [x] **Connect Expense Inputs to Core Data:**
     - **Description:** Implement functionality for expense inputs, ensuring data is saved correctly to Core Data.
-- [ ] **Verify Data Persistence and Sync:**
+- [x] **Verify Data Persistence and Sync:**
     - **Description:** Test on a physical device to confirm that entered data persists between app launches and syncs correctly and privately via CloudKit.
-- [ ] **Phase 2 Review:**
+- [x] **Phase 2 Review:**
     - **Description:** All data entry UIs are functional and correctly save to the database. The UI matches the `Design Rulebook` (spacing, fonts, colors).
 
 ---
@@ -54,17 +54,17 @@ This phase focuses on building the primary user interface for data input.
 
 This phase brings the core data to life and assembles the main app view.
 
-- [ ] **Build `SummaryFeature` Module:**
+- [x] **Build `SummaryFeature` Module:**
     - **Description:** Create the UI (`SummaryView.swift`) and logic (`SummaryViewModel.swift`). The ViewModel will fetch all data, use the `CalculationEngine` to compute metrics, and publish them to the view.
-- [ ] **Build `LiveMeterView` and ViewModel:**
+- [x] **Build `LiveMeterView` and ViewModel:**
     - **Description:** Create the `LiveMeterView.swift` header component and its `LiveMeterViewModel.swift`.
-- [ ] **Implement Live Meter Timer:**
+- [x] **Implement Live Meter Timer:**
     - **Description:** Use a `Timer` in the `LiveMeterViewModel` to frequently update the displayed financial flow value based on elapsed time since the session started.
-- [ ] **Implement Background/Foreground State Logic:**
+- [x] **Implement Background/Foreground State Logic:**
     - **Description:** Use `AppSettings` in Core Data to save the meter's state and timestamp when the app enters the background. On foregrounding, recalculate the meter's value to ensure zero data loss.
-- [ ] **Assemble Main TabView:**
+- [x] **Assemble Main TabView:**
     - **Description:** Create the main `TabView` that hosts the Incomes, Expenses, and Summary screens. Integrate the `LiveMeterView` to be persistently visible.
-- [ ] **Phase 3 Review:**
+- [x] **Phase 3 Review:**
     - **Description:** The live meter updates correctly and handles background/foreground transitions flawlessly. The summary screen displays accurate calculations. The app is now feature-complete for v1.0.
 
 ---
@@ -73,25 +73,25 @@ This phase brings the core data to life and assembles the main app view.
 
 This phase focuses on quality, accessibility, and adhering to all guidelines.
 
-- [ ] **Create String Catalog:**
+- [x] **Create String Catalog:**
     - **Description:** Externalize all user-facing strings into an `.xcstrings` file for English. Ensure no hardcoded strings remain in the UI.
-- [ ] **Design and Add App Icon:**
+- [x] **Design and Add App Icon:**
     - **Description:** Create a minimalist, modern app icon that follows Apple's guidelines and add all required sizes to the `AppIcon.appiconset`.
-- [ ] **Create Launch Screen:**
+- [x] **Create Launch Screen:**
     - **Description:** Configure the `LaunchScreen.storyboard` to show only the app icon centered on a solid background color.
-- [ ] **Implement Empty States:**
+- [x] **Implement Empty States:**
     - **Description:** Design and implement the empty state UI for the summary screen, to be shown on first launch before any data is entered.
-- [ ] **Verify Dark Mode:**
+- [x] **Verify Dark Mode:**
     - **Description:** Test the entire app in Dark Mode. Ensure all colors, text, and assets adapt correctly and maintain legibility.
 - [ ] **Verify Dynamic Type:**
     - **Description:** Test that all text scales properly when the system's font size is changed.
-- [ ] **Add Accessibility (VoiceOver) Labels:**
+- [x] **Add Accessibility (VoiceOver) Labels:**
     - **Description:** Add descriptive `accessibilityLabel`s to all UI controls (buttons, inputs, tabs) to ensure the app is usable with VoiceOver.
-- [ ] **Final Design & HIG Review:**
+- [x] **Final Design & HIG Review:**
     - **Description:** Conduct a full visual review of the app against the `Design Rulebook` and Apple's Human Interface Guidelines (HIG). Check for spacing, corner radii, touch target sizes (44pt), and haptics.
-- [ ] **Performance & Battery Profiling:**
+- [x] **Performance & Battery Profiling:**
     - **Description:** Profile the app on a physical device using Xcode Instruments to ensure it meets the launch time criteria (<2s) and has no excessive battery drain.
-- [ ] **Phase 4 Review:**
+- [x] **Phase 4 Review:**
     - **Description:** The app is visually polished, fully accessible, performant, and compliant with all project rulebooks.
 
 ---

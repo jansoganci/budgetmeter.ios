@@ -1,0 +1,159 @@
+# 🔧 BudgetMeter iOS - Refactoring Plan
+
+**Date:** September 17, 2025  
+**Phase:** Post-Phase 4 Bug Fixes  
+**Priority:** Critical Issues Before App Store Submission
+
+---
+
+## 🚨 **CRITICAL ISSUES IDENTIFIED**
+
+### **1. HOME TAB WORKING BUT WRONG DISPLAY** 
+**Severity:** 🟡 **MODERATE**
+**Description:** Home tab çalışıyor ama sadece "Getting Started" gösteriyor, Live Meter ve dashboard yok
+**Evidence:** Screenshot shows welcome screen instead of planned dashboard
+
+**Probable Causes:**
+- ✅ HomeViewModel.hasAnyData = false (henüz data girilmemiş)
+- ✅ Conditional logic: if !hasAnyData → gettingStartedView
+- ✅ Live Meter ve dashboard sadece data varsa görünüyor
+
+**Impact:** Planned dashboard design görünmüyor, user experience farklı
+
+---
+
+### **2. DATA NOT SAVING** 
+**Severity:** 🔴 **CRITICAL**
+**Description:** Income and expense data input not persisting to Core Data
+**Evidence:** User reports data not saving after input
+
+**Probable Causes:**
+- 🔴 **CategoryInputCard.updateInputText() EMPTY FUNCTION** (Line 123)
+- ✅ Input field always shows "0" because updateInputText() doesn't load category.amount
+- ✅ Data actually saves but UI doesn't reflect saved values
+- ✅ User thinks data not saving but it's just display issue
+- ✅ formatInputAmount() not called from updateInputText()
+
+**Impact:** Core app functionality broken, users lose all data
+
+---
+
+### **3. CATEGORY NAMES NOT LOCALIZED**
+**Severity:** 🟡 **MODERATE**
+**Description:** Category cards showing "category.xxx.name" instead of English names
+**Evidence:** Screenshots show raw localization keys instead of translated text
+
+**Examples from Screenshots:**
+- `category.cay_kahve.name` → Should be "Tea/Coffee"
+- `category.diger.name` → Should be "Other"
+- `category.sigara.name` → Should be "Cigarettes"
+- `category.ulasim.name` → Should be "Transportation"
+- `category.yemek.name` → Should be "Food"
+
+**Probable Causes:**
+- ✅ DataSeedingService.displayName() function not working correctly
+- ✅ String localization lookup failing
+- ✅ Localizable.xcstrings missing some category entries
+- ✅ String(localized:) not resolving properly
+- ✅ Category uniqueID mapping incorrect
+
+**Impact:** Poor user experience, app looks unfinished and unprofessional
+
+---
+
+## 🔍 **TECHNICAL ANALYSIS**
+
+### **Root Cause Investigation Needed:**
+
+**1. Home Tab Issue:**
+```swift
+// Check if HomeView is properly imported in ContentView
+// Verify tab.home.title exists in Localizable.xcstrings
+// Test HomeViewModel initialization
+```
+
+**2. Data Saving Issue:**
+```swift
+// Verify CategoryInputCard → ViewModel → PersistenceService chain
+// Check if parseAmount() is returning correct values
+// Ensure Core Data context is properly configured
+```
+
+**3. Localization Issue:**
+```swift
+// Check DataSeedingService.displayName() implementation
+// Verify Localizable.xcstrings category entries
+// Test String(localized:) resolution
+```
+
+---
+
+## 🎯 **PROPOSED FIXES**
+
+### **Priority 1: Data Saving (Critical)**
+1. Debug CategoryInputCard onChange callback
+2. Verify ViewModel save operations
+3. Test Core Data persistence chain
+4. Add logging to track save operations
+
+### **Priority 2: Home Tab (Critical)**
+1. Check ContentView HomeView integration
+2. Verify localization strings exist
+3. Test HomeViewModel loading
+4. Debug tab switching logic
+
+### **Priority 3: Localization (Moderate)**
+1. Audit Localizable.xcstrings completeness
+2. Test DataSeedingService.displayName()
+3. Verify category uniqueID mappings
+4. Fix missing translations
+
+---
+
+## 📋 **TESTING CHECKLIST**
+
+### **Before Fixes:**
+- [ ] Reproduce all issues in development environment
+- [ ] Document exact error messages and behaviors
+- [ ] Check console logs for additional clues
+
+### **After Fixes:**
+- [ ] Verify Home tab loads and displays correctly
+- [ ] Test data input and persistence across app restarts
+- [ ] Confirm all category names display in English
+- [ ] Run full regression testing on all features
+
+---
+
+## 🚀 **IMPLEMENTATION PLAN**
+
+### **Phase 1: Investigation (15 minutes)**
+1. Read all related files and check for obvious errors
+2. Run linter to identify compilation issues
+3. Test each component individually
+
+### **Phase 2: Critical Fixes (30 minutes)**
+1. Fix data saving functionality
+2. Fix Home tab loading
+3. Fix category name localization
+
+### **Phase 3: Validation (15 minutes)**
+1. Full app testing
+2. Regression testing
+3. User flow validation
+
+**Total Estimated Time:** 1 hour
+
+---
+
+## 📊 **SUCCESS CRITERIA**
+
+✅ **Home tab loads as default tab**  
+✅ **Data input saves and persists**  
+✅ **All category names show in English**  
+✅ **All existing functionality still works**  
+✅ **Zero regression issues**
+
+---
+
+**Next Action:** Begin systematic investigation and fixes of identified issues.

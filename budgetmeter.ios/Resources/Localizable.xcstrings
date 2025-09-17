@@ -1,0 +1,1160 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "-" : {
+
+    },
+    "%@ dollars" : {
+
+    },
+    "%lld" : {
+
+    },
+    "• Does not collect any personal information" : {
+
+    },
+    "• Does not share data with external services" : {
+
+    },
+    "• Does not use third-party analytics" : {
+
+    },
+    "• Stores all data locally on your device" : {
+
+    },
+    "• Terms may be updated without notice" : {
+
+    },
+    "• This app is provided 'as is' without warranty" : {
+
+    },
+    "• Use at your own risk for financial planning" : {
+
+    },
+    "• Uses iCloud for private sync across your devices" : {
+
+    },
+    "• We are not liable for financial decisions" : {
+
+    },
+    "+" : {
+
+    },
+    "✅ Categories loaded successfully!" : {
+
+    },
+    "Add Expense" : {
+
+    },
+    "Add Expenses" : {
+
+    },
+    "Add Income" : {
+
+    },
+    "Add Your First Income" : {
+
+    },
+    "Amount input for %@" : {
+
+    },
+    "BudgetMeter Debug" : {
+
+    },
+    "BudgetMeter is committed to protecting your privacy. This app:" : {
+
+    },
+    "By using BudgetMeter, you agree to these terms:" : {
+
+    },
+    "Cancel" : {
+
+    },
+    "category.%@.name" : {
+
+    },
+    "category.affiliate.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Affiliate"
+          }
+        }
+      }
+    },
+    "category.aidat.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Building Fee"
+          }
+        }
+      }
+    },
+    "category.arac_bakim.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Car Maintenance"
+          }
+        }
+      }
+    },
+    "category.arac_kasko.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Car Comprehensive"
+          }
+        }
+      }
+    },
+    "category.arac_muayene.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vehicle Inspection"
+          }
+        }
+      }
+    },
+    "category.arac_satisi.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Car Sale"
+          }
+        }
+      }
+    },
+    "category.arac_sigorta.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Car Insurance"
+          }
+        }
+      }
+    },
+    "category.arac_yakit.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Car Fuel"
+          }
+        }
+      }
+    },
+    "category.aylik_maas.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monthly Salary"
+          }
+        }
+      }
+    },
+    "category.blog.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blog"
+          }
+        }
+      }
+    },
+    "category.bonus.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bonus"
+          }
+        }
+      }
+    },
+    "category.cay_kahve.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tea/Coffee"
+          }
+        }
+      }
+    },
+    "category.danismanlik.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consulting"
+          }
+        }
+      }
+    },
+    "category.dask.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Earthquake Insurance"
+          }
+        }
+      }
+    },
+    "category.diger_aylik.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other Monthly"
+          }
+        }
+      }
+    },
+    "category.diger_gelir.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other Income"
+          }
+        }
+      }
+    },
+    "category.diger_yillik.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other Yearly"
+          }
+        }
+      }
+    },
+    "category.diger.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other"
+          }
+        }
+      }
+    },
+    "category.dijital_abonelikler.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Digital Subscriptions"
+          }
+        }
+      }
+    },
+    "category.dijital_urun.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Digital Product"
+          }
+        }
+      }
+    },
+    "category.dogalgaz.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Natural Gas"
+          }
+        }
+      }
+    },
+    "category.egitim.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Education"
+          }
+        }
+      }
+    },
+    "category.elektrik.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Electricity"
+          }
+        }
+      }
+    },
+    "category.emlak_satisi.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Real Estate Sale"
+          }
+        }
+      }
+    },
+    "category.emlak_vergi.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Property Tax"
+          }
+        }
+      }
+    },
+    "category.freelance.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Freelance"
+          }
+        }
+      }
+    },
+    "category.gym_monthly.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gym (Monthly)"
+          }
+        }
+      }
+    },
+    "category.gym_yearly.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gym (Yearly)"
+          }
+        }
+      }
+    },
+    "category.hediye.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gift"
+          }
+        }
+      }
+    },
+    "category.ikramiye.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prize"
+          }
+        }
+      }
+    },
+    "category.internet.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Internet"
+          }
+        }
+      }
+    },
+    "category.kira_geliri.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rental Income"
+          }
+        }
+      }
+    },
+    "category.kira.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rent"
+          }
+        }
+      }
+    },
+    "category.komisyon.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Commission"
+          }
+        }
+      }
+    },
+    "category.kredi_karti.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Credit Card"
+          }
+        }
+      }
+    },
+    "category.kredi_taksit.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loan Payment"
+          }
+        }
+      }
+    },
+    "category.maas.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salary"
+          }
+        }
+      }
+    },
+    "category.miras.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inheritance"
+          }
+        }
+      }
+    },
+    "category.mtv.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vehicle Tax"
+          }
+        }
+      }
+    },
+    "category.okul_taksit.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "School Fee"
+          }
+        }
+      }
+    },
+    "category.online_kurs.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Online Course"
+          }
+        }
+      }
+    },
+    "category.pasif_gelir.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passive Income"
+          }
+        }
+      }
+    },
+    "category.patent.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Patent"
+          }
+        }
+      }
+    },
+    "category.podcast.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podcast"
+          }
+        }
+      }
+    },
+    "category.saglik_sigorta.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Health Insurance"
+          }
+        }
+      }
+    },
+    "category.servis.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Service Fee"
+          }
+        }
+      }
+    },
+    "category.sgk_bagkur.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Social Security"
+          }
+        }
+      }
+    },
+    "category.sigara.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cigarettes"
+          }
+        }
+      }
+    },
+    "category.sosyal_medya.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Social Media"
+          }
+        }
+      }
+    },
+    "category.su.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Water"
+          }
+        }
+      }
+    },
+    "category.tatil.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vacation"
+          }
+        }
+      }
+    },
+    "category.telefon.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Phone"
+          }
+        }
+      }
+    },
+    "category.telif.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Royalty"
+          }
+        }
+      }
+    },
+    "category.ulasim.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transportation"
+          }
+        }
+      }
+    },
+    "category.yatirim_getirisi.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Investment Return"
+          }
+        }
+      }
+    },
+    "category.yatirim.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Investment"
+          }
+        }
+      }
+    },
+    "category.yemek.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Food"
+          }
+        }
+      }
+    },
+    "category.yillik_bonus.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yearly Bonus"
+          }
+        }
+      }
+    },
+    "category.youtube.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YouTube"
+          }
+        }
+      }
+    },
+    "Core Data Status: ✅ Connected" : {
+
+    },
+    "currency.symbol" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "$"
+          }
+        }
+      }
+    },
+    "Debug" : {
+
+    },
+    "Done" : {
+
+    },
+    "empty_state.expenses.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add your first expense to get started!"
+          }
+        }
+      }
+    },
+    "empty_state.income.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add your income sources"
+          }
+        }
+      }
+    },
+    "empty_state.summary.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter your finances to see insights"
+          }
+        }
+      }
+    },
+    "Error" : {
+
+    },
+    "Expenses" : {
+
+    },
+    "Export CSV" : {
+
+    },
+    "Export Data" : {
+
+    },
+    "Export Your Data" : {
+
+    },
+    "frequency.daily" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daily"
+          }
+        }
+      }
+    },
+    "frequency.monthly" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monthly"
+          }
+        }
+      }
+    },
+    "frequency.yearly" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yearly"
+          }
+        }
+      }
+    },
+    "Health" : {
+
+    },
+    "Home" : {
+
+    },
+    "Income" : {
+
+    },
+    "Income Categories: %lld" : {
+
+    },
+    "input.placeholder.amount" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "0"
+          }
+        }
+      }
+    },
+    "Loading expense categories..." : {
+
+    },
+    "Loading income categories..." : {
+
+    },
+    "Loading your financial data..." : {
+
+    },
+    "Money Earned" : {
+
+    },
+    "Money Spent" : {
+
+    },
+    "No amount entered" : {
+
+    },
+    "No categories found. Data seeding may not have run." : {
+
+    },
+    "OK" : {
+
+    },
+    "Opens expense entry screen to add your expenses" : {
+
+    },
+    "Opens income entry screen to add your income sources" : {
+
+    },
+    "Privacy" : {
+
+    },
+    "Privacy Policy" : {
+
+    },
+    "Quick Actions" : {
+
+    },
+    "Reset" : {
+
+    },
+    "Reset All Data" : {
+
+    },
+    "Session: %@" : {
+
+    },
+    "Settings" : {
+
+    },
+    "settings.about.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About"
+          }
+        }
+      }
+    },
+    "settings.appearance.dark" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dark"
+          }
+        }
+      }
+    },
+    "settings.appearance.footer" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose how the app appears on your device"
+          }
+        }
+      }
+    },
+    "settings.appearance.light" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light"
+          }
+        }
+      }
+    },
+    "settings.appearance.system" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System"
+          }
+        }
+      }
+    },
+    "settings.appearance.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appearance"
+          }
+        }
+      }
+    },
+    "settings.contact.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contact Support"
+          }
+        }
+      }
+    },
+    "settings.data.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data & Privacy"
+          }
+        }
+      }
+    },
+    "settings.export.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export Data"
+          }
+        }
+      }
+    },
+    "settings.language.footer" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turkish language support coming soon"
+          }
+        }
+      }
+    },
+    "settings.language.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Language & Region"
+          }
+        }
+      }
+    },
+    "settings.privacy.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privacy Policy"
+          }
+        }
+      }
+    },
+    "settings.reset.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset All Data"
+          }
+        }
+      }
+    },
+    "settings.terms.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terms of Service"
+          }
+        }
+      }
+    },
+    "settings.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        }
+      }
+    },
+    "settings.version.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App Version"
+          }
+        }
+      }
+    },
+    "Show Income View" : {
+
+    },
+    "tab.expenses.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expenses"
+          }
+        }
+      }
+    },
+    "tab.home.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home"
+          }
+        }
+      }
+    },
+    "tab.income.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Income"
+          }
+        }
+      }
+    },
+    "tab.settings.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        }
+      }
+    },
+    "tab.summary.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Summary"
+          }
+        }
+      }
+    },
+    "Terms" : {
+
+    },
+    "Terms of Service" : {
+
+    },
+    "Test Data Seeding" : {
+
+    },
+    "This will permanently delete all your financial data. This action cannot be undone." : {
+
+    },
+    "Today's Snapshot" : {
+
+    },
+    "Track your money flow in real-time.\nStart by adding your income sources." : {
+
+    },
+    "Welcome to BudgetMeter" : {
+
+    },
+    "Your financial data will be exported as a CSV file that you can save or share." : {
+
+    }
+  },
+  "version" : "1.0"
+}
