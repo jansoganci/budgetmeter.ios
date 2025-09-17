@@ -16,18 +16,30 @@
 
 ## 2. Color Palette
 
-The color palette uses standard system colors to ensure perfect adaptability for Light Mode, Dark Mode, and other accessibility settings.
+The color palette combines custom brand colors with Apple's system colors to ensure both brand consistency and perfect adaptability for Light Mode, Dark Mode, and accessibility settings.
 
-| Role          | Color Name          | UIKit Equivalent          | SwiftUI Equivalent      | Notes                                        |
-|---------------|---------------------|---------------------------|-------------------------|----------------------------------------------|
-| **Income**    | System Green        | `.systemGreen`            | `Color.green`           | For positive values, success states.         |
-| **Expense**   | System Red          | `.systemRed`              | `Color.red`             | For negative values, errors, delete actions. |
-| **Warning**   | System Orange       | `.systemOrange`           | `Color.orange`          | For warnings or neutral alerts.              |
-| **Accent**    | System Blue         | `.systemBlue`             | `Color.blue`            | For interactive elements like buttons, links.  |
-| **Background**| System Background   | `.systemBackground`       | `Color(uiColor: .systemBackground)` | Adapts to Light/Dark Mode. |
-| **Text**      | Label Color         | `.label`                  | `Color(uiColor: .label)`| Primary text color. Adapts automatically.    |
-| **Secondary Text** | Secondary Label | `.secondaryLabel`         | `Color(uiColor: .secondaryLabel)` | For less important text. |
-| **Card/Cell BG** | Secondary System BG | `.secondarySystemBackground` | `Color(uiColor: .secondarySystemBackground)` | For card and list cell backgrounds. |
+### Brand Colors
+| Role              | Hex Code    | UIKit Implementation       | SwiftUI Implementation     | Usage                                    |
+|-------------------|-------------|----------------------------|----------------------------|------------------------------------------|
+| **Primary Brand** | `#4A90E2`   | `UIColor(hex: "4A90E2")`   | `Color(hex: "4A90E2")`     | CTAs, primary buttons, highlights        |
+| **Secondary**     | `#6B7280`   | `UIColor(hex: "6B7280")`   | `Color(hex: "6B7280")`     | Secondary text, borders, inactive elements |
+| **Background**    | `#FAFAFA`   | `UIColor(hex: "FAFAFA")`   | `Color(hex: "FAFAFA")`     | Cards, surfaces, input backgrounds       |
+| **Success**       | `#10B981`   | `UIColor(hex: "10B981")`   | `Color(hex: "10B981")`     | Positive indicators, success messages    |
+
+### System Colors (Semantic)
+| Role              | Color Name          | UIKit Equivalent          | SwiftUI Equivalent      | Usage                                        |
+|-------------------|---------------------|---------------------------|-------------------------|----------------------------------------------|
+| **Income**        | System Green        | `.systemGreen`            | `Color.green`           | Income values, positive financial indicators  |
+| **Expense**       | System Red          | `.systemRed`              | `Color.red`             | Expense values, negative indicators, delete   |
+| **Warning**       | System Orange       | `.systemOrange`           | `Color.orange`          | Warnings, neutral alerts                     |
+| **Text Primary**  | Label Color         | `.label`                  | `Color(uiColor: .label)`| Primary text color (adapts automatically)   |
+| **Text Secondary**| Secondary Label     | `.secondaryLabel`         | `Color(uiColor: .secondaryLabel)` | Secondary text, descriptions       |
+| **System BG**     | System Background   | `.systemBackground`       | `Color(uiColor: .systemBackground)` | Main background (adapts to theme) |
+
+### Color Implementation Notes
+- **Dark Mode Adaptation:** Brand colors should be tested and adjusted for Dark Mode compatibility
+- **Accessibility:** All color combinations must meet WCAG AA contrast requirements (4.5:1 ratio)
+- **Color Extensions:** Create SwiftUI Color extensions for brand colors to enable `Color.brandPrimary` syntax
 
 ---
 
@@ -56,6 +68,10 @@ The color palette uses standard system colors to ensure perfect adaptability for
 
 - **Source:** **SF Symbols only.** Do not use custom PNG, SVG, or other image assets for icons.
 - **Implementation:** Icons should be treated like text—they should scale with Dynamic Type and adopt the surrounding text color unless a specific semantic color (e.g., `Color.red`) is required.
+- **Key Symbols for BudgetMeter:**
+  - **Empty States:** `tray`, `creditcard`, `chart.line.uptrend.xyaxis`
+  - **Categories:** Use appropriate SF Symbols for expense/income categories
+  - **Navigation:** `house`, `dollarsign.circle`, `chart.bar`
 
 ---
 
@@ -83,8 +99,15 @@ The color palette uses standard system colors to ensure perfect adaptability for
 
 ---
 
-## 9. Empty States
+## 9. Empty States & Illustrations
 
-- **Onboarding:** For v1, there is no onboarding. The app should launch directly into the main interface.
-- **Empty State UI:** When there is no data, the screen should display a simple, friendly illustration (using SF Symbols if possible) and a short, encouraging message (e.g., "Add your first expense to get started!").
+- **No Custom Illustrations:** Use SF Symbols exclusively for visual elements and empty states.
+- **Empty State Components:**
+  - **Icon:** Large SF Symbol (e.g., `tray`, `creditcard`, `chart.line.uptrend.xyaxis`)
+  - **Message:** Short, encouraging text using secondary text color
+  - **Action:** Optional primary button using brand color for next steps
+- **Examples:**
+  - Empty expenses: `creditcard` icon + "Add your first expense to get started!"
+  - Empty income: `dollarsign.circle` icon + "Add your income sources"
+  - Empty summary: `chart.line.uptrend.xyaxis` icon + "Enter your finances to see insights"
 
