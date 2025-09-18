@@ -21,6 +21,7 @@ final class SettingsViewModel: ObservableObject {
     @Published var showingTermsOfService = false
     @Published var showingDataExportSheet = false
     @Published var showingResetDataAlert = false
+    @Published var showingResetCumulativeAlert = false
     
     // MARK: - Private Properties
     
@@ -124,6 +125,11 @@ final class SettingsViewModel: ObservableObject {
         showingResetDataAlert = true
     }
     
+    /// Shows reset long-term meter confirmation
+    func showResetCumulativeConfirmation() {
+        showingResetCumulativeAlert = true
+    }
+    
     /// Resets all user data (with confirmation)
     func resetAllData() {
         // Reset Core Data
@@ -144,11 +150,35 @@ final class SettingsViewModel: ObservableObject {
                 DispatchQueue.main.async {
                     // Re-seed initial data
                     let seedingService = DataSeedingService()
-                    seedingService.seedInitialDataIfNeeded()
+                    seedingService.seedInitialDataIfNeeded(force: true)
                 }
             } catch {
                 print("Failed to reset data: \(error)")
             }
+        }
+    }
+
+    /// Resets the cumulative long-term meter while keeping session data untouched
+    func resetCumulativeMeter() {
+        let context = persistenceService.viewContext
+        let fetchRequest: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
+
+        do {
+            let settings = try context.fetch(fetchRequest)
+            let appSettings: AppSettings
+
+            if let existingSettings = settings.first {
+                appSettings = existingSettings
+            } else {
+                appSettings = AppSettings(context: context)
+            }
+
+            appSettings.cumulativeTotal = 0.0
+            appSettings.cumulativeStartDate = Date()
+
+            persistenceService.save()
+        } catch {
+            print("Failed to reset cumulative meter: \(error)")
         }
     }
     

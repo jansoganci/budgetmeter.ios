@@ -40,9 +40,20 @@ struct SettingsView: View {
         .sheet(isPresented: $viewModel.showingDataExportSheet) {
             dataExportView
         }
-        .alert("Reset All Data", isPresented: $viewModel.showingResetDataAlert) {
-            Button("Cancel", role: .cancel) { }
-            Button("Reset", role: .destructive) {
+        .alert(
+            String(localized: "settings.reset.cumulative.title"),
+            isPresented: $viewModel.showingResetCumulativeAlert
+        ) {
+            Button(String(localized: "settings.reset.cancel"), role: .cancel) { }
+            Button(String(localized: "settings.reset.confirm"), role: .destructive) {
+                viewModel.resetCumulativeMeter()
+            }
+        } message: {
+            Text(String(localized: "settings.reset.cumulative.message"))
+        }
+        .alert(String(localized: "settings.reset.title"), isPresented: $viewModel.showingResetDataAlert) {
+            Button(String(localized: "settings.reset.cancel"), role: .cancel) { }
+            Button(String(localized: "settings.reset.confirm"), role: .destructive) {
                 viewModel.resetAllData()
             }
         } message: {
@@ -138,7 +149,22 @@ struct SettingsView: View {
                         .font(.system(size: 14, weight: .medium))
                 }
             }
-            
+
+            // Reset Long-Term Meter
+            Button(action: viewModel.showResetCumulativeConfirmation) {
+                HStack {
+                    Image(systemName: "arrow.counterclockwise")
+                        .foregroundColor(Color(hex: "4A90E2"))
+                        .frame(width: 24)
+
+                    Text(String(localized: "settings.reset.cumulative.title"))
+                        .font(.body)
+                        .foregroundColor(.primary)
+
+                    Spacer()
+                }
+            }
+
             // Reset Data
             Button(action: viewModel.showResetDataConfirmation) {
                 HStack {

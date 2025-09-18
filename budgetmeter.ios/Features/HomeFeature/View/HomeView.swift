@@ -52,32 +52,55 @@ struct HomeView: View {
     // MARK: - Live Meter Hero
     
     private var liveMeterHero: some View {
-        VStack(spacing: 12) {
-            // Session Duration
-            Text("Session: \(viewModel.sessionDuration)")
-                .font(.caption)
-                .foregroundColor(.white.opacity(0.8))
-            
-            // Live Value Display - HERO
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(String(localized: "home.session.label"))
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.white.opacity(0.9))
+                Spacer()
+                Text(viewModel.sessionDuration)
+                    .font(.caption)
+                    .monospacedDigit()
+                    .foregroundColor(.white.opacity(0.8))
+            }
+
             HStack(spacing: 8) {
                 Text(viewModel.isPositive ? "+" : "-")
                     .font(.system(size: 48, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
-                
+
                 Text(viewModel.formattedLiveValue)
                     .font(.system(size: 48, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
                     .monospacedDigit()
             }
-            
-            // Status Text
-            Text(viewModel.isPositive ? "Money Earned" : "Money Spent")
+
+            Text(viewModel.isPositive ? String(localized: "home.session.positive") : String(localized: "home.session.negative"))
                 .font(.subheadline)
                 .fontWeight(.medium)
                 .foregroundColor(.white.opacity(0.9))
+
+            Divider()
+                .background(Color.white.opacity(0.2))
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(String(localized: "home.cumulative.label"))
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.white.opacity(0.9))
+
+                Text(viewModel.cumulativeDisplayAmount)
+                    .font(.system(size: 24, weight: .semibold, design: .rounded))
+                    .foregroundColor(viewModel.cumulativeFlowColor.opacity(0.95))
+                    .monospacedDigit()
+
+                Text(String(localized: "home.cumulative.since \(viewModel.cumulativeSinceDateText)"))
+                    .font(.footnote)
+                    .foregroundColor(.white.opacity(0.8))
+            }
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 200) // Compact but prominent
         .padding(.vertical, 24)
         .padding(.horizontal, 20)
         .background(
@@ -91,6 +114,12 @@ struct HomeView: View {
             )
         )
         .cornerRadius(12)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(
+            String(
+                localized: "home.session.accessibility \(viewModel.formattedLiveValue) \(viewModel.sessionDuration) \(viewModel.cumulativeDisplayAmount) \(viewModel.cumulativeSinceDateText)"
+            )
+        )
     }
     
     // MARK: - Quick Actions Grid

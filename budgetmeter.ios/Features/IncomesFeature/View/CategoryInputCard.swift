@@ -56,8 +56,6 @@ struct CategoryInputCard: View {
                 )
         )
         .onAppear {
-            print("🔵 CategoryInputCard: Card appeared for category \(category.uniqueID ?? "unknown")")
-            print("🔵 CategoryInputCard: Initial amount: \(category.amount)")
             updateInputText()
         }
         .onChange(of: category.amount) { _, _ in
@@ -89,11 +87,7 @@ struct CategoryInputCard: View {
             .accessibilityValue(inputText.isEmpty ? "No amount entered" : "\(inputText) dollars")
             .onChange(of: inputText) { _, newValue in
                 let amount = parseAmount(from: newValue)
-                print("🔵 CategoryInputCard: Text changed to '\(newValue)' for category \(category.uniqueID ?? "unknown")")
-                print("🔵 CategoryInputCard: Parsed amount: \(amount)")
-                print("🔵 CategoryInputCard: Calling onAmountChange...")
                 onAmountChange(amount)
-                print("🔵 CategoryInputCard: onAmountChange called successfully")
             }
             .onSubmit {
                 isEditing = false
@@ -101,7 +95,6 @@ struct CategoryInputCard: View {
             }
             .onChange(of: focusedField.wrappedValue) { _, newValue in
                 if newValue == fieldID {
-                    print("🔵 CategoryInputCard: Field focused for category \(category.uniqueID ?? "unknown")")
                     isEditing = true
                 } else if newValue != fieldID {
                     isEditing = false
@@ -120,14 +113,9 @@ struct CategoryInputCard: View {
         )
         .frame(minHeight: 44) // Minimum touch target per HIG
         .onTapGesture {
-            print("🔵 CategoryInputCard: Input area tapped for category \(category.uniqueID ?? "unknown")")
-            print("🔵 CategoryInputCard: Current focusedField: \(focusedField.wrappedValue ?? "nil")")
-            print("🔵 CategoryInputCard: Setting focus to fieldID: \(fieldID)")
-            
             // Use DispatchQueue to ensure focus is set after current UI update cycle
             DispatchQueue.main.async {
                 focusedField.wrappedValue = fieldID
-                print("🔵 CategoryInputCard: Focus set asynchronously to: \(fieldID)")
             }
         }
     }
@@ -136,8 +124,6 @@ struct CategoryInputCard: View {
     
     private func updateInputText() {
         let newText = formatInputAmount(category.amount)
-        print("🔵 CategoryInputCard: updateInputText() for \(category.uniqueID ?? "unknown")")
-        print("🔵 CategoryInputCard: Amount \(category.amount) formatted to '\(newText)'")
         inputText = newText
     }
     

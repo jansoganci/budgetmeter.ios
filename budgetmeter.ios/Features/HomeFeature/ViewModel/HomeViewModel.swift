@@ -28,6 +28,9 @@ final class HomeViewModel: ObservableObject {
     @Published var financialHealthScore: Int = 0
     @Published var financialHealthText: String = "Getting Started"
     @Published var financialHealthColor: Color = .secondary
+    @Published var cumulativeDisplayAmount: String = "$0.00"
+    @Published var cumulativeSinceDateText: String = ""
+    @Published var cumulativeFlowColor: Color = .secondary
     
     // State Management
     @Published var isLoading = false
@@ -41,7 +44,9 @@ final class HomeViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private var timer: Timer?
     private var sessionStartTime: Date
-    private var savedMeterValue: Double = 0
+    private var sessionBaseline: Double = 0
+    private var cumulativeBaseline: Double = 0
+    private var cumulativeStartDate: Date = Date()
     
     // Financial data cache
     private var dailyIncomeTotal: Double = 0
@@ -50,6 +55,13 @@ final class HomeViewModel: ObservableObject {
     private var dailyExpenseTotal: Double = 0
     private var monthlyExpenseTotal: Double = 0
     private var yearlyExpenseTotal: Double = 0
+
+    private let cumulativeDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter
+    }()
     
     // MARK: - Initialization
     
@@ -163,13 +175,14 @@ final class HomeViewModel: ObservableObject {
             liveExpense: liveExpense
         )
         
-        // Add saved meter value
-        liveValue = savedMeterValue + liveNetFlow
+        let sessionNet = liveNetFlow
+
+        liveValue = sessionBaseline + sessionNet
         isPositive = liveValue >= 0
-        
-        // Format for display
+
         formattedLiveValue = formatLiveCurrency(liveValue)
         sessionDuration = formatDuration(sessionElapsed)
+        updateCumulativeDisplay(sessionNet: sessionNet)
     }
     
     private func loadAllData() {
@@ -250,24 +263,56 @@ final class HomeViewModel: ObservableObject {
         let fetchRequest: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
         
         do {
+            sessionBaseline = 0
+
             let settings = try context.fetch(fetchRequest)
             if let appSettings = settings.first {
-                savedMeterValue = appSettings.lastMeterValue
+                cumulativeBaseline = appSettings.cumulativeTotal
+
+                if let storedDate = appSettings.cumulativeStartDate {
+                    cumulativeStartDate = storedDate
+                } else {
+                    cumulativeStartDate = Date()
+                    appSettings.cumulativeStartDate = cumulativeStartDate
+                    persistenceService.save()
+                }
+            } else {
+                cumulativeBaseline = 0
+                cumulativeStartDate = Date()
             }
+
+            liveValue = sessionBaseline
+            isPositive = liveValue >= 0
+            formattedLiveValue = formatLiveCurrency(liveValue)
+            sessionDuration = "0:00"
+
+            updateCumulativeDisplay()
         } catch {
             print("Failed to load app settings: \(error)")
         }
     }
+
+    private func updateCumulativeDisplay(sessionNet: Double = 0) {
+        let currentTotal = cumulativeBaseline + sessionNet
+        cumulativeDisplayAmount = formatCurrencyWithCents(currentTotal, absoluteValue: false)
+        cumulativeSinceDateText = cumulativeDateFormatter.string(from: cumulativeStartDate)
+        cumulativeFlowColor = currentTotal == 0 ? .white : colorForFlow(currentTotal)
+    }
     
     private func formatLiveCurrency(_ amount: Double) -> String {
+        return formatCurrencyWithCents(amount, absoluteValue: true)
+    }
+
+    private func formatCurrencyWithCents(_ amount: Double, absoluteValue: Bool) -> String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
         formatter.currencyCode = "USD"
         formatter.currencySymbol = String(localized: "currency.symbol")
         formatter.maximumFractionDigits = 2
         formatter.minimumFractionDigits = 2
-        
-        return formatter.string(from: NSNumber(value: abs(amount))) ?? "$0.00"
+
+        let value = absoluteValue ? abs(amount) : amount
+        return formatter.string(from: NSNumber(value: value)) ?? "$0.00"
     }
     
     private func formatDuration(_ seconds: TimeInterval) -> String {
@@ -323,10 +368,23 @@ final class HomeViewModel: ObservableObject {
                 appSettings = AppSettings(context: context)
             }
             
+            let sessionNet = liveValue - sessionBaseline
+            let updatedCumulativeTotal = cumulativeBaseline + sessionNet
+            let roundedCumulativeTotal = (updatedCumulativeTotal * 100).rounded() / 100
+            cumulativeBaseline = roundedCumulativeTotal
+
+            if let storedDate = appSettings.cumulativeStartDate {
+                cumulativeStartDate = storedDate
+            } else {
+                appSettings.cumulativeStartDate = cumulativeStartDate
+            }
+
+            appSettings.cumulativeTotal = roundedCumulativeTotal
             appSettings.lastMeterValue = liveValue
             appSettings.lastBackgroundedTimestamp = Date()
             
             persistenceService.save()
+            updateCumulativeDisplay()
         } catch {
             print("Failed to save app settings: \(error)")
         }
