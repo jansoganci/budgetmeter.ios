@@ -27,15 +27,22 @@ final class DataSeedingService {
     
     /// Seeds initial data if this is the first app launch
     func seedInitialDataIfNeeded() {
-        guard !userDefaults.bool(forKey: Self.didSeedInitialDataKey) else {
+        let alreadySeeded = userDefaults.bool(forKey: Self.didSeedInitialDataKey)
+        print("🌱 DataSeedingService: Checking if data needs seeding...")
+        print("🌱 DataSeedingService: Already seeded = \(alreadySeeded)")
+        
+        guard !alreadySeeded else {
+            print("🌱 DataSeedingService: Data already seeded, skipping")
             return // Data already seeded
         }
         
+        print("🌱 DataSeedingService: First launch detected, seeding data...")
         seedPredefinedCategories()
         seedInitialAppSettings()
         
         // Mark as seeded
         userDefaults.set(true, forKey: Self.didSeedInitialDataKey)
+        print("🌱 DataSeedingService: ✅ Data seeding completed and marked as done")
     }
     
     // MARK: - Private Methods

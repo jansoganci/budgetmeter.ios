@@ -63,9 +63,8 @@ final class HomeViewModel: ObservableObject {
     }
     
     deinit {
-        Task { @MainActor in
-            stopTimer()
-        }
+        timer?.invalidate()
+        timer = nil
         NotificationCenter.default.removeObserver(self)
     }
     

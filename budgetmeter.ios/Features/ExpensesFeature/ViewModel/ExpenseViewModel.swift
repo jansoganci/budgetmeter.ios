@@ -38,8 +38,17 @@ final class ExpenseViewModel: ObservableObject {
     
     /// Updates the amount for a specific expense category
     func updateAmount(for category: FinancialCategory, amount: Double) {
+        print("🔴 ExpenseViewModel: updateAmount called")
+        print("🔴 ExpenseViewModel: Category: \(category.uniqueID ?? "unknown")")
+        print("🔴 ExpenseViewModel: Old amount: \(category.amount)")
+        print("🔴 ExpenseViewModel: New amount: \(amount)")
+        
         category.amount = amount
+        print("🔴 ExpenseViewModel: Category.amount updated to: \(category.amount)")
+        print("🔴 ExpenseViewModel: Calling persistenceService.save()...")
+        
         persistenceService.save()
+        print("🔴 ExpenseViewModel: persistenceService.save() completed")
     }
     
     /// Formats amount for display in input field (no live formatting during input)

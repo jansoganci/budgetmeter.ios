@@ -38,8 +38,17 @@ final class IncomeViewModel: ObservableObject {
     
     /// Updates the amount for a specific income category
     func updateAmount(for category: FinancialCategory, amount: Double) {
+        print("🟢 IncomeViewModel: updateAmount called")
+        print("🟢 IncomeViewModel: Category: \(category.uniqueID ?? "unknown")")
+        print("🟢 IncomeViewModel: Old amount: \(category.amount)")
+        print("🟢 IncomeViewModel: New amount: \(amount)")
+        
         category.amount = amount
+        print("🟢 IncomeViewModel: Category.amount updated to: \(category.amount)")
+        print("🟢 IncomeViewModel: Calling persistenceService.save()...")
+        
         persistenceService.save()
+        print("🟢 IncomeViewModel: persistenceService.save() completed")
     }
     
     /// Formats amount for display in input field (no live formatting during input)
@@ -101,6 +110,7 @@ final class IncomeViewModel: ObservableObject {
     // MARK: - Private Methods
     
     private func loadIncomeCategories() {
+        print("🟢 IncomeViewModel: loadIncomeCategories() called")
         isLoading = true
         errorMessage = nil
         
@@ -111,16 +121,27 @@ final class IncomeViewModel: ObservableObject {
         fetchRequest.predicate = NSPredicate(format: "type == %@", "income")
         fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \FinancialCategory.uniqueID, ascending: true)]
         
+        print("🟢 IncomeViewModel: Executing fetch request for income categories...")
         do {
             let allIncomes = try context.fetch(fetchRequest)
+            print("🟢 IncomeViewModel: Fetched \(allIncomes.count) income categories")
             
             // Separate by frequency
             dailyIncomes = allIncomes.filter { $0.frequency == "daily" }
             monthlyIncomes = allIncomes.filter { $0.frequency == "monthly" }
             yearlyIncomes = allIncomes.filter { $0.frequency == "yearly" }
             
+            print("🟢 IncomeViewModel: Daily: \(dailyIncomes.count), Monthly: \(monthlyIncomes.count), Yearly: \(yearlyIncomes.count)")
+            
+            // Log current amounts
+            for category in allIncomes {
+                print("🟢 IncomeViewModel: Category \(category.uniqueID ?? "unknown") has amount: \(category.amount)")
+            }
+            
             isLoading = false
+            print("🟢 IncomeViewModel: ✅ Loading completed successfully")
         } catch {
+            print("🟢 IncomeViewModel: ❌ Loading failed: \(error)")
             errorMessage = "Failed to load income categories: \(error.localizedDescription)"
             isLoading = false
         }

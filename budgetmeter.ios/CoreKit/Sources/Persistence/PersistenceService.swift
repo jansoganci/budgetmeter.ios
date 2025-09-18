@@ -52,13 +52,23 @@ final class PersistenceService {
     func save() {
         let context = persistentContainer.viewContext
         
+        print("💾 PersistenceService: save() called")
+        print("💾 PersistenceService: Checking if context has changes...")
+        print("💾 PersistenceService: context.hasChanges = \(context.hasChanges)")
+        
         if context.hasChanges {
+            print("💾 PersistenceService: Context has changes, attempting to save...")
             do {
                 try context.save()
+                print("💾 PersistenceService: ✅ Save successful!")
             } catch {
                 let nsError = error as NSError
+                print("💾 PersistenceService: ❌ Save failed with error: \(nsError)")
+                print("💾 PersistenceService: Error details: \(nsError.userInfo)")
                 fatalError("Unresolved Core Data save error \(nsError), \(nsError.userInfo)")
             }
+        } else {
+            print("💾 PersistenceService: ⚠️ No changes to save")
         }
     }
     

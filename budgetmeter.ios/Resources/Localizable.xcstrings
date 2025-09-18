@@ -778,9 +778,6 @@
     "Error" : {
 
     },
-    "Expenses" : {
-
-    },
     "Export CSV" : {
 
     },
@@ -824,12 +821,6 @@
       }
     },
     "Health" : {
-
-    },
-    "Home" : {
-
-    },
-    "Income" : {
 
     },
     "Income Categories: %lld" : {
@@ -892,9 +883,6 @@
 
     },
     "Session: %@" : {
-
-    },
-    "Settings" : {
 
     },
     "settings.about.title" : {

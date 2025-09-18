@@ -56,6 +56,8 @@ struct CategoryInputCard: View {
                 )
         )
         .onAppear {
+            print("🔵 CategoryInputCard: Card appeared for category \(category.uniqueID ?? "unknown")")
+            print("🔵 CategoryInputCard: Initial amount: \(category.amount)")
             updateInputText()
         }
         .onChange(of: category.amount) { _, _ in
@@ -82,24 +84,26 @@ struct CategoryInputCard: View {
             .font(.body.weight(.medium))
             .foregroundColor(.primary)
             .focused(focusedField, equals: fieldID)
+            .textFieldStyle(PlainTextFieldStyle())
             .accessibilityLabel("Amount input for \(DataSeedingService.displayName(for: category.uniqueID ?? ""))")
             .accessibilityValue(inputText.isEmpty ? "No amount entered" : "\(inputText) dollars")
-            .onTapGesture {
-                focusedField.wrappedValue = fieldID
-                isEditing = true
-            }
             .onChange(of: inputText) { _, newValue in
-                if isEditing {
-                    let amount = parseAmount(from: newValue)
-                    onAmountChange(amount)
-                }
+                let amount = parseAmount(from: newValue)
+                print("🔵 CategoryInputCard: Text changed to '\(newValue)' for category \(category.uniqueID ?? "unknown")")
+                print("🔵 CategoryInputCard: Parsed amount: \(amount)")
+                print("🔵 CategoryInputCard: Calling onAmountChange...")
+                onAmountChange(amount)
+                print("🔵 CategoryInputCard: onAmountChange called successfully")
             }
             .onSubmit {
                 isEditing = false
                 focusedField.wrappedValue = nil
             }
             .onChange(of: focusedField.wrappedValue) { _, newValue in
-                if newValue != fieldID {
+                if newValue == fieldID {
+                    print("🔵 CategoryInputCard: Field focused for category \(category.uniqueID ?? "unknown")")
+                    isEditing = true
+                } else if newValue != fieldID {
                     isEditing = false
                 }
             }
@@ -115,12 +119,26 @@ struct CategoryInputCard: View {
                 )
         )
         .frame(minHeight: 44) // Minimum touch target per HIG
+        .onTapGesture {
+            print("🔵 CategoryInputCard: Input area tapped for category \(category.uniqueID ?? "unknown")")
+            print("🔵 CategoryInputCard: Current focusedField: \(focusedField.wrappedValue ?? "nil")")
+            print("🔵 CategoryInputCard: Setting focus to fieldID: \(fieldID)")
+            
+            // Use DispatchQueue to ensure focus is set after current UI update cycle
+            DispatchQueue.main.async {
+                focusedField.wrappedValue = fieldID
+                print("🔵 CategoryInputCard: Focus set asynchronously to: \(fieldID)")
+            }
+        }
     }
     
     // MARK: - Helper Methods
     
     private func updateInputText() {
-        inputText = formatInputAmount(category.amount)
+        let newText = formatInputAmount(category.amount)
+        print("🔵 CategoryInputCard: updateInputText() for \(category.uniqueID ?? "unknown")")
+        print("🔵 CategoryInputCard: Amount \(category.amount) formatted to '\(newText)'")
+        inputText = newText
     }
     
     private func formatInputAmount(_ amount: Double) -> String {
