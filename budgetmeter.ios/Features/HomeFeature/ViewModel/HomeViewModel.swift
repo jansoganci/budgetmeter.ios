@@ -32,6 +32,12 @@ final class HomeViewModel: ObservableObject {
     @Published var cumulativeSinceDateText: String = ""
     @Published var cumulativeFlowColor: Color = .secondary
     
+    // Savings Goal Data
+    @Published var savingsGoal: Double = 0
+    @Published var formattedSavingsGoal: String = "$0"
+    @Published var timeToGoal: String = ""
+    @Published var showingSavingsGoalSheet = false
+    
     // State Management
     @Published var isLoading = false
     @Published var hasAnyData = false
@@ -93,6 +99,11 @@ final class HomeViewModel: ObservableObject {
         showingExpenseSheet = true
     }
     
+    /// Shows savings goal input modal
+    func showSavingsGoalEntry() {
+        showingSavingsGoalSheet = true
+    }
+    
     /// Refreshes all data
     func refresh() {
         loadAllData()
@@ -113,6 +124,14 @@ final class HomeViewModel: ObservableObject {
         } else {
             return .secondary
         }
+    }
+    
+    /// Updates savings goal and recalculates time to goal
+    func updateSavingsGoal(_ amount: Double) {
+        savingsGoal = max(0, amount) // Ensure non-negative
+        saveSavingsGoalToDatabase(amount)
+        calculateTimeToGoal()
+        updateSavingsGoalDisplay()
     }
     
     // MARK: - Private Methods
@@ -136,6 +155,13 @@ final class HomeViewModel: ObservableObject {
             self,
             selector: #selector(currencyDidChange(_:)),
             name: .currencyDidChange,
+            object: nil
+        )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(languageDidChange(_:)),
+            name: .languageDidChange,
             object: nil
         )
     }
@@ -227,6 +253,7 @@ final class HomeViewModel: ObservableObject {
                     // Now that totals are updated, run calculations and load settings on main thread
                     self.calculateSnapshotMetrics()
                     self.loadAppSettings() // This is fast, involves another fetch but should be fine
+                    self.loadSavingsGoal() // Load savings goal and calculate time to goal
                     
                     self.isLoading = false
                 }
@@ -274,6 +301,9 @@ final class HomeViewModel: ObservableObject {
         financialHealthScore = healthScore.score
         financialHealthText = healthScore.text
         financialHealthColor = colorFromString(healthScore.color)
+        
+        // Recalculate time to goal when financial data changes
+        calculateTimeToGoal()
     }
     
     private func loadAppSettings() {
@@ -358,6 +388,102 @@ final class HomeViewModel: ObservableObject {
         default: return .secondary
         }
     }
+    
+    // MARK: - Savings Goal Private Methods
+    
+    /// Calculates time to reach savings goal using CalculationEngine
+    private func calculateTimeToGoal() {
+        guard savingsGoal > 0 else {
+            timeToGoal = ""
+            return
+        }
+        
+        let netHourlyFlowValue = CalculationEngine.netHourlyFlow(
+            dailyIncomeTotal: dailyIncomeTotal,
+            monthlyIncomeTotal: monthlyIncomeTotal,
+            yearlyIncomeTotal: yearlyIncomeTotal,
+            dailyExpenseTotal: dailyExpenseTotal,
+            monthlyExpenseTotal: monthlyExpenseTotal,
+            yearlyExpenseTotal: yearlyExpenseTotal
+        )
+        
+        let targetResult = CalculationEngine.targetTime(
+            targetAmount: savingsGoal,
+            netHourlyFlow: netHourlyFlowValue
+        )
+        
+        if let message = targetResult.message {
+            timeToGoal = message
+        } else {
+            // Format time display based on the most appropriate unit using localization
+            if targetResult.days < 1 {
+                let hoursText = "home.time_to_goal.hours".localized(defaultValue: "hours")
+                timeToGoal = String(format: "%.1f %@", targetResult.hours, hoursText)
+            } else if targetResult.days < 30 {
+                let daysText = "home.time_to_goal.days".localized(defaultValue: "days")
+                timeToGoal = String(format: "%.0f %@", targetResult.days, daysText)
+            } else if targetResult.months < 12 {
+                let monthsText = "home.time_to_goal.months".localized(defaultValue: "months")
+                timeToGoal = String(format: "%.1f %@", targetResult.months, monthsText)
+            } else {
+                let yearsText = "home.time_to_goal.years".localized(defaultValue: "years")
+                timeToGoal = String(format: "%.1f %@", targetResult.years, yearsText)
+            }
+        }
+    }
+    
+    /// Updates the formatted savings goal display
+    private func updateSavingsGoalDisplay() {
+        if savingsGoal > 0 {
+            formattedSavingsGoal = formatCurrencyWithCents(savingsGoal, absoluteValue: false)
+        } else {
+            formattedSavingsGoal = ""
+        }
+    }
+    
+    /// Loads savings goal from AppSettings
+    private func loadSavingsGoal() {
+        let context = persistenceService.viewContext
+        let fetchRequest: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
+        
+        do {
+            let settings = try context.fetch(fetchRequest)
+            if let appSettings = settings.first {
+                savingsGoal = appSettings.savingsGoalAmount
+                updateSavingsGoalDisplay()
+                calculateTimeToGoal()
+            }
+        } catch {
+            print("Failed to load savings goal: \(error)")
+        }
+    }
+    
+    /// Saves savings goal to AppSettings database
+    private func saveSavingsGoalToDatabase(_ amount: Double) {
+        persistenceService.performBackgroundTask { [weak self] context in
+            guard let self = self else { return }
+            
+            let fetchRequest: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
+            
+            do {
+                let settings = try context.fetch(fetchRequest)
+                let appSettings: AppSettings
+                
+                if let existingSettings = settings.first {
+                    appSettings = existingSettings
+                } else {
+                    appSettings = AppSettings(context: context)
+                }
+                
+                appSettings.savingsGoalAmount = amount
+                
+                // Save is automatically handled by performBackgroundTask
+                
+            } catch {
+                print("Failed to save savings goal: \(error)")
+            }
+        }
+    }
 
     private func applyCurrency(code: String) {
         let resolvedCode = CurrencyHelper.supportedCurrencyCodes.contains(code) ? code : CurrencyHelper.defaultCurrencyCode()
@@ -367,6 +493,7 @@ final class HomeViewModel: ObservableObject {
         isPositive = liveValue >= 0
         formattedLiveValue = formatLiveCurrency(liveValue)
         updateCumulativeDisplay(sessionNet: liveValue - sessionBaseline)
+        updateSavingsGoalDisplay() // Update savings goal formatting when currency changes
     }
     
     // MARK: - Notification Handlers
@@ -396,6 +523,14 @@ final class HomeViewModel: ObservableObject {
                let storedCode = settings.first?.preferredCurrencyCode {
                 applyCurrency(code: storedCode)
             }
+        }
+    }
+    
+    @objc private func languageDidChange(_ notification: Notification) {
+        // Trigger UI refresh to re-evaluate localized strings
+        DispatchQueue.main.async {
+            self.calculateTimeToGoal() // Recalculate with new language
+            self.objectWillChange.send() // Force UI refresh
         }
     }
     

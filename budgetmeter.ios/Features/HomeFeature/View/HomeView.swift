@@ -47,6 +47,17 @@ struct HomeView: View {
         .sheet(isPresented: $viewModel.showingExpenseSheet) {
             ExpenseView()
         }
+        .sheet(isPresented: $viewModel.showingSavingsGoalSheet) {
+            SavingsGoalInputView(
+                currentGoal: viewModel.savingsGoal,
+                currencySymbol: CurrencyHelper.symbol(for: CurrencyHelper.defaultCurrencyCode()),
+                onSave: { amount in
+                    viewModel.updateSavingsGoal(amount)
+                }
+            )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
     }
     
     // MARK: - Live Meter Hero
@@ -99,6 +110,41 @@ struct HomeView: View {
                     .font(.footnote)
                     .foregroundColor(.white.opacity(0.8))
             }
+            
+            // Savings Goal Section (only show if goal is set)
+            if viewModel.savingsGoal > 0 {
+                Divider()
+                    .background(Color.white.opacity(0.2))
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("home.savings_goal.label".localized(defaultValue: "Savings Goal"))
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white.opacity(0.9))
+                    
+                    HStack {
+                        HStack(spacing: 4) {
+                            Image(systemName: "target")
+                                .font(.system(size: 16))
+                                .foregroundColor(.white.opacity(0.9))
+                            
+                            Text(viewModel.formattedSavingsGoal)
+                                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                .foregroundColor(.white)
+                                .monospacedDigit()
+                        }
+                        
+                        Spacer()
+                        
+                        if !viewModel.timeToGoal.isEmpty {
+                            Text(viewModel.timeToGoal)
+                                .font(.caption)
+                                .fontWeight(.medium)
+                                .foregroundColor(.white.opacity(0.8))
+                        }
+                    }
+                }
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 24)
@@ -116,7 +162,9 @@ struct HomeView: View {
         .cornerRadius(12)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(
-            "home.session.accessibility \(viewModel.formattedLiveValue) \(viewModel.sessionDuration) \(viewModel.cumulativeDisplayAmount) \(viewModel.cumulativeSinceDateText)".localized(defaultValue: "Current session: \(viewModel.formattedLiveValue), duration: \(viewModel.sessionDuration), total: \(viewModel.cumulativeDisplayAmount) since \(viewModel.cumulativeSinceDateText)")
+            viewModel.savingsGoal > 0 
+                ? "home.session.accessibility.with_goal \(viewModel.formattedLiveValue) \(viewModel.sessionDuration) \(viewModel.cumulativeDisplayAmount) \(viewModel.cumulativeSinceDateText) \(viewModel.formattedSavingsGoal) \(viewModel.timeToGoal)".localized(defaultValue: "Current session: \(viewModel.formattedLiveValue), duration: \(viewModel.sessionDuration), total: \(viewModel.cumulativeDisplayAmount) since \(viewModel.cumulativeSinceDateText), savings goal: \(viewModel.formattedSavingsGoal), time to goal: \(viewModel.timeToGoal)")
+                : "home.session.accessibility \(viewModel.formattedLiveValue) \(viewModel.sessionDuration) \(viewModel.cumulativeDisplayAmount) \(viewModel.cumulativeSinceDateText)".localized(defaultValue: "Current session: \(viewModel.formattedLiveValue), duration: \(viewModel.sessionDuration), total: \(viewModel.cumulativeDisplayAmount) since \(viewModel.cumulativeSinceDateText)")
         )
     }
     
@@ -134,18 +182,20 @@ struct HomeView: View {
             }
             .padding(.horizontal, 4)
             
-            HStack(spacing: 12) {
+            HStack(spacing: 8) {
                 // Add Income Button
                 Button(action: viewModel.showIncomeEntry) {
-                    VStack(spacing: 8) {
+                    VStack(spacing: 6) {
                         Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 32))
+                            .font(.system(size: 28))
                             .foregroundColor(.green)
                         
                         Text("home.quick_actions.add_income".localized(defaultValue: "Add Income"))
-                            .font(.subheadline)
+                            .font(.caption)
                             .fontWeight(.medium)
                             .foregroundColor(.primary)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2)
                     }
                     .frame(maxWidth: .infinity)
                     .frame(height: 80)
@@ -158,15 +208,17 @@ struct HomeView: View {
                 
                 // Add Expense Button
                 Button(action: viewModel.showExpenseEntry) {
-                    VStack(spacing: 8) {
+                    VStack(spacing: 6) {
                         Image(systemName: "minus.circle.fill")
-                            .font(.system(size: 32))
+                            .font(.system(size: 28))
                             .foregroundColor(.red)
                         
                         Text("home.quick_actions.add_expense".localized(defaultValue: "Add Expense"))
-                            .font(.subheadline)
+                            .font(.caption)
                             .fontWeight(.medium)
                             .foregroundColor(.primary)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2)
                     }
                     .frame(maxWidth: .infinity)
                     .frame(height: 80)
@@ -176,6 +228,29 @@ struct HomeView: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel("home.quick_actions.add_expense".localized(defaultValue: "Add Expense"))
                 .accessibilityHint("home.quick_actions.add_expense.hint".localized(defaultValue: "Tap to add expense entry"))
+                
+                // Savings Goal Button
+                Button(action: viewModel.showSavingsGoalEntry) {
+                    VStack(spacing: 6) {
+                        Image(systemName: "target")
+                            .font(.system(size: 28))
+                            .foregroundColor(.purple)
+                        
+                        Text(viewModel.savingsGoal > 0 ? "home.quick_actions.goal".localized(defaultValue: "Goal") : "home.quick_actions.set_goal".localized(defaultValue: "Set Goal"))
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundColor(.primary)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 80)
+                    .background(Color(uiColor: .secondarySystemBackground))
+                    .cornerRadius(12)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(viewModel.savingsGoal > 0 ? "home.quick_actions.goal".localized(defaultValue: "Goal") : "home.quick_actions.set_goal".localized(defaultValue: "Set Goal"))
+                .accessibilityHint("home.quick_actions.goal.hint".localized(defaultValue: "Tap to set or modify savings goal"))
             }
         }
     }
