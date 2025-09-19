@@ -189,38 +189,53 @@ final class HomeViewModel: ObservableObject {
     }
     
     private func loadAllData() {
-        isLoading = true
-        
-        let context = persistenceService.viewContext
-        let fetchRequest: NSFetchRequest<FinancialCategory> = FinancialCategory.fetchRequest()
-        
-        do {
-            let allCategories = try context.fetch(fetchRequest)
+        Task { @MainActor in
+            isLoading = true
+        }
+
+        persistenceService.performBackgroundTask { [weak self] context in
+            let fetchRequest: NSFetchRequest<FinancialCategory> = FinancialCategory.fetchRequest()
             
-            // Calculate totals
-            let incomeCategories = allCategories.filter { $0.type == "income" }
-            dailyIncomeTotal = incomeCategories.filter { $0.frequency == "daily" }.reduce(0) { $0 + $1.amount }
-            monthlyIncomeTotal = incomeCategories.filter { $0.frequency == "monthly" }.reduce(0) { $0 + $1.amount }
-            yearlyIncomeTotal = incomeCategories.filter { $0.frequency == "yearly" }.reduce(0) { $0 + $1.amount }
-            
-            let expenseCategories = allCategories.filter { $0.type == "expense" }
-            dailyExpenseTotal = expenseCategories.filter { $0.frequency == "daily" }.reduce(0) { $0 + $1.amount }
-            monthlyExpenseTotal = expenseCategories.filter { $0.frequency == "monthly" }.reduce(0) { $0 + $1.amount }
-            yearlyExpenseTotal = expenseCategories.filter { $0.frequency == "yearly" }.reduce(0) { $0 + $1.amount }
-            
-            // Check if user has any data
-            hasAnyData = allCategories.contains { $0.amount > 0 }
-            
-            // Calculate snapshot metrics
-            calculateSnapshotMetrics()
-            
-            // Load app settings
-            loadAppSettings()
-            
-            isLoading = false
-        } catch {
-            print("Failed to load data: \(error)")
-            isLoading = false
+            do {
+                let allCategories = try context.fetch(fetchRequest)
+                
+                // Process data into simple value types in the background
+                let incomeCategories = allCategories.filter { $0.type == "income" }
+                let bgDailyIncome = incomeCategories.filter { $0.frequency == "daily" }.reduce(0) { $0 + $1.amount }
+                let bgMonthlyIncome = incomeCategories.filter { $0.frequency == "monthly" }.reduce(0) { $0 + $1.amount }
+                let bgYearlyIncome = incomeCategories.filter { $0.frequency == "yearly" }.reduce(0) { $0 + $1.amount }
+                
+                let expenseCategories = allCategories.filter { $0.type == "expense" }
+                let bgDailyExpense = expenseCategories.filter { $0.frequency == "daily" }.reduce(0) { $0 + $1.amount }
+                let bgMonthlyExpense = expenseCategories.filter { $0.frequency == "monthly" }.reduce(0) { $0 + $1.amount }
+                let bgYearlyExpense = expenseCategories.filter { $0.frequency == "yearly" }.reduce(0) { $0 + $1.amount }
+                
+                let bgHasAnyData = allCategories.contains { $0.amount > 0 }
+                
+                // Switch back to the main thread to update the UI
+                Task { @MainActor in
+                    guard let self = self else { return }
+                    
+                    self.dailyIncomeTotal = bgDailyIncome
+                    self.monthlyIncomeTotal = bgMonthlyIncome
+                    self.yearlyIncomeTotal = bgYearlyIncome
+                    self.dailyExpenseTotal = bgDailyExpense
+                    self.monthlyExpenseTotal = bgMonthlyExpense
+                    self.yearlyExpenseTotal = bgYearlyExpense
+                    self.hasAnyData = bgHasAnyData
+                    
+                    // Now that totals are updated, run calculations and load settings on main thread
+                    self.calculateSnapshotMetrics()
+                    self.loadAppSettings() // This is fast, involves another fetch but should be fine
+                    
+                    self.isLoading = false
+                }
+            } catch {
+                print("Failed to load data in background: \(error)")
+                Task { @MainActor in
+                    self?.isLoading = false
+                }
+            }
         }
     }
     
@@ -385,38 +400,46 @@ final class HomeViewModel: ObservableObject {
     }
     
     private func saveAppSettings() {
-        let context = persistenceService.viewContext
-        let fetchRequest: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
-        
-        do {
-            let settings = try context.fetch(fetchRequest)
-            let appSettings: AppSettings
+        // Perform the save operation on a background thread to avoid blocking
+        persistenceService.performBackgroundTask { [weak self] context in
+            guard let self = self else { return }
             
-            if let existingSettings = settings.first {
-                appSettings = existingSettings
-            } else {
-                appSettings = AppSettings(context: context)
-            }
+            let fetchRequest: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
             
-            let sessionNet = liveValue - sessionBaseline
-            let updatedCumulativeTotal = cumulativeBaseline + sessionNet
-            let roundedCumulativeTotal = (updatedCumulativeTotal * 100).rounded() / 100
-            cumulativeBaseline = roundedCumulativeTotal
+            do {
+                let settings = try context.fetch(fetchRequest)
+                let appSettings: AppSettings
+                
+                if let existingSettings = settings.first {
+                    appSettings = existingSettings
+                } else {
+                    appSettings = AppSettings(context: context)
+                }
+                
+                let sessionNet = self.liveValue - self.sessionBaseline
+                let updatedCumulativeTotal = self.cumulativeBaseline + sessionNet
+                let roundedCumulativeTotal = (updatedCumulativeTotal * 100).rounded() / 100
 
-            if let storedDate = appSettings.cumulativeStartDate {
-                cumulativeStartDate = storedDate
-            } else {
-                appSettings.cumulativeStartDate = cumulativeStartDate
-            }
+                if appSettings.cumulativeStartDate == nil {
+                    appSettings.cumulativeStartDate = self.cumulativeStartDate
+                }
 
-            appSettings.cumulativeTotal = roundedCumulativeTotal
-            appSettings.lastMeterValue = liveValue
-            appSettings.lastBackgroundedTimestamp = Date()
-            
-            persistenceService.save()
-            updateCumulativeDisplay()
-        } catch {
-            print("Failed to save app settings: \(error)")
+                appSettings.cumulativeTotal = roundedCumulativeTotal
+                appSettings.lastMeterValue = self.liveValue
+                appSettings.lastBackgroundedTimestamp = Date()
+                
+                // The save is automatically handled by performBackgroundTask
+                
+                // After saving, update the UI on the main thread
+                Task { @MainActor in
+                    // Safely update the baseline on the main thread
+                    self.cumulativeBaseline = roundedCumulativeTotal
+                    self.updateCumulativeDisplay()
+                }
+                
+            } catch {
+                print("Failed to save app settings in background: \(error)")
+            }
         }
     }
 }
