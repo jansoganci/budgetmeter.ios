@@ -73,7 +73,7 @@ struct IncomeView: View {
             HStack {
                 Image(systemName: "chart.line.uptrend.xyaxis")
                     .foregroundColor(.green)
-                Text("income.summary.title".localized(defaultValue: "Income Overview"))
+                Text(viewModel.summaryTitle)
                     .font(.headline)
                     .fontWeight(.semibold)
                 Spacer()
@@ -81,25 +81,25 @@ struct IncomeView: View {
             .padding(.horizontal, 4)
             
             HStack(spacing: 12) {
-                // Monthly Total Card
-                summaryInfoCard(
-                    title: "income.summary.monthly".localized(defaultValue: "Monthly"),
-                    value: viewModel.totalMonthlyIncome,
-                    icon: "calendar",
-                    color: .green
-                )
-                
                 // Daily Average Card
                 summaryInfoCard(
-                    title: "income.summary.daily_avg".localized(defaultValue: "Daily Avg"),
+                    title: viewModel.dailyAvgTitle,
                     value: viewModel.dailyAverageIncome,
                     icon: "calendar.day.timeline.left",
                     color: Color(hex: "32CD32")
                 )
                 
+                // Monthly Total Card
+                summaryInfoCard(
+                    title: viewModel.monthlyTitle,
+                    value: viewModel.totalMonthlyIncome,
+                    icon: "calendar",
+                    color: .green
+                )
+                
                 // Yearly Projection Card
                 summaryInfoCard(
-                    title: "income.summary.yearly".localized(defaultValue: "Yearly"),
+                    title: viewModel.yearlyTitle,
                     value: viewModel.yearlyProjectionIncome,
                     icon: "chart.line.uptrend.xyaxis",
                     color: .green.opacity(0.8)

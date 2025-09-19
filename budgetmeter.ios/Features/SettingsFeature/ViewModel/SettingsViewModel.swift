@@ -201,8 +201,7 @@ final class SettingsViewModel: ObservableObject {
     }
 
     var selectedLanguageDisplayText: String {
-        let format = "settings.language.subtitle_format".localized(defaultValue: "%@ %@")
-        return String(format: format, selectedLanguage.flag, selectedLanguage.displayName)
+        return selectedLanguage.displayName
     }
 
     /// Updates preferred currency and notifies observers

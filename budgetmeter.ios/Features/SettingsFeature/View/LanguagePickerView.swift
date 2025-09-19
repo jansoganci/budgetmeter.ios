@@ -13,12 +13,17 @@ struct LanguagePickerView: View {
     let onSelect: (SettingsViewModel.LanguageMode) -> Void
 
     @Environment(\.dismiss) private var dismiss
+    
+    // Alphabetically sorted languages by display name
+    private var sortedLanguages: [SettingsViewModel.LanguageMode] {
+        languages.sorted { $0.displayName < $1.displayName }
+    }
 
     var body: some View {
         NavigationStack {
             List {
                 Section {
-                    ForEach(languages, id: \.self) { language in
+                    ForEach(sortedLanguages, id: \.self) { language in
                         languageRow(for: language)
                     }
                 }
@@ -32,10 +37,6 @@ struct LanguagePickerView: View {
     @ViewBuilder
     private func languageRow(for language: SettingsViewModel.LanguageMode) -> some View {
         HStack(spacing: 12) {
-            Text(language.flag)
-                .font(.title2)
-                .frame(width: 32, alignment: .leading)
-
             VStack(alignment: .leading, spacing: 2) {
                 Text(language.displayName)
                     .font(.body)
@@ -65,8 +66,7 @@ struct LanguagePickerView: View {
     }
 
     private func accessibilityLabel(for language: SettingsViewModel.LanguageMode) -> String {
-        let format = "settings.language.accessibility_format".localized(defaultValue: "%@ %@")
-        return String(format: format, language.flag, language.displayName)
+        return language.displayName
     }
 }
 

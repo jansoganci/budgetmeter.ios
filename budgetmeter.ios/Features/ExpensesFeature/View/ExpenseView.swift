@@ -73,7 +73,7 @@ struct ExpenseView: View {
             HStack {
                 Image(systemName: "chart.pie.fill")
                     .foregroundColor(.red)
-                Text("expenses.summary.title".localized(defaultValue: "Expense Overview"))
+                Text(viewModel.summaryTitle)
                     .font(.headline)
                     .fontWeight(.semibold)
                 Spacer()
@@ -81,25 +81,25 @@ struct ExpenseView: View {
             .padding(.horizontal, 4)
             
             HStack(spacing: 12) {
-                // Monthly Total Card
-                summaryInfoCard(
-                    title: "expenses.summary.monthly".localized(defaultValue: "Monthly"),
-                    value: viewModel.totalMonthlyExpenses,
-                    icon: "calendar",
-                    color: .red
-                )
-                
                 // Daily Average Card
                 summaryInfoCard(
-                    title: "expenses.summary.daily_avg".localized(defaultValue: "Daily Avg"),
+                    title: viewModel.dailyAvgTitle,
                     value: viewModel.dailyAverageExpenses,
                     icon: "calendar.day.timeline.left",
                     color: .orange
                 )
                 
+                // Monthly Total Card
+                summaryInfoCard(
+                    title: viewModel.monthlyTitle,
+                    value: viewModel.totalMonthlyExpenses,
+                    icon: "calendar",
+                    color: .red
+                )
+                
                 // Yearly Projection Card
                 summaryInfoCard(
-                    title: "expenses.summary.yearly".localized(defaultValue: "Yearly"),
+                    title: viewModel.yearlyTitle,
                     value: viewModel.yearlyProjectionExpenses,
                     icon: "chart.line.uptrend.xyaxis",
                     color: .red.opacity(0.8)

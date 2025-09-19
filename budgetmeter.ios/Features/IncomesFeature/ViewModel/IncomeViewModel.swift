@@ -40,6 +40,24 @@ final class IncomeViewModel: ObservableObject {
         return totalMonthlyIncome * 12
     }
     
+    // MARK: - Localized Summary Titles
+    
+    var monthlyTitle: String {
+        return "income.summary.monthly".localized(defaultValue: "Monthly")
+    }
+    
+    var dailyAvgTitle: String {
+        return "income.summary.daily_avg".localized(defaultValue: "Daily Avg")
+    }
+    
+    var yearlyTitle: String {
+        return "income.summary.yearly".localized(defaultValue: "Yearly")
+    }
+    
+    var summaryTitle: String {
+        return "income.summary.title".localized(defaultValue: "Income Overview")
+    }
+    
     // MARK: - Private Properties
     
     private let persistenceService: PersistenceService
@@ -51,6 +69,7 @@ final class IncomeViewModel: ObservableObject {
     init(persistenceService: PersistenceService = .shared) {
         self.persistenceService = persistenceService
         setupCurrencyObserver()
+        setupLanguageObserver()
         loadCurrency()
         loadIncomeCategories()
     }
@@ -202,6 +221,15 @@ private extension IncomeViewModel {
         )
     }
     
+    func setupLanguageObserver() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(languageDidChange(_:)),
+            name: .languageDidChange,
+            object: nil
+        )
+    }
+    
 
 
     func loadCurrency() {
@@ -227,6 +255,13 @@ private extension IncomeViewModel {
             updateCurrency(code: code)
         } else {
             loadCurrency()
+        }
+    }
+    
+    @objc func languageDidChange(_ notification: Notification) {
+        // Trigger UI refresh to re-evaluate localized strings in summary cards
+        DispatchQueue.main.async {
+            self.objectWillChange.send()
         }
     }
     
