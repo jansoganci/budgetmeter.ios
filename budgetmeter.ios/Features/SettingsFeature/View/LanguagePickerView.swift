@@ -26,13 +26,6 @@ struct LanguagePickerView: View {
             .listStyle(.insetGrouped)
             .navigationTitle("settings.language.picker.title".localized(defaultValue: "Language"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("toolbar.done".localized(defaultValue: "Done")) {
-                        dismiss()
-                    }
-                }
-            }
         }
     }
 
@@ -67,6 +60,7 @@ struct LanguagePickerView: View {
             }
         }
         .buttonStyle(.plain)
+        .contentShape(Rectangle())
         .accessibilityLabel(accessibilityLabel(for: language))
         .accessibilityValue(selectedLanguage == language ? "settings.language.row.accessibility_selected".localized(defaultValue: "Selected") : "")
     }

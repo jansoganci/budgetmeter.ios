@@ -149,6 +149,7 @@ final class ExpenseViewModel: ObservableObject {
             
             isLoading = false
         } catch {
+            print("📊 ExpenseViewModel: ❌ Loading failed: \(error)")
             let baseMessage = "expenses.error.load".localized(defaultValue: "Failed to load expense categories.")
             errorMessage = "\(baseMessage) \(error.localizedDescription)"
             isLoading = false

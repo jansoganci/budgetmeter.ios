@@ -149,7 +149,7 @@ final class IncomeViewModel: ObservableObject {
             
             isLoading = false
         } catch {
-            print("🟢 IncomeViewModel: ❌ Loading failed: \(error)")
+            print("📊 IncomeViewModel: ❌ Loading failed: \(error)")
             let baseMessage = "income.error.load".localized(defaultValue: "Failed to load income categories.")
             errorMessage = "\(baseMessage) \(error.localizedDescription)"
             isLoading = false

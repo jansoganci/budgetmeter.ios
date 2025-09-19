@@ -71,6 +71,7 @@ struct CurrencyPickerView: View {
             }
         }
         .buttonStyle(.plain)
+        .contentShape(Rectangle())
         .accessibilityLabel(accessibilityLabel(for: currency))
         .accessibilityValue(selectedCurrencyCode == currency.code ? "settings.currency.row.accessibility_selected".localized(defaultValue: "Selected") : "")
     }

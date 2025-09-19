@@ -31,14 +31,23 @@ final class DataSeedingService {
         
         if !force && alreadySeeded {
             if hasExistingCategories() {
-                // Check if we need to migrate old Turkish uniqueIDs to English
-                migrateOldCategoryIDsIfNeeded()
+                // Only run migration if we haven't already completed it
+                let migrationVersionKey = "categoryIDMigrationVersion"
+                let requiredVersion = 2
+                if userDefaults.integer(forKey: migrationVersionKey) < requiredVersion {
+                    migrateOldCategoryIDsIfNeeded()
+                }
                 ensureCurrencyPreference()
                 return
             }
         } else if force {
             if hasExistingCategories() {
-                migrateOldCategoryIDsIfNeeded()
+                // Only run migration if we haven't already completed it
+                let migrationVersionKey = "categoryIDMigrationVersion"
+                let requiredVersion = 2
+                if userDefaults.integer(forKey: migrationVersionKey) < requiredVersion {
+                    migrateOldCategoryIDsIfNeeded()
+                }
                 ensureCurrencyPreference()
                 return
             }
@@ -209,9 +218,14 @@ final class DataSeedingService {
         let migrationVersionKey = "categoryIDMigrationVersion"
         let requiredVersion = 2
 
-        if userDefaults.integer(forKey: migrationVersionKey) >= requiredVersion {
+        // More robust check - ensure migration only runs once
+        let currentVersion = userDefaults.integer(forKey: migrationVersionKey)
+        if currentVersion >= requiredVersion {
+            print("🔄 DataSeedingService: Migration already completed (version \(currentVersion))")
             return
         }
+        
+        print("🔄 DataSeedingService: Starting category ID migration...")
         
         let migrationMap = createLegacyCategoryIDMigrationMap()
         
@@ -219,6 +233,19 @@ final class DataSeedingService {
         
         do {
             let categories = try context.fetch(fetchRequest)
+            
+            // Check if any categories actually need migration
+            let needsMigration = categories.contains { category in
+                guard let uniqueID = category.uniqueID else { return false }
+                return migrationMap.keys.contains(uniqueID)
+            }
+            
+            if !needsMigration {
+                print("🔄 DataSeedingService: No categories need migration")
+                userDefaults.set(requiredVersion, forKey: migrationVersionKey)
+                return
+            }
+            
             var categoriesByID: [String: FinancialCategory] = [:]
             for category in categories {
                 if let id = category.uniqueID {
@@ -227,14 +254,20 @@ final class DataSeedingService {
             }
 
             var migrationCount = 0
+            var categoriesToDelete: [FinancialCategory] = []
             
             for category in categories {
                 if let oldUniqueID = category.uniqueID,
                    let newUniqueID = migrationMap[oldUniqueID] {
+                    
                     if let existing = categoriesByID[newUniqueID], existing != category {
+                        // Only merge if both categories exist and are different
+                        print("🔄 DataSeedingService: Merging \(oldUniqueID) -> \(newUniqueID) (amount: \(category.amount))")
                         existing.amount += category.amount
-                        context.delete(category)
+                        categoriesToDelete.append(category)
                     } else {
+                        // Just update the uniqueID
+                        print("🔄 DataSeedingService: Updating \(oldUniqueID) -> \(newUniqueID)")
                         category.uniqueID = newUniqueID
                         categoriesByID[newUniqueID] = category
                     }
@@ -242,15 +275,23 @@ final class DataSeedingService {
                 }
             }
             
-            if migrationCount > 0 {
-                persistenceService.save()
-                print("🔄 DataSeedingService: Migrated \(migrationCount) legacy category IDs to canonical identifiers")
+            // Delete categories in separate loop to avoid modifying array while iterating
+            for categoryToDelete in categoriesToDelete {
+                context.delete(categoryToDelete)
             }
             
+            if migrationCount > 0 {
+                persistenceService.save()
+                print("🔄 DataSeedingService: Successfully migrated \(migrationCount) legacy category IDs, deleted \(categoriesToDelete.count) duplicates")
+            }
+            
+            // Mark migration as completed
             userDefaults.set(requiredVersion, forKey: migrationVersionKey)
+            userDefaults.synchronize() // Force immediate save
             
         } catch {
             print("❌ DataSeedingService: Failed to migrate category IDs: \(error)")
+            // Don't set migration version if it failed
         }
     }
     

@@ -21,7 +21,7 @@ struct IncomeView: View {
                 LazyVStack(spacing: 24) {
                     if viewModel.isLoading {
                         loadingView
-                    } else if !viewModel.hasIncomeData && !viewModel.categoryGroups.isEmpty {
+                    } else if viewModel.categoryGroups.isEmpty {
                         emptyStateView
                     } else {
                         // Summary Card

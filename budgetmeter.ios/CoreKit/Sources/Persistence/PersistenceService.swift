@@ -27,6 +27,7 @@ final class PersistenceService {
         
         container.loadPersistentStores { _, error in
             if let error = error as NSError? {
+                print("💾 PersistenceService: ❌ Error loading stores: \(error)")
                 // In production, you should handle this error appropriately
                 fatalError("Unresolved Core Data error \(error), \(error.userInfo)")
             }
@@ -57,6 +58,7 @@ final class PersistenceService {
                 try context.save()
             } catch {
                 let nsError = error as NSError
+                print("💾 PersistenceService: ❌ Save failed: \(nsError)")
                 fatalError("Unresolved Core Data save error \(nsError), \(nsError.userInfo)")
             }
         }
