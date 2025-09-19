@@ -657,13 +657,13 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "دعم اللغة التركية قريباً"
+            "value": "اختر لغتك المفضلة لواجهة التطبيق"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Türkische Sprachunterstützung kommt bald"
+            "value": "Wählen Sie Ihre bevorzugte Sprache für die App-Oberfläche"
           }
         },
         "en": {
@@ -675,43 +675,43 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Soporte para idioma turco próximamente"
+            "value": "Elige tu idioma preferido para la interfaz de la aplicación"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Support de la langue turque bientôt disponible"
+            "value": "Choisissez votre langue préférée pour l'interface de l'application"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Supporto lingua turca in arrivo"
+            "value": "Scegli la tua lingua preferita per l'interfaccia dell'app"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "トルコ語サポート近日公開"
+            "value": "アプリインターフェースの優先言語を選択してください"
           }
         },
         "pt": {
           "stringUnit": {
             "state": "translated",
-            "value": "Suporte ao idioma turco em breve"
+            "value": "Escolha seu idioma preferido para a interface do aplicativo"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Türkçe dil desteği yakında"
+            "value": "Uygulama arayüzü için tercih ettiğiniz dili seçin"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "土耳其语支持即将推出"
+            "value": "为应用界面选择您的首选语言"
           }
         }
       }
