@@ -16,6 +16,9 @@ BudgetMeter is a native iOS application that provides a **real-time, continuous 
 - **📊 Live Financial Meter** - Real-time tracking of your money flow since app launch
 - **💸 Income & Expense Tracking** - Simple category-based financial input
 - **📈 Smart Dashboard** - Comprehensive financial health overview
+- **🎯 Savings Goal Tracking** - Set targets and track progress with time-to-goal projections
+- **💰 Multi-Currency Support** - 21+ currencies with automatic language-based selection
+- **🌍 Multi-Language Interface** - 10 languages including English, Turkish, German, French, Spanish, Italian, Portuguese, Japanese, Chinese, and Arabic
 - **🔒 Complete Privacy** - No external servers, no tracking, no data collection
 - **☁️ Private iCloud Sync** - Your data syncs securely across your devices
 - **🎨 Native iOS Experience** - Built with SwiftUI, follows Apple's Human Interface Guidelines
@@ -110,8 +113,20 @@ The project uses **zero external dependencies** - everything is built with Apple
 ### 📈 Financial Dashboard
 - **Net financial flow** calculation
 - **Financial health scoring** system
-- **Savings goal tracking** with progress visualization
-- **Time-to-goal** projections based on current spending patterns
+- **Cumulative tracking** - total financial flow since first app use
+- **Today's snapshot** - daily and monthly flow summaries
+
+### 🎯 Savings Goal Management
+- **Custom goal setting** - set any savings target amount
+- **Progress tracking** - visual progress indicators
+- **Time-to-goal projections** - calculated based on current financial patterns
+- **Goal modification** - easily update or remove goals anytime
+
+### 💰 Multi-Currency System
+- **21+ supported currencies** - USD, EUR, TRY, JPY, GBP, CAD, CHF, CNY, and more
+- **Language-based defaults** - automatically selects appropriate currency for your language
+- **Consistent formatting** - standardized number formatting across all currencies
+- **Real-time conversion** - seamless currency switching with data preservation
 
 ## 🔒 Privacy & Security
 
@@ -143,8 +158,16 @@ The project includes comprehensive unit tests, especially for financial calculat
 Currently supported languages:
 - **English** (Primary)
 - **Turkish** (Native support)
+- **German** (Deutsch)
+- **French** (Français)
+- **Spanish** (Español)
+- **Italian** (Italiano)
+- **Portuguese** (Português)
+- **Japanese** (日本語)
+- **Chinese Simplified** (简体中文)
+- **Arabic** (العربية)
 
-All user-facing strings are externalized using Xcode's modern String Catalogs system for easy localization.
+All user-facing strings are externalized using Xcode's modern String Catalogs system (.xcstrings) with complete translations for all supported languages. The app automatically selects appropriate currency defaults based on the chosen language.
 
 ## 🎨 Design Philosophy
 
@@ -164,19 +187,26 @@ BudgetMeter follows Apple's **Human Interface Guidelines** with:
 - [x] Basic income/expense categories
 - [x] CloudKit sync
 - [x] iOS HIG compliance
+- [x] Multi-currency support (21+ currencies)
+- [x] Multi-language support (10 languages)
+- [x] Savings goal tracking with progress visualization
+- [x] Financial health scoring system
+- [x] Cumulative financial flow tracking
 
 ### Version 1.1 (Planned)
 - [ ] Custom category creation
 - [ ] Advanced charts and visualizations
-- [ ] Export functionality
+- [ ] Export functionality (CSV, PDF)
 - [ ] Widgets for iOS home screen
 - [ ] Apple Watch companion app
+- [ ] Enhanced savings goal features (multiple goals)
 
 ### Version 2.0 (Future)
-- [ ] Multi-currency support
 - [ ] Advanced budgeting features
-- [ ] Financial goal setting
 - [ ] Trend analysis and insights
+- [ ] Financial forecasting
+- [ ] Category spending limits
+- [ ] Recurring transaction templates
 
 ## 🤝 Contributing
 
@@ -194,6 +224,8 @@ This is currently a personal project, but feedback and suggestions are welcome! 
 - Ensure all UI changes are accessible
 - Test on multiple iOS versions and device sizes
 - Respect privacy-first principles
+- Test with all supported languages and currencies
+- Verify savings goal calculations and projections
 
 ## 📄 License
 
