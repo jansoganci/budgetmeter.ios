@@ -21,21 +21,25 @@ struct DebugView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
-                Text("BudgetMeter Debug")
+                Text("debug.title".localized())
                     .font(.largeTitle)
                     .fontWeight(.bold)
                 
-                Text("Core Data Status: ✅ Connected")
+                Text("debug.coredata.status".localized())
                     .foregroundColor(.green)
                 
-                Text("Income Categories: \(incomeCategories.count)")
+                Text(
+                    "debug.income.count"
+                        .localized(defaultValue: "Income Categories: %lld")
+                        .replacingOccurrences(of: "%lld", with: "\(incomeCategories.count)")
+                )
                     .font(.headline)
                 
                 if incomeCategories.isEmpty {
-                    Text("No categories found. Data seeding may not have run.")
+                    Text("debug.categories.error".localized())
                         .foregroundColor(.orange)
                 } else {
-                    Text("✅ Categories loaded successfully!")
+                    Text("debug.categories.success".localized())
                         .foregroundColor(.green)
                 }
                 

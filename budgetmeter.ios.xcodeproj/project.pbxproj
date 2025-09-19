@@ -6,8 +6,27 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C5A1E0302F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Alerts.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C5A1E0102F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Alerts.xcstrings */; };
+		C5A1E0312F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Categories.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C5A1E0112F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Categories.xcstrings */; };
+		C5A1E0322F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Currency.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C5A1E0122F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Currency.xcstrings */; };
+		C5A1E0332F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Debug.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C5A1E0132F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Debug.xcstrings */; };
+		C5A1E0342F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Home.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C5A1E0142F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Home.xcstrings */; };
+		C5A1E0352F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Settings.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C5A1E0152F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Settings.xcstrings */; };
+		C5A1E0362F2C4D1A00A1F001 /* budgetmeter.ios/Resources/UI.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C5A1E0162F2C4D1A00A1F001 /* budgetmeter.ios/Resources/UI.xcstrings */; };
+		C5A1E0382F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C5A1E0172F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Localizable.xcstrings */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		C549F9152E7B0F4100517515 /* budgetmeter.ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = budgetmeter.ios.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C5A1E0102F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Alerts.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = budgetmeter.ios/Resources/Alerts.xcstrings; sourceTree = SOURCE_ROOT; };
+		C5A1E0112F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Categories.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = budgetmeter.ios/Resources/Categories.xcstrings; sourceTree = SOURCE_ROOT; };
+		C5A1E0122F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Currency.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = budgetmeter.ios/Resources/Currency.xcstrings; sourceTree = SOURCE_ROOT; };
+		C5A1E0132F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Debug.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = budgetmeter.ios/Resources/Debug.xcstrings; sourceTree = SOURCE_ROOT; };
+		C5A1E0142F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Home.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = budgetmeter.ios/Resources/Home.xcstrings; sourceTree = SOURCE_ROOT; };
+		C5A1E0152F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Settings.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = budgetmeter.ios/Resources/Settings.xcstrings; sourceTree = SOURCE_ROOT; };
+		C5A1E0162F2C4D1A00A1F001 /* budgetmeter.ios/Resources/UI.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = budgetmeter.ios/Resources/UI.xcstrings; sourceTree = SOURCE_ROOT; };
+		C5A1E0172F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = budgetmeter.ios/Resources/Localizable.xcstrings; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -34,6 +53,14 @@
 			children = (
 				C549F9172E7B0F4100517515 /* budgetmeter.ios */,
 				C549F9162E7B0F4100517515 /* Products */,
+				C5A1E0102F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Alerts.xcstrings */,
+				C5A1E0112F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Categories.xcstrings */,
+				C5A1E0122F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Currency.xcstrings */,
+				C5A1E0132F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Debug.xcstrings */,
+				C5A1E0142F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Home.xcstrings */,
+				C5A1E0152F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Settings.xcstrings */,
+				C5A1E0162F2C4D1A00A1F001 /* budgetmeter.ios/Resources/UI.xcstrings */,
+				C5A1E0172F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Localizable.xcstrings */,
 			);
 			sourceTree = "<group>";
 		};
@@ -91,6 +118,15 @@
 			knownRegions = (
 				en,
 				Base,
+				tr,
+				de,
+				fr,
+				es,
+				it,
+				pt,
+				ja,
+				"zh-Hans",
+				ar,
 			);
 			mainGroup = C549F90C2E7B0F4100517515;
 			minimizedProjectReferenceProxies = 1;
@@ -109,6 +145,14 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C5A1E0302F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Alerts.xcstrings in Resources */,
+				C5A1E0312F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Categories.xcstrings in Resources */,
+				C5A1E0322F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Currency.xcstrings in Resources */,
+				C5A1E0332F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Debug.xcstrings in Resources */,
+				C5A1E0342F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Home.xcstrings in Resources */,
+				C5A1E0352F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Settings.xcstrings in Resources */,
+				C5A1E0362F2C4D1A00A1F001 /* budgetmeter.ios/Resources/UI.xcstrings in Resources */,
+				C5A1E0382F2C4D1A00A1F001 /* budgetmeter.ios/Resources/Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

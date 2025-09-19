@@ -21,17 +21,43 @@ final class ExpenseViewModel: ObservableObject {
     @Published var yearlyExpenses: [FinancialCategory] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published private(set) var currencySymbol: String = CurrencyHelper.symbol(for: CurrencyHelper.defaultCurrencyCode())
+    
+    // MARK: - Summary Computed Properties
+    
+    var totalMonthlyExpenses: Double {
+        let dailyTotal = dailyExpenses.reduce(0) { $0 + $1.amount } * 30 // Daily × 30
+        let monthlyTotal = monthlyExpenses.reduce(0) { $0 + $1.amount }
+        let yearlyMonthly = yearlyExpenses.reduce(0) { $0 + $1.amount } / 12 // Yearly ÷ 12
+        return dailyTotal + monthlyTotal + yearlyMonthly
+    }
+    
+    var dailyAverageExpenses: Double {
+        return totalMonthlyExpenses / 30
+    }
+    
+    var yearlyProjectionExpenses: Double {
+        return totalMonthlyExpenses * 12
+    }
     
     // MARK: - Private Properties
     
     private let persistenceService: PersistenceService
     private var cancellables = Set<AnyCancellable>()
-    
+    private var currencyCode: String = CurrencyHelper.defaultCurrencyCode()
+
     // MARK: - Initialization
-    
+
     init(persistenceService: PersistenceService = .shared) {
         self.persistenceService = persistenceService
+        setupCurrencyObserver()
+        setupLanguageObserver()
+        loadCurrency()
         loadExpenseCategories()
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     // MARK: - Public Methods
@@ -50,6 +76,7 @@ final class ExpenseViewModel: ObservableObject {
         
         let formatter = NumberFormatter()
         formatter.numberStyle = .none
+        formatter.locale = Locale(identifier: "en_US") // Standardized formatting (1234.56)
         formatter.maximumFractionDigits = 2
         formatter.minimumFractionDigits = 0
         
@@ -73,12 +100,13 @@ final class ExpenseViewModel: ObservableObject {
     func formatCurrencyDisplay(_ amount: Double) -> String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        formatter.currencySymbol = String(localized: "currency.symbol")
+        formatter.locale = Locale(identifier: "en_US") // Standardized formatting (1,234.56)
+        formatter.currencyCode = currencyCode
+        formatter.currencySymbol = CurrencyHelper.symbol(for: currencyCode)
         formatter.maximumFractionDigits = 2
         formatter.minimumFractionDigits = 0
         
-        return formatter.string(from: NSNumber(value: amount)) ?? "$0"
+        return formatter.string(from: NSNumber(value: amount)) ?? "\(currencySymbol)0"
     }
     
     /// Gets the localized display name for a category
@@ -121,7 +149,8 @@ final class ExpenseViewModel: ObservableObject {
             
             isLoading = false
         } catch {
-            errorMessage = "Failed to load expense categories: \(error.localizedDescription)"
+            let baseMessage = "expenses.error.load".localized(defaultValue: "Failed to load expense categories.")
+            errorMessage = "\(baseMessage) \(error.localizedDescription)"
             isLoading = false
         }
     }
@@ -136,17 +165,17 @@ extension ExpenseViewModel {
     var categoryGroups: [(title: String, categories: [FinancialCategory], color: Color)] {
         [
             (
-                title: String(localized: "frequency.daily"),
+                title: "frequency.daily".localized(defaultValue: "Daily"),
                 categories: dailyExpenses,
                 color: .red
             ),
             (
-                title: String(localized: "frequency.monthly"),
+                title: "frequency.monthly".localized(defaultValue: "Monthly"),
                 categories: monthlyExpenses,
                 color: .orange
             ),
             (
-                title: String(localized: "frequency.yearly"),
+                title: "frequency.yearly".localized(defaultValue: "Yearly"),
                 categories: yearlyExpenses,
                 color: Color(hex: "6B7280") // Secondary color from design rulebook
             )
@@ -158,6 +187,61 @@ extension ExpenseViewModel {
         let allCategories = dailyExpenses + monthlyExpenses + yearlyExpenses
         return allCategories.contains { category in
             return category.amount > 0
+        }
+    }
+}
+
+// MARK: - Currency Handling
+
+private extension ExpenseViewModel {
+    func setupCurrencyObserver() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(currencyDidChange(_:)),
+            name: .currencyDidChange,
+            object: nil
+        )
+    }
+    
+    func setupLanguageObserver() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(languageDidChange(_:)),
+            name: .languageDidChange,
+            object: nil
+        )
+    }
+
+    func loadCurrency() {
+        let context = persistenceService.viewContext
+        let fetchRequest: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
+        if let settings = try? context.fetch(fetchRequest),
+           let storedCode = settings.first?.preferredCurrencyCode,
+           CurrencyHelper.supportedCurrencyCodes.contains(storedCode) {
+            updateCurrency(code: storedCode)
+        } else {
+            updateCurrency(code: CurrencyHelper.defaultCurrencyCode())
+        }
+    }
+
+    func updateCurrency(code: String) {
+        let resolvedCode = CurrencyHelper.supportedCurrencyCodes.contains(code) ? code : CurrencyHelper.defaultCurrencyCode()
+        currencyCode = resolvedCode
+        currencySymbol = CurrencyHelper.symbol(for: resolvedCode)
+    }
+
+    @objc func currencyDidChange(_ notification: Notification) {
+        if let code = notification.userInfo?["code"] as? String {
+            updateCurrency(code: code)
+        } else {
+            loadCurrency()
+        }
+    }
+    
+    @objc func languageDidChange(_ notification: Notification) {
+        // Force UI refresh to update localized strings
+        DispatchQueue.main.async {
+            self.objectWillChange.send()
         }
     }
 }

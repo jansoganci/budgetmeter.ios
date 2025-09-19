@@ -32,7 +32,7 @@ struct HomeView: View {
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
-            .navigationTitle(String(localized: "tab.home.title"))
+            .navigationTitle("tab.home.title".localized(defaultValue: "Home"))
             .navigationBarTitleDisplayMode(.large)
             .refreshable {
                 viewModel.refresh()
@@ -54,7 +54,7 @@ struct HomeView: View {
     private var liveMeterHero: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .firstTextBaseline) {
-                Text(String(localized: "home.session.label"))
+                Text("home.session.label".localized(defaultValue: "Current Session"))
                     .font(.caption)
                     .fontWeight(.semibold)
                     .foregroundColor(.white.opacity(0.9))
@@ -76,7 +76,7 @@ struct HomeView: View {
                     .monospacedDigit()
             }
 
-            Text(viewModel.isPositive ? String(localized: "home.session.positive") : String(localized: "home.session.negative"))
+            Text(viewModel.isPositive ? "home.session.positive".localized(defaultValue: "You're ahead") : "home.session.negative".localized(defaultValue: "You're behind"))
                 .font(.subheadline)
                 .fontWeight(.medium)
                 .foregroundColor(.white.opacity(0.9))
@@ -85,7 +85,7 @@ struct HomeView: View {
                 .background(Color.white.opacity(0.2))
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(String(localized: "home.cumulative.label"))
+                Text("home.cumulative.label".localized(defaultValue: "Long-Term Total"))
                     .font(.caption)
                     .fontWeight(.semibold)
                     .foregroundColor(.white.opacity(0.9))
@@ -95,7 +95,7 @@ struct HomeView: View {
                     .foregroundColor(viewModel.cumulativeFlowColor.opacity(0.95))
                     .monospacedDigit()
 
-                Text(String(localized: "home.cumulative.since \(viewModel.cumulativeSinceDateText)"))
+                Text("home.cumulative.since \(viewModel.cumulativeSinceDateText)".localized(defaultValue: "Since \(viewModel.cumulativeSinceDateText)"))
                     .font(.footnote)
                     .foregroundColor(.white.opacity(0.8))
             }
@@ -116,9 +116,7 @@ struct HomeView: View {
         .cornerRadius(12)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(
-            String(
-                localized: "home.session.accessibility \(viewModel.formattedLiveValue) \(viewModel.sessionDuration) \(viewModel.cumulativeDisplayAmount) \(viewModel.cumulativeSinceDateText)"
-            )
+            "home.session.accessibility \(viewModel.formattedLiveValue) \(viewModel.sessionDuration) \(viewModel.cumulativeDisplayAmount) \(viewModel.cumulativeSinceDateText)".localized(defaultValue: "Current session: \(viewModel.formattedLiveValue), duration: \(viewModel.sessionDuration), total: \(viewModel.cumulativeDisplayAmount) since \(viewModel.cumulativeSinceDateText)")
         )
     }
     
@@ -129,7 +127,7 @@ struct HomeView: View {
             HStack {
                 Image(systemName: "bolt.fill")
                     .foregroundColor(Color(hex: "4A90E2"))
-                Text("Quick Actions")
+                Text("home.quick_actions.title".localized(defaultValue: "Quick Actions"))
                     .font(.headline)
                     .fontWeight(.semibold)
                 Spacer()
@@ -144,7 +142,7 @@ struct HomeView: View {
                             .font(.system(size: 32))
                             .foregroundColor(.green)
                         
-                        Text("Add Income")
+                        Text("home.quick_actions.add_income".localized(defaultValue: "Add Income"))
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.primary)
@@ -155,8 +153,8 @@ struct HomeView: View {
                     .cornerRadius(12)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Add Income")
-                .accessibilityHint("Opens income entry screen to add your income sources")
+                .accessibilityLabel("home.quick_actions.add_income".localized(defaultValue: "Add Income"))
+                .accessibilityHint("home.quick_actions.add_income.hint".localized(defaultValue: "Tap to add income entry"))
                 
                 // Add Expense Button
                 Button(action: viewModel.showExpenseEntry) {
@@ -165,7 +163,7 @@ struct HomeView: View {
                             .font(.system(size: 32))
                             .foregroundColor(.red)
                         
-                        Text("Add Expense")
+                        Text("home.quick_actions.add_expense".localized(defaultValue: "Add Expense"))
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.primary)
@@ -176,8 +174,8 @@ struct HomeView: View {
                     .cornerRadius(12)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Add Expense")
-                .accessibilityHint("Opens expense entry screen to add your expenses")
+                .accessibilityLabel("home.quick_actions.add_expense".localized(defaultValue: "Add Expense"))
+                .accessibilityHint("home.quick_actions.add_expense.hint".localized(defaultValue: "Tap to add expense entry"))
             }
         }
     }
@@ -189,7 +187,7 @@ struct HomeView: View {
             HStack {
                 Image(systemName: "chart.line.uptrend.xyaxis")
                     .foregroundColor(Color(hex: "4A90E2"))
-                Text("Today's Snapshot")
+                Text("home.snapshot.title".localized(defaultValue: "Today's Snapshot"))
                     .font(.headline)
                     .fontWeight(.semibold)
                 Spacer()
@@ -199,14 +197,14 @@ struct HomeView: View {
             HStack(spacing: 12) {
                 // Daily Flow Card
                 snapshotCard(
-                    title: "Daily",
+                    title: "home.snapshot.daily".localized(defaultValue: "Daily"),
                     value: viewModel.dailyNetFlow,
                     icon: "calendar"
                 )
                 
                 // Monthly Flow Card
                 snapshotCard(
-                    title: "Monthly",
+                    title: "home.snapshot.monthly".localized(defaultValue: "Monthly"),
                     value: viewModel.monthlyNetFlow,
                     icon: "calendar.badge.clock"
                 )
@@ -217,7 +215,7 @@ struct HomeView: View {
                         .font(.system(size: 20))
                         .foregroundColor(viewModel.financialHealthColor)
                     
-                    Text("Health")
+                    Text("home.snapshot.health".localized(defaultValue: "Health"))
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
@@ -228,6 +226,7 @@ struct HomeView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: 70)
+                .padding(.vertical, 12)
                 .background(Color(uiColor: .secondarySystemBackground))
                 .cornerRadius(12)
             }
@@ -246,12 +245,12 @@ struct HomeView: View {
                     .font(.system(size: 80))
                     .foregroundColor(Color(hex: "4A90E2"))
                 
-                Text("Welcome to BudgetMeter")
+                Text("home.getting_started.title".localized(defaultValue: "Welcome to BudgetMeter"))
                     .font(.title2)
                     .fontWeight(.bold)
                     .multilineTextAlignment(.center)
                 
-                Text("Track your money flow in real-time.\nStart by adding your income sources.")
+                Text("home.getting_started.subtitle".localized(defaultValue: "Track your financial flow in real-time"))
                     .font(.body)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -263,7 +262,7 @@ struct HomeView: View {
                     HStack {
                         Image(systemName: "plus.circle.fill")
                             .font(.title2)
-                        Text("Add Your First Income")
+                        Text("home.getting_started.add_income".localized(defaultValue: "Add Your First Income"))
                             .font(.headline)
                             .fontWeight(.semibold)
                     }
@@ -279,7 +278,7 @@ struct HomeView: View {
                     HStack {
                         Image(systemName: "minus.circle")
                             .font(.title2)
-                        Text("Add Expenses")
+                        Text("home.getting_started.add_expense".localized(defaultValue: "Add Your First Expense"))
                             .font(.headline)
                             .fontWeight(.medium)
                     }
@@ -307,7 +306,7 @@ struct HomeView: View {
         VStack(spacing: 16) {
             ProgressView()
                 .scaleEffect(1.2)
-            Text("Loading your financial data...")
+            Text("home.loading".localized(defaultValue: "Loading..."))
                 .foregroundColor(.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -332,6 +331,7 @@ struct HomeView: View {
         }
         .frame(maxWidth: .infinity)
         .frame(height: 70)
+        .padding(.vertical, 12)
         .background(Color(uiColor: .secondarySystemBackground))
         .cornerRadius(12)
     }

@@ -22,6 +22,9 @@ final class SettingsViewModel: ObservableObject {
     @Published var showingDataExportSheet = false
     @Published var showingResetDataAlert = false
     @Published var showingResetCumulativeAlert = false
+    @Published var selectedCurrencyCode: String = CurrencyHelper.defaultCurrencyCode()
+    @Published var isCurrencyPickerPresented = false
+    @Published var isLanguagePickerPresented = false
     
     // MARK: - Private Properties
     
@@ -44,9 +47,9 @@ final class SettingsViewModel: ObservableObject {
         
         var displayName: String {
             switch self {
-            case .light: return String(localized: "settings.appearance.light")
-            case .dark: return String(localized: "settings.appearance.dark")
-            case .system: return String(localized: "settings.appearance.system")
+            case .light: return "settings.appearance.light".localized(defaultValue: "Light")
+            case .dark: return "settings.appearance.dark".localized(defaultValue: "Dark")
+            case .system: return "settings.appearance.system".localized(defaultValue: "System")
             }
         }
         
@@ -62,11 +65,27 @@ final class SettingsViewModel: ObservableObject {
     enum LanguageMode: String, CaseIterable {
         case english = "en"
         case turkish = "tr"
+        case german = "de"
+        case french = "fr"
+        case spanish = "es"
+        case italian = "it"
+        case portuguese = "pt"
+        case japanese = "ja"
+        case chineseSimplified = "zh-Hans"
+        case arabic = "ar"
         
         var displayName: String {
             switch self {
             case .english: return "English"
             case .turkish: return "Türkçe"
+            case .german: return "Deutsch"
+            case .french: return "Français"
+            case .spanish: return "Español"
+            case .italian: return "Italiano"
+            case .portuguese: return "Português"
+            case .japanese: return "日本語"
+            case .chineseSimplified: return "简体中文"
+            case .arabic: return "العربية"
             }
         }
         
@@ -74,6 +93,14 @@ final class SettingsViewModel: ObservableObject {
             switch self {
             case .english: return "🇺🇸"
             case .turkish: return "🇹🇷"
+            case .german: return "🇩🇪"
+            case .french: return "🇫🇷"
+            case .spanish: return "🇪🇸"
+            case .italian: return "🇮🇹"
+            case .portuguese: return "🇵🇹"
+            case .japanese: return "🇯🇵"
+            case .chineseSimplified: return "🇨🇳"
+            case .arabic: return "🇸🇦"
             }
         }
     }
@@ -87,6 +114,7 @@ final class SettingsViewModel: ObservableObject {
         self.userDefaults = userDefaults
         self.persistenceService = persistenceService
         loadSettings()
+        loadCurrencyPreference()
     }
     
     // MARK: - Public Methods
@@ -98,11 +126,13 @@ final class SettingsViewModel: ObservableObject {
         applyAppearance()
     }
     
-    /// Updates language preference (for future i18n)
+    /// Updates language preference and applies it immediately
     func updateLanguage(_ language: LanguageMode) {
         selectedLanguage = language
         userDefaults.set(language.rawValue, forKey: SettingsKeys.languageMode)
-        // Note: Full i18n implementation would require app restart
+        
+        // Apply language change immediately using LocalizationManager
+        LocalizationManager.shared.currentLanguage = language.rawValue
     }
     
     /// Shows privacy policy
@@ -119,12 +149,95 @@ final class SettingsViewModel: ObservableObject {
     func exportData() {
         showingDataExportSheet = true
     }
-    
+
     /// Shows reset data confirmation
     func showResetDataConfirmation() {
         showingResetDataAlert = true
     }
-    
+
+    var featuredCurrencies: [CurrencyOption] {
+        CurrencyHelper.groupedCurrencyOptions().featured
+    }
+
+    var otherCurrencies: [CurrencyOption] {
+        CurrencyHelper.groupedCurrencyOptions().others
+    }
+
+    var selectedCurrencyDisplayText: String {
+        guard let option = CurrencyHelper.currencyOption(for: selectedCurrencyCode) else {
+            return selectedCurrencyCode
+        }
+
+        let format = "settings.currency.subtitle_format".localized(defaultValue: "%@ – %@")
+        return String(format: format, option.symbol, option.localizedName)
+    }
+
+    func showCurrencyPicker() {
+        isCurrencyPickerPresented = true
+    }
+
+    func dismissCurrencyPicker() {
+        isCurrencyPickerPresented = false
+    }
+
+    func selectCurrency(_ currency: CurrencyOption) {
+        updateCurrency(currency.code)
+        dismissCurrencyPicker()
+    }
+
+    // MARK: - Language Picker Methods
+
+    func showLanguagePicker() {
+        isLanguagePickerPresented = true
+    }
+
+    func dismissLanguagePicker() {
+        isLanguagePickerPresented = false
+    }
+
+    func selectLanguage(_ language: LanguageMode) {
+        updateLanguage(language)
+        dismissLanguagePicker()
+    }
+
+    var selectedLanguageDisplayText: String {
+        let format = "settings.language.subtitle_format".localized(defaultValue: "%@ %@")
+        return String(format: format, selectedLanguage.flag, selectedLanguage.displayName)
+    }
+
+    /// Updates preferred currency and notifies observers
+    func updateCurrency(_ code: String) {
+        let resolvedCode = CurrencyHelper.supportedCurrencyCodes.contains(code) ? code : CurrencyHelper.defaultCurrencyCode()
+        guard resolvedCode != selectedCurrencyCode else { return }
+
+        selectedCurrencyCode = resolvedCode
+
+        let context = persistenceService.viewContext
+        let fetchRequest: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
+
+        do {
+            let settings = try context.fetch(fetchRequest)
+            let appSettings: AppSettings
+
+            if let existing = settings.first {
+                appSettings = existing
+            } else {
+                appSettings = AppSettings(context: context)
+            }
+
+            appSettings.preferredCurrencyCode = resolvedCode
+            persistenceService.save()
+
+            NotificationCenter.default.post(
+                name: .currencyDidChange,
+                object: nil,
+                userInfo: ["code": resolvedCode]
+            )
+        } catch {
+            print("Failed to persist currency: \(error)")
+        }
+    }
+
     /// Shows reset long-term meter confirmation
     func showResetCumulativeConfirmation() {
         showingResetCumulativeAlert = true
@@ -151,6 +264,12 @@ final class SettingsViewModel: ObservableObject {
                     // Re-seed initial data
                     let seedingService = DataSeedingService()
                     seedingService.seedInitialDataIfNeeded(force: true)
+                    self.loadCurrencyPreference()
+                    NotificationCenter.default.post(
+                        name: .currencyDidChange,
+                        object: nil,
+                        userInfo: ["code": self.selectedCurrencyCode]
+                    )
                 }
             } catch {
                 print("Failed to reset data: \(error)")
@@ -205,15 +324,23 @@ final class SettingsViewModel: ObservableObject {
             selectedAppearance = mode
         }
         
-        // Load language mode
+        // Load language mode and sync with LocalizationManager
         if let savedLanguage = userDefaults.string(forKey: SettingsKeys.languageMode),
            let language = LanguageMode(rawValue: savedLanguage) {
             selectedLanguage = language
+            DispatchQueue.main.async {
+                LocalizationManager.shared.currentLanguage = language.rawValue
+            }
+        } else {
+            // Initialize LocalizationManager with default language
+            DispatchQueue.main.async {
+                LocalizationManager.shared.currentLanguage = self.selectedLanguage.rawValue
+            }
         }
         
         applyAppearance()
     }
-    
+
     private func applyAppearance() {
         // Apply to all windows in the app
         DispatchQueue.main.async {
@@ -228,6 +355,19 @@ final class SettingsViewModel: ObservableObject {
             case .system:
                 window.overrideUserInterfaceStyle = .unspecified
             }
+        }
+    }
+
+    private func loadCurrencyPreference() {
+        let context = persistenceService.viewContext
+        let fetchRequest: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
+
+        if let settings = try? context.fetch(fetchRequest),
+           let storedCode = settings.first?.preferredCurrencyCode,
+           CurrencyHelper.supportedCurrencyCodes.contains(storedCode) {
+            selectedCurrencyCode = storedCode
+        } else {
+            selectedCurrencyCode = CurrencyHelper.defaultCurrencyCode()
         }
     }
 }

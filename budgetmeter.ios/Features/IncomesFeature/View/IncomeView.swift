@@ -12,6 +12,7 @@ import CoreData
 struct IncomeView: View {
     
     @StateObject private var viewModel = IncomeViewModel()
+    @StateObject private var localizationManager = LocalizationManager.shared
     @FocusState private var focusedField: String?
     
     var body: some View {
@@ -22,16 +23,19 @@ struct IncomeView: View {
                         loadingView
                     } else if !viewModel.hasIncomeData && !viewModel.categoryGroups.isEmpty {
                         emptyStateView
-                    }
-                    
-                    ForEach(viewModel.categoryGroups, id: \.title) { group in
-                        categoryGroupView(group)
+                    } else {
+                        // Summary Card
+                        incomeSummaryCard
+                        
+                        ForEach(viewModel.categoryGroups, id: \.title) { group in
+                            categoryGroupView(group)
+                        }
                     }
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
             }
-            .navigationTitle(String(localized: "tab.income.title"))
+            .navigationTitle("tab.income.title".localized(defaultValue: "Income"))
             .navigationBarTitleDisplayMode(.large)
             .refreshable {
                 viewModel.refresh()
@@ -39,7 +43,7 @@ struct IncomeView: View {
             .toolbar {
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
-                    Button("Done") {
+                    Button("toolbar.done".localized(defaultValue: "Done")) {
                         focusedField = nil
                     }
                     .foregroundColor(Color(hex: "4A90E2"))
@@ -50,8 +54,8 @@ struct IncomeView: View {
         .onAppear {
             viewModel.refresh()
         }
-        .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
-            Button("OK") {
+        .alert("alert.error.title".localized(defaultValue: "Error"), isPresented: .constant(viewModel.errorMessage != nil)) {
+            Button("alert.ok".localized(defaultValue: "OK")) {
                 viewModel.errorMessage = nil
             }
         } message: {
@@ -63,11 +67,51 @@ struct IncomeView: View {
     
     // MARK: - Subviews
     
+    private var incomeSummaryCard: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Image(systemName: "chart.line.uptrend.xyaxis")
+                    .foregroundColor(.green)
+                Text("income.summary.title".localized(defaultValue: "Income Overview"))
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                Spacer()
+            }
+            .padding(.horizontal, 4)
+            
+            HStack(spacing: 12) {
+                // Monthly Total Card
+                summaryInfoCard(
+                    title: "income.summary.monthly".localized(defaultValue: "Monthly"),
+                    value: viewModel.totalMonthlyIncome,
+                    icon: "calendar",
+                    color: .green
+                )
+                
+                // Daily Average Card
+                summaryInfoCard(
+                    title: "income.summary.daily_avg".localized(defaultValue: "Daily Avg"),
+                    value: viewModel.dailyAverageIncome,
+                    icon: "calendar.day.timeline.left",
+                    color: Color(hex: "32CD32")
+                )
+                
+                // Yearly Projection Card
+                summaryInfoCard(
+                    title: "income.summary.yearly".localized(defaultValue: "Yearly"),
+                    value: viewModel.yearlyProjectionIncome,
+                    icon: "chart.line.uptrend.xyaxis",
+                    color: .green.opacity(0.8)
+                )
+            }
+        }
+    }
+    
     private var loadingView: some View {
         VStack(spacing: 16) {
             ProgressView()
                 .scaleEffect(1.2)
-            Text("Loading income categories...")
+            Text("income.loading".localized(defaultValue: "Loading income..."))
                 .foregroundColor(.secondary)
         }
         .frame(maxWidth: .infinity, minHeight: 200)
@@ -79,7 +123,7 @@ struct IncomeView: View {
                 .font(.system(size: 64))
                 .foregroundColor(.green)
             
-            Text(String(localized: "empty_state.income.message"))
+            Text("empty_state.income.message".localized(defaultValue: "No income yet. Tap the + button to add your first income source."))
                 .font(.headline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -111,6 +155,7 @@ struct IncomeView: View {
                         onAmountChange: { amount in
                             viewModel.updateAmount(for: category, amount: amount)
                         },
+                        currencySymbol: viewModel.currencySymbol,
                         focusedField: $focusedField
                     )
                 }
@@ -120,6 +165,29 @@ struct IncomeView: View {
     
     
     // MARK: - Helper Methods
+    
+    private func summaryInfoCard(title: String, value: Double, icon: String, color: Color) -> some View {
+        VStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.system(size: 18))
+                .foregroundColor(color)
+            
+            Text(title)
+                .font(.caption)
+                .foregroundColor(.secondary)
+            
+            Text(viewModel.formatCurrencyDisplay(value))
+                .font(.system(size: 16, weight: .bold, design: .rounded))
+                .foregroundColor(color)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 80)
+        .padding(.vertical, 12)
+        .background(Color(uiColor: .secondarySystemBackground))
+        .cornerRadius(12)
+    }
     
     private func createGridColumns() -> [GridItem] {
         // Responsive grid: 2 columns on iPhone, 3 on iPad

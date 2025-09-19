@@ -33,15 +33,17 @@ final class DataSeedingService {
             if hasExistingCategories() {
                 // Check if we need to migrate old Turkish uniqueIDs to English
                 migrateOldCategoryIDsIfNeeded()
+                ensureCurrencyPreference()
                 return
             }
         } else if force {
             if hasExistingCategories() {
                 migrateOldCategoryIDsIfNeeded()
+                ensureCurrencyPreference()
                 return
             }
         }
-        
+
         seedPredefinedCategories()
         seedInitialAppSettings()
         
@@ -81,15 +83,15 @@ final class DataSeedingService {
             ("natural_gas", "Natural Gas", "monthly"),
             ("internet", "Internet", "monthly"),
             ("phone", "Phone", "monthly"),
-            ("building_fee", "Building Fee", "monthly"),
-            ("service_fee", "Service Fee", "monthly"),
+            ("hoa_fees", "HOA Fees", "monthly"),
+            ("maintenance_fees", "Maintenance Fees", "monthly"),
             ("car_fuel", "Car Fuel", "monthly"),
             ("social_security", "Social Security", "monthly"),
             ("school_fee", "School Fee", "monthly"),
             ("loan_payment", "Loan Payment", "monthly"),
             ("credit_card", "Credit Card", "monthly"),
             ("gym_monthly", "Gym (Monthly)", "monthly"),
-            ("digital_subscriptions", "Digital Subscriptions", "monthly")
+            ("streaming_services", "Streaming Services", "monthly")
         ]
         
         // Yearly Expense Categories
@@ -97,9 +99,9 @@ final class DataSeedingService {
             ("car_maintenance", "Car Maintenance", "yearly"),
             ("car_insurance", "Car Insurance", "yearly"),
             ("vehicle_tax", "Vehicle Tax", "yearly"),
-            ("car_comprehensive", "Car Comprehensive", "yearly"),
+            ("comprehensive_insurance", "Comprehensive Insurance", "yearly"),
             ("vehicle_inspection", "Vehicle Inspection", "yearly"),
-            ("earthquake_insurance", "Earthquake Insurance", "yearly"),
+            ("property_insurance", "Property Insurance", "yearly"),
             ("health_insurance", "Health Insurance", "yearly"),
             ("property_tax", "Property Tax", "yearly"),
             ("vacation", "Vacation", "yearly"),
@@ -126,7 +128,7 @@ final class DataSeedingService {
             ("passive_income", "Passive Income", "monthly"),
             ("bonus", "Bonus", "monthly"),
             ("commission", "Commission", "monthly"),
-            ("digital_product", "Digital Product", "monthly"),
+            ("online_business", "Online Business", "monthly"),
             ("education", "Education", "monthly"),
             ("consulting", "Consulting", "monthly"),
             ("social_media", "Social Media", "monthly"),
@@ -190,54 +192,71 @@ final class DataSeedingService {
                 appSettings.savingsGoalAmount = 0.0
                 appSettings.cumulativeTotal = 0.0
                 appSettings.cumulativeStartDate = Date()
+                appSettings.preferredCurrencyCode = CurrencyHelper.defaultCurrencyCode()
+            } else if let existing = existingSettings.first,
+                      existing.preferredCurrencyCode == nil {
+                existing.preferredCurrencyCode = CurrencyHelper.defaultCurrencyCode()
+                persistenceService.save()
             }
         } catch {
             print("Error checking for existing AppSettings: \(error)")
         }
     }
     
-    /// Migrates old Turkish uniqueIDs to new English uniqueIDs for existing installations
+    /// Migrates legacy uniqueIDs to the latest canonical identifiers for existing installations
     private func migrateOldCategoryIDsIfNeeded() {
         let context = persistenceService.viewContext
-        let migrationKey = "didMigrateCategoryIDs"
-        
-        // Check if migration already completed
-        if userDefaults.bool(forKey: migrationKey) {
+        let migrationVersionKey = "categoryIDMigrationVersion"
+        let requiredVersion = 2
+
+        if userDefaults.integer(forKey: migrationVersionKey) >= requiredVersion {
             return
         }
         
-        let migrationMap = createTurkishToEnglishMigrationMap()
+        let migrationMap = createLegacyCategoryIDMigrationMap()
         
         let fetchRequest: NSFetchRequest<FinancialCategory> = FinancialCategory.fetchRequest()
         
         do {
             let categories = try context.fetch(fetchRequest)
+            var categoriesByID: [String: FinancialCategory] = [:]
+            for category in categories {
+                if let id = category.uniqueID {
+                    categoriesByID[id] = category
+                }
+            }
+
             var migrationCount = 0
             
             for category in categories {
                 if let oldUniqueID = category.uniqueID,
                    let newUniqueID = migrationMap[oldUniqueID] {
-                    category.uniqueID = newUniqueID
+                    if let existing = categoriesByID[newUniqueID], existing != category {
+                        existing.amount += category.amount
+                        context.delete(category)
+                    } else {
+                        category.uniqueID = newUniqueID
+                        categoriesByID[newUniqueID] = category
+                    }
                     migrationCount += 1
                 }
             }
             
             if migrationCount > 0 {
                 persistenceService.save()
-                print("🔄 DataSeedingService: Migrated \(migrationCount) category IDs from Turkish to English")
+                print("🔄 DataSeedingService: Migrated \(migrationCount) legacy category IDs to canonical identifiers")
             }
             
-            // Mark migration as completed
-            userDefaults.set(true, forKey: migrationKey)
+            userDefaults.set(requiredVersion, forKey: migrationVersionKey)
             
         } catch {
             print("❌ DataSeedingService: Failed to migrate category IDs: \(error)")
         }
     }
     
-    /// Creates mapping from old Turkish uniqueIDs to new English uniqueIDs
-    private func createTurkishToEnglishMigrationMap() -> [String: String] {
-        return [
+    /// Creates mapping from legacy uniqueIDs (Turkish and earlier English identifiers) to current canonical IDs
+    private func createLegacyCategoryIDMigrationMap() -> [String: String] {
+        let turkishToCanonical: [String: String] = [
             // Daily Expenses
             "yemek": "food",
             "cay_kahve": "tea_coffee",
@@ -251,22 +270,22 @@ final class DataSeedingService {
             "su": "water",
             "dogalgaz": "natural_gas",
             "telefon": "phone",
-            "aidat": "building_fee",
-            "servis": "service_fee",
+            "aidat": "hoa_fees",
+            "servis": "maintenance_fees",
             "arac_yakit": "car_fuel",
             "sgk_bagkur": "social_security",
             "okul_taksit": "school_fee",
             "kredi_taksit": "loan_payment",
             "kredi_karti": "credit_card",
-            "dijital_abonelikler": "digital_subscriptions",
+            "dijital_abonelikler": "streaming_services",
             
             // Yearly Expenses
             "arac_bakim": "car_maintenance",
             "arac_sigorta": "car_insurance",
             "mtv": "vehicle_tax",
-            "arac_kasko": "car_comprehensive",
+            "arac_kasko": "comprehensive_insurance",
             "arac_muayene": "vehicle_inspection",
-            "dask": "earthquake_insurance",
+            "dask": "property_insurance",
             "saglik_sigorta": "health_insurance",
             "emlak_vergi": "property_tax",
             "tatil": "vacation",
@@ -281,7 +300,7 @@ final class DataSeedingService {
             "kira_geliri": "rental_income",
             "pasif_gelir": "passive_income",
             "komisyon": "commission",
-            "dijital_urun": "digital_product",
+            "dijital_urun": "other_income",
             "egitim": "education",
             "danismanlik": "consulting",
             "sosyal_medya": "social_media",
@@ -299,6 +318,17 @@ final class DataSeedingService {
             "telif": "royalty",
             "diger_yillik": "other_yearly"
         ]
+        
+        let englishLegacyToCanonical: [String: String] = [
+            "building_fee": "hoa_fees",
+            "service_fee": "maintenance_fees",
+            "digital_subscriptions": "streaming_services",
+            "car_comprehensive": "comprehensive_insurance",
+            "earthquake_insurance": "property_insurance",
+            "digital_product": "other_income"
+        ]
+        
+        return turkishToCanonical.merging(englishLegacyToCanonical) { _, new in new }
     }
 }
 
@@ -317,89 +347,29 @@ private extension DataSeedingService {
             return false
         }
     }
+
+    func ensureCurrencyPreference() {
+        let context = persistenceService.viewContext
+        let fetchRequest: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
+
+        guard let settings = try? context.fetch(fetchRequest),
+              let existing = settings.first,
+              existing.preferredCurrencyCode == nil else {
+            return
+        }
+
+        existing.preferredCurrencyCode = CurrencyHelper.defaultCurrencyCode()
+        persistenceService.save()
+    }
 }
 
 extension DataSeedingService {
     
-    /// Maps category uniqueIDs to display names for UI
-    /// Uses static mapping to avoid dynamic string interpolation issues
+    /// Maps category uniqueIDs to localized display names for UI
     static func displayName(for uniqueID: String) -> String {
-        switch uniqueID {
-        // Daily Expenses
-        case "food": return "Food"
-        case "tea_coffee": return "Tea/Coffee"
-        case "cigarettes": return "Cigarettes"
-        case "transportation": return "Transportation"
-        case "other": return "Other"
-        
-        // Monthly Expenses
-        case "rent": return "Rent"
-        case "electricity": return "Electricity"
-        case "water": return "Water"
-        case "natural_gas": return "Natural Gas"
-        case "internet": return "Internet"
-        case "phone": return "Phone"
-        case "building_fee": return "Building Fee"
-        case "service_fee": return "Service Fee"
-        case "car_fuel": return "Car Fuel"
-        case "social_security": return "Social Security"
-        case "school_fee": return "School Fee"
-        case "loan_payment": return "Loan Payment"
-        case "credit_card": return "Credit Card"
-        case "gym_monthly": return "Gym (Monthly)"
-        case "digital_subscriptions": return "Digital Subscriptions"
-        
-        // Yearly Expenses
-        case "car_maintenance": return "Car Maintenance"
-        case "car_insurance": return "Car Insurance"
-        case "vehicle_tax": return "Vehicle Tax"
-        case "car_comprehensive": return "Car Comprehensive"
-        case "vehicle_inspection": return "Vehicle Inspection"
-        case "earthquake_insurance": return "Earthquake Insurance"
-        case "health_insurance": return "Health Insurance"
-        case "property_tax": return "Property Tax"
-        case "vacation": return "Vacation"
-        case "gym_yearly": return "Gym (Yearly)"
-        
-        // Daily Income
-        case "salary": return "Salary"
-        case "freelance": return "Freelance"
-        case "investment": return "Investment"
-        case "other_income": return "Other Income"
-        
-        // Monthly Income
-        case "monthly_salary": return "Monthly Salary"
-        case "rental_income": return "Rental Income"
-        case "passive_income": return "Passive Income"
-        case "bonus": return "Bonus"
-        case "commission": return "Commission"
-        case "digital_product": return "Digital Product"
-        case "education": return "Education"
-        case "consulting": return "Consulting"
-        case "social_media": return "Social Media"
-        case "youtube": return "YouTube"
-        case "blog": return "Blog"
-        case "podcast": return "Podcast"
-        case "online_course": return "Online Course"
-        case "affiliate": return "Affiliate"
-        case "other_monthly": return "Other Monthly"
-        
-        // Yearly Income
-        case "yearly_bonus": return "Yearly Bonus"
-        case "investment_return": return "Investment Return"
-        case "real_estate_sale": return "Real Estate Sale"
-        case "car_sale": return "Car Sale"
-        case "inheritance": return "Inheritance"
-        case "gift": return "Gift"
-        case "prize": return "Prize"
-        case "royalty": return "Royalty"
-        case "patent": return "Patent"
-        case "other_yearly": return "Other Yearly"
-        
-        // Fallback for unknown IDs
-        default: 
-            return uniqueID.capitalized.replacingOccurrences(of: "_", with: " ")
-        }
+        let key = "category.\(uniqueID).name"
+        let defaultValue = uniqueID.replacingOccurrences(of: "_", with: " ").capitalized
+        return key.localized(defaultValue: defaultValue)
     }
     
     /// Maps category uniqueIDs to SF Symbol names based on design rulebook
@@ -419,23 +389,23 @@ extension DataSeedingService {
             "natural_gas": "flame.fill",
             "internet": "wifi",
             "phone": "phone.fill",
-            "building_fee": "building.2.fill",
-            "service_fee": "bus.fill",
+            "hoa_fees": "building.2.fill",
+            "maintenance_fees": "wrench.and.screwdriver.fill",
             "car_fuel": "fuelpump.fill",
             "social_security": "cross.fill",
             "school_fee": "graduationcap.fill",
             "loan_payment": "banknote.fill",
             "credit_card": "creditcard.fill",
             "gym_monthly": "dumbbell.fill",
-            "digital_subscriptions": "tv.fill",
+            "streaming_services": "tv.fill",
             
             // Yearly Expenses
             "car_maintenance": "wrench.and.screwdriver.fill",
             "car_insurance": "car.fill",
             "vehicle_tax": "doc.text.fill",
-            "car_comprehensive": "shield.fill",
+            "comprehensive_insurance": "shield.fill",
             "vehicle_inspection": "magnifyingglass",
-            "earthquake_insurance": "house.and.flag.fill",
+            "property_insurance": "house.and.flag.fill",
             "health_insurance": "stethoscope",
             "property_tax": "building.columns.fill",
             "vacation": "airplane",
@@ -453,16 +423,16 @@ extension DataSeedingService {
             "passive_income": "arrow.clockwise",
             "bonus": "gift.fill",
             "commission": "percent",
-            "digital_product": "opticaldisc.fill",
+            "online_business": "desktopcomputer",
             "education": "graduationcap.fill",
-            "consulting": "handshake.fill",
+            "consulting": "briefcase.circle.fill",
             "social_media": "person.3.fill",
             "youtube": "play.rectangle.fill",
             "blog": "doc.text.fill",
             "podcast": "mic.fill",
             "online_course": "laptopcomputer",
             "affiliate": "link",
-            "other_monthly": "gem",
+            "other_monthly": "star.circle.fill",
             
             // Yearly Income
             "yearly_bonus": "gift.fill",
@@ -474,7 +444,7 @@ extension DataSeedingService {
             "prize": "trophy.fill",
             "royalty": "book.fill",
             "patent": "lightbulb.fill",
-            "other_yearly": "gem"
+            "other_yearly": "star.circle.fill"
         ]
         
         return symbolNames[uniqueID] ?? "questionmark.circle"

@@ -20,6 +20,9 @@ struct SettingsView: View {
                 
                 // Language & Region Section
                 languageSection
+
+                // Currency Section
+                currencySection
                 
                 // Data & Privacy Section
                 dataPrivacySection
@@ -27,10 +30,33 @@ struct SettingsView: View {
                 // About Section
                 aboutSection
             }
-            .navigationTitle(String(localized: "settings.title"))
+            .navigationTitle("settings.title".localized(defaultValue: "Settings"))
             .navigationBarTitleDisplayMode(.large)
         }
         .preferredColorScheme(viewModel.selectedAppearance.systemColorScheme)
+        .sheet(isPresented: $viewModel.isCurrencyPickerPresented) {
+            CurrencyPickerView(
+                featuredCurrencies: viewModel.featuredCurrencies,
+                otherCurrencies: viewModel.otherCurrencies,
+                selectedCurrencyCode: viewModel.selectedCurrencyCode,
+                onSelect: { currency in
+                    viewModel.selectCurrency(currency)
+                }
+            )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $viewModel.isLanguagePickerPresented) {
+            LanguagePickerView(
+                languages: SettingsViewModel.LanguageMode.allCases,
+                selectedLanguage: viewModel.selectedLanguage,
+                onSelect: { language in
+                    viewModel.selectLanguage(language)
+                }
+            )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
         .sheet(isPresented: $viewModel.showingPrivacyPolicy) {
             privacyPolicyView
         }
@@ -41,23 +67,23 @@ struct SettingsView: View {
             dataExportView
         }
         .alert(
-            String(localized: "settings.reset.cumulative.title"),
+            "settings.reset.cumulative.title".localized(defaultValue: "Reset Long-Term Meter"),
             isPresented: $viewModel.showingResetCumulativeAlert
         ) {
-            Button(String(localized: "settings.reset.cancel"), role: .cancel) { }
-            Button(String(localized: "settings.reset.confirm"), role: .destructive) {
+            Button("settings.reset.cancel".localized(defaultValue: "Cancel"), role: .cancel) { }
+            Button("settings.reset.confirm".localized(defaultValue: "Reset"), role: .destructive) {
                 viewModel.resetCumulativeMeter()
             }
         } message: {
-            Text(String(localized: "settings.reset.cumulative.message"))
+            Text("settings.reset.cumulative.message".localized(defaultValue: "This will reset your long-term financial meter to zero. Your income and expense data will remain unchanged."))
         }
-        .alert(String(localized: "settings.reset.title"), isPresented: $viewModel.showingResetDataAlert) {
-            Button(String(localized: "settings.reset.cancel"), role: .cancel) { }
-            Button(String(localized: "settings.reset.confirm"), role: .destructive) {
+        .alert("settings.reset.title".localized(defaultValue: "Reset All Data"), isPresented: $viewModel.showingResetDataAlert) {
+            Button("settings.reset.cancel".localized(defaultValue: "Cancel"), role: .cancel) { }
+            Button("settings.reset.confirm".localized(defaultValue: "Reset"), role: .destructive) {
                 viewModel.resetAllData()
             }
         } message: {
-            Text("This will permanently delete all your financial data. This action cannot be undone.")
+            Text("settings.reset.all.warning".localized(defaultValue: "This will permanently delete all your financial data. This action cannot be undone."))
         }
     }
     
@@ -88,9 +114,9 @@ struct SettingsView: View {
                 }
             }
         } header: {
-            Text(String(localized: "settings.appearance.title"))
+            Text("settings.appearance.title".localized(defaultValue: "Appearance"))
         } footer: {
-            Text(String(localized: "settings.appearance.footer"))
+            Text("settings.appearance.footer".localized(defaultValue: "Choose how the app looks on your device."))
         }
     }
     
@@ -98,32 +124,67 @@ struct SettingsView: View {
     
     private var languageSection: some View {
         Section {
-            ForEach(SettingsViewModel.LanguageMode.allCases, id: \.self) { language in
-                HStack {
-                    Text(language.flag)
-                        .font(.title2)
-                        .frame(width: 24)
-                    
-                    Text(language.displayName)
-                        .font(.body)
-                    
-                    Spacer()
-                    
-                    if viewModel.selectedLanguage == language {
-                        Image(systemName: "checkmark")
-                            .foregroundColor(Color(hex: "4A90E2"))
-                            .font(.system(size: 16, weight: .semibold))
+            Button {
+                viewModel.showLanguagePicker()
+            } label: {
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("settings.language.title".localized(defaultValue: "Language"))
+                            .font(.body)
+                            .foregroundColor(.primary)
+                        Text(viewModel.selectedLanguageDisplayText)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.secondary)
+                        .font(.system(size: 14, weight: .medium))
                 }
                 .contentShape(Rectangle())
-                .onTapGesture {
-                    viewModel.updateLanguage(language)
-                }
             }
-        } header: {
-            Text(String(localized: "settings.language.title"))
+            .buttonStyle(.plain)
+            .accessibilityLabel("settings.language.title".localized(defaultValue: "Language"))
+            .accessibilityValue(viewModel.selectedLanguageDisplayText)
         } footer: {
-            Text(String(localized: "settings.language.footer"))
+            Text("settings.language.footer".localized(defaultValue: "Change the app's display language. This setting is independent of your device's system language."))
+        }
+    }
+
+    // MARK: - Currency Section
+
+    private var currencySection: some View {
+        Section {
+            Button {
+                viewModel.showCurrencyPicker()
+            } label: {
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("settings.currency.row.label".localized(defaultValue: "Currency"))
+                            .font(.body)
+                            .foregroundColor(.primary)
+                        Text(viewModel.selectedCurrencyDisplayText)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.secondary)
+                        .font(.system(size: 14, weight: .medium))
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("settings.currency.row.accessibility_label".localized(defaultValue: "Currency"))
+            .accessibilityValue(viewModel.selectedCurrencyDisplayText)
+        } header: {
+            Text("settings.currency.title".localized(defaultValue: "Currency"))
+        } footer: {
+            Text("settings.currency.footer".localized(defaultValue: "Select your preferred currency for displaying amounts."))
         }
     }
     
@@ -138,7 +199,7 @@ struct SettingsView: View {
                         .foregroundColor(Color(hex: "4A90E2"))
                         .frame(width: 24)
                     
-                    Text(String(localized: "settings.export.title"))
+                    Text("settings.export.title".localized(defaultValue: "Export Data"))
                         .font(.body)
                         .foregroundColor(.primary)
                     
@@ -157,7 +218,7 @@ struct SettingsView: View {
                         .foregroundColor(Color(hex: "4A90E2"))
                         .frame(width: 24)
 
-                    Text(String(localized: "settings.reset.cumulative.title"))
+                    Text("settings.reset.cumulative.title".localized(defaultValue: "Reset Long-Term Meter"))
                         .font(.body)
                         .foregroundColor(.primary)
 
@@ -172,7 +233,7 @@ struct SettingsView: View {
                         .foregroundColor(.red)
                         .frame(width: 24)
                     
-                    Text(String(localized: "settings.reset.title"))
+                    Text("settings.reset.title".localized(defaultValue: "Reset All Data"))
                         .font(.body)
                         .foregroundColor(.red)
                     
@@ -187,7 +248,7 @@ struct SettingsView: View {
                         .foregroundColor(Color(hex: "4A90E2"))
                         .frame(width: 24)
                     
-                    Text(String(localized: "settings.privacy.title"))
+                    Text("settings.privacy.title".localized(defaultValue: "Privacy Policy"))
                         .font(.body)
                         .foregroundColor(.primary)
                     
@@ -199,7 +260,7 @@ struct SettingsView: View {
                 }
             }
         } header: {
-            Text(String(localized: "settings.data.title"))
+            Text("settings.data.title".localized(defaultValue: "Data & Privacy"))
         }
     }
     
@@ -213,7 +274,7 @@ struct SettingsView: View {
                     .foregroundColor(Color(hex: "4A90E2"))
                     .frame(width: 24)
                 
-                Text(String(localized: "settings.version.title"))
+                Text("settings.version.title".localized(defaultValue: "Version"))
                     .font(.body)
                 
                 Spacer()
@@ -230,7 +291,7 @@ struct SettingsView: View {
                         .foregroundColor(Color(hex: "4A90E2"))
                         .frame(width: 24)
                     
-                    Text(String(localized: "settings.terms.title"))
+                    Text("settings.terms.title".localized(defaultValue: "Terms of Service"))
                         .font(.body)
                         .foregroundColor(.primary)
                     
@@ -249,7 +310,7 @@ struct SettingsView: View {
                         .foregroundColor(Color(hex: "4A90E2"))
                         .frame(width: 24)
                     
-                    Text(String(localized: "settings.contact.title"))
+                    Text("settings.contact.title".localized(defaultValue: "Contact Support"))
                         .font(.body)
                         .foregroundColor(.primary)
                     
@@ -261,7 +322,7 @@ struct SettingsView: View {
                 }
             }
         } header: {
-            Text(String(localized: "settings.about.title"))
+            Text("settings.about.title".localized(defaultValue: "About"))
         }
     }
     
@@ -271,20 +332,20 @@ struct SettingsView: View {
         NavigationView {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Privacy Policy")
+                    Text("settings.privacy.sheet.title".localized(defaultValue: "Privacy Policy"))
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .padding(.bottom, 8)
                     
-                    Text("BudgetMeter is committed to protecting your privacy. This app:")
+                    Text("settings.privacy.sheet.intro".localized(defaultValue: "Your privacy is important to us. Here's how we handle your data:"))
                         .font(.body)
                     
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("• Stores all data locally on your device")
-                        Text("• Uses iCloud for private sync across your devices")
-                        Text("• Does not collect any personal information")
-                        Text("• Does not use third-party analytics")
-                        Text("• Does not share data with external services")
+                        Text("settings.privacy.sheet.bullet.local".localized(defaultValue: "• All data is stored locally on your device"))
+                        Text("settings.privacy.sheet.bullet.icloud".localized(defaultValue: "• Optional iCloud sync for your convenience"))
+                        Text("settings.privacy.sheet.bullet.personal".localized(defaultValue: "• No personal information is collected"))
+                        Text("settings.privacy.sheet.bullet.analytics".localized(defaultValue: "• No analytics or tracking"))
+                        Text("settings.privacy.sheet.bullet.share".localized(defaultValue: "• We never share your data with third parties"))
                     }
                     .font(.body)
                     .padding(.leading, 8)
@@ -293,36 +354,36 @@ struct SettingsView: View {
                 }
                 .padding(16)
             }
-            .navigationTitle("Privacy")
+            .navigationTitle("settings.privacy.sheet.nav_title".localized(defaultValue: "Privacy Policy"))
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button("toolbar.done".localized(defaultValue: "Done")) {
                         viewModel.showingPrivacyPolicy = false
                     }
                 }
             }
         }
     }
-    
+
     private var termsOfServiceView: some View {
         NavigationView {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Terms of Service")
+                    Text("settings.terms.sheet.title".localized(defaultValue: "Terms of Service"))
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .padding(.bottom, 8)
                     
-                    Text("By using BudgetMeter, you agree to these terms:")
+                    Text("settings.terms.sheet.intro".localized(defaultValue: "By using BudgetMeter, you agree to these terms:"))
                         .font(.body)
                     
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("• This app is provided 'as is' without warranty")
-                        Text("• Use at your own risk for financial planning")
-                        Text("• We are not liable for financial decisions")
-                        Text("• Terms may be updated without notice")
+                        Text("settings.terms.sheet.bullet.warranty".localized(defaultValue: "• The app is provided as-is without warranty"))
+                        Text("settings.terms.sheet.bullet.risk".localized(defaultValue: "• You use the app at your own risk"))
+                        Text("settings.terms.sheet.bullet.liability".localized(defaultValue: "• We are not liable for any financial decisions"))
+                        Text("settings.terms.sheet.bullet.update".localized(defaultValue: "• Terms may be updated with app updates"))
                     }
                     .font(.body)
                     .padding(.leading, 8)
@@ -331,19 +392,19 @@ struct SettingsView: View {
                 }
                 .padding(16)
             }
-            .navigationTitle("Terms")
+            .navigationTitle("settings.terms.sheet.nav_title".localized(defaultValue: "Terms of Service"))
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button("toolbar.done".localized(defaultValue: "Done")) {
                         viewModel.showingTermsOfService = false
                     }
                 }
             }
         }
     }
-    
+
     private var dataExportView: some View {
         NavigationView {
             VStack(spacing: 24) {
@@ -351,16 +412,16 @@ struct SettingsView: View {
                     .font(.system(size: 64))
                     .foregroundColor(Color(hex: "4A90E2"))
                 
-                Text("Export Your Data")
+                Text("settings.export.sheet.title".localized(defaultValue: "Export Your Data"))
                     .font(.title2)
                     .fontWeight(.semibold)
                 
-                Text("Your financial data will be exported as a CSV file that you can save or share.")
+                Text("settings.export.sheet.body".localized(defaultValue: "Export all your financial data as a CSV file for backup or analysis."))
                     .font(.body)
                     .multilineTextAlignment(.center)
                     .foregroundColor(.secondary)
                 
-                Button("Export CSV") {
+                Button("settings.export.sheet.button.export".localized(defaultValue: "Export CSV")) {
                     // TODO: Implement CSV export
                 }
                 .buttonStyle(.borderedProminent)
@@ -369,12 +430,12 @@ struct SettingsView: View {
                 Spacer()
             }
             .padding(16)
-            .navigationTitle("Export Data")
+            .navigationTitle("settings.export.sheet.nav_title".localized(defaultValue: "Export Data"))
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button("toolbar.done".localized(defaultValue: "Done")) {
                         viewModel.showingDataExportSheet = false
                     }
                 }

@@ -14,6 +14,7 @@ struct CategoryInputCard: View {
     let category: FinancialCategory
     let accentColor: Color
     let onAmountChange: (Double) -> Void
+    let currencySymbol: String
     
     var focusedField: FocusState<String?>.Binding
     @State private var inputText: String = ""
@@ -68,23 +69,32 @@ struct CategoryInputCard: View {
     private var amountInputView: some View {
         HStack(spacing: 4) {
             // Currency Symbol
-            Text(String(localized: "currency.symbol"))
+            Text(currencySymbol)
                 .font(.caption)
                 .foregroundColor(.secondary)
             
             // Input Field - Apple NumPad with Toolbar Done Button
             TextField(
-                String(localized: "input.placeholder.amount"),
+                "input.placeholder.amount".localized(defaultValue: "Enter amount"),
                 text: $inputText
             )
             .keyboardType(.decimalPad)
             .multilineTextAlignment(.center)
-            .font(.body.weight(.medium))
-            .foregroundColor(.primary)
-            .focused(focusedField, equals: fieldID)
-            .textFieldStyle(PlainTextFieldStyle())
-            .accessibilityLabel("Amount input for \(DataSeedingService.displayName(for: category.uniqueID ?? ""))")
-            .accessibilityValue(inputText.isEmpty ? "No amount entered" : "\(inputText) dollars")
+           .font(.body.weight(.medium))
+           .foregroundColor(.primary)
+           .focused(focusedField, equals: fieldID)
+           .textFieldStyle(PlainTextFieldStyle())
+            .accessibilityLabel(
+                String(
+                    format: "category.input.label".localized(defaultValue: "Amount input for %@"),
+                    DataSeedingService.displayName(for: category.uniqueID ?? "")
+                )
+            )
+            .accessibilityValue(
+                inputText.isEmpty
+                    ? "category.input.value.empty".localized(defaultValue: "No amount entered")
+                    : "\(inputText) \(currencySymbol)"
+            )
             .onChange(of: inputText) { _, newValue in
                 let amount = parseAmount(from: newValue)
                 onAmountChange(amount)
@@ -134,6 +144,7 @@ struct CategoryInputCard: View {
         
         let formatter = NumberFormatter()
         formatter.numberStyle = .none
+        formatter.locale = Locale(identifier: "en_US") // Standardized formatting (1234.56)
         formatter.maximumFractionDigits = 2
         formatter.minimumFractionDigits = 0
         

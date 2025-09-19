@@ -47,6 +47,7 @@ final class HomeViewModel: ObservableObject {
     private var sessionBaseline: Double = 0
     private var cumulativeBaseline: Double = 0
     private var cumulativeStartDate: Date = Date()
+    private var currencyCode: String = CurrencyHelper.defaultCurrencyCode()
     
     // Financial data cache
     private var dailyIncomeTotal: Double = 0
@@ -99,13 +100,8 @@ final class HomeViewModel: ObservableObject {
     
     /// Formats currency for display
     func formatCurrency(_ amount: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        formatter.currencySymbol = String(localized: "currency.symbol")
-        formatter.maximumFractionDigits = 0
-        
-        return formatter.string(from: NSNumber(value: amount)) ?? "$0"
+        let formatter = makeCurrencyFormatter(maxFractionDigits: 0, minFractionDigits: 0)
+        return formatter.string(from: NSNumber(value: amount)) ?? "\(CurrencyHelper.symbol(for: currencyCode))0"
     }
     
     /// Gets color for financial flow
@@ -133,6 +129,13 @@ final class HomeViewModel: ObservableObject {
             self,
             selector: #selector(appWillEnterForeground),
             name: UIApplication.willEnterForegroundNotification,
+            object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(currencyDidChange(_:)),
+            name: .currencyDidChange,
             object: nil
         )
     }
@@ -267,6 +270,8 @@ final class HomeViewModel: ObservableObject {
 
             let settings = try context.fetch(fetchRequest)
             if let appSettings = settings.first {
+                let preferredCode = appSettings.preferredCurrencyCode ?? CurrencyHelper.defaultCurrencyCode()
+                currencyCode = CurrencyHelper.supportedCurrencyCodes.contains(preferredCode) ? preferredCode : CurrencyHelper.defaultCurrencyCode()
                 cumulativeBaseline = appSettings.cumulativeTotal
 
                 if let storedDate = appSettings.cumulativeStartDate {
@@ -277,6 +282,7 @@ final class HomeViewModel: ObservableObject {
                     persistenceService.save()
                 }
             } else {
+                currencyCode = CurrencyHelper.defaultCurrencyCode()
                 cumulativeBaseline = 0
                 cumulativeStartDate = Date()
             }
@@ -284,7 +290,7 @@ final class HomeViewModel: ObservableObject {
             liveValue = sessionBaseline
             isPositive = liveValue >= 0
             formattedLiveValue = formatLiveCurrency(liveValue)
-            sessionDuration = "0:00"
+            sessionDuration = "home.session.duration.reset".localized(defaultValue: "0:00")
 
             updateCumulativeDisplay()
         } catch {
@@ -304,15 +310,16 @@ final class HomeViewModel: ObservableObject {
     }
 
     private func formatCurrencyWithCents(_ amount: Double, absoluteValue: Bool) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        formatter.currencySymbol = String(localized: "currency.symbol")
-        formatter.maximumFractionDigits = 2
-        formatter.minimumFractionDigits = 2
-
+        let formatter = makeCurrencyFormatter(maxFractionDigits: 2, minFractionDigits: 2)
         let value = absoluteValue ? abs(amount) : amount
-        return formatter.string(from: NSNumber(value: value)) ?? "$0.00"
+        return formatter.string(from: NSNumber(value: value)) ?? "\(CurrencyHelper.symbol(for: currencyCode))0.00"
+    }
+
+    private func makeCurrencyFormatter(maxFractionDigits: Int, minFractionDigits: Int) -> NumberFormatter {
+        let formatter = CurrencyHelper.formatter(for: currencyCode)
+        formatter.maximumFractionDigits = maxFractionDigits
+        formatter.minimumFractionDigits = minFractionDigits
+        return formatter
     }
     
     private func formatDuration(_ seconds: TimeInterval) -> String {
@@ -336,6 +343,16 @@ final class HomeViewModel: ObservableObject {
         default: return .secondary
         }
     }
+
+    private func applyCurrency(code: String) {
+        let resolvedCode = CurrencyHelper.supportedCurrencyCodes.contains(code) ? code : CurrencyHelper.defaultCurrencyCode()
+        guard resolvedCode != currencyCode else { return }
+        currencyCode = resolvedCode
+
+        isPositive = liveValue >= 0
+        formattedLiveValue = formatLiveCurrency(liveValue)
+        updateCumulativeDisplay(sessionNet: liveValue - sessionBaseline)
+    }
     
     // MARK: - Notification Handlers
     
@@ -351,6 +368,19 @@ final class HomeViewModel: ObservableObject {
             loadAllData()
             sessionStartTime = Date()
             startTimer()
+        }
+    }
+
+    @objc private func currencyDidChange(_ notification: Notification) {
+        if let code = notification.userInfo?["code"] as? String {
+            applyCurrency(code: code)
+        } else {
+            let context = persistenceService.viewContext
+            let fetchRequest: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
+            if let settings = try? context.fetch(fetchRequest),
+               let storedCode = settings.first?.preferredCurrencyCode {
+                applyCurrency(code: storedCode)
+            }
         }
     }
     

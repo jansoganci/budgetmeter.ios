@@ -250,50 +250,50 @@ struct CalculationEngine {
         totalMonthlyExpense: Double
     ) -> FinancialHealthScore {
         if totalMonthlyExpense == 0 {
-            return FinancialHealthScore(
+            return financialHealthScore(
                 score: 10,
-                text: "Mükemmel",
-                color: "green",
-                description: "Hiç gideriniz yok!"
+                textKey: "home.health.status.perfect",
+                descriptionKey: "home.health.desc.no_expenses",
+                color: "green"
             )
         }
-        
+
         let ratio = totalMonthlyIncome / totalMonthlyExpense
-        
+
         if ratio >= 2 {
-            return FinancialHealthScore(
+            return financialHealthScore(
                 score: 10,
-                text: "Mükemmel",
-                color: "green",
-                description: "Geliriniz giderinizin 2 katından fazla"
+                textKey: "home.health.status.perfect",
+                descriptionKey: "home.health.desc.income_double",
+                color: "green"
             )
         } else if ratio >= 1.5 {
-            return FinancialHealthScore(
+            return financialHealthScore(
                 score: 8,
-                text: "İyi",
-                color: "blue",
-                description: "Geliriniz giderinizin %50 fazlası"
+                textKey: "home.health.status.good",
+                descriptionKey: "home.health.desc.income_50",
+                color: "blue"
             )
         } else if ratio >= 1.2 {
-            return FinancialHealthScore(
+            return financialHealthScore(
                 score: 6,
-                text: "Orta",
-                color: "yellow",
-                description: "Geliriniz giderinizin %20 fazlası"
+                textKey: "home.health.status.fair",
+                descriptionKey: "home.health.desc.income_20",
+                color: "yellow"
             )
         } else if ratio >= 1 {
-            return FinancialHealthScore(
+            return financialHealthScore(
                 score: 4,
-                text: "Zayıf",
-                color: "orange",
-                description: "Gelir ve gideriniz eşit"
+                textKey: "home.health.status.poor",
+                descriptionKey: "home.health.desc.income_equal",
+                color: "orange"
             )
         } else {
-            return FinancialHealthScore(
+            return financialHealthScore(
                 score: 2,
-                text: "Kötü",
-                color: "red",
-                description: "Gideriniz gelirinizden fazla"
+                textKey: "home.health.status.bad",
+                descriptionKey: "home.health.desc.expense_higher",
+                color: "red"
             )
         }
     }
@@ -324,7 +324,10 @@ struct CalculationEngine {
                 weeks: 0,
                 months: 0,
                 years: 0,
-                message: "Net akışınız negatif! Hedefe ulaşamazsınız."
+                message: LocalizationManager.shared.localizedString(
+                    for: "home.target.message.negative",
+                    defaultValue: "Your net flow is negative. Increase income or reduce expenses to reach the target."
+                )
             )
         }
         
@@ -341,6 +344,21 @@ struct CalculationEngine {
             months: (months * 100).rounded() / 100,
             years: (years * 100).rounded() / 100,
             message: nil
+        )
+    }
+
+    private static func financialHealthScore(
+        score: Int,
+        textKey: String,
+        descriptionKey: String,
+        color: String
+    ) -> FinancialHealthScore {
+        let manager = LocalizationManager.shared
+        return FinancialHealthScore(
+            score: score,
+            text: manager.localizedString(for: textKey, defaultValue: textKey),
+            color: color,
+            description: manager.localizedString(for: descriptionKey, defaultValue: descriptionKey)
         )
     }
     

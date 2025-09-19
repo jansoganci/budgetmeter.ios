@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct ContentView: View {
+    @ObservedObject private var localizationManager = LocalizationManager.shared
+    
     var body: some View {
         // Phase 4: Steve Jobs "focus and simplify" - Home-first design
         // 4 tabs: Home (dashboard) + Income + Expenses + Settings
@@ -15,27 +17,29 @@ struct ContentView: View {
             HomeView()
                 .tabItem {
                     Image(systemName: "house")
-                    Text(String(localized: "tab.home.title"))
+                    Text("tab.home.title".localized(defaultValue: "Home"))
                 }
             
             IncomeView()
                 .tabItem {
                     Image(systemName: "plus.circle")
-                    Text(String(localized: "tab.income.title"))
+                    Text("tab.income.title".localized(defaultValue: "Income"))
                 }
             
             ExpenseView()
                 .tabItem {
                     Image(systemName: "minus.circle")
-                    Text(String(localized: "tab.expenses.title"))
+                    Text("tab.expenses.title".localized(defaultValue: "Expenses"))
                 }
             
             SettingsView()
                 .tabItem {
                     Image(systemName: "gearshape")
-                    Text(String(localized: "tab.settings.title"))
+                    Text("tab.settings.title".localized(defaultValue: "Settings"))
                 }
         }
+        .environment(\.locale, localizationManager.currentLocale)
+        .id(localizationManager.currentLanguage)
         .accentColor(Color(hex: "4A90E2")) // Brand primary color from design rulebook
     }
 }
