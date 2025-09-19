@@ -39,7 +39,6 @@ struct ContentView: View {
                 }
         }
         .environment(\.locale, localizationManager.currentLocale)
-        .id(localizationManager.currentLanguage)
         .accentColor(Color(hex: "4A90E2")) // Brand primary color from design rulebook
     }
 }

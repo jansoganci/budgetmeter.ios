@@ -31,36 +31,35 @@ struct LanguagePickerView: View {
 
     @ViewBuilder
     private func languageRow(for language: SettingsViewModel.LanguageMode) -> some View {
-        Button {
-            onSelect(language)
-            dismiss()
-        } label: {
-            HStack(spacing: 12) {
-                Text(language.flag)
-                    .font(.title2)
-                    .frame(width: 32, alignment: .leading)
+        HStack(spacing: 12) {
+            Text(language.flag)
+                .font(.title2)
+                .frame(width: 32, alignment: .leading)
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(language.displayName)
-                        .font(.body)
-                        .foregroundColor(.primary)
-                    Text(language.rawValue.uppercased())
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
+            VStack(alignment: .leading, spacing: 2) {
+                Text(language.displayName)
+                    .font(.body)
+                    .foregroundColor(.primary)
+                Text(language.rawValue.uppercased())
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
 
-                Spacer()
+            Spacer()
 
-                if selectedLanguage == language {
-                    Image(systemName: "checkmark")
-                        .foregroundColor(Color(hex: "4A90E2"))
-                        .font(.system(size: 16, weight: .semibold))
-                        .accessibilityHidden(true)
-                }
+            if selectedLanguage == language {
+                Image(systemName: "checkmark")
+                    .foregroundColor(Color(hex: "4A90E2"))
+                    .font(.system(size: 16, weight: .semibold))
+                    .accessibilityHidden(true)
             }
         }
-        .buttonStyle(.plain)
         .contentShape(Rectangle())
+        .onTapGesture {
+            onSelect(language)
+            dismiss()
+        }
+        .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilityLabel(for: language))
         .accessibilityValue(selectedLanguage == language ? "settings.language.row.accessibility_selected".localized(defaultValue: "Selected") : "")
     }

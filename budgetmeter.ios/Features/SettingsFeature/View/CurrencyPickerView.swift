@@ -42,36 +42,35 @@ struct CurrencyPickerView: View {
 
     @ViewBuilder
     private func currencyRow(for currency: CurrencyOption) -> some View {
-        Button {
-            onSelect(currency)
-            dismiss()
-        } label: {
-            HStack(spacing: 12) {
-                Text(currency.symbol)
-                    .font(.title3)
-                    .frame(width: 32, alignment: .leading)
+        HStack(spacing: 12) {
+            Text(currency.symbol)
+                .font(.title3)
+                .frame(width: 32, alignment: .leading)
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(currency.localizedName)
-                        .font(.body)
-                        .foregroundColor(.primary)
-                    Text(currency.code)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
+            VStack(alignment: .leading, spacing: 2) {
+                Text(currency.localizedName)
+                    .font(.body)
+                    .foregroundColor(.primary)
+                Text(currency.code)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
 
-                Spacer()
+            Spacer()
 
-                if selectedCurrencyCode == currency.code {
-                    Image(systemName: "checkmark")
-                        .foregroundColor(Color(hex: "4A90E2"))
-                        .font(.system(size: 16, weight: .semibold))
-                        .accessibilityHidden(true)
-                }
+            if selectedCurrencyCode == currency.code {
+                Image(systemName: "checkmark")
+                    .foregroundColor(Color(hex: "4A90E2"))
+                    .font(.system(size: 16, weight: .semibold))
+                    .accessibilityHidden(true)
             }
         }
-        .buttonStyle(.plain)
         .contentShape(Rectangle())
+        .onTapGesture {
+            onSelect(currency)
+            dismiss()
+        }
+        .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilityLabel(for: currency))
         .accessibilityValue(selectedCurrencyCode == currency.code ? "settings.currency.row.accessibility_selected".localized(defaultValue: "Selected") : "")
     }

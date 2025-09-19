@@ -51,6 +51,7 @@ struct ExpenseView: View {
                 }
             }
         }
+        .environment(\.locale, localizationManager.currentLocale)
         .onAppear {
             viewModel.refresh()
         }

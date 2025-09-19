@@ -51,7 +51,6 @@ final class IncomeViewModel: ObservableObject {
     init(persistenceService: PersistenceService = .shared) {
         self.persistenceService = persistenceService
         setupCurrencyObserver()
-        setupLanguageObserver()
         loadCurrency()
         loadIncomeCategories()
     }
@@ -203,14 +202,7 @@ private extension IncomeViewModel {
         )
     }
     
-    func setupLanguageObserver() {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(languageDidChange(_:)),
-            name: .languageDidChange,
-            object: nil
-        )
-    }
+
 
     func loadCurrency() {
         let context = persistenceService.viewContext
@@ -238,10 +230,5 @@ private extension IncomeViewModel {
         }
     }
     
-    @objc func languageDidChange(_ notification: Notification) {
-        // Force UI refresh to update localized strings
-        DispatchQueue.main.async {
-            self.objectWillChange.send()
-        }
-    }
+
 }

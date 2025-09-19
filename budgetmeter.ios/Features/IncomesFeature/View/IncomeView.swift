@@ -51,6 +51,7 @@ struct IncomeView: View {
                 }
             }
         }
+        .environment(\.locale, localizationManager.currentLocale)
         .onAppear {
             viewModel.refresh()
         }
