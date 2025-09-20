@@ -7,7 +7,25 @@
     "%lld" : {
 
     },
+    "• Access: View all your data within the app\n• Delete: Reset all data via Settings\n• Control: Disable iCloud sync anytime" : {
+
+    },
+    "• BudgetMeter is for informational purposes only\n• This app does not provide professional financial advice\n• We are not liable for financial decisions made using this app\n• Calculations may contain errors - verify important figures" : {
+
+    },
+    "• Financial data (income, expenses, categories) - stored locally on your device\n• App preferences (currency, language) - stored locally\n• iCloud sync data (when enabled) - stored in your personal iCloud account" : {
+
+    },
+    "• Local: Core Data database on your device\n• Cloud: Your private iCloud account (optional)\n• No external servers or third-party databases" : {
+
+    },
+    "• To provide financial tracking functionality\n• To sync across your devices via iCloud (optional)\n• All processing happens locally on your device" : {
+
+    },
     "+" : {
+
+    },
+    "ACCEPTANCE" : {
 
     },
     "alert.error.title" : {
@@ -139,6 +157,18 @@
           }
         }
       }
+    },
+    "BudgetMeter app and all content are owned by Umurcan Soganci. All rights reserved." : {
+
+    },
+    "BudgetMeter Privacy Policy" : {
+
+    },
+    "BudgetMeter Terms of Service" : {
+
+    },
+    "By downloading and using BudgetMeter, you agree to these terms of service." : {
+
     },
     "category.affiliate.name" : {
       "extractionState" : "manual",
@@ -4495,6 +4525,9 @@
         }
       }
     },
+    "CONTACT" : {
+
+    },
     "currency.symbol" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4559,6 +4592,18 @@
           }
         }
       }
+    },
+    "DATA CONTROLLER" : {
+
+    },
+    "DATA SHARING" : {
+
+    },
+    "DATA STORAGE" : {
+
+    },
+    "DATA WE COLLECT" : {
+
     },
     "Debug" : {
 
@@ -5212,6 +5257,12 @@
           }
         }
       }
+    },
+    "FINANCIAL DISCLAIMER" : {
+
+    },
+    "For privacy questions: umursoganci@gmail.com" : {
+
     },
     "frequency.daily" : {
       "extractionState" : "manual",
@@ -7553,6 +7604,9 @@
         }
       }
     },
+    "HOW WE USE DATA" : {
+
+    },
     "income.error.load" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7747,6 +7801,24 @@
           }
         }
       }
+    },
+    "INTELLECTUAL PROPERTY" : {
+
+    },
+    "Last Updated: September 2025" : {
+
+    },
+    "LICENSE" : {
+
+    },
+    "LIMITATION OF LIABILITY" : {
+
+    },
+    "Our maximum liability is limited to the amount you paid for the app (currently free)." : {
+
+    },
+    "Questions about these terms: umursoganci@gmail.com" : {
+
     },
     "settings.about.title" : {
       "extractionState" : "manual",
@@ -11524,6 +11596,9 @@
     "Test Data Seeding" : {
 
     },
+    "The app is provided 'as-is' without warranties of any kind, express or implied." : {
+
+    },
     "toolbar.done" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11588,6 +11663,21 @@
           }
         }
       }
+    },
+    "Umurcan Soganci\nEmail: umursoganci@gmail.com" : {
+
+    },
+    "WARRANTY DISCLAIMER" : {
+
+    },
+    "We do not share, sell, or transmit your personal data to any third parties." : {
+
+    },
+    "We grant you a personal, non-commercial license to use BudgetMeter for managing your personal finances." : {
+
+    },
+    "YOUR RIGHTS" : {
+
     }
   },
   "version" : "1.0"

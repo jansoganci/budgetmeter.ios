@@ -53,7 +53,7 @@ final class HomeViewModel: ObservableObject {
     private var sessionBaseline: Double = 0
     private var cumulativeBaseline: Double = 0
     private var cumulativeStartDate: Date = Date()
-    private var currencyCode: String = CurrencyHelper.defaultCurrencyCode()
+    var currencyCode: String = CurrencyHelper.defaultCurrencyCode()
     
     // Financial data cache
     private var dailyIncomeTotal: Double = 0

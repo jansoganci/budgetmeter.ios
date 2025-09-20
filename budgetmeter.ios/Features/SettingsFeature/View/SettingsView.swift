@@ -63,9 +63,6 @@ struct SettingsView: View {
         .sheet(isPresented: $viewModel.showingTermsOfService) {
             termsOfServiceView
         }
-        .sheet(isPresented: $viewModel.showingDataExportSheet) {
-            dataExportView
-        }
         .alert(
             "settings.reset.cumulative.title".localized(defaultValue: "Reset Long-Term Meter"),
             isPresented: $viewModel.showingResetCumulativeAlert
@@ -192,25 +189,6 @@ struct SettingsView: View {
     
     private var dataPrivacySection: some View {
         Section {
-            // Export Data
-            Button(action: viewModel.exportData) {
-                HStack {
-                    Image(systemName: "square.and.arrow.up")
-                        .foregroundColor(Color(hex: "4A90E2"))
-                        .frame(width: 24)
-                    
-                    Text("settings.export.title".localized(defaultValue: "Export Data"))
-                        .font(.body)
-                        .foregroundColor(.primary)
-                    
-                    Spacer()
-                    
-                    Image(systemName: "chevron.right")
-                        .foregroundColor(.secondary)
-                        .font(.system(size: 14, weight: .medium))
-                }
-            }
-
             // Reset Long-Term Meter
             Button(action: viewModel.showResetCumulativeConfirmation) {
                 HStack {
@@ -304,7 +282,11 @@ struct SettingsView: View {
             }
             
             // Contact Support
-            Button(action: {}) {
+            Button(action: {
+                if let url = URL(string: "mailto:umursoganci@gmail.com?subject=BudgetMeter%20Support&body=Please%20describe%20your%20issue:%0A%0ADevice:%20\(UIDevice.current.model)%0AiOS:%20\(UIDevice.current.systemVersion)%0AApp%20Version:%201.0") {
+                    UIApplication.shared.open(url)
+                }
+            }) {
                 HStack {
                     Image(systemName: "envelope")
                         .foregroundColor(Color(hex: "4A90E2"))
@@ -332,23 +314,65 @@ struct SettingsView: View {
         NavigationView {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("settings.privacy.sheet.title".localized(defaultValue: "Privacy Policy"))
+                    Text("BudgetMeter Privacy Policy")
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .padding(.bottom, 8)
                     
-                    Text("settings.privacy.sheet.intro".localized(defaultValue: "Your privacy is important to us. Here's how we handle your data:"))
-                        .font(.body)
+                    Text("Last Updated: September 2025")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.bottom, 8)
                     
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("settings.privacy.sheet.bullet.local".localized(defaultValue: "• All data is stored locally on your device"))
-                        Text("settings.privacy.sheet.bullet.icloud".localized(defaultValue: "• Optional iCloud sync for your convenience"))
-                        Text("settings.privacy.sheet.bullet.personal".localized(defaultValue: "• No personal information is collected"))
-                        Text("settings.privacy.sheet.bullet.analytics".localized(defaultValue: "• No analytics or tracking"))
-                        Text("settings.privacy.sheet.bullet.share".localized(defaultValue: "• We never share your data with third parties"))
+                    Group {
+                        Text("DATA CONTROLLER")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                        Text("Umurcan Soganci\nEmail: umursoganci@gmail.com")
+                            .font(.body)
+                        
+                        Text("DATA WE COLLECT")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .padding(.top, 8)
+                        Text("• Financial data (income, expenses, categories) - stored locally on your device\n• App preferences (currency, language) - stored locally\n• iCloud sync data (when enabled) - stored in your personal iCloud account")
+                            .font(.body)
+                        
+                        Text("HOW WE USE DATA")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .padding(.top, 8)
+                        Text("• To provide financial tracking functionality\n• To sync across your devices via iCloud (optional)\n• All processing happens locally on your device")
+                            .font(.body)
+                        
+                        Text("DATA SHARING")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .padding(.top, 8)
+                        Text("We do not share, sell, or transmit your personal data to any third parties.")
+                            .font(.body)
+                        
+                        Text("DATA STORAGE")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .padding(.top, 8)
+                        Text("• Local: Core Data database on your device\n• Cloud: Your private iCloud account (optional)\n• No external servers or third-party databases")
+                            .font(.body)
+                        
+                        Text("YOUR RIGHTS")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .padding(.top, 8)
+                        Text("• Access: View all your data within the app\n• Delete: Reset all data via Settings\n• Control: Disable iCloud sync anytime")
+                            .font(.body)
+                        
+                        Text("CONTACT")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .padding(.top, 8)
+                        Text("For privacy questions: umursoganci@gmail.com")
+                            .font(.body)
                     }
-                    .font(.body)
-                    .padding(.leading, 8)
                     
                     Spacer()
                 }
@@ -371,22 +395,65 @@ struct SettingsView: View {
         NavigationView {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("settings.terms.sheet.title".localized(defaultValue: "Terms of Service"))
+                    Text("BudgetMeter Terms of Service")
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .padding(.bottom, 8)
                     
-                    Text("settings.terms.sheet.intro".localized(defaultValue: "By using BudgetMeter, you agree to these terms:"))
-                        .font(.body)
+                    Text("Last Updated: September 2025")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.bottom, 8)
                     
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("settings.terms.sheet.bullet.warranty".localized(defaultValue: "• The app is provided as-is without warranty"))
-                        Text("settings.terms.sheet.bullet.risk".localized(defaultValue: "• You use the app at your own risk"))
-                        Text("settings.terms.sheet.bullet.liability".localized(defaultValue: "• We are not liable for any financial decisions"))
-                        Text("settings.terms.sheet.bullet.update".localized(defaultValue: "• Terms may be updated with app updates"))
+                    Group {
+                        Text("ACCEPTANCE")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                        Text("By downloading and using BudgetMeter, you agree to these terms of service.")
+                            .font(.body)
+                        
+                        Text("LICENSE")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .padding(.top, 8)
+                        Text("We grant you a personal, non-commercial license to use BudgetMeter for managing your personal finances.")
+                            .font(.body)
+                        
+                        Text("FINANCIAL DISCLAIMER")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .padding(.top, 8)
+                        Text("• BudgetMeter is for informational purposes only\n• This app does not provide professional financial advice\n• We are not liable for financial decisions made using this app\n• Calculations may contain errors - verify important figures")
+                            .font(.body)
+                        
+                        Text("INTELLECTUAL PROPERTY")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .padding(.top, 8)
+                        Text("BudgetMeter app and all content are owned by Umurcan Soganci. All rights reserved.")
+                            .font(.body)
+                        
+                        Text("WARRANTY DISCLAIMER")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .padding(.top, 8)
+                        Text("The app is provided 'as-is' without warranties of any kind, express or implied.")
+                            .font(.body)
+                        
+                        Text("LIMITATION OF LIABILITY")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .padding(.top, 8)
+                        Text("Our maximum liability is limited to the amount you paid for the app (currently free).")
+                            .font(.body)
+                        
+                        Text("CONTACT")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .padding(.top, 8)
+                        Text("Questions about these terms: umursoganci@gmail.com")
+                            .font(.body)
                     }
-                    .font(.body)
-                    .padding(.leading, 8)
                     
                     Spacer()
                 }
@@ -405,43 +472,6 @@ struct SettingsView: View {
         }
     }
 
-    private var dataExportView: some View {
-        NavigationView {
-            VStack(spacing: 24) {
-                Image(systemName: "square.and.arrow.up.circle")
-                    .font(.system(size: 64))
-                    .foregroundColor(Color(hex: "4A90E2"))
-                
-                Text("settings.export.sheet.title".localized(defaultValue: "Export Your Data"))
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                
-                Text("settings.export.sheet.body".localized(defaultValue: "Export all your financial data as a CSV file for backup or analysis."))
-                    .font(.body)
-                    .multilineTextAlignment(.center)
-                    .foregroundColor(.secondary)
-                
-                Button("settings.export.sheet.button.export".localized(defaultValue: "Export CSV")) {
-                    // TODO: Implement CSV export
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(Color(hex: "4A90E2"))
-                
-                Spacer()
-            }
-            .padding(16)
-            .navigationTitle("settings.export.sheet.nav_title".localized(defaultValue: "Export Data"))
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationBarBackButtonHidden(true)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("toolbar.done".localized(defaultValue: "Done")) {
-                        viewModel.showingDataExportSheet = false
-                    }
-                }
-            }
-        }
-    }
     
     // MARK: - Helper Methods
     

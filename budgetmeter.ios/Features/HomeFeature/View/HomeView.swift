@@ -50,7 +50,7 @@ struct HomeView: View {
         .sheet(isPresented: $viewModel.showingSavingsGoalSheet) {
             SavingsGoalInputView(
                 currentGoal: viewModel.savingsGoal,
-                currencySymbol: CurrencyHelper.symbol(for: CurrencyHelper.defaultCurrencyCode()),
+                currencySymbol: CurrencyHelper.symbol(for: viewModel.currencyCode),
                 onSave: { amount in
                     viewModel.updateSavingsGoal(amount)
                 }

@@ -19,7 +19,6 @@ final class SettingsViewModel: ObservableObject {
     @Published var selectedLanguage: LanguageMode = .english
     @Published var showingPrivacyPolicy = false
     @Published var showingTermsOfService = false
-    @Published var showingDataExportSheet = false
     @Published var showingResetDataAlert = false
     @Published var showingResetCumulativeAlert = false
     @Published var selectedCurrencyCode: String = CurrencyHelper.defaultCurrencyCode()
@@ -145,10 +144,6 @@ final class SettingsViewModel: ObservableObject {
         showingTermsOfService = true
     }
     
-    /// Initiates data export process
-    func exportData() {
-        showingDataExportSheet = true
-    }
 
     /// Shows reset data confirmation
     func showResetDataConfirmation() {
