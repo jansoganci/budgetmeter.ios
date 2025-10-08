@@ -7,12 +7,38 @@
         <attribute name="lastBackgroundedTimestamp" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="lastMeterValue" optional="YES" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="savingsGoalAmount" optional="YES" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="isPremiumUser" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="premiumPurchaseDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="isBiometricEnabled" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="selectedTheme" optional="YES" attributeType="String"/>
+        <attribute name="customAppIcon" optional="YES" attributeType="String"/>
+        <attribute name="lastExportDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
     </entity>
     <entity name="FinancialCategory" representedClassName="FinancialCategory" syncable="YES" codeGenerationType="class">
         <attribute name="amount" optional="YES" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="customColorHex" optional="YES" attributeType="String"/>
+        <attribute name="customIconName" optional="YES" attributeType="String"/>
+        <attribute name="customName" optional="YES" attributeType="String"/>
         <attribute name="frequency" optional="YES" attributeType="String"/>
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isCustom" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="type" optional="YES" attributeType="String"/>
         <attribute name="uniqueID" optional="YES" attributeType="String"/>
+    </entity>
+    <entity name="RecurringTransaction" representedClassName="RecurringTransaction" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+        <attribute name="amount" optional="YES" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="categoryName" optional="YES" attributeType="String"/>
+        <attribute name="categoryType" optional="YES" attributeType="String"/>
+        <attribute name="frequency" optional="YES" attributeType="String"/>
+        <attribute name="startDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="endDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="nextDueDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="isActive" optional="YES" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="notes" optional="YES" attributeType="String"/>
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="lastProcessedDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
     </entity>
 </model>

@@ -1,16 +1,44 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "" : {
+
+    },
     "-" : {
 
     },
+    "%@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@"
+          }
+        }
+      }
+    },
     "%lld" : {
+
+    },
+    "%lld%%" : {
+
+    },
+    "• %@" : {
 
     },
     "• Access: View all your data within the app\n• Delete: Reset all data via Settings\n• Control: Disable iCloud sync anytime" : {
 
     },
+    "• App settings and preferences" : {
+
+    },
     "• BudgetMeter is for informational purposes only\n• This app does not provide professional financial advice\n• We are not liable for financial decisions made using this app\n• Calculations may contain errors - verify important figures" : {
+
+    },
+    "• Custom categories" : {
+
+    },
+    "• Financial categories and amounts" : {
 
     },
     "• Financial data (income, expenses, categories) - stored locally on your device\n• App preferences (currency, language) - stored locally\n• iCloud sync data (when enabled) - stored in your personal iCloud account" : {
@@ -19,13 +47,37 @@
     "• Local: Core Data database on your device\n• Cloud: Your private iCloud account (optional)\n• No external servers or third-party databases" : {
 
     },
+    "• Recurring transactions" : {
+
+    },
     "• To provide financial tracking functionality\n• To sync across your devices via iCloud (optional)\n• All processing happens locally on your device" : {
 
     },
     "+" : {
 
     },
+    "$" : {
+
+    },
+    "0.00" : {
+
+    },
     "ACCEPTANCE" : {
+
+    },
+    "Add %@ Category" : {
+
+    },
+    "Add BudgetMeter widgets to your Home Screen and Lock Screen to quickly view your financial data." : {
+
+    },
+    "Add Card" : {
+
+    },
+    "Add Custom Category Cards" : {
+
+    },
+    "Add Widget" : {
 
     },
     "alert.error.title" : {
@@ -158,6 +210,12 @@
         }
       }
     },
+    "Amount" : {
+
+    },
+    "Apply Theme" : {
+
+    },
     "BudgetMeter app and all content are owned by Umurcan Soganci. All rights reserved." : {
 
     },
@@ -168,6 +226,18 @@
 
     },
     "By downloading and using BudgetMeter, you agree to these terms of service." : {
+
+    },
+    "Cancel" : {
+
+    },
+    "Category" : {
+
+    },
+    "Category Details" : {
+
+    },
+    "Category Name" : {
 
     },
     "category.affiliate.name" : {
@@ -4525,6 +4595,15 @@
         }
       }
     },
+    "Choose from beautiful color themes and custom app icons to personalize your BudgetMeter experience." : {
+
+    },
+    "Choose Icon" : {
+
+    },
+    "Clear Test Data" : {
+
+    },
     "CONTACT" : {
 
     },
@@ -4593,6 +4672,12 @@
         }
       }
     },
+    "Custom Category Flow Test" : {
+
+    },
+    "Custom Category Test" : {
+
+    },
     "DATA CONTROLLER" : {
 
     },
@@ -4603,6 +4688,9 @@
 
     },
     "DATA WE COLLECT" : {
+
+    },
+    "Date" : {
 
     },
     "Debug" : {
@@ -4868,6 +4956,50 @@
         }
       }
     },
+    "debug.premium.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toggle premium features for testing"
+          }
+        }
+      }
+    },
+    "debug.premium.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Premium Mode"
+          }
+        }
+      }
+    },
+    "debug.section.footer" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This section is only visible in debug builds"
+          }
+        }
+      }
+    },
+    "debug.section.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Debug"
+          }
+        }
+      }
+    },
     "debug.title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5128,6 +5260,9 @@
         }
       }
     },
+    "Expenses" : {
+
+    },
     "expenses.error.load" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5259,6 +5394,9 @@
       }
     },
     "FINANCIAL DISCLAIMER" : {
+
+    },
+    "Flow Test" : {
 
     },
     "For privacy questions: umursoganci@gmail.com" : {
@@ -5458,6 +5596,9 @@
           }
         }
       }
+    },
+    "Health Score" : {
+
     },
     "home.cumulative.label" : {
       "extractionState" : "manual",
@@ -7607,6 +7748,9 @@
     "HOW WE USE DATA" : {
 
     },
+    "Income" : {
+
+    },
     "income.error.load" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7802,7 +7946,263 @@
         }
       }
     },
+    "insights.chart.health_trends" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Financial Health"
+          }
+        }
+      }
+    },
+    "insights.chart.health_trends.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your financial wellness score"
+          }
+        }
+      }
+    },
+    "insights.chart.monthly_trends" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monthly Trends"
+          }
+        }
+      }
+    },
+    "insights.chart.monthly_trends.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Income vs Expenses over time"
+          }
+        }
+      }
+    },
+    "insights.chart.spending_patterns" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spending Patterns"
+          }
+        }
+      }
+    },
+    "insights.chart.spending_patterns.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daily spending trends"
+          }
+        }
+      }
+    },
+    "insights.chart.top_categories" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Spending Categories"
+          }
+        }
+      }
+    },
+    "insights.chart.top_categories.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where your money goes"
+          }
+        }
+      }
+    },
+    "insights.charts.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Charts & Analytics"
+          }
+        }
+      }
+    },
+    "insights.insight.monthly_expenses" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monthly Expenses"
+          }
+        }
+      }
+    },
+    "insights.insight.monthly_income" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monthly Income"
+          }
+        }
+      }
+    },
+    "insights.insight.top_category" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top Spending Category"
+          }
+        }
+      }
+    },
+    "insights.nav_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insights"
+          }
+        }
+      }
+    },
+    "insights.quick_insights.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quick Insights"
+          }
+        }
+      }
+    },
+    "insights.summary.daily_avg" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daily Avg"
+          }
+        }
+      }
+    },
+    "insights.summary.net_flow" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Net Flow"
+          }
+        }
+      }
+    },
+    "insights.summary.savings_rate" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Savings Rate"
+          }
+        }
+      }
+    },
+    "insights.summary.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Financial Summary"
+          }
+        }
+      }
+    },
+    "insights.time_range.1_year" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last Year"
+          }
+        }
+      }
+    },
+    "insights.time_range.3_months" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last 3 Months"
+          }
+        }
+      }
+    },
+    "insights.time_range.6_months" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last 6 Months"
+          }
+        }
+      }
+    },
+    "insights.time_range.all_time" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All Time"
+          }
+        }
+      }
+    },
+    "insights.time_range.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Time Range"
+          }
+        }
+      }
+    },
     "INTELLECTUAL PROPERTY" : {
+
+    },
+    "Invalid Category" : {
 
     },
     "Last Updated: September 2025" : {
@@ -7814,11 +8214,305 @@
     "LIMITATION OF LIABILITY" : {
 
     },
+    "Manual Tests" : {
+
+    },
+    "Month" : {
+
+    },
+    "OK" : {
+
+    },
     "Our maximum liability is limited to the amount you paid for the app (currently free)." : {
+
+    },
+    "Premium" : {
+
+    },
+    "Premium Status: %@" : {
+
+    },
+    "Premium Themes" : {
+
+    },
+    "Preview" : {
 
     },
     "Questions about these terms: umursoganci@gmail.com" : {
 
+    },
+    "Run All Tests" : {
+
+    },
+    "Running Tests..." : {
+
+    },
+    "Save" : {
+
+    },
+    "security.auth.button" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Authenticate"
+          }
+        }
+      }
+    },
+    "security.auth.error.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Authentication failed. Please try again."
+          }
+        }
+      }
+    },
+    "security.auth.error.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Authentication Error"
+          }
+        }
+      }
+    },
+    "security.auth.fallback" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Having trouble?"
+          }
+        }
+      }
+    },
+    "security.auth.passcode" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use Passcode"
+          }
+        }
+      }
+    },
+    "security.auth.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use %@ to access your financial data"
+          }
+        }
+      }
+    },
+    "security.auth.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Secure Access"
+          }
+        }
+      }
+    },
+    "security.settings.alert.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biometric Authentication"
+          }
+        }
+      }
+    },
+    "security.settings.biometric.footer" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When enabled, you'll need to authenticate with %@ to access your financial data."
+          }
+        }
+      }
+    },
+    "security.settings.biometric.header" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Security"
+          }
+        }
+      }
+    },
+    "security.settings.biometric.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protect your financial data with Face ID or Touch ID"
+          }
+        }
+      }
+    },
+    "security.settings.biometric.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biometric Authentication"
+          }
+        }
+      }
+    },
+    "security.settings.biometric.unavailable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biometric authentication is not available on this device."
+          }
+        }
+      }
+    },
+    "security.settings.enable.error" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Failed to enable biometric authentication"
+          }
+        }
+      }
+    },
+    "security.settings.nav_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Security"
+          }
+        }
+      }
+    },
+    "security.settings.status.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your financial data is protected"
+          }
+        }
+      }
+    },
+    "security.settings.status.enabled" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biometric Lock Enabled"
+          }
+        }
+      }
+    },
+    "security.settings.status.header" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Status"
+          }
+        }
+      }
+    },
+    "security.settings.unavailable.header" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Why is this unavailable?"
+          }
+        }
+      }
+    },
+    "security.settings.unavailable.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biometric authentication is not available on this device. This could be because:"
+          }
+        }
+      }
+    },
+    "security.settings.unavailable.reason1" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Face ID or Touch ID is not set up"
+          }
+        }
+      }
+    },
+    "security.settings.unavailable.reason2" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Device doesn't support biometric authentication"
+          }
+        }
+      }
+    },
+    "security.settings.unavailable.reason3" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biometric authentication is disabled in Settings"
+          }
+        }
+      }
+    },
+    "security.settings.unavailable.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not Available"
+          }
+        }
+      }
     },
     "settings.about.title" : {
       "extractionState" : "manual",
@@ -11333,6 +12027,9 @@
     "Show Income View" : {
 
     },
+    "Spending" : {
+
+    },
     "tab.expenses.title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11528,6 +12225,89 @@
         }
       }
     },
+    "tab.insights.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الرؤى"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einblicke"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insights"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perspectivas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aperçus"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Approfondimenti"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インサイト"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "인사이트"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insights"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Аналитика"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İçgörüler"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "洞察"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "洞察"
+          }
+        }
+      }
+    },
     "tab.settings.title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11593,10 +12373,40 @@
         }
       }
     },
+    "Test Category Validation" : {
+
+    },
     "Test Data Seeding" : {
 
     },
+    "Test Expense Category Modal" : {
+
+    },
+    "Test Income Category Modal" : {
+
+    },
+    "Test Migration Service" : {
+
+    },
+    "Test Modals" : {
+
+    },
+    "Test Premium Status Toggle" : {
+
+    },
+    "Test Results" : {
+
+    },
     "The app is provided 'as-is' without warranties of any kind, express or implied." : {
+
+    },
+    "Themes" : {
+
+    },
+    "Time Range" : {
+
+    },
+    "Toggle Premium (Debug)" : {
 
     },
     "toolbar.done" : {
@@ -11667,6 +12477,9 @@
     "Umurcan Soganci\nEmail: umursoganci@gmail.com" : {
 
     },
+    "Unlock" : {
+
+    },
     "WARRANTY DISCLAIMER" : {
 
     },
@@ -11674,6 +12487,12 @@
 
     },
     "We grant you a personal, non-commercial license to use BudgetMeter for managing your personal finances." : {
+
+    },
+    "Widgets" : {
+
+    },
+    "Widgets Setup" : {
 
     },
     "YOUR RIGHTS" : {

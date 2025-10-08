@@ -27,13 +27,13 @@ struct CategoryInputCard: View {
     var body: some View {
         VStack(spacing: 12) {
             // Icon
-            Image(systemName: DataSeedingService.sfSymbolName(for: category.uniqueID ?? ""))
+            Image(systemName: DataSeedingService.sfSymbolName(for: category))
                 .font(.system(size: 28, weight: .medium))
                 .foregroundColor(accentColor)
                 .frame(height: 32)
             
             // Category Name
-            Text(DataSeedingService.displayName(for: category.uniqueID ?? ""))
+            Text(DataSeedingService.displayName(for: category))
                 .font(.caption)
                 .fontWeight(.medium)
                 .foregroundColor(.primary)
@@ -87,7 +87,7 @@ struct CategoryInputCard: View {
             .accessibilityLabel(
                 String(
                     format: "category.input.label".localized(defaultValue: "Amount input for %@"),
-                    DataSeedingService.displayName(for: category.uniqueID ?? "")
+                    DataSeedingService.displayName(for: category)
                 )
             )
             .accessibilityValue(

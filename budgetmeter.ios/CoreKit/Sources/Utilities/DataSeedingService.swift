@@ -491,3 +491,49 @@ extension DataSeedingService {
         return symbolNames[uniqueID] ?? "questionmark.circle"
     }
 }
+
+// MARK: - Unified Category Display Logic
+
+extension DataSeedingService {
+    
+    /// Unified method to get display name for any FinancialCategory (predefined or custom)
+    static func displayName(for category: FinancialCategory) -> String {
+        if category.isCustom {
+            return category.customName ?? "Unnamed Category"
+        } else {
+            return displayName(for: category.uniqueID ?? "")
+        }
+    }
+    
+    /// Unified method to get SF Symbol name for any FinancialCategory (predefined or custom)
+    static func sfSymbolName(for category: FinancialCategory) -> String {
+        if category.isCustom {
+            return category.customIconName ?? "tag.fill"
+        } else {
+            return sfSymbolName(for: category.uniqueID ?? "")
+        }
+    }
+    
+    /// Unified method to get color for any FinancialCategory (predefined or custom)
+    static func categoryColor(for category: FinancialCategory) -> String {
+        if category.isCustom {
+            // Use custom color if provided, otherwise fall back to default color scheme
+            return category.customColorHex ?? defaultColorForType(category.type ?? "expense")
+        } else {
+            // Use default color scheme for predefined categories
+            return defaultColorForType(category.type ?? "expense")
+        }
+    }
+    
+    /// Returns default color hex for category type
+    private static func defaultColorForType(_ type: String) -> String {
+        switch type {
+        case "income":
+            return "10B981" // Green for income
+        case "expense":
+            return "EF4444" // Red for expense
+        default:
+            return "6B7280" // Gray for unknown
+        }
+    }
+}

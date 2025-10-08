@@ -15,6 +15,10 @@ struct IncomeView: View {
     @StateObject private var localizationManager = LocalizationManager.shared
     @FocusState private var focusedField: String?
     
+    // Modal state
+    @State private var showingCreateModal = false
+    @State private var selectedFrequency = ""
+    
     var body: some View {
         NavigationView {
             ScrollView {
@@ -52,6 +56,20 @@ struct IncomeView: View {
             }
         }
         .environment(\.locale, localizationManager.currentLocale)
+        .sheet(isPresented: $showingCreateModal) {
+            CreateCategoryModal(
+                frequency: selectedFrequency,
+                type: "income",
+                onSave: { category in
+                    // Refresh the view model to show the new category
+                    viewModel.refresh()
+                    showingCreateModal = false
+                },
+                onCancel: {
+                    showingCreateModal = false
+                }
+            )
+        }
         .onAppear {
             viewModel.refresh()
         }
@@ -160,6 +178,17 @@ struct IncomeView: View {
                         focusedField: $focusedField
                     )
                 }
+                
+                // Add Custom Category Card
+                AddCustomCategoryCard(
+                    frequency: group.title.lowercased(),
+                    type: "income",
+                    accentColor: group.color,
+                    onAddCategory: {
+                        selectedFrequency = group.title.lowercased()
+                        showingCreateModal = true
+                    }
+                )
             }
         }
     }

@@ -7,9 +7,11 @@
 
 import SwiftUI
 import UIKit
+import BackgroundTasks
 
 @main
 struct budgetmeter_iosApp: App {
+    @StateObject private var biometricManager = BiometricManager.shared
     
     init() {
         // Load and apply stored theme preference before any views render
@@ -18,12 +20,35 @@ struct budgetmeter_iosApp: App {
         // Seed initial data on first launch
         let dataSeedingService = DataSeedingService()
         dataSeedingService.seedInitialDataIfNeeded()
+        
+        // Migrate custom categories to unified FinancialCategory system
+        let migrationService = CustomCategoryMigrationService()
+        migrationService.performMigrationIfNeeded()
+        
+        // Initialize background processing
+        BackgroundProcessingService.shared.scheduleBackgroundProcessing()
     }
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environment(\.managedObjectContext, PersistenceService.shared.viewContext)
+            Group {
+                if biometricManager.shouldRequireAuthentication() {
+                    BiometricAuthView {
+                        // Authentication successful, show main app
+                    }
+                } else {
+                    ContentView()
+                        .environment(\.managedObjectContext, PersistenceService.shared.viewContext)
+                }
+            }
+            .environmentObject(biometricManager)
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { _ in
+                BackgroundProcessingService.shared.applicationDidEnterBackground()
+                biometricManager.resetAuthentication()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+                BackgroundProcessingService.shared.applicationWillEnterForeground()
+            }
         }
     }
     

@@ -11,6 +11,7 @@ import SwiftUI
 struct SettingsView: View {
     
     @StateObject private var viewModel = SettingsViewModel()
+    @StateObject private var premiumManager = PremiumManager.shared
     
     var body: some View {
         NavigationView {
@@ -24,11 +25,19 @@ struct SettingsView: View {
                 // Currency Section
                 currencySection
                 
+                // Premium Section
+                premiumSection
+                
                 // Data & Privacy Section
                 dataPrivacySection
                 
                 // About Section
                 aboutSection
+                
+                // Debug Section (DEBUG builds only)
+                #if DEBUG
+                debugSection
+                #endif
             }
             .navigationTitle("settings.title".localized(defaultValue: "Settings"))
             .navigationBarTitleDisplayMode(.large)
@@ -182,6 +191,86 @@ struct SettingsView: View {
             Text("settings.currency.title".localized(defaultValue: "Currency"))
         } footer: {
             Text("settings.currency.footer".localized(defaultValue: "Select your preferred currency for displaying amounts."))
+        }
+    }
+    
+    // MARK: - Premium Section
+    
+    private var premiumSection: some View {
+        Section {
+            NavigationLink(destination: RecurringTransactionsView()) {
+                PremiumFeatureRow(
+                    title: "settings.premium.recurring".localized(defaultValue: "Recurring Transactions"),
+                    subtitle: "settings.premium.recurring.subtitle".localized(defaultValue: "Automate repeating transactions"),
+                    iconName: "repeat",
+                    premiumFeature: .recurringTransactions
+                )
+            }
+            
+            NavigationLink(destination: DataExportView()) {
+                PremiumFeatureRow(
+                    title: "settings.premium.export".localized(defaultValue: "Data Export"),
+                    subtitle: "settings.premium.export.subtitle".localized(defaultValue: "Export your data in multiple formats"),
+                    iconName: "square.and.arrow.up",
+                    premiumFeature: .dataExport
+                )
+            }
+            
+            NavigationLink(destination: WidgetsSetupView()) {
+                PremiumFeatureRow(
+                    title: "settings.premium.widgets".localized(defaultValue: "Widgets"),
+                    subtitle: "settings.premium.widgets.subtitle".localized(defaultValue: "Display data on Home Screen"),
+                    iconName: "rectangle.3.group",
+                    premiumFeature: .widgets
+                )
+            }
+            
+            NavigationLink(destination: InsightsView()) {
+                PremiumFeatureRow(
+                    title: "settings.premium.insights".localized(defaultValue: "Spending Insights"),
+                    subtitle: "settings.premium.insights.subtitle".localized(defaultValue: "Visual charts and analytics"),
+                    iconName: "chart.bar.fill",
+                    premiumFeature: .spendingInsights
+                )
+            }
+            
+            NavigationLink(destination: BiometricSettingsView()) {
+                HStack {
+                    Image(systemName: "faceid")
+                        .foregroundColor(.accentColor)
+                        .frame(width: 24)
+
+                    VStack(alignment: .leading) {
+                        Text("settings.premium.biometric".localized(defaultValue: "Biometric Lock"))
+                            .font(.body)
+                            .foregroundColor(.primary)
+                        Text("settings.premium.biometric.subtitle".localized(defaultValue: "Protect with Face ID or Touch ID"))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
+                    Spacer()
+
+                    // DEBUG: Always show as available for testing
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.green)
+                        .font(.caption)
+                }
+                .contentShape(Rectangle())
+            }
+            
+            NavigationLink(destination: PremiumThemesView()) {
+                PremiumFeatureRow(
+                    title: "settings.premium.themes".localized(defaultValue: "Premium Themes"),
+                    subtitle: "settings.premium.themes.subtitle".localized(defaultValue: "Beautiful themes and app icons"),
+                    iconName: "paintbrush.fill",
+                    premiumFeature: .premiumThemes
+                )
+            }
+        } header: {
+            Text("settings.premium.title".localized(defaultValue: "Premium Features"))
+        } footer: {
+            Text("settings.premium.footer".localized(defaultValue: "Unlock all premium features with a one-time purchase of $4.99"))
         }
     }
     
@@ -472,6 +561,40 @@ struct SettingsView: View {
         }
     }
 
+    
+    // MARK: - Debug Section
+    
+    #if DEBUG
+    private var debugSection: some View {
+        Section {
+            HStack {
+                Image(systemName: "crown.fill")
+                    .foregroundColor(.yellow)
+                    .frame(width: 24)
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("debug.premium.title".localized(defaultValue: "Premium Mode"))
+                        .font(.headline)
+                    Text("debug.premium.subtitle".localized(defaultValue: "Toggle premium features for testing"))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+                
+                Toggle("", isOn: $premiumManager.isPremium)
+                    .onChange(of: premiumManager.isPremium) { newValue in
+                        premiumManager.setDebugPremiumStatus(newValue)
+                    }
+            }
+            .padding(.vertical, 5)
+        } header: {
+            Text("debug.section.title".localized(defaultValue: "Debug"))
+        } footer: {
+            Text("debug.section.footer".localized(defaultValue: "This section is only visible in debug builds"))
+        }
+    }
+    #endif
     
     // MARK: - Helper Methods
     

@@ -12,7 +12,7 @@ struct ContentView: View {
     
     var body: some View {
         // Phase 4: Steve Jobs "focus and simplify" - Home-first design
-        // 4 tabs: Home (dashboard) + Income + Expenses + Settings
+        // 5 tabs: Home (dashboard) + Income + Expenses + Insights + Settings
         TabView {
             HomeView()
                 .tabItem {
@@ -31,6 +31,18 @@ struct ContentView: View {
                     Image(systemName: "minus.circle")
                     Text("tab.expenses.title".localized(defaultValue: "Expenses"))
                 }
+            
+            PremiumFeatureView(
+                premiumFeature: .spendingInsights,
+                onDismiss: {},
+                content: {
+                    InsightsView()
+                }
+            )
+            .tabItem {
+                Image(systemName: "chart.bar.fill")
+                Text("tab.insights.title".localized(defaultValue: "Insights"))
+            }
             
             SettingsView()
                 .tabItem {

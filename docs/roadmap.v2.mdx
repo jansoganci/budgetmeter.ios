@@ -1,0 +1,838 @@
+# 🚀 BudgetMeter Premium Development Roadmap v2.0
+
+*Think Fast, Iterate Faster — Steve Jobs*
+
+---
+
+## 🎯 Executive Summary
+
+This roadmap defines the strategic implementation plan for BudgetMeter's 7 core premium features. Following Steve Jobs' philosophy of "Think Fast, Iterate Faster," we prioritize user value over technical perfection, shipping working features that users can immediately benefit from.
+
+**Target:** $4.99 lifetime purchase with 7 premium features that transform BudgetMeter from a basic tracker into a comprehensive personal finance companion.
+
+---
+
+## 🏗️ Current Architecture Analysis
+
+### ✅ Solid Foundation
+- **MVVM + Core Data + CloudKit** — Battle-tested iOS architecture
+- **Modular feature structure** — `Features/` folder ready for expansion
+- **Calculation Engine** — Handles complex financial formulas perfectly
+- **Localization system** — 10+ languages supported
+- **2 Core Data entities** — `FinancialCategory` & `AppSettings` (CloudKit-ready)
+
+### 🔗 Premium Integration Points
+- **Extend `AppSettings`** — Add premium flags and preferences
+- **New Core Data entities** — Custom categories, recurring transactions
+- **Widget framework** — Share data between app and widgets
+- **Biometric integration** — Leverage existing security patterns
+- **Export system** — Build on existing data structure
+
+---
+
+## 🎯 The 7 Premium Features - Implementation Strategy
+
+### Phase 1: Foundation (Week 1-2)
+**Goal:** Establish premium infrastructure and user experience
+
+#### 1. PremiumManager & Feature Gating
+**Priority:** Critical Foundation  
+**Complexity:** Medium  
+**User Impact:** Enables all other features
+
+**Implementation:**
+```swift
+// CoreKit/Sources/Premium/PremiumManager.swift
+final class PremiumManager: ObservableObject {
+    @Published var isPremium: Bool = false
+    @Published var purchaseState: PurchaseState = .unknown
+    
+    func checkPremiumStatus() { }
+    func purchasePremium() { }
+    func restorePurchases() { }
+}
+```
+
+**Detailed Subtasks:**
+- **UI:** Premium paywall view with Apple HIG-compliant design
+- **Core Data:** Extend `AppSettings` entity with premium flags
+- **ViewModel:** Create `PremiumViewModel` following MVVM patterns
+- **Testing:** Unit tests for purchase flow and state management
+
+**Design Dependencies:**
+- **design_rulebook.mdx:** Button styles, color palette, typography standards
+- **Apple HIG:** StoreKit integration patterns, purchase flow guidelines
+- **SF Symbols:** `crown.fill`, `checkmark.seal.fill` for premium indicators
+
+**Testing Criteria:**
+- Purchase flow completes without errors
+- Feature gating blocks access appropriately
+- Purchase state persists across app restarts
+- Restore purchases works correctly
+- No memory leaks in premium state management
+
+**Future Extensions:**
+- Family sharing support
+- Subscription model alternative
+- Premium feature analytics
+- A/B testing for paywall designs
+
+**Integration Points:**
+- Extend `AppSettings` with `isPremiumUser` flag
+- Add StoreKit 2 integration for lifetime purchase
+- Create premium paywall UI component
+- Add feature gating throughout existing views
+
+**Success Metrics:**
+- Premium purchase flow works seamlessly
+- Feature gating blocks free users appropriately
+- Purchase state persists across app launches
+
+---
+
+#### 2. Custom Categories & Icons
+**Priority:** High User Value  
+**Complexity:** Medium  
+**User Impact:** Personalization & ownership
+
+**Implementation:**
+```swift
+// New Core Data Entity: CustomCategory
+class CustomCategory: NSManagedObject {
+    @NSManaged var name: String
+    @NSManaged var iconName: String
+    @NSManaged var colorHex: String
+    @NSManaged var type: String // "income" or "expense"
+    @NSManaged var isCustom: Bool
+}
+```
+
+**Detailed Subtasks:**
+- **UI:** Category creation form with SF Symbols picker and color selection
+- **Core Data:** New `CustomCategory` entity with CloudKit sync
+- **ViewModel:** Extend existing ViewModels to handle custom categories
+- **Testing:** Unit tests for category creation, editing, and deletion
+
+**Design Dependencies:**
+- **design_rulebook.mdx:** Form input styling, color palette, SF Symbols usage
+- **Apple HIG:** Color picker patterns, form validation guidelines
+- **SF Symbols:** Comprehensive icon library for financial categories
+
+**Testing Criteria:**
+- Custom categories save and sync correctly
+- Icons and colors display properly in all views
+- Category deletion doesn't break existing transactions
+- CloudKit sync works for custom categories
+- Form validation prevents invalid category names
+
+**Future Extensions:**
+- Category templates and sharing
+- Smart category suggestions based on transaction patterns
+- Category usage analytics
+- Bulk category import/export
+
+**Integration Points:**
+- Extend existing `FinancialCategory` or create new entity
+- Modify `DataSeedingService` to handle custom categories
+- Update `IncomeViewModel` & `ExpenseViewModel` to show custom categories
+- Create category creation UI with SF Symbols picker
+- Add color customization with Apple's color palette
+
+**Success Metrics:**
+- Users can create unlimited custom categories
+- Custom categories appear in existing income/expense flows
+- SF Symbols and colors persist correctly
+
+---
+
+### Phase 2: Automation & Data (Week 3-4)
+**Goal:** Add convenience features that save users time
+
+#### 3. Recurring Transactions
+**Priority:** High Convenience  
+**Complexity:** High  
+**User Impact:** "Set it and forget it" automation
+
+**Implementation:**
+```swift
+// New Core Data Entity: RecurringTransaction
+class RecurringTransaction: NSManagedObject {
+    @NSManaged var categoryID: String
+    @NSManaged var amount: Double
+    @NSManaged var frequency: String // "daily", "weekly", "monthly", "yearly"
+    @NSManaged var nextDueDate: Date
+    @NSManaged var isActive: Bool
+    @NSManaged var lastProcessedDate: Date?
+}
+```
+
+**Detailed Subtasks:**
+- **UI:** Recurring transaction creation and management interface
+- **Core Data:** New `RecurringTransaction` entity with background processing
+- **ViewModel:** `RecurringTransactionViewModel` with scheduling logic
+- **Testing:** Unit tests for frequency calculations and background processing
+
+**Design Dependencies:**
+- **design_rulebook.mdx:** Form layouts, date picker styling, notification patterns
+- **Apple HIG:** Background processing guidelines, notification design
+- **SF Symbols:** `repeat`, `calendar`, `bell` for recurring transaction UI
+
+**Testing Criteria:**
+- Recurring transactions process at correct intervals
+- Background processing works reliably
+- Notifications trigger appropriately
+- Financial calculations include recurring amounts
+- Edge cases (leap years, month-end) handled correctly
+
+**Future Extensions:**
+- Smart frequency detection from transaction patterns
+- Recurring transaction templates
+- Advanced scheduling (every 2 weeks, quarterly)
+- Recurring transaction analytics and insights
+
+**Integration Points:**
+- Create background processing system for automatic transactions
+- Extend `CalculationEngine` to include recurring amounts
+- Add recurring transaction management UI
+- Implement notification system for upcoming transactions
+- Modify existing financial calculations to include recurring amounts
+
+**Success Metrics:**
+- Recurring transactions process automatically
+- Users receive notifications for upcoming transactions
+- Financial calculations include recurring amounts correctly
+
+---
+
+#### 4. Data Export (PDF/CSV/JSON)
+**Priority:** Medium  
+**Complexity:** Low-Medium  
+**User Impact:** "Your data, your way"
+
+**Implementation:**
+```swift
+// CoreKit/Sources/Export/DataExportService.swift
+final class DataExportService {
+    func exportToPDF() -> URL { }
+    func exportToCSV() -> URL { }
+    func exportToJSON() -> URL { }
+    func generateSummaryReport() -> String { }
+}
+```
+
+**Detailed Subtasks:**
+- **UI:** Export options interface in Settings with format selection
+- **Core Data:** Data aggregation and formatting for export
+- **ViewModel:** `ExportViewModel` with progress tracking
+- **Testing:** Unit tests for data accuracy and format validation
+
+**Design Dependencies:**
+- **design_rulebook.mdx:** Button styles, progress indicators, share sheet patterns
+- **Apple HIG:** Share sheet integration, file handling guidelines
+- **SF Symbols:** `square.and.arrow.up`, `doc.text`, `chart.bar` for export UI
+
+**Testing Criteria:**
+- All export formats generate correctly
+- Exported data matches app data exactly
+- Share sheet integration works across all formats
+- Large datasets export without performance issues
+- File naming and metadata are correct
+
+**Future Extensions:**
+- Scheduled automatic exports
+- Custom export templates
+- Export to cloud storage services
+- Advanced filtering and date range selection
+
+**Integration Points:**
+- Leverage existing `FinancialCategory` and `AppSettings` data
+- Use `CalculationEngine` for summary calculations
+- Create share sheet integration
+- Add export options in Settings
+- Generate formatted reports with charts
+
+**Success Metrics:**
+- All three export formats work correctly
+- Exported data is complete and accurate
+- Share sheet integration works smoothly
+
+---
+
+### Phase 3: Engagement & Insights (Week 5-6)
+**Goal:** Increase user engagement and provide valuable insights
+
+#### 5. Widgets (Home & Lock Screen)
+**Priority:** High Engagement  
+**Complexity:** Medium-High  
+**User Impact:** Instant awareness & engagement
+
+**Implementation:**
+```swift
+// Widget Extension: BudgetMeterWidgets
+struct LiveBalanceWidget: Widget {
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: "LiveBalance", provider: LiveBalanceProvider()) { entry in
+            LiveBalanceWidgetView(entry: entry)
+        }
+        .configurationDisplayName("Live Balance")
+        .description("See your current financial flow")
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
+    }
+}
+```
+
+**Detailed Subtasks:**
+- **UI:** Widget views for multiple sizes with live data display
+- **Core Data:** Shared container configuration between app and widget
+- **ViewModel:** Widget data providers with efficient data fetching
+- **Testing:** Widget functionality tests and performance validation
+
+**Design Dependencies:**
+- **design_rulebook.mdx:** Widget color schemes, typography, layout principles
+- **Apple HIG:** Widget design guidelines, lock screen widget patterns
+- **SF Symbols:** Widget-appropriate icons with proper sizing
+
+**Testing Criteria:**
+- Widgets display accurate financial data
+- Updates occur within expected timeframes
+- All widget sizes render correctly
+- Lock screen widgets function properly
+- No performance impact on main app
+
+**Future Extensions:**
+- Interactive widget elements
+- Multiple widget types (balance, trends, goals)
+- Widget customization options
+- Smart widget suggestions based on usage
+
+**Integration Points:**
+- Create Widget Extension target
+- Share Core Data container between app and widget
+- Use `CalculationEngine` for widget calculations
+- Implement multiple widget sizes and configurations
+- Add lock screen widget support (iOS 16+)
+
+**Success Metrics:**
+- Widgets update in real-time
+- Multiple widget configurations available
+- Lock screen widgets work correctly
+- Data syncs properly between app and widgets
+
+---
+
+#### 6. Spending Insights & Charts
+**Priority:** High Value  
+**Complexity:** Medium  
+**User Impact:** Clarity through visual feedback
+
+**Implementation:**
+```swift
+// New Feature: InsightsFeature/
+struct InsightsView: View {
+    @StateObject private var viewModel = InsightsViewModel()
+    
+    var body: some View {
+        ScrollView {
+            LazyVStack {
+                MonthlyTrendsChart()
+                TopCategoriesChart()
+                SpendingPatternsChart()
+                FinancialHealthTrendsChart()
+            }
+        }
+    }
+}
+```
+
+**Detailed Subtasks:**
+- **UI:** Chart views using SwiftUI Charts with responsive design
+- **Core Data:** Data aggregation queries for trend analysis
+- **ViewModel:** `InsightsViewModel` with chart data processing
+- **Testing:** Unit tests for trend calculations and chart rendering
+
+**Design Dependencies:**
+- **design_rulebook.mdx:** Chart color schemes, typography, layout principles
+- **Apple HIG:** Chart design guidelines, data visualization patterns
+- **SF Symbols:** `chart.line.uptrend.xyaxis`, `chart.bar.fill` for insights UI
+
+**Testing Criteria:**
+- Charts display accurate financial data
+- Trend calculations are mathematically correct
+- UI performance remains smooth with large datasets
+- Charts adapt to different screen sizes
+- Data updates reflect in charts immediately
+
+**Future Extensions:**
+- Interactive chart elements with drill-down
+- Customizable chart types and time periods
+- Export charts as images
+- Advanced analytics and predictions
+
+**Integration Points:**
+- Extend `CalculationEngine` with trend analysis functions
+- Create new `InsightsViewModel` following existing patterns
+- Use SwiftUI Charts framework for visualizations
+- Add Insights tab to main `TabView`
+- Implement data aggregation for historical trends
+
+**Success Metrics:**
+- Charts display accurate financial data
+- Trends are calculated correctly over time
+- UI is responsive and visually appealing
+- Insights provide actionable information
+
+---
+
+### Phase 4: Polish & Security (Week 7-8)
+**Goal:** Add premium polish and security features
+
+#### 7. Biometric Lock (Face ID/Touch ID)
+**Priority:** Medium-High  
+**Complexity:** Low-Medium  
+**User Impact:** Privacy, trust, and peace of mind
+
+**Implementation:**
+```swift
+// CoreKit/Sources/Security/BiometricManager.swift
+final class BiometricManager: ObservableObject {
+    @Published var isBiometricEnabled: Bool = false
+    @Published var isAuthenticated: Bool = false
+    
+    func enableBiometric() { }
+    func authenticateUser() -> Bool { }
+    func disableBiometric() { }
+}
+```
+
+**Detailed Subtasks:**
+- **UI:** Biometric authentication screens and settings interface
+- **Core Data:** Extend `AppSettings` with biometric preferences
+- **ViewModel:** `BiometricViewModel` with authentication state management
+- **Testing:** Unit tests for authentication flow and security validation
+
+**Design Dependencies:**
+- **design_rulebook.mdx:** Security UI patterns, authentication screen design
+- **Apple HIG:** Biometric authentication guidelines, security best practices
+- **SF Symbols:** `faceid`, `touchid`, `lock.fill` for security UI
+
+**Testing Criteria:**
+- Biometric authentication works on all supported devices
+- Fallback to passcode works correctly
+- Authentication state persists across app launches
+- No security vulnerabilities in implementation
+- Performance impact is minimal
+
+**Future Extensions:**
+- Advanced security options (timeout settings)
+- Multiple authentication methods
+- Security audit logging
+- Integration with iOS security features
+
+**Integration Points:**
+- Add biometric settings to `SettingsView`
+- Integrate with existing app lifecycle management
+- Add authentication checks before showing financial data
+- Extend `AppSettings` with biometric preferences
+- Implement secure keychain storage for sensitive data
+
+**Success Metrics:**
+- Biometric authentication works reliably
+- App locks/unlocks smoothly
+- Settings persist correctly
+- No performance impact on app launch
+
+---
+
+#### 8. Premium Themes & Custom App Icons
+**Priority:** Low-Medium  
+**Complexity:** Low  
+**User Impact:** Aesthetics and personalization
+
+**Implementation:**
+```swift
+// CoreKit/Sources/Theming/ThemeManager.swift
+final class ThemeManager: ObservableObject {
+    @Published var currentTheme: AppTheme = .default
+    @Published var customAppIcon: AppIcon = .default
+    
+    func applyTheme(_ theme: AppTheme) { }
+    func setAppIcon(_ icon: AppIcon) { }
+}
+```
+
+**Detailed Subtasks:**
+- **UI:** Theme selection interface with live preview
+- **Core Data:** Extend `AppSettings` with theme and icon preferences
+- **ViewModel:** `ThemeViewModel` with theme application logic
+- **Testing:** Unit tests for theme switching and icon changes
+
+**Design Dependencies:**
+- **design_rulebook.mdx:** Color palette extensions, theme consistency rules
+- **Apple HIG:** App icon design guidelines, theme switching patterns
+- **SF Symbols:** Theme-appropriate icons and visual elements
+
+**Testing Criteria:**
+- All themes render correctly across all views
+- App icons change without requiring app restart
+- Theme switching is smooth and immediate
+- Dark mode compatibility maintained
+- Accessibility standards met for all themes
+
+**Future Extensions:**
+- User-created custom themes
+- Seasonal theme collections
+- Dynamic themes based on time of day
+- Theme sharing and community features
+
+**Integration Points:**
+- Extend existing `SettingsViewModel` with theme options
+- Create theme definitions with color palettes
+- Add app icon alternatives in project settings
+- Integrate with existing dark/light mode system
+- Add theme preview functionality
+
+**Success Metrics:**
+- All themes look polished and professional
+- App icons change correctly
+- Theme switching is smooth and immediate
+- Themes work with existing UI components
+
+---
+
+## 🛠️ Technical Implementation Details
+
+### Core Data Schema Extensions
+
+```swift
+// Extend AppSettings for premium features
+extension AppSettings {
+    @NSManaged var isPremiumUser: Bool
+    @NSManaged var premiumPurchaseDate: Date?
+    @NSManaged var isBiometricEnabled: Bool
+    @NSManaged var selectedTheme: String
+    @NSManaged var customAppIcon: String
+    @NSManaged var lastExportDate: Date?
+}
+
+// New entity for custom categories
+class CustomCategory: NSManagedObject {
+    @NSManaged var id: UUID
+    @NSManaged var name: String
+    @NSManaged var iconName: String
+    @NSManaged var colorHex: String
+    @NSManaged var type: String
+    @NSManaged var isActive: Bool
+    @NSManaged var createdAt: Date
+}
+
+// New entity for recurring transactions
+class RecurringTransaction: NSManagedObject {
+    @NSManaged var id: UUID
+    @NSManaged var categoryID: String
+    @NSManaged var amount: Double
+    @NSManaged var frequency: String
+    @NSManaged var nextDueDate: Date
+    @NSManaged var isActive: Bool
+    @NSManaged var lastProcessedDate: Date?
+    @NSManaged var createdAt: Date
+}
+```
+
+### Premium Feature Gating Pattern
+
+```swift
+// Consistent feature gating throughout app
+struct PremiumFeatureView<Content: View>: View {
+    let content: Content
+    let premiumFeature: PremiumFeature
+    
+    var body: some View {
+        if PremiumManager.shared.isPremium {
+            content
+        } else {
+            PremiumPaywallView(feature: premiumFeature)
+        }
+    }
+}
+
+// Usage in existing views
+PremiumFeatureView(
+    premiumFeature: .customCategories,
+    content: CustomCategoriesView()
+)
+```
+
+---
+
+## 📅 Implementation Timeline
+
+### Week 1-2: Foundation
+- [x] PremiumManager & StoreKit integration
+- [x] Premium paywall UI
+- [x] Feature gating system
+- [x] Custom categories Core Data model
+- [x] Custom categories UI
+
+### Week 3-4: Automation & Data ✅
+- [x] Recurring transactions system
+- [x] Background processing
+- [x] Data export functionality
+- [x] Export UI in settings
+- [x] Widgets implementation
+
+### Week 5-6: Engagement & Insights
+- [x] Widget extension setup
+- [x] Widget data sharing
+- [x] Insights dashboard
+- [x] Charts and visualizations
+
+### Week 7-8: Polish & Security
+- [ ] Biometric authentication
+- [ ] Premium themes
+- [ ] Custom app icons
+- [ ] Final testing and polish
+
+---
+
+## 🎯 Success Metrics
+
+### User Engagement
+- **Premium conversion rate:** Target 5-8%
+- **Widget usage:** 60% of premium users
+- **Custom categories:** 80% of premium users create at least 3
+- **Recurring transactions:** 70% of premium users set up at least 2
+
+### Technical Performance
+- **App launch time:** < 3 seconds (no degradation)
+- **Widget update frequency:** Every 15 minutes
+- **Export generation:** < 2 seconds for all formats
+- **Biometric authentication:** < 1 second response time
+
+### User Satisfaction
+- **App Store rating:** Maintain 4.5+ stars
+- **Premium feature adoption:** 90% of purchasers use 5+ features
+- **Support tickets:** < 1% of premium users
+- **User retention:** 40%+ after 30 days
+
+---
+
+## 🔄 Iteration Strategy
+
+### 📊 Post-Launch Enhancement Matrix
+
+#### 🚀 Quick Wins (Weeks 9-10)
+| Feature | Impact | Effort | Priority |
+|---------|--------|--------|----------|
+| **Additional Themes** | High | Low | 🔥 Critical |
+| **Widget Size Options** | Medium | Low | ⚡ High |
+| **Export Format Improvements** | Medium | Low | ⚡ High |
+| **Biometric Timeout Settings** | Low | Low | 📋 Medium |
+
+#### 📈 User Feedback Integrations (Weeks 11-12)
+| Feature | Impact | Effort | Priority |
+|---------|--------|--------|----------|
+| **Advanced Insights** | High | Medium | 🔥 Critical |
+| **Custom Category Templates** | Medium | Medium | ⚡ High |
+| **Recurring Transaction Templates** | Medium | Medium | ⚡ High |
+| **Performance Optimizations** | High | Medium | 🔥 Critical |
+
+#### 🎯 Long-Term Vision (Phase 2)
+| Feature | Impact | Effort | Priority |
+|---------|--------|--------|----------|
+| **Multiple Accounts Support** | High | High | 🔥 Critical |
+| **Photo Receipt Attachment** | Medium | High | ⚡ High |
+| **Advanced Search & Filtering** | Medium | Medium | 📋 Medium |
+| **Budget Alerts & Smart Limits** | High | High | 🔥 Critical |
+| **Rolling Budgets with Carry-Over** | Medium | High | 📋 Medium |
+
+### 📋 Enhancement Categories
+
+#### 🔥 Critical Priority
+- **Multiple Accounts Support** — Essential for power users
+- **Budget Alerts & Smart Limits** — Core financial management feature
+- **Advanced Insights** — Differentiates from basic trackers
+- **Performance Optimizations** — Maintains user satisfaction
+
+#### ⚡ High Priority
+- **Widget Size Options** — Improves user engagement
+- **Export Format Improvements** — Enhances data portability
+- **Custom Category Templates** — Reduces setup friction
+- **Recurring Transaction Templates** — Speeds up automation
+
+#### 📋 Medium Priority
+- **Biometric Timeout Settings** — Nice-to-have security feature
+- **Advanced Search & Filtering** — Power user convenience
+- **Rolling Budgets with Carry-Over** — Advanced budgeting feature
+
+### 🎯 Success Metrics for Iterations
+
+#### Quick Wins Success Criteria
+- **Theme Adoption:** 60% of premium users try new themes
+- **Widget Usage:** 80% of premium users add widgets to home screen
+- **Export Usage:** 40% of premium users export data monthly
+- **Performance:** App launch time remains under 3 seconds
+
+#### User Feedback Integration Success Criteria
+- **Insights Engagement:** 70% of premium users view insights weekly
+- **Template Usage:** 50% of premium users create custom templates
+- **User Satisfaction:** App Store rating maintains 4.5+ stars
+- **Support Reduction:** Premium support tickets decrease by 30%
+
+#### Long-Term Vision Success Criteria
+- **Account Management:** 30% of premium users manage multiple accounts
+- **Receipt Usage:** 25% of premium users attach receipts regularly
+- **Advanced Features:** 40% of premium users use advanced search
+- **Budget Management:** 60% of premium users set up budget alerts
+
+### 🔄 Iteration Feedback Loop
+
+1. **Data Collection** — Monitor usage patterns and user behavior
+2. **Feedback Analysis** — Review App Store reviews and support tickets
+3. **Priority Adjustment** — Update enhancement matrix based on real data
+4. **Implementation** — Execute highest-impact, lowest-effort improvements
+5. **Validation** — Measure success against defined criteria
+6. **Iteration** — Repeat cycle with new insights
+
+### 📊 Post-Launch Improvements (Weeks 9-12)
+1. **User feedback integration** - Analyze usage patterns and user requests
+2. **Performance optimization** - Fine-tune based on real-world usage
+3. **Additional themes** - Create seasonal and special edition themes
+4. **Advanced insights** - Add more sophisticated analytics
+5. **Widget enhancements** - Additional widget configurations
+
+### 🚀 Future Premium Features (Phase 2)
+- Multiple accounts support
+- Photo receipt attachment
+- Advanced search and filtering
+- Budget alerts and smart limits
+- Rolling budgets with carry-over
+
+---
+
+## 💡 Steve Jobs Philosophy Applied
+
+### "Think Fast, Iterate Faster"
+- **Ship working features quickly** - Don't wait for perfection
+- **User feedback drives decisions** - Real usage > theoretical optimization
+- **Simplicity over complexity** - Every feature must be intuitive
+- **Focus on core value** - Financial insights and convenience first
+
+### Quality Standards
+- **Apple HIG compliance** - Every UI element follows guidelines
+- **Performance first** - No feature should slow down the app
+- **Privacy by design** - All data stays on-device or in user's iCloud
+- **Accessibility built-in** - Screen readers, large text, voice control
+
+---
+
+## 🚀 Launch Strategy
+
+### Soft Launch (Week 8)
+- Beta test with 100 existing users
+- Gather feedback on premium features
+- Fine-tune pricing and feature positioning
+- Test App Store review process
+
+### Full Launch (Week 9)
+- App Store feature request
+- Social media announcement
+- User onboarding improvements
+- Premium feature tutorials
+
+### Post-Launch (Week 10+)
+- Monitor conversion metrics
+- Iterate based on user feedback
+- Plan Phase 2 premium features
+- Optimize for App Store search
+
+---
+
+## 📋 Development Compliance & Process
+
+### 🎨 Design & Architecture Compliance
+**CRITICAL:** All premium feature development must strictly follow:
+
+- **design_rulebook.mdx** — UI/UX patterns, Apple HIG compliance, visual consistency
+- **general_rulebook.mdx** — Architecture patterns, naming conventions, coding standards
+- **7-Step Development Process** — Every feature must complete all 7 steps before release
+
+### 🔄 7-Step Development Process
+**MANDATORY:** Every premium feature must complete this process:
+
+1. **Requirements Analysis** — Define feature scope, user impact, and success metrics
+2. **Design Alignment** — Ensure compliance with design_rulebook.mdx and Apple HIG
+3. **Architecture Planning** — Follow general_rulebook.mdx patterns and MVVM structure
+4. **Coding & Implementation** — Write code following established naming conventions
+5. **Testing & Validation** — Unit tests, UI tests, and performance validation
+6. **Documentation Update** — Update premium_plan.mdx and relevant documentation
+7. **Review & Approval** — Code review, design review, and final approval
+
+### 📚 Rulebook Integration Matrix
+
+| Development Phase | design_rulebook.mdx | general_rulebook.mdx | 7-Step Process |
+|------------------|---------------------|----------------------|----------------|
+| **UI Design** | Color palette, typography, SF Symbols | Naming conventions | Step 2: Design Alignment |
+| **Architecture** | Layout principles, spacing | MVVM patterns, Core Data | Step 3: Architecture Planning |
+| **Implementation** | Component styling, animations | Coding standards, testing | Step 4: Coding & Implementation |
+| **Testing** | Accessibility guidelines | Unit testing requirements | Step 5: Testing & Validation |
+| **Documentation** | Visual consistency rules | Documentation standards | Step 6: Documentation Update |
+
+### 🔄 Roadmap Update Protocol
+**MANDATORY:** After completing each development milestone:
+
+1. **Update roadmap.v2.mdx** — Mark completed steps with ✅
+2. **Update premium_plan.mdx** — Update implementation status checklist
+3. **Document decisions** — Record any deviations from original plan
+4. **Test compliance** — Verify design_rulebook.mdx and general_rulebook.mdx adherence
+5. **Prepare next phase** — Review and adjust upcoming steps based on learnings
+
+### 📝 Process Integration
+This roadmap integrates with our existing documentation ecosystem:
+- **design_rulebook.mdx** → Step 2 (Design Alignment) & ongoing UI compliance
+- **general_rulebook.mdx** → Step 4 (Coding & Implementation) & architecture patterns
+- **premium_plan.mdx** → Step 6 (Documentation Update) & feature tracking
+
+### 🎯 Quality Gates
+**Each feature must pass these gates before release:**
+
+- **Design Gate:** 100% compliance with design_rulebook.mdx
+- **Architecture Gate:** 100% compliance with general_rulebook.mdx
+- **Testing Gate:** 90%+ code coverage with unit tests
+- **Performance Gate:** No degradation in app launch time or responsiveness
+- **Accessibility Gate:** Full VoiceOver support and Dynamic Type compatibility
+
+**Remember:** Every premium feature must pass through the complete 7-step process and maintain 100% compliance with established design and coding standards.
+
+---
+
+## 🎯 Steve Jobs Doctrine
+
+### Three Guiding Principles for BudgetMeter Premium
+
+#### 1. **Build Simplicity That Scales**
+*"Simplicity is the ultimate sophistication."* — Steve Jobs
+
+- Every premium feature must feel intuitive and natural
+- Complex functionality hidden behind simple interfaces
+- Users should never feel overwhelmed by options
+- Core value proposition remains clear and focused
+
+#### 2. **Speed Through Clarity**
+*"Think Fast, Iterate Faster."* — Steve Jobs
+
+- Ship working features quickly, perfect them through iteration
+- User feedback drives all development decisions
+- Technical debt is acceptable if it accelerates user value
+- Performance and responsiveness are non-negotiable
+
+#### 3. **Focus on What Matters**
+*"Innovation is saying no to a thousand things."* — Steve Jobs
+
+- Only build features that directly serve user needs
+- Premium features must provide clear, measurable value
+- Resist feature creep and scope expansion
+- Quality over quantity in every implementation
+
+---
+
+*This roadmap ensures BudgetMeter evolves from a simple tracker into a comprehensive personal finance companion, following Steve Jobs' principles of user-centric design and rapid iteration. Every feature adds real value while maintaining the app's core simplicity and performance.*
