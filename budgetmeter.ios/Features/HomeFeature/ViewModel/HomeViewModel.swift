@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 import CoreData
 import Combine
+import WidgetKit
 
 /// ViewModel for the Home screen following MVVM architecture
 @MainActor
@@ -487,9 +488,12 @@ final class HomeViewModel: ObservableObject {
                 }
                 
                 appSettings.savingsGoalAmount = amount
-                
+
                 // Save is automatically handled by performBackgroundTask
-                
+
+                // Reload widgets to show updated savings goal
+                WidgetCenter.shared.reloadAllTimelines()
+
             } catch {
                 print("Failed to save savings goal: \(error)")
             }
@@ -573,9 +577,12 @@ final class HomeViewModel: ObservableObject {
                 appSettings.cumulativeTotal = roundedCumulativeTotal
                 appSettings.lastMeterValue = self.liveValue
                 appSettings.lastBackgroundedTimestamp = Date()
-                
+
                 // The save is automatically handled by performBackgroundTask
-                
+
+                // Reload widgets to show updated data
+                WidgetCenter.shared.reloadAllTimelines()
+
                 // After saving, update the UI on the main thread
                 Task { @MainActor in
                     // Safely update the baseline on the main thread

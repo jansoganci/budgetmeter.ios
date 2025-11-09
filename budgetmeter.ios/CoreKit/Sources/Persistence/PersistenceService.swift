@@ -29,12 +29,19 @@ final class PersistenceService {
     /// The persistent container for the application
     lazy var persistentContainer: NSPersistentCloudKitContainer = {
         let container = NSPersistentCloudKitContainer(name: "BudgetMeter")
-        
+
         // Configure for CloudKit
         let storeDescription = container.persistentStoreDescriptions.first
         storeDescription?.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
         storeDescription?.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
-        
+
+        // Configure shared container for widgets
+        if let containerURL = FileManager.default.containerURL(
+            forSecurityApplicationGroupIdentifier: "group.com.budgetmeter.shared"
+        ) {
+            storeDescription?.url = containerURL.appendingPathComponent("BudgetMeter.sqlite")
+        }
+
         container.loadPersistentStores { [weak self] _, error in
             if let error = error as NSError? {
                 print("💾 PersistenceService: ❌ Error loading stores: \(error)")

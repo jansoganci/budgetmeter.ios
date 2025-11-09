@@ -239,6 +239,7 @@ struct CombinedWidgetEntryView: View {
             )
         )
         .cornerRadius(16)
+        .widgetURL(URL(string: "budgetmeter://home"))
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Balance: \(CurrencyHelper.formatAmount(entry.balance)), Savings: \(CurrencyHelper.formatAmount(entry.savingsAmount)), \(Int(entry.savingsProgress * 100))% complete")
     }
