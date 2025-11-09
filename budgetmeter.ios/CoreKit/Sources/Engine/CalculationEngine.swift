@@ -429,4 +429,298 @@ struct CalculationEngine {
     ) -> Double {
         return liveIncome - liveExpense
     }
+
+    // MARK: - Health Score (0-100 Scale)
+
+    /// Calculate comprehensive financial health score (0-100)
+    /// Components: Income stability (30 pts) + Expense management (30 pts) + Savings rate (40 pts)
+    static func calculateFinancialHealthScore(
+        monthlyIncome: Double,
+        monthlyExpense: Double,
+        savingsGoal: Double
+    ) -> Int {
+        var score = 0
+
+        // Income Score (0-30 points)
+        // Having income is essential
+        if monthlyIncome > 0 {
+            score += 30
+        } else if monthlyIncome > monthlyExpense {
+            score += 20
+        } else if monthlyIncome > 0 {
+            score += 10
+        }
+
+        // Expense Management Score (0-30 points)
+        // Based on income to expense ratio
+        if monthlyIncome > 0 {
+            let ratio = monthlyIncome / max(monthlyExpense, 1)
+
+            if ratio >= 2.0 {
+                score += 30 // Excellent: Spending < 50% of income
+            } else if ratio >= 1.5 {
+                score += 25 // Great: Spending < 67% of income
+            } else if ratio >= 1.2 {
+                score += 20 // Good: Spending < 83% of income
+            } else if ratio >= 1.0 {
+                score += 15 // Fair: Breaking even
+            } else if ratio >= 0.8 {
+                score += 10 // Poor: Spending 125% of income
+            } else {
+                score += 5  // Bad: Spending much more than income
+            }
+        }
+
+        // Savings Score (0-40 points) - Most important
+        let savingsAmount = max(0, monthlyIncome - monthlyExpense)
+
+        if monthlyIncome > 0 {
+            let savingsRate = savingsAmount / monthlyIncome
+
+            if savingsRate >= 0.30 {
+                score += 40 // Excellent: Saving 30%+ of income
+            } else if savingsRate >= 0.20 {
+                score += 35 // Great: Saving 20-30% of income
+            } else if savingsRate >= 0.15 {
+                score += 30 // Good: Saving 15-20% of income
+            } else if savingsRate >= 0.10 {
+                score += 25 // Fair: Saving 10-15% of income
+            } else if savingsRate >= 0.05 {
+                score += 15 // Poor: Saving 5-10% of income
+            } else if savingsRate > 0 {
+                score += 10 // Bad: Saving less than 5%
+            }
+            // 0 points if not saving
+        }
+
+        return min(100, max(0, score))
+    }
+
+    /// Convert health score to descriptive text
+    static func healthScoreText(for score: Int) -> String {
+        switch score {
+        case 90...100:
+            return "Excellent"
+        case 75...89:
+            return "Great"
+        case 60...74:
+            return "Good"
+        case 40...59:
+            return "Fair"
+        case 20...39:
+            return "Needs Improvement"
+        default:
+            return "Getting Started"
+        }
+    }
+
+    /// Calculate detailed health score breakdown
+    static func calculateHealthScoreBreakdown(
+        monthlyIncome: Double,
+        monthlyExpense: Double,
+        savingsGoal: Double
+    ) -> HealthScoreBreakdown {
+        var incomeScore = 0
+        var incomeReason = ""
+
+        // Income Score (0-30 points)
+        if monthlyIncome > 0 {
+            incomeScore = 30
+            incomeReason = "You have a steady income source"
+        } else if monthlyIncome > monthlyExpense {
+            incomeScore = 20
+            incomeReason = "Income covers your expenses"
+        } else if monthlyIncome > 0 {
+            incomeScore = 10
+            incomeReason = "Income is present but low"
+        } else {
+            incomeReason = "No income tracked yet"
+        }
+
+        // Expense Score (0-30 points)
+        var expenseScore = 0
+        var expenseReason = ""
+
+        if monthlyIncome > 0 {
+            let ratio = monthlyIncome / max(monthlyExpense, 1)
+
+            if ratio >= 2.0 {
+                expenseScore = 30
+                expenseReason = "Spending less than 50% of income"
+            } else if ratio >= 1.5 {
+                expenseScore = 25
+                expenseReason = "Spending less than 67% of income"
+            } else if ratio >= 1.2 {
+                expenseScore = 20
+                expenseReason = "Spending less than 83% of income"
+            } else if ratio >= 1.0 {
+                expenseScore = 15
+                expenseReason = "Breaking even with income"
+            } else if ratio >= 0.8 {
+                expenseScore = 10
+                expenseReason = "Spending exceeds income"
+            } else {
+                expenseScore = 5
+                expenseReason = "Spending significantly exceeds income"
+            }
+        } else {
+            expenseReason = "Set up income to track expense ratio"
+        }
+
+        // Savings Score (0-40 points)
+        var savingsScore = 0
+        var savingsReason = ""
+
+        let savingsAmount = max(0, monthlyIncome - monthlyExpense)
+
+        if monthlyIncome > 0 {
+            let savingsRate = savingsAmount / monthlyIncome
+
+            if savingsRate >= 0.30 {
+                savingsScore = 40
+                savingsReason = "Saving 30%+ of income - Outstanding!"
+            } else if savingsRate >= 0.20 {
+                savingsScore = 35
+                savingsReason = "Saving 20-30% of income - Great job!"
+            } else if savingsRate >= 0.15 {
+                savingsScore = 30
+                savingsReason = "Saving 15-20% of income - Good progress"
+            } else if savingsRate >= 0.10 {
+                savingsScore = 25
+                savingsReason = "Saving 10-15% of income - Keep going"
+            } else if savingsRate >= 0.05 {
+                savingsScore = 15
+                savingsReason = "Saving 5-10% of income - Room to improve"
+            } else if savingsRate > 0 {
+                savingsScore = 10
+                savingsReason = "Saving less than 5% - Try to save more"
+            } else {
+                savingsReason = "Not saving yet - Reduce expenses"
+            }
+        } else {
+            savingsReason = "Add income to start saving"
+        }
+
+        let totalScore = min(100, max(0, incomeScore + expenseScore + savingsScore))
+
+        return HealthScoreBreakdown(
+            totalScore: totalScore,
+            incomeScore: incomeScore,
+            expenseScore: expenseScore,
+            savingsScore: savingsScore,
+            incomeReason: incomeReason,
+            expenseReason: expenseReason,
+            savingsReason: savingsReason
+        )
+    }
+
+    /// Generate actionable health tips
+    static func generateHealthTips(
+        breakdown: HealthScoreBreakdown,
+        currentIncome: Double,
+        currentExpense: Double,
+        savingsGoal: Double
+    ) -> [HealthTip] {
+        var tips: [HealthTip] = []
+
+        let savingsAmount = max(0, currentIncome - currentExpense)
+        let savingsRate = currentIncome > 0 ? savingsAmount / currentIncome : 0
+
+        // Tip 1: Savings Rate
+        if savingsRate < 0.10 && currentIncome > 0 {
+            let targetAmount = currentIncome * 0.10
+            let reductionNeeded = currentExpense - (currentIncome - targetAmount)
+            tips.append(HealthTip(
+                icon: "arrow.down.circle.fill",
+                title: "Increase Your Savings Rate",
+                description: "Try to save at least 10% of your income. Reduce expenses by \(CurrencyHelper.formatAmount(reductionNeeded)) to reach this goal.",
+                priority: .high,
+                category: .savings
+            ))
+        } else if savingsRate < 0.20 && currentIncome > 0 {
+            tips.append(HealthTip(
+                icon: "arrow.up.circle.fill",
+                title: "Boost Your Savings",
+                description: "You're saving \(String(format: "%.0f", savingsRate * 100))%. Aim for 20% to build wealth faster.",
+                priority: .medium,
+                category: .savings
+            ))
+        }
+
+        // Tip 2: Expense Management
+        if currentIncome > 0 {
+            let ratio = currentIncome / max(currentExpense, 1)
+            if ratio < 1.2 {
+                tips.append(HealthTip(
+                    icon: "chart.pie.fill",
+                    title: "Review Your Expenses",
+                    description: "Your expenses are close to your income. Look for categories where you can cut back.",
+                    priority: .high,
+                    category: .expense
+                ))
+            }
+        }
+
+        // Tip 3: Income Growth
+        if breakdown.incomeScore < 30 {
+            tips.append(HealthTip(
+                icon: "dollarsign.circle.fill",
+                title: "Add Income Sources",
+                description: "Track all your income sources to get an accurate financial picture.",
+                priority: .high,
+                category: .income
+            ))
+        } else if savingsGoal > 0 && savingsAmount > 0 {
+            let monthsToGoal = ceil(savingsGoal / savingsAmount)
+            if monthsToGoal > 12 {
+                tips.append(HealthTip(
+                    icon: "arrow.up.right.circle.fill",
+                    title: "Consider Additional Income",
+                    description: "At your current rate, it will take \(Int(monthsToGoal)) months to reach your goal. Extra income could help you get there faster.",
+                    priority: .medium,
+                    category: .income
+                ))
+            }
+        }
+
+        // Tip 4: Goal Progress
+        if savingsGoal > 0 && savingsAmount > 0 {
+            let progress = (savingsAmount / savingsGoal) * 100
+            if progress < 25 {
+                tips.append(HealthTip(
+                    icon: "target",
+                    title: "Adjust Your Savings Goal",
+                    description: "Your current savings are \(String(format: "%.0f", progress))% of your goal. Consider if your goal is realistic for your income level.",
+                    priority: .low,
+                    category: .goal
+                ))
+            }
+        } else if savingsGoal == 0 && savingsAmount > 0 {
+            tips.append(HealthTip(
+                icon: "flag.fill",
+                title: "Set a Savings Goal",
+                description: "You're saving \(CurrencyHelper.formatAmount(savingsAmount))/month. Set a goal to stay motivated!",
+                priority: .medium,
+                category: .goal
+            ))
+        }
+
+        // Tip 5: Positive Reinforcement
+        if breakdown.totalScore >= 75 {
+            tips.append(HealthTip(
+                icon: "star.fill",
+                title: "You're Doing Great!",
+                description: "Your financial health score is \(breakdown.totalScore)/100. Keep up the excellent habits!",
+                priority: .low,
+                category: .general
+            ))
+        }
+
+        // Sort by priority and limit to top 5
+        return tips.sorted { tip1, tip2 in
+            let priority1 = tip1.priority == .high ? 3 : (tip1.priority == .medium ? 2 : 1)
+            let priority2 = tip2.priority == .high ? 3 : (tip2.priority == .medium ? 2 : 1)
+            return priority1 > priority2
+        }.prefix(5).map { $0 }
+    }
 }
