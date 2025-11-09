@@ -102,131 +102,23 @@ struct InsightsView: View {
         VStack(spacing: 24) {
             // Spending Breakdown Pie Chart
             if !viewModel.spendingBreakdown.isEmpty {
-                spendingBreakdownChart
+                SpendingBreakdownView(data: viewModel.spendingBreakdown)
             }
 
             // Month Comparison Bar Chart
-            if viewModel.monthComparison != nil {
-                monthComparisonChart
+            if let comparison = viewModel.monthComparison {
+                MonthComparisonView(
+                    currentMonth: comparison.current,
+                    previousMonth: comparison.previous
+                )
             }
 
             // Balance Trend Line Chart
             if !viewModel.balanceTrend.isEmpty {
-                balanceTrendChart
-            }
-        }
-    }
-
-    // MARK: - Spending Breakdown Chart
-
-    @available(iOS 16.0, *)
-    private var spendingBreakdownChart: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Spending Breakdown")
-                .font(.title3)
-                .fontWeight(.semibold)
-
-            if viewModel.pieChartData.isEmpty {
-                Text("No spending data available")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            } else {
-                // Simple pie chart representation
-                VStack(spacing: 8) {
-                    ForEach(Array(viewModel.pieChartData.enumerated()), id: \.offset) { index, data in
-                        HStack {
-                            Circle()
-                                .fill(categoryColor(for: index))
-                                .frame(width: 12, height: 12)
-
-                            Text(DataSeedingService.displayName(for: data.0))
-                                .font(.subheadline)
-
-                            Spacer()
-
-                            Text(CurrencyHelper.formatAmount(data.1))
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                        }
-                    }
-                }
-                .padding()
-                .background(Color(.systemGray6))
-                .cornerRadius(12)
-            }
-        }
-    }
-
-    // MARK: - Month Comparison Chart
-
-    @available(iOS 16.0, *)
-    private var monthComparisonChart: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Monthly Comparison")
-                .font(.title3)
-                .fontWeight(.semibold)
-
-            if viewModel.barChartData.isEmpty {
-                Text("Not enough data for comparison")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            } else {
-                VStack(spacing: 8) {
-                    ForEach(viewModel.barChartData, id: \.0) { data in
-                        HStack {
-                            Text(data.0)
-                                .font(.subheadline)
-                                .frame(width: 100, alignment: .leading)
-
-                            GeometryReader { geometry in
-                                RoundedRectangle(cornerRadius: 4)
-                                    .fill(data.0 == "This Month" ? Color.blue : Color.gray.opacity(0.5))
-                                    .frame(width: barWidth(for: data.1, in: geometry.size.width))
-                                    .frame(height: 24)
-                            }
-
-                            Text(CurrencyHelper.formatAmount(data.1))
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                                .frame(width: 80, alignment: .trailing)
-                        }
-                        .frame(height: 24)
-                    }
-                }
-                .padding()
-                .background(Color(.systemGray6))
-                .cornerRadius(12)
-            }
-        }
-    }
-
-    // MARK: - Balance Trend Chart
-
-    @available(iOS 16.0, *)
-    private var balanceTrendChart: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Balance Trend (30 Days)")
-                .font(.title3)
-                .fontWeight(.semibold)
-
-            if viewModel.lineChartData.isEmpty {
-                Text("Not enough data for trend")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            } else {
-                Chart {
-                    ForEach(viewModel.lineChartData, id: \.0) { dataPoint in
-                        LineMark(
-                            x: .value("Date", dataPoint.0),
-                            y: .value("Balance", dataPoint.1)
-                        )
-                        .foregroundStyle(dataPoint.1 >= 0 ? Color.green : Color.red)
-                    }
-                }
-                .frame(height: 200)
-                .padding()
-                .background(Color(.systemGray6))
-                .cornerRadius(12)
+                BalanceTrendView(
+                    snapshots: viewModel.balanceTrend,
+                    days: 30
+                )
             }
         }
     }
@@ -311,20 +203,6 @@ struct InsightsView: View {
             Spacer()
         }
         .padding()
-    }
-
-    // MARK: - Helper Methods
-
-    private func categoryColor(for index: Int) -> Color {
-        let colors: [Color] = [.blue, .green, .orange, .purple, .pink]
-        return colors[index % colors.count]
-    }
-
-    private func barWidth(for value: Double, in totalWidth: Double) -> CGFloat {
-        guard let maxValue = viewModel.barChartData.map({ $0.1 }).max(), maxValue > 0 else {
-            return 0
-        }
-        return CGFloat((value / maxValue) * Double(totalWidth))
     }
 }
 
