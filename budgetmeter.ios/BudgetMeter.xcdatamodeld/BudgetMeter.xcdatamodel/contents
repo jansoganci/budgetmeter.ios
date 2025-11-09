@@ -13,6 +13,13 @@
         <attribute name="selectedTheme" optional="YES" attributeType="String"/>
         <attribute name="customAppIcon" optional="YES" attributeType="String"/>
         <attribute name="lastExportDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="weeklySummaryEnabled" optional="YES" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="weeklySummaryTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="milestonesEnabled" optional="YES" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="spendingAlertsEnabled" optional="YES" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="dailyEncouragementEnabled" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="lastWeeklySummary" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="lastMilestoneCheck" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
     </entity>
     <entity name="FinancialCategory" representedClassName="FinancialCategory" syncable="YES" codeGenerationType="class">
         <attribute name="amount" optional="YES" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
@@ -40,5 +47,19 @@
         <attribute name="notes" optional="YES" attributeType="String"/>
         <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="lastProcessedDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+    </entity>
+    <entity name="FinancialSnapshot" representedClassName="FinancialSnapshot" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="date" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="snapshotType" optional="YES" attributeType="String"/>
+        <attribute name="totalIncome" optional="YES" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="totalExpense" optional="YES" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="balance" optional="YES" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="netFlow" optional="YES" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="savingsAmount" optional="YES" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="healthScore" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="savingsRate" optional="YES" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="categoryBreakdown" optional="YES" attributeType="String"/>
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
     </entity>
 </model>
