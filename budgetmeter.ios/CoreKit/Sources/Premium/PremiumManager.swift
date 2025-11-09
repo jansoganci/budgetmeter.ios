@@ -49,8 +49,20 @@ final class PremiumManager: ObservableObject {
         transactionListener?.cancel()
     }
     
+    // MARK: - Feature Access
+
+    /// Check if user has access to Insights Dashboard
+    var hasInsights: Bool {
+        return isPremium
+    }
+
+    /// Check if user has access to Advanced Notifications
+    var hasAdvancedNotifications: Bool {
+        return isPremium
+    }
+
     // MARK: - Public Methods
-    
+
     /// Checks current premium status from Core Data
     func checkPremiumStatus() {
         loadPremiumStatus()
