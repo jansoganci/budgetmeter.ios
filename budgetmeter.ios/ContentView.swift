@@ -9,7 +9,8 @@ import SwiftUI
 
 struct ContentView: View {
     @ObservedObject private var localizationManager = LocalizationManager.shared
-    
+    @ObservedObject private var themeManager = ThemeManager.shared
+
     var body: some View {
         // Phase 4: Steve Jobs "focus and simplify" - Home-first design
         // 5 tabs: Home (dashboard) + Income + Expenses + Insights + Settings
@@ -19,19 +20,19 @@ struct ContentView: View {
                     Image(systemName: "house")
                     Text("tab.home.title".localized(defaultValue: "Home"))
                 }
-            
+
             IncomeView()
                 .tabItem {
                     Image(systemName: "plus.circle")
                     Text("tab.income.title".localized(defaultValue: "Income"))
                 }
-            
+
             ExpenseView()
                 .tabItem {
                     Image(systemName: "minus.circle")
                     Text("tab.expenses.title".localized(defaultValue: "Expenses"))
                 }
-            
+
             PremiumFeatureView(
                 premiumFeature: .spendingInsights,
                 onDismiss: {},
@@ -43,7 +44,7 @@ struct ContentView: View {
                 Image(systemName: "chart.bar.fill")
                 Text("tab.insights.title".localized(defaultValue: "Insights"))
             }
-            
+
             SettingsView()
                 .tabItem {
                     Image(systemName: "gearshape")
@@ -51,7 +52,7 @@ struct ContentView: View {
                 }
         }
         .environment(\.locale, localizationManager.currentLocale)
-        .accentColor(Color(hex: "4A90E2")) // Brand primary color from design rulebook
+        .accentColor(themeManager.accentColor)
     }
 }
 

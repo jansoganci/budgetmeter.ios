@@ -12,23 +12,24 @@ import BackgroundTasks
 @main
 struct budgetmeter_iosApp: App {
     @StateObject private var biometricManager = BiometricManager.shared
-    
+    @StateObject private var themeManager = ThemeManager.shared
+
     init() {
         // Load and apply stored theme preference before any views render
         loadAndApplyStoredTheme()
-        
+
         // Seed initial data on first launch
         let dataSeedingService = DataSeedingService()
         dataSeedingService.seedInitialDataIfNeeded()
-        
+
         // Migrate custom categories to unified FinancialCategory system
         let migrationService = CustomCategoryMigrationService()
         migrationService.performMigrationIfNeeded()
-        
+
         // Initialize background processing
         BackgroundProcessingService.shared.scheduleBackgroundProcessing()
     }
-    
+
     var body: some Scene {
         WindowGroup {
             Group {
@@ -42,6 +43,7 @@ struct budgetmeter_iosApp: App {
                 }
             }
             .environmentObject(biometricManager)
+            .accentColor(themeManager.accentColor)
             .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { _ in
                 BackgroundProcessingService.shared.applicationDidEnterBackground()
                 biometricManager.resetAuthentication()
