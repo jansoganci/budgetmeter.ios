@@ -24,7 +24,10 @@ struct SettingsView: View {
 
                 // Currency Section
                 currencySection
-                
+
+                // Notifications Section
+                notificationsSection
+
                 // Premium Section
                 premiumSection
                 
@@ -193,9 +196,43 @@ struct SettingsView: View {
             Text("settings.currency.footer".localized(defaultValue: "Select your preferred currency for displaying amounts."))
         }
     }
-    
+
+    // MARK: - Notifications Section
+
+    private var notificationsSection: some View {
+        Section {
+            NavigationLink(destination: NotificationSettingsView()) {
+                HStack(spacing: 12) {
+                    Image(systemName: "bell.fill")
+                        .foregroundColor(Color(hex: "4A90E2"))
+                        .frame(width: 24)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Notifications")
+                            .font(.body)
+                            .foregroundColor(.primary)
+                        Text("Manage alerts and reminders")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.secondary)
+                        .font(.system(size: 14, weight: .medium))
+                }
+                .contentShape(Rectangle())
+            }
+        } header: {
+            Text("NOTIFICATIONS")
+        } footer: {
+            Text("Control how BudgetMeter notifies you about your financial progress")
+        }
+    }
+
     // MARK: - Premium Section
-    
+
     private var premiumSection: some View {
         Section {
             NavigationLink(destination: RecurringTransactionsView()) {
