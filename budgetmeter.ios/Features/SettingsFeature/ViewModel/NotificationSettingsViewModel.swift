@@ -52,6 +52,15 @@ final class NotificationSettingsViewModel: ObservableObject {
     /// Error message
     @Published var errorMessage: String?
 
+    /// Show error alert
+    @Published var showErrorAlert = false
+
+    /// Success message
+    @Published var successMessage: String?
+
+    /// Show success alert
+    @Published var showSuccessAlert = false
+
     // MARK: - Private Properties
 
     private let persistenceService: PersistenceService
@@ -153,6 +162,12 @@ final class NotificationSettingsViewModel: ObservableObject {
 
     /// Toggle weekly summary notifications
     func toggleWeekly(_ enabled: Bool) {
+        guard permissionStatus == .authorized || !enabled else {
+            showError("Please enable notifications in Settings first")
+            weeklyEnabled = false
+            return
+        }
+
         weeklyEnabled = enabled
         saveSettings()
 
@@ -196,7 +211,14 @@ final class NotificationSettingsViewModel: ObservableObject {
         // Check premium status
         guard premiumManager.hasAdvancedNotifications else {
             showPaywall = true
+            dailyEnabled = false
             print("📱 NotificationSettings: ⭐ Premium required for daily encouragement")
+            return
+        }
+
+        guard permissionStatus == .authorized || !enabled else {
+            showError("Please enable notifications in Settings first")
+            dailyEnabled = false
             return
         }
 
@@ -331,5 +353,31 @@ final class NotificationSettingsViewModel: ObservableObject {
         components.hour = 9
         components.minute = 0
         return calendar.date(from: components) ?? Date()
+    }
+
+    /// Show error message to user
+    private func showError(_ message: String) {
+        errorMessage = message
+        showErrorAlert = true
+        print("📱 NotificationSettings: ❌ Error: \(message)")
+    }
+
+    /// Show success message to user
+    private func showSuccess(_ message: String) {
+        successMessage = message
+        showSuccessAlert = true
+        print("📱 NotificationSettings: ✅ Success: \(message)")
+    }
+
+    /// Clear error state
+    func clearError() {
+        errorMessage = nil
+        showErrorAlert = false
+    }
+
+    /// Clear success state
+    func clearSuccess() {
+        successMessage = nil
+        showSuccessAlert = false
     }
 }

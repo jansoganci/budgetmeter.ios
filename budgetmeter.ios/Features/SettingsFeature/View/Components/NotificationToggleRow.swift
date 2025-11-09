@@ -90,8 +90,11 @@ struct NotificationToggleRow: View {
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(title), \(description), \(isOn ? "enabled" : "disabled")\(isPremium ? ", premium feature" : "")")
-        .accessibilityHint(isLocked ? "Double tap to unlock with premium" : "Double tap to toggle")
+        .accessibilityLabel("\(title), \(description)")
+        .accessibilityValue(isOn ? "enabled" : "disabled")
+        .accessibilityHint(isLocked ? "Premium feature. Double tap to view upgrade options" : "Double tap to \(isOn ? "disable" : "enable") \(title.lowercased())")
+        .accessibilityAddTraits(isLocked ? [.isButton] : [])
+        .accessibilityRemoveTraits(isLocked ? [] : [.isButton])
     }
 
     // MARK: - Premium Badge
