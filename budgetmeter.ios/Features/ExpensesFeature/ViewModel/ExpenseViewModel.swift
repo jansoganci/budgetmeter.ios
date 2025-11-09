@@ -24,16 +24,22 @@ final class ExpenseViewModel: ObservableObject {
     @Published private(set) var currencySymbol: String = CurrencyHelper.symbol(for: CurrencyHelper.defaultCurrencyCode())
     
     // MARK: - Summary Computed Properties
-    
+
     var totalMonthlyExpenses: Double {
-        let dailyTotal = dailyExpenses.reduce(0) { $0 + $1.amount } * 30 // Daily × 30
+        let dailyTotal = dailyExpenses.reduce(0) { $0 + $1.amount }
         let monthlyTotal = monthlyExpenses.reduce(0) { $0 + $1.amount }
-        let yearlyMonthly = yearlyExpenses.reduce(0) { $0 + $1.amount } / 12 // Yearly ÷ 12
-        return dailyTotal + monthlyTotal + yearlyMonthly
+        let yearlyTotal = yearlyExpenses.reduce(0) { $0 + $1.amount }
+
+        // Use CalculationEngine for consistency
+        return CalculationEngine.totalMonthlyExpense(
+            dailyTotal: dailyTotal,
+            monthlyTotal: monthlyTotal,
+            yearlyTotal: yearlyTotal
+        )
     }
-    
+
     var dailyAverageExpenses: Double {
-        return totalMonthlyExpenses / 30
+        return totalMonthlyExpenses / CalculationEngine.daysPerMonth
     }
     
     var yearlyProjectionExpenses: Double {
@@ -101,17 +107,29 @@ final class ExpenseViewModel: ObservableObject {
         return formatter.string(from: NSNumber(value: amount)) ?? "0"
     }
     
-    /// Parses input string to Double amount
+    /// Parses input string to Double amount with validation
     func parseAmount(from input: String) -> Double {
         // Remove any non-numeric characters except decimal point
         let cleanedInput = input.replacingOccurrences(of: "[^0-9.]", with: "", options: .regularExpression)
-        
+
         // Handle empty input
         if cleanedInput.isEmpty {
             return 0
         }
-        
-        return Double(cleanedInput) ?? 0
+
+        guard let amount = Double(cleanedInput) else {
+            return 0
+        }
+
+        // Validate maximum value (prevent overflow and unrealistic amounts)
+        // Max: 1 billion (prevents display issues and calculation overflow)
+        let maxAmount: Double = 1_000_000_000
+
+        // Validate minimum value
+        let minAmount: Double = 0
+
+        // Clamp to valid range
+        return min(max(amount, minAmount), maxAmount)
     }
     
     /// Formats amount for currency display (shown when not editing)
