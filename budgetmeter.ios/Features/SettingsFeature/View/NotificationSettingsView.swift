@@ -17,6 +17,12 @@ struct NotificationSettingsView: View {
     @StateObject private var viewModel = NotificationSettingsViewModel()
     @State private var showWeeklyTimePicker = false
     @State private var showDailyTimePicker = false
+    @State private var showTestSuccess = false
+    @State private var showTestError = false
+
+    // Haptic feedback generator
+    private let hapticFeedback = UIImpactFeedbackGenerator(style: .medium)
+    private let successFeedback = UINotificationFeedbackGenerator()
 
     // MARK: - Body
 
@@ -44,14 +50,45 @@ struct NotificationSettingsView: View {
             .navigationBarTitleDisplayMode(.large)
             .sheet(isPresented: $viewModel.showPaywall) {
                 PremiumPaywallView(
-                    feature: .advancedNotifications,
+                    feature: nil,
                     onDismiss: {
                         viewModel.dismissPaywall()
+                    },
+                    onPurchase: {
+                        Task {
+                            // Purchase will be handled by PremiumManager
+                            viewModel.dismissPaywall()
+                        }
+                    },
+                    onRestore: {
+                        Task {
+                            // Restore will be handled by PremiumManager
+                            viewModel.dismissPaywall()
+                        }
                     }
                 )
             }
+            .alert("Test Notification Sent!", isPresented: $showTestSuccess) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("Check your notifications in a few seconds!")
+            }
+            .alert("Notification Failed", isPresented: $showTestError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("Please enable notifications in Settings to receive alerts.")
+            }
+            .alert("Error", isPresented: $viewModel.showErrorAlert) {
+                Button("OK", role: .cancel) {
+                    viewModel.clearError()
+                }
+            } message: {
+                Text(viewModel.errorMessage ?? "An unexpected error occurred")
+            }
             .onAppear {
                 viewModel.checkPermissionStatus()
+                hapticFeedback.prepare()
+                successFeedback.prepare()
             }
         }
     }
@@ -60,8 +97,12 @@ struct NotificationSettingsView: View {
 
     private var permissionBanner: some View {
         NotificationPermissionBanner {
+            hapticFeedback.impactOccurred()
             viewModel.openSystemSettings()
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Notifications are currently disabled")
+        .accessibilityHint("Double tap to open Settings and enable notifications")
     }
 
     // MARK: - Notification Types Section
@@ -86,11 +127,13 @@ struct NotificationSettingsView: View {
                         }
                     )
                     .onChange(of: viewModel.weeklyEnabled) { newValue in
+                        hapticFeedback.impactOccurred()
                         viewModel.toggleWeekly(newValue)
                     }
                     .onTapGesture {
                         if viewModel.weeklyEnabled {
-                            withAnimation {
+                            hapticFeedback.impactOccurred()
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                                 showWeeklyTimePicker.toggle()
                             }
                         }
@@ -98,7 +141,10 @@ struct NotificationSettingsView: View {
 
                     if showWeeklyTimePicker && viewModel.weeklyEnabled {
                         weeklyTimePicker
-                            .transition(.opacity.combined(with: .move(edge: .top)))
+                            .transition(.asymmetric(
+                                insertion: .scale(scale: 0.95).combined(with: .opacity),
+                                removal: .scale(scale: 0.95).combined(with: .opacity)
+                            ))
                     }
                 }
 
@@ -116,6 +162,7 @@ struct NotificationSettingsView: View {
                     }
                 )
                 .onChange(of: viewModel.milestonesEnabled) { newValue in
+                    hapticFeedback.impactOccurred()
                     viewModel.toggleMilestones(newValue)
                 }
 
@@ -133,6 +180,7 @@ struct NotificationSettingsView: View {
                     }
                 )
                 .onChange(of: viewModel.spendingEnabled) { newValue in
+                    hapticFeedback.impactOccurred()
                     viewModel.toggleSpending(newValue)
                 }
 
@@ -150,16 +198,19 @@ struct NotificationSettingsView: View {
                         isLocked: !viewModel.isPremium,
                         onTap: {
                             if !viewModel.isPremium {
+                                hapticFeedback.impactOccurred()
                                 viewModel.toggleDaily(true)
                             }
                         }
                     )
                     .onChange(of: viewModel.dailyEnabled) { newValue in
+                        hapticFeedback.impactOccurred()
                         viewModel.toggleDaily(newValue)
                     }
                     .onTapGesture {
                         if viewModel.dailyEnabled && viewModel.isPremium {
-                            withAnimation {
+                            hapticFeedback.impactOccurred()
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                                 showDailyTimePicker.toggle()
                             }
                         }
@@ -167,7 +218,10 @@ struct NotificationSettingsView: View {
 
                     if showDailyTimePicker && viewModel.dailyEnabled && viewModel.isPremium {
                         dailyTimePicker
-                            .transition(.opacity.combined(with: .move(edge: .top)))
+                            .transition(.asymmetric(
+                                insertion: .scale(scale: 0.95).combined(with: .opacity),
+                                removal: .scale(scale: 0.95).combined(with: .opacity)
+                            ))
                     }
                 }
             }
@@ -189,8 +243,11 @@ struct NotificationSettingsView: View {
             .datePickerStyle(.wheel)
             .labelsHidden()
             .onChange(of: viewModel.weeklyTime) { newTime in
+                hapticFeedback.impactOccurred()
                 viewModel.updateWeeklyTime(newTime)
             }
+            .accessibilityLabel("Weekly notification time picker")
+            .accessibilityHint("Select the time for weekly summary notifications every Sunday")
 
             Text("Notification will be sent every Sunday at this time")
                 .font(.caption)
@@ -214,8 +271,11 @@ struct NotificationSettingsView: View {
             .datePickerStyle(.wheel)
             .labelsHidden()
             .onChange(of: viewModel.dailyTime) { newTime in
+                hapticFeedback.impactOccurred()
                 viewModel.updateDailyTime(newTime)
             }
+            .accessibilityLabel("Daily notification time picker")
+            .accessibilityHint("Select the time for daily encouragement notifications. Premium feature")
 
             Text("Notification will be sent every day at this time")
                 .font(.caption)
@@ -234,7 +294,14 @@ struct NotificationSettingsView: View {
     private var testNotificationSection: some View {
         VStack(spacing: 12) {
             Button {
-                viewModel.sendTestNotification()
+                if viewModel.permissionStatus == .authorized {
+                    successFeedback.notificationOccurred(.success)
+                    viewModel.sendTestNotification()
+                    showTestSuccess = true
+                } else {
+                    successFeedback.notificationOccurred(.error)
+                    showTestError = true
+                }
             } label: {
                 HStack {
                     Image(systemName: "paperplane.fill")
@@ -247,7 +314,7 @@ struct NotificationSettingsView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(Color.blue)
+                .background(viewModel.permissionStatus == .authorized ? Color.blue : Color.gray)
                 .cornerRadius(10)
             }
             .disabled(viewModel.permissionStatus != .authorized)
@@ -258,6 +325,9 @@ struct NotificationSettingsView: View {
                     .foregroundColor(.secondary)
             }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Test notification button")
+        .accessibilityHint(viewModel.permissionStatus == .authorized ? "Send a test notification to verify your settings" : "Notifications are disabled. Enable them first to send a test notification")
     }
 
     // MARK: - Info Section
@@ -299,6 +369,8 @@ struct NotificationSettingsView: View {
             .cornerRadius(12)
             .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("How notifications work")
     }
 
     private func infoRow(icon: String, title: String, description: String) -> some View {
@@ -307,6 +379,7 @@ struct NotificationSettingsView: View {
                 .font(.title3)
                 .foregroundColor(.blue)
                 .frame(width: 24)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
@@ -318,6 +391,8 @@ struct NotificationSettingsView: View {
                     .foregroundColor(.secondary)
             }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title): \(description)")
     }
 
     // MARK: - Computed Properties

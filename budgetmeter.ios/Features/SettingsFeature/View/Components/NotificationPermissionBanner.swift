@@ -56,6 +56,8 @@ struct NotificationPermissionBanner: View {
                 .background(Color.blue)
                 .cornerRadius(10)
             }
+            .accessibilityLabel("Open iOS Settings")
+            .accessibilityHint("Opens the Settings app to enable notifications for BudgetMeter")
         }
         .padding()
         .background(Color.orange.opacity(0.1))
@@ -64,8 +66,9 @@ struct NotificationPermissionBanner: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(Color.orange.opacity(0.3), lineWidth: 1)
         )
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Notifications are disabled. Tap to open Settings and enable notifications.")
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Notification permission alert")
+        .accessibilityHint("Notifications are currently disabled for BudgetMeter")
     }
 }
 
