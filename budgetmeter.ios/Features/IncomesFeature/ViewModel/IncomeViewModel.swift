@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 import CoreData
 import Combine
+import WidgetKit
 
 /// ViewModel for the Income screen following MVVM architecture
 @MainActor
@@ -90,6 +91,9 @@ final class IncomeViewModel: ObservableObject {
     func updateAmount(for category: FinancialCategory, amount: Double) {
         category.amount = amount
         persistenceService.save()
+
+        // Reload widgets to show updated income data
+        WidgetCenter.shared.reloadAllTimelines()
     }
     
     /// Formats amount for display in input field (no live formatting during input)

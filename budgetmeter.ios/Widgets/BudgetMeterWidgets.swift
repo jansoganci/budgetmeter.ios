@@ -2,11 +2,21 @@ import WidgetKit
 import SwiftUI
 import CoreData
 
+@main
 struct BudgetMeterWidgets: WidgetBundle {
     var body: some Widget {
+        // Home Screen Widgets
         BalanceWidget()
         SpendingWidget()
         SavingsWidget()
+        CombinedBalanceSavingsWidget()
+
+        // Lock Screen Widgets (iOS 16+)
+        if #available(iOS 16.0, *) {
+            LockScreenBalanceCircular()
+            LockScreenBalanceRectangular()
+            LockScreenBalanceInline()
+        }
     }
 }
 
@@ -96,30 +106,30 @@ struct BalanceWidgetEntryView: View {
 
 struct SmallBalanceView: View {
     let entry: BalanceEntry
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Image(systemName: "dollarsign.circle.fill")
                     .foregroundColor(.white)
                     .font(.title2)
-                
+
                 Spacer()
-                
+
                 if entry.isPremium {
                     Image(systemName: "crown.fill")
                         .foregroundColor(.yellow)
                         .font(.caption)
                 }
             }
-            
+
             Spacer()
-            
+
             VStack(alignment: .leading, spacing: 4) {
                 Text("widget.balance.label".localized(defaultValue: "Balance"))
                     .font(.caption)
                     .foregroundColor(.white.opacity(0.8))
-                
+
                 Text(CurrencyHelper.formatAmount(entry.balance))
                     .font(.title2)
                     .fontWeight(.bold)
@@ -127,7 +137,7 @@ struct SmallBalanceView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
             }
-            
+
             Spacer()
         }
         .padding()
@@ -139,6 +149,7 @@ struct SmallBalanceView: View {
             )
         )
         .cornerRadius(16)
+        .widgetURL(URL(string: "budgetmeter://home"))
     }
 }
 
@@ -198,6 +209,7 @@ struct MediumBalanceView: View {
             )
         )
         .cornerRadius(16)
+        .widgetURL(URL(string: "budgetmeter://home"))
     }
 }
 
@@ -381,6 +393,7 @@ struct MediumSpendingView: View {
             )
         )
         .cornerRadius(16)
+        .widgetURL(URL(string: "budgetmeter://expenses"))
     }
 }
 
@@ -448,6 +461,7 @@ struct LargeSpendingView: View {
             )
         )
         .cornerRadius(16)
+        .widgetURL(URL(string: "budgetmeter://expenses"))
     }
 }
 
@@ -630,6 +644,7 @@ struct SmallSavingsView: View {
             )
         )
         .cornerRadius(16)
+        .widgetURL(URL(string: "budgetmeter://home"))
     }
 }
 
@@ -708,5 +723,6 @@ struct MediumSavingsView: View {
             )
         )
         .cornerRadius(16)
+        .widgetURL(URL(string: "budgetmeter://home"))
     }
 }

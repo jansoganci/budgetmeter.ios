@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import CoreData
+import WidgetKit
 
 /// ViewModel for Settings screen following MVVM architecture and HIG patterns
 @MainActor
@@ -222,6 +223,9 @@ final class SettingsViewModel: ObservableObject {
             appSettings.preferredCurrencyCode = resolvedCode
             persistenceService.save()
 
+            // Reload widgets to show updated currency
+            WidgetCenter.shared.reloadAllTimelines()
+
             NotificationCenter.default.post(
                 name: .currencyDidChange,
                 object: nil,
@@ -290,6 +294,9 @@ final class SettingsViewModel: ObservableObject {
             appSettings.cumulativeStartDate = Date()
 
             persistenceService.save()
+
+            // Reload widgets to show reset data
+            WidgetCenter.shared.reloadAllTimelines()
         } catch {
             print("Failed to reset cumulative meter: \(error)")
         }

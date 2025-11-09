@@ -51,6 +51,31 @@ struct budgetmeter_iosApp: App {
             .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
                 BackgroundProcessingService.shared.applicationWillEnterForeground()
             }
+            .onOpenURL { url in
+                handleDeepLink(url)
+            }
+        }
+    }
+
+    // MARK: - Deep Linking
+
+    /// Handles deep link URLs from widgets and other sources
+    private func handleDeepLink(_ url: URL) {
+        guard url.scheme == "budgetmeter" else { return }
+
+        // Handle different deep link paths
+        switch url.host {
+        case "home":
+            // Navigate to home tab (already selected by default)
+            NotificationCenter.default.post(name: NSNotification.Name("NavigateToHome"), object: nil)
+        case "expenses":
+            // Navigate to expenses tab
+            NotificationCenter.default.post(name: NSNotification.Name("NavigateToExpenses"), object: nil)
+        case "income":
+            // Navigate to income tab
+            NotificationCenter.default.post(name: NSNotification.Name("NavigateToIncome"), object: nil)
+        default:
+            break
         }
     }
     
