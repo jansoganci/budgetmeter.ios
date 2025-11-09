@@ -28,33 +28,57 @@ struct WidgetsSetupView: View {
                     .padding(.horizontal)
                 
                 VStack(alignment: .leading, spacing: 15) {
-                    widgetFeatureRow(
-                        icon: "house",
-                        title: "Home Screen Widgets",
-                        description: "View your current balance and spending summary"
+                    Text("How to Add Widgets")
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .padding(.top, 10)
+
+                    setupStepRow(
+                        number: "1",
+                        title: "Long Press Home Screen",
+                        description: "Press and hold on an empty area of your Home Screen"
                     )
-                    
-                    widgetFeatureRow(
-                        icon: "lock",
-                        title: "Lock Screen Widgets",
-                        description: "Quick access to your financial overview"
+
+                    setupStepRow(
+                        number: "2",
+                        title: "Tap the + Button",
+                        description: "Tap the + button in the top-left corner"
                     )
-                    
-                    widgetFeatureRow(
-                        icon: "chart.bar.fill",
-                        title: "Multiple Sizes",
-                        description: "Small, medium, and large widget options"
+
+                    setupStepRow(
+                        number: "3",
+                        title: "Search for BudgetMeter",
+                        description: "Find BudgetMeter in the widget list"
+                    )
+
+                    setupStepRow(
+                        number: "4",
+                        title: "Choose Widget & Size",
+                        description: "Select your preferred widget and size"
+                    )
+
+                    setupStepRow(
+                        number: "5",
+                        title: "Add Widget",
+                        description: "Tap \"Add Widget\" to place it on your Home Screen"
                     )
                 }
                 .padding(.horizontal)
-                
+
                 Spacer()
-                
-                Button("Add Widget") {
-                    // TODO: Implement widget setup
+
+                VStack(spacing: 12) {
+                    Text("Available Widgets")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+
+                    HStack(spacing: 12) {
+                        widgetBadge(name: "Balance", color: .blue)
+                        widgetBadge(name: "Spending", color: .green)
+                        widgetBadge(name: "Savings", color: .purple)
+                        widgetBadge(name: "Combined", color: .blue)
+                    }
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
                 .padding(.horizontal)
             }
             .padding()
@@ -63,23 +87,42 @@ struct WidgetsSetupView: View {
         }
     }
     
-    private func widgetFeatureRow(icon: String, title: String, description: String) -> some View {
-        HStack {
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundColor(.accentColor)
-                .frame(width: 30)
-            
-            VStack(alignment: .leading) {
-                Text(title)
+    private func setupStepRow(number: String, title: String, description: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(Color.accentColor.opacity(0.2))
+                    .frame(width: 32, height: 32)
+
+                Text(number)
                     .font(.headline)
-                Text(description)
+                    .fontWeight(.bold)
+                    .foregroundColor(.accentColor)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
                     .font(.subheadline)
+                    .fontWeight(.semibold)
+
+                Text(description)
+                    .font(.caption)
                     .foregroundColor(.secondary)
             }
-            
+
             Spacer()
         }
+    }
+
+    private func widgetBadge(name: String, color: Color) -> some View {
+        Text(name)
+            .font(.caption2)
+            .fontWeight(.medium)
+            .foregroundColor(.white)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(color)
+            .cornerRadius(8)
     }
 }
 

@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 import CoreData
 import Combine
+import WidgetKit
 
 /// ViewModel for the Home screen following MVVM architecture
 @MainActor
@@ -45,7 +46,7 @@ final class HomeViewModel: ObservableObject {
     @Published var showingExpenseSheet = false
     
     // MARK: - Private Properties
-    
+
     private let persistenceService: PersistenceService
     private var cancellables = Set<AnyCancellable>()
     private var timer: Timer?
@@ -54,6 +55,9 @@ final class HomeViewModel: ObservableObject {
     private var cumulativeBaseline: Double = 0
     private var cumulativeStartDate: Date = Date()
     var currencyCode: String = CurrencyHelper.defaultCurrencyCode()
+
+    // Prevent timer race conditions
+    private var isUpdatingLiveValue: Bool = false
     
     // Financial data cache
     private var dailyIncomeTotal: Double = 0
@@ -180,9 +184,17 @@ final class HomeViewModel: ObservableObject {
     }
     
     private func updateLiveValue() {
+        // Prevent race conditions - skip if already updating
+        guard !isUpdatingLiveValue else {
+            return
+        }
+
+        isUpdatingLiveValue = true
+        defer { isUpdatingLiveValue = false }
+
         let currentTime = Date()
         let sessionElapsed = currentTime.timeIntervalSince(sessionStartTime)
-        
+
         // Calculate live income and expense
         let liveIncome = CalculationEngine.calculateLiveIncome(
             dailyIncomeTotal: dailyIncomeTotal,
@@ -190,20 +202,20 @@ final class HomeViewModel: ObservableObject {
             yearlyIncomeTotal: yearlyIncomeTotal,
             sessionSeconds: sessionElapsed
         )
-        
+
         let liveExpense = CalculationEngine.calculateLiveExpense(
             dailyTotal: dailyExpenseTotal,
             monthlyTotal: monthlyExpenseTotal,
             yearlyTotal: yearlyExpenseTotal,
             sessionSeconds: sessionElapsed
         )
-        
+
         // Calculate net live flow
         let liveNetFlow = CalculationEngine.calculateLiveNetFlow(
             liveIncome: liveIncome,
             liveExpense: liveExpense
         )
-        
+
         let sessionNet = liveNetFlow
 
         liveValue = sessionBaseline + sessionNet
@@ -476,9 +488,12 @@ final class HomeViewModel: ObservableObject {
                 }
                 
                 appSettings.savingsGoalAmount = amount
-                
+
                 // Save is automatically handled by performBackgroundTask
-                
+
+                // Reload widgets to show updated savings goal
+                WidgetCenter.shared.reloadAllTimelines()
+
             } catch {
                 print("Failed to save savings goal: \(error)")
             }
@@ -562,9 +577,12 @@ final class HomeViewModel: ObservableObject {
                 appSettings.cumulativeTotal = roundedCumulativeTotal
                 appSettings.lastMeterValue = self.liveValue
                 appSettings.lastBackgroundedTimestamp = Date()
-                
+
                 // The save is automatically handled by performBackgroundTask
-                
+
+                // Reload widgets to show updated data
+                WidgetCenter.shared.reloadAllTimelines()
+
                 // After saving, update the UI on the main thread
                 Task { @MainActor in
                     // Safely update the baseline on the main thread

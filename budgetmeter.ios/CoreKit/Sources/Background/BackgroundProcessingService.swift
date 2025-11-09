@@ -4,12 +4,22 @@ import CoreData
 
 final class BackgroundProcessingService {
     static let shared = BackgroundProcessingService()
-    
+
     private let persistenceService: PersistenceService
     private let backgroundTaskIdentifier = "com.budgetmeter.recurring-transactions"
-    
-    private init(persistenceService: PersistenceService = .shared) {
+
+    // Services for insights and notifications
+    private let historicalDataService: HistoricalDataService
+    private let notificationService: NotificationService
+
+    private init(
+        persistenceService: PersistenceService = .shared,
+        historicalDataService: HistoricalDataService = .shared,
+        notificationService: NotificationService = .shared
+    ) {
         self.persistenceService = persistenceService
+        self.historicalDataService = historicalDataService
+        self.notificationService = notificationService
         registerBackgroundTask()
     }
     
@@ -34,15 +44,17 @@ final class BackgroundProcessingService {
     private func handleBackgroundTask(_ task: BGAppRefreshTask) {
         // Schedule the next background task
         scheduleBackgroundProcessing()
-        
+
         // Set expiration handler
         task.expirationHandler = {
             task.setTaskCompleted(success: false)
         }
-        
-        // Process recurring transactions
+
+        // Process all background tasks
         Task {
             await processRecurringTransactions()
+            await processSnapshots()
+            await checkNotifications()
             task.setTaskCompleted(success: true)
         }
     }
@@ -123,16 +135,69 @@ final class BackgroundProcessingService {
         }
     }
     
+    // MARK: - Snapshot Processing
+
+    @MainActor
+    private func processSnapshots() async {
+        print("📊 BackgroundProcessingService: Processing snapshots...")
+
+        // Save daily snapshot
+        historicalDataService.saveDailySnapshot()
+
+        // Check if it's the first day of the month
+        let calendar = Calendar.current
+        let dayOfMonth = calendar.component(.day, from: Date())
+
+        if dayOfMonth == 1 {
+            historicalDataService.saveMonthlySnapshot()
+            print("📊 BackgroundProcessingService: Saved monthly snapshot")
+        }
+
+        // Clean up old snapshots (every 7 days)
+        if dayOfMonth % 7 == 0 {
+            historicalDataService.cleanupOldSnapshots()
+            print("📊 BackgroundProcessingService: Cleaned up old snapshots")
+        }
+    }
+
+    // MARK: - Notification Processing
+
+    @MainActor
+    private func checkNotifications() async {
+        print("🔔 BackgroundProcessingService: Checking notifications...")
+
+        // Check for milestones
+        notificationService.checkMilestones()
+
+        // Check for spending alerts (on Mondays)
+        let calendar = Calendar.current
+        let weekday = calendar.component(.weekday, from: Date())
+
+        if weekday == 2 { // Monday
+            notificationService.checkSpendingAlert()
+        }
+
+        print("🔔 BackgroundProcessingService: Notification check complete")
+    }
+
     // MARK: - App Lifecycle Integration
-    
+
     func applicationDidEnterBackground() {
         scheduleBackgroundProcessing()
+
+        // Save snapshot when app goes to background
+        historicalDataService.saveDailySnapshot()
     }
-    
+
     func applicationWillEnterForeground() {
         // Process any pending transactions when app becomes active
         Task {
             await processRecurringTransactions()
+            await processSnapshots()
         }
+
+        // Re-schedule notifications
+        notificationService.scheduleWeeklySummary()
+        notificationService.scheduleDailyEncouragement()
     }
 }

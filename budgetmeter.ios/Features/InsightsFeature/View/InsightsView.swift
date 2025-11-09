@@ -2,567 +2,499 @@
 //  InsightsView.swift
 //  BudgetMeter
 //
+//  Phase 1B: Insights Dashboard
 //  Created by BudgetMeter Team on 17.09.2025.
 //
 
 import SwiftUI
 import Charts
 
-/// Spending Insights dashboard with charts and analytics
+/// Main view for Phase 1B Insights Dashboard
 struct InsightsView: View {
-    
+
     // MARK: - Properties
-    
+
     @StateObject private var viewModel = InsightsViewModel()
-    @State private var selectedTimeRange: TimeRange = .last6Months
-    @State private var showingDetailSheet = false
-    @State private var selectedChart: ChartType = .monthlyTrends
-    
-    // MARK: - Enums
-    
-    enum TimeRange: String, CaseIterable, Identifiable {
-        case last3Months = "3months"
-        case last6Months = "6months"
-        case lastYear = "1year"
-        case allTime = "all"
-        
-        var id: String { self.rawValue }
-        
-        var displayName: String {
-            switch self {
-            case .last3Months: return "insights.time_range.3_months".localized(defaultValue: "Last 3 Months")
-            case .last6Months: return "insights.time_range.6_months".localized(defaultValue: "Last 6 Months")
-            case .lastYear: return "insights.time_range.1_year".localized(defaultValue: "Last Year")
-            case .allTime: return "insights.time_range.all_time".localized(defaultValue: "All Time")
-            }
-        }
-    }
-    
-    enum ChartType: String, CaseIterable, Identifiable {
-        case monthlyTrends = "monthly"
-        case topCategories = "categories"
-        case spendingPatterns = "patterns"
-        case healthTrends = "health"
-        
-        var id: String { self.rawValue }
-        
-        var displayName: String {
-            switch self {
-            case .monthlyTrends: return "insights.chart.monthly_trends".localized(defaultValue: "Monthly Trends")
-            case .topCategories: return "insights.chart.top_categories".localized(defaultValue: "Top Categories")
-            case .spendingPatterns: return "insights.chart.spending_patterns".localized(defaultValue: "Spending Patterns")
-            case .healthTrends: return "insights.chart.health_trends".localized(defaultValue: "Financial Health")
-            }
-        }
-    }
-    
+    @Environment(\.colorScheme) var colorScheme
+
     // MARK: - Body
-    
+
     var body: some View {
-        NavigationView {
-            ScrollView {
-                LazyVStack(spacing: 20) {
-                    // Summary Cards
-                    summaryCardsSection
-                    
-                    // Time Range Picker
-                    timeRangePicker
-                    
-                    // Charts Section
-                    chartsSection
-                    
-                    // Quick Insights
-                    quickInsightsSection
+        NavigationStack {
+            Group {
+                if viewModel.showPaywall && !viewModel.isPremium {
+                    // Show paywall for non-premium users
+                    paywallView
+                } else if viewModel.isLoading {
+                    // Loading state
+                    loadingView
+                } else if !viewModel.hasEnoughData {
+                    // Empty state
+                    emptyStateView
+                } else {
+                    // Main content
+                    contentView
                 }
-                .padding(.horizontal, 16)
-                .padding(.top, 8)
             }
-            .navigationTitle("insights.nav_title".localized(defaultValue: "Insights"))
+            .navigationTitle("Insights")
             .navigationBarTitleDisplayMode(.large)
-            .refreshable {
-                viewModel.refresh()
-            }
-            .onAppear {
-                viewModel.loadInsightsData()
-            }
-            .sheet(isPresented: $showingDetailSheet) {
-                ChartDetailView(
-                    chartType: selectedChart,
-                    timeRange: selectedTimeRange,
-                    viewModel: viewModel
+            .sheet(isPresented: $viewModel.showPaywall) {
+                PremiumPaywallView(
+                    feature: .insightsDashboard,
+                    onDismiss: {
+                        viewModel.dismissPaywall()
+                    }
                 )
             }
         }
     }
-    
-    // MARK: - Summary Cards Section
-    
-    private var summaryCardsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: "chart.bar.fill")
-                    .foregroundColor(Color(hex: "4A90E2"))
-                Text("insights.summary.title".localized(defaultValue: "Financial Summary"))
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                Spacer()
-            }
-            .padding(.horizontal, 4)
-            
-            HStack(spacing: 12) {
-                // Net Flow Card
-                summaryCard(
-                    title: "insights.summary.net_flow".localized(defaultValue: "Net Flow"),
-                    value: viewModel.netFlow,
-                    icon: "arrow.up.arrow.down",
-                    color: viewModel.netFlow >= 0 ? .green : .red
-                )
-                
-                // Savings Rate Card
-                summaryCard(
-                    title: "insights.summary.savings_rate".localized(defaultValue: "Savings Rate"),
-                    value: viewModel.savingsRate,
-                    icon: "percent",
-                    color: .blue,
-                    isPercentage: true
-                )
-                
-                // Daily Average Card
-                summaryCard(
-                    title: "insights.summary.daily_avg".localized(defaultValue: "Daily Avg"),
-                    value: viewModel.averageDailySpending,
-                    icon: "calendar",
-                    color: .orange
-                )
-            }
-        }
-    }
-    
-    private func summaryCard(title: String, value: Double, icon: String, color: Color, isPercentage: Bool = false) -> some View {
-        VStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.system(size: 20))
-                .foregroundColor(color)
-            
-            Text(title)
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-            
-            Text(formatValue(value, isPercentage: isPercentage))
-                .font(.title3)
-                .fontWeight(.bold)
-                .foregroundColor(.primary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: 80)
-        .padding(.vertical, 12)
-        .background(Color(uiColor: .secondarySystemBackground))
-        .cornerRadius(12)
-    }
-    
-    // MARK: - Time Range Picker
-    
-    private var timeRangePicker: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: "calendar")
-                    .foregroundColor(Color(hex: "4A90E2"))
-                Text("insights.time_range.title".localized(defaultValue: "Time Range"))
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                Spacer()
-            }
-            .padding(.horizontal, 4)
-            
-            Picker("Time Range", selection: $selectedTimeRange) {
-                ForEach(TimeRange.allCases) { range in
-                    Text(range.displayName).tag(range)
+
+    // MARK: - Content View
+
+    private var contentView: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                // Insights Cards Section
+                insightsSection
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+
+                // Charts Section
+                if #available(iOS 16.0, *) {
+                    chartsSection
+                        .transition(.opacity.combined(with: .move(edge: .bottom)))
                 }
             }
-            .pickerStyle(.segmented)
+            .padding()
+            .animation(.easeInOut(duration: 0.3), value: viewModel.insights.count)
+        }
+        .refreshable {
+            await viewModel.refresh()
         }
     }
-    
-    // MARK: - Charts Section
-    
-    private var chartsSection: some View {
+
+    // MARK: - Insights Section
+
+    private var insightsSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Image(systemName: "chart.line.uptrend.xyaxis")
-                    .foregroundColor(Color(hex: "4A90E2"))
-                Text("insights.charts.title".localized(defaultValue: "Charts & Analytics"))
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                Spacer()
-            }
-            .padding(.horizontal, 4)
-            
-            // Monthly Trends Chart
-            chartCard(
-                title: "insights.chart.monthly_trends".localized(defaultValue: "Monthly Trends"),
-                subtitle: "insights.chart.monthly_trends.subtitle".localized(defaultValue: "Income vs Expenses over time"),
-                chartType: .monthlyTrends
-            ) {
-                MonthlyTrendsChart(trends: viewModel.monthlyTrends)
-            }
-            
-            // Top Categories Chart
-            chartCard(
-                title: "insights.chart.top_categories".localized(defaultValue: "Top Spending Categories"),
-                subtitle: "insights.chart.top_categories.subtitle".localized(defaultValue: "Where your money goes"),
-                chartType: .topCategories
-            ) {
-                TopCategoriesChart(categories: viewModel.topCategories)
-            }
-            
-            // Spending Patterns Chart
-            chartCard(
-                title: "insights.chart.spending_patterns".localized(defaultValue: "Spending Patterns"),
-                subtitle: "insights.chart.spending_patterns.subtitle".localized(defaultValue: "Daily spending trends"),
-                chartType: .spendingPatterns
-            ) {
-                SpendingPatternsChart(patterns: viewModel.spendingPatterns)
-            }
-            
-            // Financial Health Chart
-            chartCard(
-                title: "insights.chart.health_trends".localized(defaultValue: "Financial Health"),
-                subtitle: "insights.chart.health_trends.subtitle".localized(defaultValue: "Your financial wellness score"),
-                chartType: .healthTrends
-            ) {
-                FinancialHealthChart(trends: viewModel.financialHealthTrends)
-            }
-        }
-    }
-    
-    private func chartCard<Content: View>(
-        title: String,
-        subtitle: String,
-        chartType: ChartType,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(title)
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                    
-                    Text(subtitle)
+            Text("Your Financial Insights")
+                .font(.title2)
+                .fontWeight(.bold)
+
+            if viewModel.insights.isEmpty {
+                if viewModel.isLoading {
+                    // Loading state with skeleton cards
+                    LazyVGrid(columns: [
+                        GridItem(.flexible()),
+                        GridItem(.flexible())
+                    ], spacing: 16) {
+                        ForEach(0..<6, id: \.self) { _ in
+                            SkeletonInsightCard()
+                        }
+                    }
+                } else {
+                    Text("No insights available yet. Add your income and expenses to see insights.")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
+                        .padding()
                 }
-                
-                Spacer()
-                
-                Button {
-                    selectedChart = chartType
-                    showingDetailSheet = true
-                } label: {
-                    Image(systemName: "arrow.up.right.square")
-                        .font(.system(size: 16))
-                        .foregroundColor(Color(hex: "4A90E2"))
+            } else {
+                LazyVGrid(columns: [
+                    GridItem(.flexible()),
+                    GridItem(.flexible())
+                ], spacing: 16) {
+                    ForEach(Array(viewModel.insights.enumerated()), id: \.element.id) { index, insight in
+                        InsightCardView(insight: insight)
+                            .transition(.asymmetric(
+                                insertion: .scale.combined(with: .opacity),
+                                removal: .opacity
+                            ))
+                            .animation(.spring(response: 0.4, dampingFraction: 0.7).delay(Double(index) * 0.05), value: viewModel.insights.count)
+                    }
                 }
             }
-            
-            content()
-                .frame(height: 200)
-                .background(Color(uiColor: .secondarySystemBackground))
-                .cornerRadius(12)
         }
-        .padding()
-        .background(Color(uiColor: .systemBackground))
-        .cornerRadius(16)
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
     }
-    
-    // MARK: - Quick Insights Section
-    
-    private var quickInsightsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: "lightbulb.fill")
-                    .foregroundColor(Color(hex: "4A90E2"))
-                Text("insights.quick_insights.title".localized(defaultValue: "Quick Insights"))
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                Spacer()
+
+    // MARK: - Charts Section
+
+    @available(iOS 16.0, *)
+    private var chartsSection: some View {
+        VStack(spacing: 24) {
+            // Spending Breakdown Pie Chart
+            if !viewModel.spendingBreakdown.isEmpty {
+                SpendingBreakdownView(data: viewModel.spendingBreakdown)
             }
-            .padding(.horizontal, 4)
-            
-            VStack(spacing: 8) {
-                insightRow(
-                    icon: "dollarsign.circle.fill",
-                    title: "insights.insight.top_category".localized(defaultValue: "Top Spending Category"),
-                    value: viewModel.topSpendingCategory,
-                    color: .red
+
+            // Month Comparison Bar Chart
+            if let comparison = viewModel.monthComparison {
+                MonthComparisonView(
+                    currentMonth: comparison.current,
+                    previousMonth: comparison.previous
                 )
-                
-                insightRow(
-                    icon: "chart.line.uptrend.xyaxis",
-                    title: "insights.insight.monthly_income".localized(defaultValue: "Monthly Income"),
-                    value: CurrencyHelper.formatAmount(viewModel.totalMonthlyIncome),
-                    color: .green
-                )
-                
-                insightRow(
-                    icon: "chart.line.downtrend.xyaxis",
-                    title: "insights.insight.monthly_expenses".localized(defaultValue: "Monthly Expenses"),
-                    value: CurrencyHelper.formatAmount(viewModel.totalMonthlyExpenses),
-                    color: .orange
+            }
+
+            // Balance Trend Line Chart
+            if !viewModel.balanceTrend.isEmpty {
+                BalanceTrendView(
+                    snapshots: viewModel.balanceTrend,
+                    days: 30
                 )
             }
         }
     }
-    
-    private func insightRow(icon: String, title: String, value: String, color: Color) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 16))
-                .foregroundColor(color)
-                .frame(width: 24)
-            
-            Text(title)
-                .font(.body)
-                .foregroundColor(.primary)
-            
+
+    // MARK: - Paywall View
+
+    private var paywallView: some View {
+        VStack(spacing: 24) {
             Spacer()
-            
-            Text(value)
-                .font(.body)
-                .fontWeight(.medium)
+
+            Image(systemName: "chart.bar.doc.horizontal.fill")
+                .font(.system(size: 80))
+                .foregroundColor(.blue)
+
+            VStack(spacing: 12) {
+                Text("Premium Feature")
+                    .font(.title)
+                    .fontWeight(.bold)
+
+                Text("Unlock Insights Dashboard with Premium")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+
+                Text("Get automated financial insights, spending breakdowns, and trend analysis to make smarter money decisions.")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+            }
+
+            Button {
+                viewModel.upgradeToPremium()
+            } label: {
+                Text("Upgrade to Premium")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .cornerRadius(12)
+            }
+            .padding(.horizontal)
+
+            Spacer()
+        }
+    }
+
+    // MARK: - Loading View
+
+    private var loadingView: some View {
+        VStack(spacing: 16) {
+            ProgressView()
+            Text("Loading insights...")
+                .font(.subheadline)
                 .foregroundColor(.secondary)
         }
-        .padding(.vertical, 8)
-        .padding(.horizontal, 12)
-        .background(Color(uiColor: .secondarySystemBackground))
-        .cornerRadius(8)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
-    
-    // MARK: - Helper Methods
-    
-    private func formatValue(_ value: Double, isPercentage: Bool = false) -> String {
-        if isPercentage {
-            return String(format: "%.1f%%", value)
-        } else {
-            return CurrencyHelper.formatAmount(value)
-        }
-    }
-}
 
-// MARK: - Chart Components
+    // MARK: - Empty State View
 
-struct MonthlyTrendsChart: View {
-    let trends: [MonthlyTrend]
-    
-    var body: some View {
-        Chart(trends) { trend in
-            BarMark(
-                x: .value("Month", trend.formattedMonth),
-                y: .value("Income", trend.income)
-            )
-            .foregroundStyle(.green)
-            .opacity(0.7)
-            
-            BarMark(
-                x: .value("Month", trend.formattedMonth),
-                y: .value("Expenses", trend.expenses)
-            )
-            .foregroundStyle(.red)
-            .opacity(0.7)
-        }
-        .chartYAxis {
-            AxisMarks(position: .leading) { value in
-                AxisGridLine()
-                AxisValueLabel {
-                    if let amount = value.as(Double.self) {
-                        Text(CurrencyHelper.formatAmount(amount))
-                            .font(.caption)
-                    }
-                }
+    private var emptyStateView: some View {
+        VStack(spacing: 24) {
+            Spacer()
+
+            Image(systemName: "chart.bar.xaxis")
+                .font(.system(size: 80))
+                .foregroundColor(.gray)
+
+            VStack(spacing: 12) {
+                Text("No Data Yet")
+                    .font(.title2)
+                    .fontWeight(.bold)
+
+                Text("Add your income and expenses to see insights")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
             }
-        }
-        .chartXAxis {
-            AxisMarks { value in
-                AxisValueLabel {
-                    if let month = value.as(String.self) {
-                        Text(month)
-                            .font(.caption)
-                    }
-                }
-            }
+
+            Spacer()
         }
         .padding()
     }
 }
 
-struct TopCategoriesChart: View {
-    let categories: [CategoryInsight]
-    
+// MARK: - Insight Card View
+
+struct InsightCardView: View {
+    let insight: Insight
+
     var body: some View {
-        Chart(categories.prefix(5)) { category in
-            BarMark(
-                x: .value("Amount", category.totalAmount),
-                y: .value("Category", category.name)
-            )
-            .foregroundStyle(.blue)
-            .opacity(0.7)
-        }
-        .chartXAxis {
-            AxisMarks(position: .bottom) { value in
-                AxisGridLine()
-                AxisValueLabel {
-                    if let amount = value.as(Double.self) {
-                        Text(CurrencyHelper.formatAmount(amount))
-                            .font(.caption)
-                    }
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: insight.icon)
+                    .foregroundColor(insight.color)
+                    .font(.title3)
+                    .accessibilityHidden(true)
+
+                Spacer()
+
+                if let trend = insight.trend {
+                    trendIcon(trend)
                 }
             }
-        }
-        .chartYAxis {
-            AxisMarks { value in
-                AxisValueLabel {
-                    if let name = value.as(String.self) {
-                        Text(name)
-                            .font(.caption)
-                    }
-                }
+
+            Text(insight.title)
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            Text(insight.value)
+                .font(.title3)
+                .fontWeight(.bold)
+
+            if let description = insight.description {
+                Text(description)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
             }
         }
         .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(accessibilityText)
+    }
+
+    private var accessibilityText: String {
+        var text = "\(insight.title): \(insight.value)"
+        if let description = insight.description {
+            text += ". \(description)"
+        }
+        if let trend = insight.trend {
+            text += ". Trend: \(trendAccessibilityText(trend))"
+        }
+        return text
+    }
+
+    private func trendAccessibilityText(_ trend: Insight.Trend) -> String {
+        switch trend {
+        case .up: return "increasing"
+        case .down: return "decreasing"
+        case .neutral: return "stable"
+        }
+    }
+
+    private func trendIcon(_ trend: Insight.Trend) -> some View {
+        Group {
+            switch trend {
+            case .up:
+                Image(systemName: "arrow.up.right")
+                    .foregroundColor(.green)
+            case .down:
+                Image(systemName: "arrow.down.right")
+                    .foregroundColor(.red)
+            case .neutral:
+                Image(systemName: "arrow.right")
+                    .foregroundColor(.orange)
+            }
+        }
+        .font(.caption)
+        .accessibilityHidden(true)
     }
 }
 
-struct SpendingPatternsChart: View {
-    let patterns: [SpendingPattern]
-    
+// MARK: - Skeleton Insight Card
+
+struct SkeletonInsightCard: View {
+    @State private var isAnimating = false
+
     var body: some View {
-        Chart(patterns.suffix(14)) { pattern in
-            LineMark(
-                x: .value("Date", pattern.date),
-                y: .value("Spending", pattern.totalSpending)
-            )
-            .foregroundStyle(.orange)
-            .lineStyle(StrokeStyle(lineWidth: 2))
-            
-            AreaMark(
-                x: .value("Date", pattern.date),
-                y: .value("Spending", pattern.totalSpending)
-            )
-            .foregroundStyle(.orange.opacity(0.3))
-        }
-        .chartYAxis {
-            AxisMarks(position: .leading) { value in
-                AxisGridLine()
-                AxisValueLabel {
-                    if let amount = value.as(Double.self) {
-                        Text(CurrencyHelper.formatAmount(amount))
-                            .font(.caption)
-                    }
-                }
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Circle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 24, height: 24)
+
+                Spacer()
             }
-        }
-        .chartXAxis {
-            AxisMarks { value in
-                AxisValueLabel {
-                    if let date = value.as(Date.self) {
-                        Text(date, format: .dateTime.month(.abbreviated).day())
-                            .font(.caption)
-                    }
-                }
-            }
+
+            RoundedRectangle(cornerRadius: 4)
+                .fill(Color.gray.opacity(0.3))
+                .frame(height: 12)
+                .frame(maxWidth: 80)
+
+            RoundedRectangle(cornerRadius: 4)
+                .fill(Color.gray.opacity(0.3))
+                .frame(height: 20)
+                .frame(maxWidth: 120)
+
+            RoundedRectangle(cornerRadius: 4)
+                .fill(Color.gray.opacity(0.3))
+                .frame(height: 10)
+                .frame(maxWidth: .infinity)
         }
         .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
+        .opacity(isAnimating ? 0.5 : 1.0)
+        .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: isAnimating)
+        .onAppear {
+            isAnimating = true
+        }
     }
 }
 
-struct FinancialHealthChart: View {
-    let trends: [HealthTrend]
-    
-    var body: some View {
-        Chart(trends) { trend in
-            LineMark(
-                x: .value("Month", trend.month),
-                y: .value("Health Score", trend.healthScore)
-            )
-            .foregroundStyle(.green)
-            .lineStyle(StrokeStyle(lineWidth: 3))
-            
-            AreaMark(
-                x: .value("Month", trend.month),
-                y: .value("Health Score", trend.healthScore)
-            )
-            .foregroundStyle(.green.opacity(0.3))
-        }
-        .chartYAxis {
-            AxisMarks(position: .leading) { value in
-                AxisGridLine()
-                AxisValueLabel {
-                    if let score = value.as(Double.self) {
-                        Text("\(Int(score))")
-                            .font(.caption)
-                    }
-                }
-            }
-        }
-        .chartXAxis {
-            AxisMarks { value in
-                AxisValueLabel {
-                    if let date = value.as(Date.self) {
-                        Text(date, format: .dateTime.month(.abbreviated))
-                            .font(.caption)
-                    }
-                }
-            }
-        }
-        .padding()
-    }
-}
+// MARK: - Premium Paywall View
 
-// MARK: - Chart Detail View
+struct PremiumPaywallView: View {
+    let feature: PremiumFeatureType
+    let onDismiss: () -> Void
 
-struct ChartDetailView: View {
-    let chartType: InsightsView.ChartType
-    let timeRange: InsightsView.TimeRange
-    let viewModel: InsightsViewModel
-    
+    @StateObject private var premiumManager = PremiumManager.shared
     @Environment(\.dismiss) var dismiss
-    
+
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(spacing: 20) {
-                    switch chartType {
-                    case .monthlyTrends:
-                        MonthlyTrendsChart(trends: viewModel.monthlyTrends)
-                            .frame(height: 400)
-                    case .topCategories:
-                        TopCategoriesChart(categories: viewModel.topCategories)
-                            .frame(height: 400)
-                    case .spendingPatterns:
-                        SpendingPatternsChart(patterns: viewModel.spendingPatterns)
-                            .frame(height: 400)
-                    case .healthTrends:
-                        FinancialHealthChart(trends: viewModel.financialHealthTrends)
-                            .frame(height: 400)
+        NavigationStack {
+            VStack(spacing: 32) {
+                // Feature icon and description
+                VStack(spacing: 16) {
+                    Image(systemName: featureIcon)
+                        .font(.system(size: 80))
+                        .foregroundColor(.blue)
+
+                    Text(featureTitle)
+                        .font(.title)
+                        .fontWeight(.bold)
+
+                    Text(featureDescription)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                }
+
+                // Premium features list
+                VStack(alignment: .leading, spacing: 16) {
+                    ForEach(premiumFeatures, id: \.self) { feature in
+                        HStack(spacing: 12) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                            Text(feature)
+                                .font(.subheadline)
+                            Spacer()
+                        }
                     }
                 }
                 .padding()
+
+                Spacer()
+
+                // Purchase button
+                Button {
+                    Task {
+                        await premiumManager.purchasePremium()
+                        dismiss()
+                        onDismiss()
+                    }
+                } label: {
+                    if premiumManager.isLoading {
+                        ProgressView()
+                            .tint(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                    } else {
+                        Text("Upgrade to Premium - $4.99")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                    }
+                }
+                .background(Color.blue)
+                .cornerRadius(12)
+                .padding(.horizontal)
+                .disabled(premiumManager.isLoading)
+
+                // Restore purchases
+                Button {
+                    Task {
+                        await premiumManager.restorePurchases()
+                        dismiss()
+                        onDismiss()
+                    }
+                } label: {
+                    Text("Restore Purchases")
+                        .font(.subheadline)
+                        .foregroundColor(.blue)
+                }
             }
-            .navigationTitle(chartType.displayName)
+            .padding()
+            .navigationTitle("Upgrade to Premium")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("toolbar.done".localized(defaultValue: "Done")) {
+                    Button("Close") {
                         dismiss()
+                        onDismiss()
                     }
                 }
             }
         }
     }
+
+    // MARK: - Computed Properties
+
+    private var featureIcon: String {
+        switch feature {
+        case .insightsDashboard:
+            return "chart.bar.doc.horizontal.fill"
+        case .advancedNotifications:
+            return "bell.badge.fill"
+        }
+    }
+
+    private var featureTitle: String {
+        switch feature {
+        case .insightsDashboard:
+            return "Insights Dashboard"
+        case .advancedNotifications:
+            return "Smart Notifications"
+        }
+    }
+
+    private var featureDescription: String {
+        switch feature {
+        case .insightsDashboard:
+            return "Get automated insights, spending breakdowns, and trend analysis to make smarter financial decisions."
+        case .advancedNotifications:
+            return "Receive personalized notifications about your financial progress, milestones, and spending alerts."
+        }
+    }
+
+    private var premiumFeatures: [String] {
+        [
+            "Automated Financial Insights",
+            "Spending Breakdown Charts",
+            "Balance Trend Analysis",
+            "Month-over-Month Comparison",
+            "Smart Notifications",
+            "Unlimited Custom Categories",
+            "All Premium Widgets"
+        ]
+    }
 }
+
+// MARK: - Supporting Types
+
+enum PremiumFeatureType {
+    case insightsDashboard
+    case advancedNotifications
+}
+
+// MARK: - Preview
 
 #Preview {
     InsightsView()
