@@ -12,23 +12,24 @@ import BackgroundTasks
 @main
 struct budgetmeter_iosApp: App {
     @StateObject private var biometricManager = BiometricManager.shared
-    
+    @StateObject private var themeManager = ThemeManager.shared
+
     init() {
         // Load and apply stored theme preference before any views render
         loadAndApplyStoredTheme()
-        
+
         // Seed initial data on first launch
         let dataSeedingService = DataSeedingService()
         dataSeedingService.seedInitialDataIfNeeded()
-        
+
         // Migrate custom categories to unified FinancialCategory system
         let migrationService = CustomCategoryMigrationService()
         migrationService.performMigrationIfNeeded()
-        
+
         // Initialize background processing
         BackgroundProcessingService.shared.scheduleBackgroundProcessing()
     }
-    
+
     var body: some Scene {
         WindowGroup {
             Group {
@@ -42,6 +43,7 @@ struct budgetmeter_iosApp: App {
                 }
             }
             .environmentObject(biometricManager)
+            .accentColor(themeManager.accentColor)
             .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { _ in
                 BackgroundProcessingService.shared.applicationDidEnterBackground()
                 biometricManager.resetAuthentication()
@@ -49,6 +51,31 @@ struct budgetmeter_iosApp: App {
             .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
                 BackgroundProcessingService.shared.applicationWillEnterForeground()
             }
+            .onOpenURL { url in
+                handleDeepLink(url)
+            }
+        }
+    }
+
+    // MARK: - Deep Linking
+
+    /// Handles deep link URLs from widgets and other sources
+    private func handleDeepLink(_ url: URL) {
+        guard url.scheme == "budgetmeter" else { return }
+
+        // Handle different deep link paths
+        switch url.host {
+        case "home":
+            // Navigate to home tab (already selected by default)
+            NotificationCenter.default.post(name: NSNotification.Name("NavigateToHome"), object: nil)
+        case "expenses":
+            // Navigate to expenses tab
+            NotificationCenter.default.post(name: NSNotification.Name("NavigateToExpenses"), object: nil)
+        case "income":
+            // Navigate to income tab
+            NotificationCenter.default.post(name: NSNotification.Name("NavigateToIncome"), object: nil)
+        default:
+            break
         }
     }
     

@@ -284,26 +284,37 @@ struct HomeView: View {
                     icon: "calendar.badge.clock"
                 )
                 
-                // Health Score Card
-                VStack(spacing: 4) {
-                    Image(systemName: "heart.fill")
-                        .font(.system(size: 20))
-                        .foregroundColor(viewModel.financialHealthColor)
-                    
-                    Text("home.snapshot.health".localized(defaultValue: "Health"))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Text("\(viewModel.financialHealthScore)")
-                        .font(.title3)
-                        .fontWeight(.bold)
-                        .foregroundColor(viewModel.financialHealthColor)
+                // Health Score Card (Tappable - navigates to HealthDetailsView)
+                NavigationLink(destination: HealthDetailsView()) {
+                    VStack(spacing: 4) {
+                        Image(systemName: "heart.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(viewModel.financialHealthColor)
+
+                        Text("home.snapshot.health".localized(defaultValue: "Health"))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+
+                        HStack(spacing: 4) {
+                            Text("\(viewModel.financialHealthScore)")
+                                .font(.title3)
+                                .fontWeight(.bold)
+                                .foregroundColor(viewModel.financialHealthColor)
+
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 70)
+                    .padding(.vertical, 12)
+                    .background(Color(uiColor: .secondarySystemBackground))
+                    .cornerRadius(12)
                 }
-                .frame(maxWidth: .infinity)
-                .frame(height: 70)
-                .padding(.vertical, 12)
-                .background(Color(uiColor: .secondarySystemBackground))
-                .cornerRadius(12)
+                .buttonStyle(.plain)
+                .accessibilityLabel("home.snapshot.health.accessibility".localized(defaultValue: "Financial Health Score: \(viewModel.financialHealthScore)"))
+                .accessibilityHint("home.snapshot.health.hint".localized(defaultValue: "Tap to see detailed health breakdown and personalized tips"))
             }
         }
     }
