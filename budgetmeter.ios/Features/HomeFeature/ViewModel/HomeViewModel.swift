@@ -45,7 +45,7 @@ final class HomeViewModel: ObservableObject {
     @Published var showingExpenseSheet = false
     
     // MARK: - Private Properties
-    
+
     private let persistenceService: PersistenceService
     private var cancellables = Set<AnyCancellable>()
     private var timer: Timer?
@@ -54,6 +54,9 @@ final class HomeViewModel: ObservableObject {
     private var cumulativeBaseline: Double = 0
     private var cumulativeStartDate: Date = Date()
     var currencyCode: String = CurrencyHelper.defaultCurrencyCode()
+
+    // Prevent timer race conditions
+    private var isUpdatingLiveValue: Bool = false
     
     // Financial data cache
     private var dailyIncomeTotal: Double = 0
@@ -180,9 +183,17 @@ final class HomeViewModel: ObservableObject {
     }
     
     private func updateLiveValue() {
+        // Prevent race conditions - skip if already updating
+        guard !isUpdatingLiveValue else {
+            return
+        }
+
+        isUpdatingLiveValue = true
+        defer { isUpdatingLiveValue = false }
+
         let currentTime = Date()
         let sessionElapsed = currentTime.timeIntervalSince(sessionStartTime)
-        
+
         // Calculate live income and expense
         let liveIncome = CalculationEngine.calculateLiveIncome(
             dailyIncomeTotal: dailyIncomeTotal,
@@ -190,20 +201,20 @@ final class HomeViewModel: ObservableObject {
             yearlyIncomeTotal: yearlyIncomeTotal,
             sessionSeconds: sessionElapsed
         )
-        
+
         let liveExpense = CalculationEngine.calculateLiveExpense(
             dailyTotal: dailyExpenseTotal,
             monthlyTotal: monthlyExpenseTotal,
             yearlyTotal: yearlyExpenseTotal,
             sessionSeconds: sessionElapsed
         )
-        
+
         // Calculate net live flow
         let liveNetFlow = CalculationEngine.calculateLiveNetFlow(
             liveIncome: liveIncome,
             liveExpense: liveExpense
         )
-        
+
         let sessionNet = liveNetFlow
 
         liveValue = sessionBaseline + sessionNet

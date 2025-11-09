@@ -10,7 +10,28 @@ import Foundation
 /// Pure calculation engine that ports all financial formulas from the JavaScript web app
 /// All functions are stateless and use Double for compatibility with Core Data
 struct CalculationEngine {
-    
+
+    // MARK: - Constants
+
+    /// Average days in a month (365.25 / 12)
+    /// Using the astronomically accurate value for consistency
+    static let daysPerMonth: Double = 30.4375
+
+    /// Days in a year (including leap years)
+    static let daysPerYear: Double = 365.25
+
+    /// Hours per day
+    static let hoursPerDay: Double = 24
+
+    /// Seconds per day
+    static let secondsPerDay: Double = 86400
+
+    /// Seconds per month (using accurate days per month)
+    static let secondsPerMonth: Double = daysPerMonth * hoursPerDay * 60 * 60
+
+    /// Seconds per year
+    static let secondsPerYear: Double = daysPerYear * hoursPerDay * 60 * 60
+
     // MARK: - Financial Health Score
     
     struct FinancialHealthScore {
@@ -32,27 +53,27 @@ struct CalculationEngine {
     // MARK: - Expense Calculations
     
     /// Calculates the total monthly expense based on the exact web app formula.
-    /// Formula: (dailyTotal * 30) + monthlyTotal + (yearlyTotal / 12)
+    /// Formula: (dailyTotal * daysPerMonth) + monthlyTotal + (yearlyTotal / 12)
     static func totalMonthlyExpense(
         dailyTotal: Double,
         monthlyTotal: Double,
         yearlyTotal: Double
     ) -> Double {
-        return (dailyTotal * 30) + monthlyTotal + (yearlyTotal / 12)
+        return (dailyTotal * daysPerMonth) + monthlyTotal + (yearlyTotal / 12)
     }
     
     /// Calculate daily expense total (including converted monthly and yearly)
-    /// Formula: dailyTotal + (monthlyTotal / 30) + (yearlyTotal / 365)
+    /// Formula: dailyTotal + (monthlyTotal / daysPerMonth) + (yearlyTotal / daysPerYear)
     static func dailyExpenseTotal(
         dailyTotal: Double,
         monthlyTotal: Double,
         yearlyTotal: Double
     ) -> Double {
-        return dailyTotal + (monthlyTotal / 30) + (yearlyTotal / 365)
+        return dailyTotal + (monthlyTotal / daysPerMonth) + (yearlyTotal / daysPerYear)
     }
     
     /// Calculate hourly expense
-    /// Formula: dailyExpenseTotal / 24
+    /// Formula: dailyExpenseTotal / hoursPerDay
     static func hourlyExpense(
         dailyTotal: Double,
         monthlyTotal: Double,
@@ -63,7 +84,7 @@ struct CalculationEngine {
             monthlyTotal: monthlyTotal,
             yearlyTotal: yearlyTotal
         )
-        return dailyExpense / 24
+        return dailyExpense / hoursPerDay
     }
     
     /// Calculate weekly expense
@@ -83,27 +104,27 @@ struct CalculationEngine {
     
     // MARK: - Income Calculations
     
-    /// Calculate total monthly income (daily * 30 + monthly + yearly/12)
+    /// Calculate total monthly income (daily * daysPerMonth + monthly + yearly/12)
     static func totalMonthlyIncome(
         dailyIncomeTotal: Double,
         monthlyIncomeTotal: Double,
         yearlyIncomeTotal: Double
     ) -> Double {
-        return (dailyIncomeTotal * 30) + monthlyIncomeTotal + (yearlyIncomeTotal / 12)
+        return (dailyIncomeTotal * daysPerMonth) + monthlyIncomeTotal + (yearlyIncomeTotal / 12)
     }
     
     /// Calculate daily income total (including converted monthly and yearly)
-    /// Formula: dailyIncomeTotal + (monthlyIncomeTotal / 30) + (yearlyIncomeTotal / 365)
+    /// Formula: dailyIncomeTotal + (monthlyIncomeTotal / daysPerMonth) + (yearlyIncomeTotal / daysPerYear)
     static func dailyIncomeTotalConverted(
         dailyIncomeTotal: Double,
         monthlyIncomeTotal: Double,
         yearlyIncomeTotal: Double
     ) -> Double {
-        return dailyIncomeTotal + (monthlyIncomeTotal / 30) + (yearlyIncomeTotal / 365)
+        return dailyIncomeTotal + (monthlyIncomeTotal / daysPerMonth) + (yearlyIncomeTotal / daysPerYear)
     }
     
     /// Calculate hourly income
-    /// Formula: dailyIncomeTotalConverted / 24
+    /// Formula: dailyIncomeTotalConverted / hoursPerDay
     static func hourlyIncome(
         dailyIncomeTotal: Double,
         monthlyIncomeTotal: Double,
@@ -114,7 +135,7 @@ struct CalculationEngine {
             monthlyIncomeTotal: monthlyIncomeTotal,
             yearlyIncomeTotal: yearlyIncomeTotal
         )
-        return dailyIncome / 24
+        return dailyIncome / hoursPerDay
     }
     
     /// Calculate weekly income
@@ -227,7 +248,7 @@ struct CalculationEngine {
     }
     
     /// Calculate net yearly flow
-    /// Formula: (dailyIncome * 365) + (monthlyIncome * 12) + yearlyIncome - (dailyExpense * 365) - (monthlyExpense * 12) - yearlyExpense
+    /// Formula: (dailyIncome * daysPerYear) + (monthlyIncome * 12) + yearlyIncome - (dailyExpense * daysPerYear) - (monthlyExpense * 12) - yearlyExpense
     static func netYearlyFlow(
         dailyIncomeTotal: Double,
         monthlyIncomeTotal: Double,
@@ -236,8 +257,8 @@ struct CalculationEngine {
         monthlyExpenseTotal: Double,
         yearlyExpenseTotal: Double
     ) -> Double {
-        let yearlyIncome = (dailyIncomeTotal * 365) + (monthlyIncomeTotal * 12) + yearlyIncomeTotal
-        let yearlyExpense = (dailyExpenseTotal * 365) + (monthlyExpenseTotal * 12) + yearlyExpenseTotal
+        let yearlyIncome = (dailyIncomeTotal * daysPerYear) + (monthlyIncomeTotal * 12) + yearlyIncomeTotal
+        let yearlyExpense = (dailyExpenseTotal * daysPerYear) + (monthlyExpenseTotal * 12) + yearlyExpenseTotal
         return yearlyIncome - yearlyExpense
     }
     
@@ -332,10 +353,10 @@ struct CalculationEngine {
         }
         
         let hours = targetAmount / netHourlyFlow
-        let days = hours / 24
+        let days = hours / hoursPerDay
         let weeks = days / 7
-        let months = days / 30.44 // Real average month (365.25/12)
-        let years = days / 365.25 // Including leap years
+        let months = days / daysPerMonth
+        let years = days / daysPerYear
         
         return TargetTimeResult(
             hours: (hours * 100).rounded() / 100,
@@ -372,9 +393,9 @@ struct CalculationEngine {
         yearlyTotal: Double,
         sessionSeconds: Double
     ) -> Double {
-        let dailyExpensePerSecond = dailyTotal / (24 * 60 * 60)
-        let monthlyExpensePerSecond = monthlyTotal / (30 * 24 * 60 * 60)
-        let yearlyExpensePerSecond = yearlyTotal / (365 * 24 * 60 * 60)
+        let dailyExpensePerSecond = dailyTotal / secondsPerDay
+        let monthlyExpensePerSecond = monthlyTotal / secondsPerMonth
+        let yearlyExpensePerSecond = yearlyTotal / secondsPerYear
         
         let liveExpense = (dailyExpensePerSecond + monthlyExpensePerSecond + yearlyExpensePerSecond) * sessionSeconds
         
@@ -390,9 +411,9 @@ struct CalculationEngine {
         yearlyIncomeTotal: Double,
         sessionSeconds: Double
     ) -> Double {
-        let dailyIncomePerSecond = dailyIncomeTotal / (24 * 60 * 60)
-        let monthlyIncomePerSecond = monthlyIncomeTotal / (30 * 24 * 60 * 60)
-        let yearlyIncomePerSecond = yearlyIncomeTotal / (365 * 24 * 60 * 60)
+        let dailyIncomePerSecond = dailyIncomeTotal / secondsPerDay
+        let monthlyIncomePerSecond = monthlyIncomeTotal / secondsPerMonth
+        let yearlyIncomePerSecond = yearlyIncomeTotal / secondsPerYear
         
         let liveIncome = (dailyIncomePerSecond + monthlyIncomePerSecond + yearlyIncomePerSecond) * sessionSeconds
         
