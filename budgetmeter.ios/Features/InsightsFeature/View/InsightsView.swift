@@ -56,13 +56,16 @@ struct InsightsView: View {
             VStack(spacing: 24) {
                 // Insights Cards Section
                 insightsSection
+                    .transition(.opacity.combined(with: .move(edge: .top)))
 
                 // Charts Section
                 if #available(iOS 16.0, *) {
                     chartsSection
+                        .transition(.opacity.combined(with: .move(edge: .bottom)))
                 }
             }
             .padding()
+            .animation(.easeInOut(duration: 0.3), value: viewModel.insights.count)
         }
         .refreshable {
             await viewModel.refresh()
@@ -78,17 +81,34 @@ struct InsightsView: View {
                 .fontWeight(.bold)
 
             if viewModel.insights.isEmpty {
-                Text("No insights available yet. Add your income and expenses to see insights.")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .padding()
+                if viewModel.isLoading {
+                    // Loading state with skeleton cards
+                    LazyVGrid(columns: [
+                        GridItem(.flexible()),
+                        GridItem(.flexible())
+                    ], spacing: 16) {
+                        ForEach(0..<6, id: \.self) { _ in
+                            SkeletonInsightCard()
+                        }
+                    }
+                } else {
+                    Text("No insights available yet. Add your income and expenses to see insights.")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .padding()
+                }
             } else {
                 LazyVGrid(columns: [
                     GridItem(.flexible()),
                     GridItem(.flexible())
                 ], spacing: 16) {
-                    ForEach(viewModel.insights) { insight in
+                    ForEach(Array(viewModel.insights.enumerated()), id: \.element.id) { index, insight in
                         InsightCardView(insight: insight)
+                            .transition(.asymmetric(
+                                insertion: .scale.combined(with: .opacity),
+                                removal: .opacity
+                            ))
+                            .animation(.spring(response: 0.4, dampingFraction: 0.7).delay(Double(index) * 0.05), value: viewModel.insights.count)
                     }
                 }
             }
@@ -217,6 +237,7 @@ struct InsightCardView: View {
                 Image(systemName: insight.icon)
                     .foregroundColor(insight.color)
                     .font(.title3)
+                    .accessibilityHidden(true)
 
                 Spacer()
 
@@ -243,6 +264,27 @@ struct InsightCardView: View {
         .padding()
         .background(Color(.systemGray6))
         .cornerRadius(12)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(accessibilityText)
+    }
+
+    private var accessibilityText: String {
+        var text = "\(insight.title): \(insight.value)"
+        if let description = insight.description {
+            text += ". \(description)"
+        }
+        if let trend = insight.trend {
+            text += ". Trend: \(trendAccessibilityText(trend))"
+        }
+        return text
+    }
+
+    private func trendAccessibilityText(_ trend: Insight.Trend) -> String {
+        switch trend {
+        case .up: return "increasing"
+        case .down: return "decreasing"
+        case .neutral: return "stable"
+        }
     }
 
     private func trendIcon(_ trend: Insight.Trend) -> some View {
@@ -260,6 +302,48 @@ struct InsightCardView: View {
             }
         }
         .font(.caption)
+        .accessibilityHidden(true)
+    }
+}
+
+// MARK: - Skeleton Insight Card
+
+struct SkeletonInsightCard: View {
+    @State private var isAnimating = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Circle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 24, height: 24)
+
+                Spacer()
+            }
+
+            RoundedRectangle(cornerRadius: 4)
+                .fill(Color.gray.opacity(0.3))
+                .frame(height: 12)
+                .frame(maxWidth: 80)
+
+            RoundedRectangle(cornerRadius: 4)
+                .fill(Color.gray.opacity(0.3))
+                .frame(height: 20)
+                .frame(maxWidth: 120)
+
+            RoundedRectangle(cornerRadius: 4)
+                .fill(Color.gray.opacity(0.3))
+                .frame(height: 10)
+                .frame(maxWidth: .infinity)
+        }
+        .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
+        .opacity(isAnimating ? 0.5 : 1.0)
+        .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: isAnimating)
+        .onAppear {
+            isAnimating = true
+        }
     }
 }
 
