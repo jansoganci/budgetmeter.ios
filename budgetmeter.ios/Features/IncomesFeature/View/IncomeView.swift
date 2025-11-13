@@ -22,7 +22,7 @@ struct IncomeView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                LazyVStack(spacing: 24) {
+                LazyVStack(spacing: Spacing.xl) {
                     if viewModel.isLoading {
                         loadingView
                     } else if viewModel.categoryGroups.isEmpty {
@@ -30,14 +30,14 @@ struct IncomeView: View {
                     } else {
                         // Summary Card
                         incomeSummaryCard
-                        
+
                         ForEach(viewModel.categoryGroups, id: \.title) { group in
                             categoryGroupView(group)
                         }
                     }
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
+                .padding(.horizontal, Spacing.lg)
+                .padding(.vertical, Spacing.sm)
             }
             .navigationTitle("tab.income.title".localized(defaultValue: "Income"))
             .navigationBarTitleDisplayMode(.large)
@@ -87,7 +87,7 @@ struct IncomeView: View {
     // MARK: - Subviews
     
     private var incomeSummaryCard: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Spacing.lg) {
             HStack {
                 Image(systemName: "chart.line.uptrend.xyaxis")
                     .foregroundColor(.brandPositive)
@@ -96,9 +96,9 @@ struct IncomeView: View {
                     .fontWeight(.semibold)
                 Spacer()
             }
-            .padding(.horizontal, 4)
-            
-            HStack(spacing: 12) {
+            .padding(.horizontal, Spacing.xs)
+
+            HStack(spacing: Spacing.md) {
                 // Daily Average Card
                 summaryInfoCard(
                     title: viewModel.dailyAvgTitle,
@@ -127,7 +127,7 @@ struct IncomeView: View {
     }
     
     private var loadingView: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: Spacing.lg) {
             ProgressView()
                 .scaleEffect(1.2)
             Text("income.loading".localized(defaultValue: "Loading income..."))
@@ -137,7 +137,7 @@ struct IncomeView: View {
     }
     
     private var emptyStateView: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: Spacing.lg) {
             Image(systemName: "plus.circle")
                 .font(.system(size: 64))
                 .foregroundColor(.brandPositive)
@@ -152,7 +152,7 @@ struct IncomeView: View {
     }
     
     private func categoryGroupView(_ group: (title: String, categories: [FinancialCategory], color: Color)) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Spacing.md) {
             // Group Header
             HStack {
                 Image(systemName: "calendar")
@@ -163,10 +163,10 @@ struct IncomeView: View {
                     .foregroundColor(.primary)
                 Spacer()
             }
-            .padding(.horizontal, 4)
-            
+            .padding(.horizontal, Spacing.xs)
+
             // Category Grid
-            LazyVGrid(columns: createGridColumns(), spacing: 12) {
+            LazyVGrid(columns: createGridColumns(), spacing: Spacing.md) {
                 ForEach(group.categories, id: \.objectID) { category in
                     CategoryInputCard(
                         category: category,
@@ -214,15 +214,15 @@ struct IncomeView: View {
         }
         .frame(maxWidth: .infinity)
         .frame(height: 80)
-        .padding(.vertical, 12)
+        .padding(.vertical, Spacing.md)
         .background(Color(uiColor: .secondarySystemBackground))
-        .cornerRadius(12)
+        .cornerRadius(CornerRadius.card)
     }
     
     private func createGridColumns() -> [GridItem] {
         // Responsive grid: 2 columns on iPhone, 3 on iPad
         let columnCount = UIDevice.current.userInterfaceIdiom == .pad ? 3 : 2
-        return Array(repeating: GridItem(.flexible(), spacing: 12), count: columnCount)
+        return Array(repeating: GridItem(.flexible(), spacing: Spacing.md), count: columnCount)
     }
 }
 
