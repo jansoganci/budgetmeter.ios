@@ -77,8 +77,7 @@ struct InsightsView: View {
     private var insightsSection: some View {
         VStack(alignment: .leading, spacing: Spacing.lg) {
             Text("Your Financial Insights")
-                .font(.title2)
-                .fontWeight(.bold)
+                .sectionTitleStyle()
 
             if viewModel.insights.isEmpty {
                 if viewModel.isLoading {
@@ -247,8 +246,7 @@ struct InsightCardView: View {
             }
 
             Text(insight.title)
-                .font(.caption)
-                .foregroundColor(.secondary)
+                .cardLabelStyle()
 
             Text(insight.value)
                 .font(.title3)
