@@ -92,8 +92,7 @@ struct ExpenseView: View {
                 Image(systemName: "chart.pie.fill")
                     .foregroundColor(.brandExpense)
                 Text(viewModel.summaryTitle)
-                    .font(.headline)
-                    .fontWeight(.semibold)
+                    .sectionTitleStyle()
                 Spacer()
             }
             .padding(.horizontal, Spacing.xs)
@@ -158,9 +157,7 @@ struct ExpenseView: View {
                 Image(systemName: "calendar")
                     .foregroundColor(group.color)
                 Text(group.title)
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.primary)
+                    .sectionTitleStyle()
                 Spacer()
             }
             .padding(.horizontal, Spacing.xs)
@@ -201,11 +198,10 @@ struct ExpenseView: View {
             Image(systemName: icon)
                 .font(.system(size: 18))
                 .foregroundColor(color)
-            
+
             Text(title)
-                .font(.caption)
-                .foregroundColor(.secondary)
-            
+                .cardLabelStyle()
+
             Text(viewModel.formatCurrencyDisplay(value))
                 .font(.system(size: 16, weight: .bold, design: .rounded))
                 .foregroundColor(color)
@@ -215,7 +211,7 @@ struct ExpenseView: View {
         .frame(maxWidth: .infinity)
         .frame(height: 80)
         .padding(.vertical, Spacing.md)
-        .background(Color(uiColor: .secondarySystemBackground))
+        .background(Color.cardBackground)
         .cornerRadius(CornerRadius.card)
     }
 
