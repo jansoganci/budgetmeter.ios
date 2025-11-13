@@ -225,7 +225,7 @@ struct HealthDetailsView: View {
                                 .font(.caption)
                                 .fontWeight(.semibold)
                         }
-                        .foregroundColor(Color(hex: "FFD700"))
+                        .foregroundColor(.brandProgress)
                     }
                 }
             }
@@ -301,7 +301,7 @@ struct HealthDetailsView: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 24)
                     .padding(.vertical, 12)
-                    .background(Color.blue)
+                    .background(Color.brandProgress)
                     .cornerRadius(10)
             }
         }
@@ -367,7 +367,7 @@ struct HealthDetailsView: View {
                 HStack(spacing: 12) {
                     Image(systemName: "lock.fill")
                         .font(.title2)
-                        .foregroundColor(Color(hex: "FFD700"))
+                        .foregroundColor(.brandProgress)
 
                     VStack(alignment: .leading, spacing: 4) {
                         Text("\(viewModel.healthTips.count - 3) More Premium Tips")
@@ -388,11 +388,11 @@ struct HealthDetailsView: View {
                 }
                 .padding(16)
             }
-            .background(Color(hex: "FFD700").opacity(0.1))
+            .background(Color.brandProgress.opacity(0.1))
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color(hex: "FFD700").opacity(0.3), lineWidth: 1.5)
+                    .stroke(Color.brandProgress.opacity(0.3), lineWidth: 1.5)
             )
         }
         .buttonStyle(.plain)
@@ -409,7 +409,7 @@ struct HealthDetailsView: View {
         } label: {
             Image(systemName: "square.and.arrow.up")
                 .font(.body)
-                .foregroundColor(.blue)
+                .foregroundColor(.brandProgress)
         }
         .disabled(viewModel.isLoading || !viewModel.hasData)
         .accessibilityLabel("Share health report")
