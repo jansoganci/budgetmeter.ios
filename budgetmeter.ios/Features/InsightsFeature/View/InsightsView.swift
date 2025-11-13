@@ -53,7 +53,7 @@ struct InsightsView: View {
 
     private var contentView: some View {
         ScrollView {
-            VStack(spacing: 24) {
+            VStack(spacing: Spacing.xl) {
                 // Insights Cards Section
                 insightsSection
                     .transition(.opacity.combined(with: .move(edge: .top)))
@@ -64,7 +64,7 @@ struct InsightsView: View {
                         .transition(.opacity.combined(with: .move(edge: .bottom)))
                 }
             }
-            .padding()
+            .padding(Spacing.lg)
             .animation(.easeInOut(duration: 0.3), value: viewModel.insights.count)
         }
         .refreshable {
@@ -75,7 +75,7 @@ struct InsightsView: View {
     // MARK: - Insights Section
 
     private var insightsSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Spacing.lg) {
             Text("Your Financial Insights")
                 .font(.title2)
                 .fontWeight(.bold)
@@ -86,7 +86,7 @@ struct InsightsView: View {
                     LazyVGrid(columns: [
                         GridItem(.flexible()),
                         GridItem(.flexible())
-                    ], spacing: 16) {
+                    ], spacing: Spacing.lg) {
                         ForEach(0..<6, id: \.self) { _ in
                             SkeletonInsightCard()
                         }
@@ -101,7 +101,7 @@ struct InsightsView: View {
                 LazyVGrid(columns: [
                     GridItem(.flexible()),
                     GridItem(.flexible())
-                ], spacing: 16) {
+                ], spacing: Spacing.lg) {
                     ForEach(Array(viewModel.insights.enumerated()), id: \.element.id) { index, insight in
                         InsightCardView(insight: insight)
                             .transition(.asymmetric(
@@ -119,7 +119,7 @@ struct InsightsView: View {
 
     @available(iOS 16.0, *)
     private var chartsSection: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: Spacing.xl) {
             // Spending Breakdown Pie Chart
             if !viewModel.spendingBreakdown.isEmpty {
                 SpendingBreakdownView(data: viewModel.spendingBreakdown)
@@ -146,14 +146,14 @@ struct InsightsView: View {
     // MARK: - Paywall View
 
     private var paywallView: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: Spacing.xl) {
             Spacer()
 
             Image(systemName: "chart.bar.doc.horizontal.fill")
                 .font(.system(size: 80))
                 .foregroundColor(.brandProgress)
 
-            VStack(spacing: 12) {
+            VStack(spacing: Spacing.md) {
                 Text("Premium Feature")
                     .font(.title)
                     .fontWeight(.bold)
@@ -179,7 +179,7 @@ struct InsightsView: View {
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color.brandProgress)
-                    .cornerRadius(12)
+                    .cornerRadius(CornerRadius.button)
             }
             .padding(.horizontal)
 
@@ -190,7 +190,7 @@ struct InsightsView: View {
     // MARK: - Loading View
 
     private var loadingView: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: Spacing.lg) {
             ProgressView()
             Text("Loading insights...")
                 .font(.subheadline)
@@ -202,14 +202,14 @@ struct InsightsView: View {
     // MARK: - Empty State View
 
     private var emptyStateView: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: Spacing.xl) {
             Spacer()
 
             Image(systemName: "chart.bar.xaxis")
                 .font(.system(size: 80))
                 .foregroundColor(.chartInactive)
 
-            VStack(spacing: 12) {
+            VStack(spacing: Spacing.md) {
                 Text("No Data Yet")
                     .font(.title2)
                     .fontWeight(.bold)
@@ -232,7 +232,7 @@ struct InsightCardView: View {
     let insight: Insight
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
             HStack {
                 Image(systemName: insight.icon)
                     .foregroundColor(insight.color)
@@ -263,7 +263,7 @@ struct InsightCardView: View {
         }
         .padding()
         .background(Color.cardBackground)
-        .cornerRadius(12)
+        .cornerRadius(CornerRadius.card)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilityText)
     }
@@ -312,7 +312,7 @@ struct SkeletonInsightCard: View {
     @State private var isAnimating = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
             HStack {
                 Circle()
                     .fill(Color.gray.opacity(0.3))
@@ -338,7 +338,7 @@ struct SkeletonInsightCard: View {
         }
         .padding()
         .background(Color.cardBackground)
-        .cornerRadius(12)
+        .cornerRadius(CornerRadius.card)
         .opacity(isAnimating ? 0.5 : 1.0)
         .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: isAnimating)
         .onAppear {
@@ -358,9 +358,9 @@ struct PremiumPaywallView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 32) {
+            VStack(spacing: Spacing.xxl) {
                 // Feature icon and description
-                VStack(spacing: 16) {
+                VStack(spacing: Spacing.lg) {
                     Image(systemName: featureIcon)
                         .font(.system(size: 80))
                         .foregroundColor(.brandProgress)
@@ -377,9 +377,9 @@ struct PremiumPaywallView: View {
                 }
 
                 // Premium features list
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: Spacing.lg) {
                     ForEach(premiumFeatures, id: \.self) { feature in
-                        HStack(spacing: 12) {
+                        HStack(spacing: Spacing.md) {
                             Image(systemName: "checkmark.circle.fill")
                                 .foregroundColor(.brandPositive)
                             Text(feature)
@@ -414,7 +414,7 @@ struct PremiumPaywallView: View {
                     }
                 }
                 .background(Color.brandProgress)
-                .cornerRadius(12)
+                .cornerRadius(CornerRadius.button)
                 .padding(.horizontal)
                 .disabled(premiumManager.isLoading)
 
