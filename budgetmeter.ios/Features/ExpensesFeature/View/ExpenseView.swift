@@ -50,7 +50,7 @@ struct ExpenseView: View {
                     Button("toolbar.done".localized(defaultValue: "Done")) {
                         focusedField = nil
                     }
-                    .foregroundColor(Color(hex: "4A90E2"))
+                    .foregroundColor(.brandProgress)
                     .fontWeight(.semibold)
                 }
             }
@@ -90,7 +90,7 @@ struct ExpenseView: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Image(systemName: "chart.pie.fill")
-                    .foregroundColor(.red)
+                    .foregroundColor(.brandExpense)
                 Text(viewModel.summaryTitle)
                     .font(.headline)
                     .fontWeight(.semibold)
@@ -104,23 +104,23 @@ struct ExpenseView: View {
                     title: viewModel.dailyAvgTitle,
                     value: viewModel.dailyAverageExpenses,
                     icon: "calendar.day.timeline.left",
-                    color: .orange
+                    color: .brandExpense
                 )
-                
+
                 // Monthly Total Card
                 summaryInfoCard(
                     title: viewModel.monthlyTitle,
                     value: viewModel.totalMonthlyExpenses,
                     icon: "calendar",
-                    color: .red
+                    color: .brandExpense
                 )
-                
+
                 // Yearly Projection Card
                 summaryInfoCard(
                     title: viewModel.yearlyTitle,
                     value: viewModel.yearlyProjectionExpenses,
                     icon: "chart.line.uptrend.xyaxis",
-                    color: .red.opacity(0.8)
+                    color: .brandExpense.opacity(0.8)
                 )
             }
         }
@@ -140,8 +140,8 @@ struct ExpenseView: View {
         VStack(spacing: 16) {
             Image(systemName: "minus.circle")
                 .font(.system(size: 64))
-                .foregroundColor(.red)
-            
+                .foregroundColor(.brandExpense)
+
             Text("empty_state.expenses.message".localized(defaultValue: "No expenses yet. Tap the + button to add your first expense."))
                 .font(.headline)
                 .foregroundColor(.secondary)
