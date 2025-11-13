@@ -1,196 +1,876 @@
+# BudgetMeter iOS: Design Rulebook v2.0
 
-# BudgetMeter iOS: Design Rulebook
-
-**Version:** 1.0  
-**Purpose:** This document defines the visual identity, layout principles, and interaction patterns for the BudgetMeter iOS app. It ensures a consistent, minimalist, and HIG-compliant user experience.
+**Version:** 2.0
+**Design Language:** Modern Financial Dashboard (iOS-Adapted)
+**Purpose:** This document defines the visual identity, layout principles, and interaction patterns for the BudgetMeter iOS app with the new dashboard-focused design language. It ensures a consistent, modern, data-driven user experience while maintaining iOS platform conventions.
 
 ---
 
 ## 1. Core Principles
 
-- **Clarity:** The UI must be clean, legible, and immediately understandable. Avoid visual clutter.
-- **Native Feel:** The app should look and feel like it was made by Apple. Use standard components, symbols, and patterns wherever possible.
-- **Consistency:** All design elements (colors, fonts, spacing) must be applied consistently across the entire application.
+- **Data-First:** Metrics, charts, and financial insights should be prominent and immediately visible. The interface prioritizes information density without sacrificing clarity.
+- **Modern Boldness:** Move away from subtle minimalism toward confident, prominent UI elements with strong visual hierarchy.
+- **iOS Native:** Despite the dashboard aesthetic, maintain iOS platform conventions—no hover effects, proper navigation patterns, full dark mode support, and haptic feedback.
+- **Performance:** Smooth animations and transitions are non-negotiable. All data visualizations must render at 60fps.
 
 ---
 
 ## 2. Color Palette
 
-The color palette combines custom brand colors with Apple's system colors to ensure both brand consistency and perfect adaptability for Light Mode, Dark Mode, and accessibility settings.
+The new palette emphasizes **vibrant greens for positive metrics** and **blues for progress/goals**, while maintaining full dark mode support and accessibility compliance.
 
-### Brand Colors
-| Role              | Hex Code    | UIKit Implementation       | SwiftUI Implementation     | Usage                                    |
-|-------------------|-------------|----------------------------|----------------------------|------------------------------------------|
-| **Primary Brand** | `#4A90E2`   | `UIColor(hex: "4A90E2")`   | `Color(hex: "4A90E2")`     | CTAs, primary buttons, highlights        |
-| **Secondary**     | `#6B7280`   | `UIColor(hex: "6B7280")`   | `Color(hex: "6B7280")`     | Secondary text, borders, inactive elements |
-| **Background**    | `#FAFAFA`   | `UIColor(hex: "FAFAFA")`   | `Color(hex: "FAFAFA")`     | Cards, surfaces, input backgrounds       |
-| **Success**       | `#10B981`   | `UIColor(hex: "10B981")`   | `Color(hex: "10B981")`     | Positive indicators, success messages    |
+### Brand Colors (Light Mode)
 
-### System Colors (Semantic)
-| Role              | Color Name          | UIKit Equivalent          | SwiftUI Equivalent      | Usage                                        |
-|-------------------|---------------------|---------------------------|-------------------------|----------------------------------------------|
-| **Income**        | System Green        | `.systemGreen`            | `Color.green`           | Income values, positive financial indicators  |
-| **Expense**       | System Red          | `.systemRed`              | `Color.red`             | Expense values, negative indicators, delete   |
-| **Warning**       | System Orange       | `.systemOrange`           | `Color.orange`          | Warnings, neutral alerts                     |
-| **Text Primary**  | Label Color         | `.label`                  | `Color(uiColor: .label)`| Primary text color (adapts automatically)   |
-| **Text Secondary**| Secondary Label     | `.secondaryLabel`         | `Color(uiColor: .secondaryLabel)` | Secondary text, descriptions       |
-| **System BG**     | System Background   | `.systemBackground`       | `Color(uiColor: .systemBackground)` | Main background (adapts to theme) |
+| Role                    | Hex Code    | SwiftUI Implementation              | Usage                                           |
+|-------------------------|-------------|-------------------------------------|-------------------------------------------------|
+| **Primary Positive**    | `#10B981`   | `Color(hex: "10B981")`             | Income, net positive flow, success indicators    |
+| **Primary Progress**    | `#3B82F6`   | `Color(hex: "3B82F6")`             | Progress bars, savings goals, action buttons     |
+| **Background Main**     | `#F9FAFB`   | `Color(hex: "F9FAFB")`             | App background (behind cards)                    |
+| **Card Background**     | `#FFFFFF`   | `Color(hex: "FFFFFF")`             | All card surfaces                                |
+| **Text Primary**        | `#111827`   | `Color(hex: "111827")`             | Primary text, headings, values                   |
+| **Text Secondary**      | `#6B7280`   | `Color(hex: "6B7280")`             | Labels, descriptions, secondary information      |
+| **Chart Inactive**      | `#E5E7EB`   | `Color(hex: "E5E7EB")`             | Bar chart default state, inactive elements       |
+| **Expense/Negative**    | `#EF4444`   | `Color(hex: "EF4444")`             | Expense values, negative flow, warnings          |
 
-### Color Implementation Notes
-- **Dark Mode Adaptation:** Brand colors should be tested and adjusted for Dark Mode compatibility
-- **Accessibility:** All color combinations must meet WCAG AA contrast requirements (4.5:1 ratio)
-- **Color Extensions:** Create SwiftUI Color extensions for brand colors to enable `Color.brandPrimary` syntax
+### Brand Colors (Dark Mode)
+
+| Role                    | Hex Code    | SwiftUI Implementation              | Dark Mode Adaptation                             |
+|-------------------------|-------------|-------------------------------------|--------------------------------------------------|
+| **Primary Positive**    | `#34D399`   | `Color(hex: "34D399")`             | Brighter green for contrast                      |
+| **Primary Progress**    | `#60A5FA`   | `Color(hex: "60A5FA")`             | Brighter blue for visibility                     |
+| **Background Main**     | `#000000`   | `Color(hex: "000000")`             | True black for OLED optimization                 |
+| **Card Background**     | `#1F2937`   | `Color(hex: "1F2937")`             | Elevated dark gray cards                         |
+| **Text Primary**        | `#F9FAFB`   | `Color(hex: "F9FAFB")`             | Light text on dark background                    |
+| **Text Secondary**      | `#9CA3AF`   | `Color(hex: "9CA3AF")`             | Muted secondary text                             |
+| **Chart Inactive**      | `#374151`   | `Color(hex: "374151")`             | Darker bars for dark mode                        |
+| **Expense/Negative**    | `#F87171`   | `Color(hex: "F87171")`             | Softer red for dark mode                         |
+
+### Adaptive Color Implementation
+
+```swift
+extension Color {
+    // Primary colors with automatic dark mode adaptation
+    static let brandPositive = Color(light: Color(hex: "10B981"), dark: Color(hex: "34D399"))
+    static let brandProgress = Color(light: Color(hex: "3B82F6"), dark: Color(hex: "60A5FA"))
+    static let brandExpense = Color(light: Color(hex: "EF4444"), dark: Color(hex: "F87171"))
+
+    // Backgrounds
+    static let appBackground = Color(light: Color(hex: "F9FAFB"), dark: Color(hex: "000000"))
+    static let cardBackground = Color(light: Color(hex: "FFFFFF"), dark: Color(hex: "1F2937"))
+
+    // Text colors
+    static let textPrimary = Color(light: Color(hex: "111827"), dark: Color(hex: "F9FAFB"))
+    static let textSecondary = Color(light: Color(hex: "6B7280"), dark: Color(hex: "9CA3AF"))
+
+    // Chart colors
+    static let chartInactive = Color(light: Color(hex: "E5E7EB"), dark: Color(hex: "374151"))
+}
+```
+
+### Color Usage Rules
+
+- **Income/Positive Flow:** Always use `Color.brandPositive` (green)
+- **Expense/Negative Flow:** Always use `Color.brandExpense` (red)
+- **Progress Indicators:** Use `Color.brandProgress` (blue) for savings goals, loading states
+- **Neutral Data:** Use `Color.textSecondary` for neutral metrics
+- **Accessibility:** All color combinations must maintain WCAG AA contrast ratio (4.5:1 minimum)
 
 ---
 
 ## 3. Typography
 
-- **Font:** **SF Pro**. The app must use the standard system font. Do not bundle custom fonts.
-- **Weights:** Use **Regular** for body text and **Bold** or **Semibold** for titles and emphasis.
-- **Sizes:**
-    - **Body/Input:** 17pt (Standard)
-    - **Titles (Large):** 22pt (Bold)
-    - **Subheadings:** 16pt (Semibold)
-- **Rule:** All text must support **Dynamic Type**. Use built-in text styles like `.body`, `.headline`, `.subheadline` where possible.
+**Font Family:** **SF Pro** (System Font) — No custom fonts. Leverage SF Pro's excellent tabular figure support for financial data.
+
+### Type Scale
+
+| Style                    | Size      | Weight      | Usage                                              |
+|--------------------------|-----------|-------------|---------------------------------------------------|
+| **Hero Metric**          | 48pt      | Bold        | Net flow value, large financial numbers            |
+| **Large Metric**         | 34pt      | Bold        | Secondary metrics, savings amounts                 |
+| **Medium Metric**        | 24pt      | Semibold    | Card values, interval amounts                      |
+| **Small Metric**         | 17pt      | Semibold    | Inline metrics, list values                        |
+| **Section Title**        | 20pt      | Semibold    | Card titles, section headers                       |
+| **Card Label**           | 15pt      | Medium      | Labels, descriptions within cards                  |
+| **Caption**              | 13pt      | Regular     | Timestamps, secondary info, footnotes              |
+| **Trend Indicator**      | 14pt      | Medium      | Percentage changes, "+12.5%"                       |
+
+### Typography Rules
+
+1. **Tabular Figures:** All financial values MUST use `.monospacedDigit()` modifier for smooth animations
+2. **Dynamic Type:** Support Dynamic Type scaling for accessibility (minimum .large, maximum .accessibility3)
+3. **Number Formatting:**
+   - Currencies: `$2,450.50` format with locale-aware symbols
+   - Percentages: `+12.5%` with explicit sign for trends
+   - Large numbers: `562K` or `1.2M` for compact display when space-constrained
+4. **Line Spacing:** Use default SF Pro line spacing (do not override)
+5. **Letter Spacing:** Default tracking (no custom kerning)
+
+### SwiftUI Text Modifiers
+
+```swift
+// Hero metric
+Text(value)
+    .font(.system(size: 48, weight: .bold, design: .default))
+    .monospacedDigit()
+    .foregroundColor(.brandPositive)
+
+// Section title
+Text("Financial Health Score")
+    .font(.system(size: 20, weight: .semibold))
+    .foregroundColor(.textPrimary)
+
+// Card label
+Text("Net Flow This Month")
+    .font(.system(size: 15, weight: .medium))
+    .foregroundColor(.textSecondary)
+```
 
 ---
 
 ## 4. Layout & Spacing
 
-- **Minimum Padding:** **16pt** for screen edges and around major content blocks.
-- **Standard Spacing:** **8pt** for spacing between related elements (e.g., items in a VStack, cards in a list).
-- **Corner Radius:** **12pt** for all cards and large buttons to maintain a soft, modern aesthetic.
-- **Touch Targets:** All interactive elements (buttons, list rows, inputs) must have a minimum touch target size of **44x44pt**.
+### Spacing System
+
+The new design uses a **larger, more generous spacing system** to create breathing room and visual hierarchy.
+
+| Token           | Value    | Usage                                                  |
+|-----------------|----------|--------------------------------------------------------|
+| **xs**          | 4pt      | Icon-to-text spacing, tight groupings                  |
+| **sm**          | 8pt      | Related elements within a card                         |
+| **md**          | 12pt     | Vertical spacing between card content sections         |
+| **lg**          | 16pt     | Horizontal screen padding (mobile)                     |
+| **xl**          | 24pt     | Card gap spacing, section separation, desktop padding  |
+| **2xl**         | 32pt     | Major section breaks                                   |
+
+### Layout Rules
+
+1. **Screen Padding:**
+   - **iPhone:** 16pt horizontal padding
+   - **iPad:** 24pt horizontal padding
+   - **Max Width:** None (full-width, iOS convention) — Unlike web design, iOS apps use full screen width
+
+2. **Card Spacing:**
+   - **Between cards:** 24pt vertical gap
+   - **Card internal padding:** 20pt all sides
+
+3. **Grid Layouts:**
+   - **2-column grid (iPhone):** 12pt gap
+   - **3-column grid (iPad):** 16pt gap
+   - Use `LazyVGrid` with `GridItem(.flexible())` for responsive grids
+
+4. **Corner Radius:**
+   - **Cards:** 16pt (increased from previous 12pt)
+   - **Buttons:** 12pt
+   - **Small elements (badges, chips):** 8pt
+   - **Progress bars:** 8pt
+
+5. **Touch Targets:**
+   - **Minimum:** 44x44pt (HIG requirement)
+   - **Recommended for primary actions:** 50pt height
 
 ---
 
-## 5. Iconography
+## 5. Components
 
-- **Source:** **SF Symbols only.** Do not use custom PNG, SVG, or other image assets for icons.
-- **Implementation:** Icons should be treated like text—they should scale with Dynamic Type and adopt the surrounding text color unless a specific semantic color (e.g., `Color.red`) is required.
-- **Key Symbols for BudgetMeter:**
-  - **Empty States:** `tray`, `creditcard`, `chart.line.uptrend.xyaxis`
-  - **Categories:** Use appropriate SF Symbols for expense/income categories
-  - **Navigation:** `house`, `dollarsign.circle`, `chart.bar`
+### 5.1 Hero Net Flow Card
 
----
+**Purpose:** Display the primary financial metric with maximum prominence.
 
-## 6. Components
-
-- **Buttons:** Use standard SwiftUI button styles (`.borderedProminent`, `.plain`). Ensure they meet the 44pt minimum touch target.
-- **Cards:** Use a container with a `.secondarySystemBackground` color and a 12pt corner radius.
-- **Form Inputs:** Use standard SwiftUI `TextField`s with the `.decimalPad` keyboard type.
-
----
-
-## 7. Motion & Haptics
-
-- **Animations:** Keep animations minimal and purposeful. Use the default SwiftUI animations (`.animation(.default, value: ...)`).
-- **Haptics:** Use subtle haptics for confirmation of user actions.
-    - **Action:** Saving a value, deleting an item.
-    - **Feedback:** A single, light tap (`UIImpactFeedbackGenerator(style: .light)`).
-
----
-
-## 8. App Icon & Splash Screen
-
-- **App Icon:** The design should be minimalist, flat, and modern. It should be recognizable and work well on a variety of wallpapers.
-- **Splash Screen (Launch Screen):** The launch screen storyboard must be simple: it should contain only the app icon centered on a solid background color that matches the app's theme. **No text or other graphics.**
-
----
-
-## 9. Live Meter Design
-
-- **Placement:** Fixed header above tab content, approximately 80pt height
-- **Background:** Subtle gradient from brand primary (#4A90E2) to lighter tint
-- **Animation:** Smooth numerical counting using NumberFormatter with locale support (no flip-style)
+**Specifications:**
+- **Height:** 180pt minimum
+- **Background:** Gradient from `Color.brandPositive` to lighter tint (use `LinearGradient`)
+- **Content:**
+  - Value: 48pt bold, white text with `.monospacedDigit()`
+  - Label: 15pt medium, white with 90% opacity
+  - Trend indicator: 14pt medium, white, with arrow symbol (↑ `arrow.up` / ↓ `arrow.down`)
 - **Color Logic:**
-  - **Positive flow:** Green text (`Color.green`)
-  - **Negative flow:** Red text (`Color.red`)
-  - **Zero flow:** Neutral gray text (`Color.secondary`)
-- **Typography:** Large, bold numbers with tabular spacing for smooth animation
-- **Performance:** Updates without impacting scroll performance
+  - Positive flow: Green gradient background
+  - Negative flow: Red gradient background (`Color.brandExpense`)
+  - Zero: Neutral gray gradient (`Color.textSecondary`)
+- **Corner Radius:** 16pt
+- **Shadow:** `color: .black.opacity(0.15), radius: 12, x: 0, y: 4`
+
+**Layout:**
+```
+┌─────────────────────────────┐
+│                             │
+│       Net Flow This Month   │ (label)
+│                             │
+│         +$2,450.50         │ (hero value)
+│                             │
+│           ↑ +12.5%          │ (trend)
+│                             │
+└─────────────────────────────┘
+```
+
+**Interaction:**
+- Tap: Navigate to detailed breakdown view
+- Haptic: `.impactOccurred(.light)` on tap
+- Animation: Value animates on appear using `NumberFormatter` (0 → target over 1.2s)
 
 ---
 
-## 10. Financial Category Icons (SF Symbols)
+### 5.2 Health Score Card
 
-### Expense Categories
-- **Food/Dining:** `fork.knife` or `takeoutbag.and.cup.and.straw`
-- **Transportation:** `car.fill` or `bus.fill`
-- **Rent/Housing:** `house.fill`
-- **Utilities:** `bolt.fill` or `lightbulb.fill`
-- **Healthcare:** `cross.fill` or `stethoscope`
-- **Entertainment:** `tv.fill` or `gamecontroller.fill`
-- **Shopping:** `bag.fill`
+**Purpose:** Display circular financial health score with status indicator.
 
-### Income Categories
-- **Salary/Income:** `dollarsign.circle.fill`
-- **Freelance:** `briefcase.fill`
-- **Investment:** `chart.line.uptrend.xyaxis`
+**Specifications:**
+- **Card Height:** 160pt
+- **Background:** `Color.cardBackground`
+- **Progress Ring:**
+  - Diameter: 100pt
+  - Stroke width: 10pt
+  - Foreground color: `Color.brandPositive` (for good scores), `Color.orange` (fair), `Color.brandExpense` (poor)
+  - Background color: `Color.chartInactive`
+  - Animation: Stroke animates from 0° to target angle over 1.5s with spring animation
+- **Center Content:**
+  - Score: 34pt bold, `Color.textPrimary`
+  - "/100": 17pt medium, `Color.textSecondary`
+- **Status Label:**
+  - Text: "Good" / "Fair" / "Poor"
+  - Size: 15pt semibold
+  - Color: Matches progress ring color
+  - Position: Below ring
+- **Corner Radius:** 16pt
+- **Shadow:** `color: .black.opacity(0.08), radius: 8, x: 0, y: 2`
 
-### Implementation Notes
-- Use **SF Symbols 4+** with semantic colors
-- **Filled versions** for active/selected states
-- **Outlined versions** for inactive states
-- Ensure icons **scale with Dynamic Type**
-
----
-
-## 11. Input Field Styling
-
-- **Keyboard Type:** `.decimalPad` exclusively for all monetary inputs
-- **Formatting Strategy:**
-  - Show **plain numbers** during input (no live formatting)
-  - Display **formatted currency** on blur using `NumberFormatter`
-  - Currency symbol as **prefix display only** (not in input field)
-- **Visual Style:**
-  - Rounded rectangle with subtle border
-  - Increase border width/color on focus using brand primary
-  - 44pt minimum touch target height
-- **Error States:**
-  - Red border with system red color
-  - Subtle shake animation for invalid input
-- **Accessibility:** Full VoiceOver support with descriptive labels
+**SVG Implementation:**
+```swift
+Circle()
+    .trim(from: 0, to: progress) // animate this value
+    .stroke(Color.brandPositive, style: StrokeStyle(lineWidth: 10, lineCap: .round))
+    .rotationEffect(.degrees(-90))
+    .animation(.spring(response: 1.5, dampingFraction: 0.7), value: progress)
+```
 
 ---
 
-## 12. Tab Bar Design
+### 5.3 Interval Metric Card (with Mini Chart)
 
-- **Icons (Active/Inactive):**
-  - **Expenses:** `minus.circle.fill` / `minus.circle`
-  - **Income:** `plus.circle.fill` / `plus.circle`  
-  - **Summary:** `chart.bar.fill` / `chart.bar`
-  - **Settings:** `gearshape.fill` / `gearshape` (if needed)
-- **Selection Style:**
-  - **Active:** Brand primary color (#4A90E2)
-  - **Inactive:** System gray colors
-- **Animation:** Subtle scale animation (1.0 to 1.1) on tap
-- **Labels:** Show text labels for accessibility compliance
+**Purpose:** Show hourly/daily/monthly metrics with sparkline visualization.
+
+**Specifications:**
+- **Card Height:** 140pt
+- **Background:** `Color.cardBackground`
+- **Content Layout:**
+  - Title: 15pt medium, `Color.textSecondary`, top-left
+  - Value: 24pt semibold, `Color.textPrimary`, center-left
+  - Chart: 60pt height, fills bottom portion of card
+- **Mini Bar Chart:**
+  - Bar width: 4pt
+  - Bar spacing: 2pt
+  - Bar color: `Color.chartInactive` (default)
+  - Highlight color: `Color.brandProgress` (on tap/selection)
+  - Animation: Bars grow from bottom to height over 0.8s with staggered delay (0.05s per bar)
+- **Corner Radius:** 16pt
+- **Shadow:** `color: .black.opacity(0.08), radius: 8, x: 0, y: 2`
+
+**Layout:**
+```
+┌─────────────────────────┐
+│ Hourly                  │ (title)
+│                         │
+│ €2,450                  │ (value)
+│                         │
+│ ▂▃▂▅▄▇▆                │ (mini chart)
+└─────────────────────────┘
+```
+
+**Chart Data Structure:**
+```swift
+struct IntervalData {
+    let period: String // "Hourly", "Daily", "Monthly"
+    let value: Decimal
+    let chartData: [Double] // Array of values for bar chart
+}
+```
+
+**Interaction:**
+- Tap: Expand to full-screen chart view
+- Haptic: `.impactOccurred(.light)` on tap
 
 ---
 
-## 13. Dark Mode Adaptations
+### 5.4 Savings Goal Card (Horizontal Progress)
 
-- **Brand Color Adjustments:**
-  - **Primary Brand:** #4A90E2 → #5BA3F5 (15-20% lighter)
-  - **Success Green:** #10B981 → #34D399 (slightly brighter)
-  - **Background:** Use `Color(uiColor: .systemBackground)` instead of fixed #FAFAFA
-- **Implementation:** Use adaptive colors with `UIColor { traitCollection in ... }`
-- **Accessibility:** Maintain minimum 4.5:1 contrast ratio
-- **Fallback:** Use system accent colors when brand colors don't meet contrast requirements
+**Purpose:** Display savings progress with milestone markers.
+
+**Specifications:**
+- **Card Height:** 160pt
+- **Background:** `Color.cardBackground`
+- **Content:**
+  - Title: "Savings Goal" — 20pt semibold
+  - Target amount: "€50,000" — 17pt medium, `Color.textSecondary`
+  - Current amount: "€38,500" — 24pt semibold, `Color.brandProgress`
+  - Progress bar: 12pt height, 8pt corner radius
+  - Milestone markers: Vertical ticks at 50%, 75%, 100%
+  - Target date: "Target: Dec 2025" — 13pt regular, `Color.textSecondary`
+- **Progress Bar:**
+  - Background: `Color.chartInactive`
+  - Foreground: `LinearGradient` from `Color.brandProgress` to lighter tint
+  - Animation: Width animates from 0% to 77% over 1.2s with spring
+- **Milestone Markers:**
+  - Position: Above progress bar
+  - Icon: Small circle (6pt diameter)
+  - Filled if achieved, outlined if not
+  - Color: `Color.brandProgress` (achieved), `Color.chartInactive` (not achieved)
+- **Corner Radius:** 16pt
+- **Shadow:** `color: .black.opacity(0.08), radius: 8, x: 0, y: 2`
+
+**Layout:**
+```
+┌──────────────────────────────┐
+│ Savings Goal                 │
+│ Target: €50,000              │
+│                              │
+│ €38,500                      │
+│                              │
+│     •      •         ○       │ (milestones: 50%, 75%, 100%)
+│ ████████████████░░░░░░░░░░  │ (progress bar 77%)
+│                              │
+│ Target: Dec 2025             │
+└──────────────────────────────┘
+```
+
+**Interaction:**
+- Tap: Navigate to goal details/editing
+- Haptic: `.impactOccurred(.medium)` on milestone achievement
 
 ---
 
-## 14. Empty States & Illustrations
+### 5.5 Insight Card (Trend Card)
 
-- **No Custom Illustrations:** Use SF Symbols exclusively for visual elements and empty states.
-- **Empty State Components:**
-  - **Icon:** Large SF Symbol from category mapping above
-  - **Message:** Short, encouraging text using secondary text color
-  - **Action:** Optional primary button using brand color for next steps
-- **Examples:**
-  - Empty expenses: `minus.circle` icon + "Add your first expense to get started!"
-  - Empty income: `plus.circle` icon + "Add your income sources"  
-  - Empty summary: `chart.bar` icon + "Enter your finances to see insights"
+**Purpose:** Display quick financial insights with trend indicators.
 
+**Specifications:**
+- **Card Height:** 100pt
+- **Background:** `Color.cardBackground`
+- **Content:**
+  - Icon: 24pt SF Symbol, semantic color
+  - Title: 15pt medium, `Color.textPrimary`
+  - Value change: 17pt semibold with trend color
+  - Percentage: 14pt medium, `Color.textSecondary`
+- **Corner Radius:** 12pt
+- **Shadow:** `color: .black.opacity(0.06), radius: 6, x: 0, y: 2`
+
+**Layout (2-column grid):**
+```
+┌────────────┐  ┌────────────┐
+│  📈        │  │  💰        │
+│            │  │            │
+│ Spending   │  │ Income     │
+│ +15%       │  │ +8%        │
+│ $1,240     │  │ $3,200     │
+└────────────┘  └────────────┘
+```
+
+---
+
+### 5.6 Trend Indicator Component
+
+**Purpose:** Show percentage change with directional arrow (inline component).
+
+**Specifications:**
+- **Font:** 14pt medium
+- **Color Logic:**
+  - Positive trend: `Color.brandPositive` with ↑ `arrow.up`
+  - Negative trend: `Color.brandExpense` with ↓ `arrow.down`
+  - Neutral: `Color.textSecondary` with → `arrow.forward`
+- **Format:** Always include sign: `+12.5%`, `-3.2%`, `0.0%`
+- **Layout:** Icon leading, percentage trailing
+
+```swift
+struct TrendIndicator: View {
+    let percentage: Double
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: percentage > 0 ? "arrow.up" : "arrow.down")
+            Text(String(format: "%+.1f%%", percentage))
+        }
+        .font(.system(size: 14, weight: .medium))
+        .foregroundColor(percentage > 0 ? .brandPositive : .brandExpense)
+    }
+}
+```
+
+---
+
+## 6. Data Visualization
+
+### 6.1 Mini Bar Charts (Sparklines)
+
+**Purpose:** Provide at-a-glance visual trends within cards.
+
+**Specifications:**
+- **Height:** 60pt fixed
+- **Bar Style:**
+  - Width: 4pt
+  - Spacing: 2pt
+  - Corner radius: 2pt (top only)
+  - Default color: `Color.chartInactive`
+  - Active color: `Color.brandProgress`
+- **Animation:**
+  - Bars animate from 0 height to final height
+  - Staggered delay: `0.05s * index`
+  - Spring animation: `response: 0.8, dampingFraction: 0.7`
+- **Data Normalization:** Scale all values to fit 60pt height (max value = 60pt)
+- **Interaction:** No direct interaction (tap on parent card)
+
+**Implementation Pattern:**
+```swift
+HStack(alignment: .bottom, spacing: 2) {
+    ForEach(Array(data.enumerated()), id: \.offset) { index, value in
+        RoundedRectangle(cornerRadius: 2, style: .continuous)
+            .fill(Color.chartInactive)
+            .frame(width: 4, height: normalizedHeight(value))
+            .animation(
+                .spring(response: 0.8, dampingFraction: 0.7)
+                .delay(Double(index) * 0.05),
+                value: animationTrigger
+            )
+    }
+}
+.frame(height: 60)
+```
+
+### 6.2 Circular Progress Indicator
+
+**Purpose:** Display percentage-based progress (health score, goals).
+
+**Specifications:**
+- **Implementation:** SVG `Circle` with `trim(from:to:)` modifier
+- **Rotation:** Start at top (−90°)
+- **Animation:**
+  - Type: Spring animation
+  - Duration: 1.5s
+  - Curve: `response: 1.5, dampingFraction: 0.7`
+- **Colors:** Context-dependent (health: green, goals: blue, alerts: red)
+- **Accessibility:** Provide VoiceOver label with percentage
+
+### 6.3 Horizontal Progress Bar
+
+**Purpose:** Linear progress visualization (savings, budgets).
+
+**Specifications:**
+- **Height:** 12pt
+- **Corner Radius:** 8pt
+- **Background:** `Color.chartInactive`
+- **Foreground:** `LinearGradient` (left to right)
+- **Animation:**
+  - Animate width from 0% to target over 1.2s
+  - Use `matchedGeometryEffect` for smooth transitions
+- **Milestone Markers:** Optional circles at specific percentages
+
+---
+
+## 7. Motion & Animation
+
+### Animation Principles
+
+1. **Purpose-Driven:** Every animation must serve a functional purpose (feedback, transition, or guidance)
+2. **Performance:** All animations must maintain 60fps on iPhone 12 and newer
+3. **Consistency:** Use standardized timing curves and durations
+4. **Accessibility:** Respect "Reduce Motion" system setting
+
+### Standard Timing System
+
+| Duration    | Use Case                                        | Curve                                    |
+|-------------|-------------------------------------------------|------------------------------------------|
+| **0.3s**    | Quick feedback, button taps, toggles            | `.easeInOut`                             |
+| **0.6s**    | Card appears/dismisses, navigation              | `.easeOut`                               |
+| **0.8s**    | Bar chart animations                            | `.spring(response: 0.8, damping: 0.7)`   |
+| **1.2s**    | Progress bar fills, value counts                | `.spring(response: 1.2, damping: 0.7)`   |
+| **1.5s**    | Circular progress animations, health score      | `.spring(response: 1.5, damping: 0.7)`   |
+
+### Spring Animation Standards
+
+```swift
+// Quick spring (buttons, toggles)
+.spring(response: 0.3, dampingFraction: 0.7)
+
+// Medium spring (cards, reveals)
+.spring(response: 0.6, dampingFraction: 0.75)
+
+// Slow spring (hero elements, progress)
+.spring(response: 1.2, dampingFraction: 0.7)
+```
+
+### Staggered Animations
+
+For lists of elements (insight cards, bar charts):
+```swift
+.animation(
+    .spring(response: 0.6, dampingFraction: 0.7)
+    .delay(Double(index) * 0.05),
+    value: animationTrigger
+)
+```
+
+### Number Counting Animation
+
+For financial values that animate from 0 to target:
+```swift
+struct AnimatedNumberView: View {
+    let target: Double
+    @State private var current: Double = 0
+
+    var body: some View {
+        Text(formatCurrency(current))
+            .onAppear {
+                withAnimation(.spring(response: 1.2, dampingFraction: 0.8)) {
+                    current = target
+                }
+            }
+    }
+}
+```
+
+### Reduce Motion Support
+
+Always provide non-animated fallbacks:
+```swift
+@Environment(\.accessibilityReduceMotion) var reduceMotion
+
+withAnimation(reduceMotion ? .none : .spring(response: 0.6)) {
+    // animation code
+}
+```
+
+---
+
+## 8. Interaction Patterns (iOS Adaptations)
+
+### 8.1 Card Interactions
+
+**Web Pattern (Hover):** Cards scale 1.02x and increase shadow on hover
+**iOS Adaptation:** Cards use press state with haptic feedback
+
+**Implementation:**
+```swift
+@State private var isPressed = false
+
+CardContent()
+    .scaleEffect(isPressed ? 0.98 : 1.0)
+    .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isPressed)
+    .onLongPressGesture(minimumDuration: .infinity, maximumDistance: .infinity, pressing: { pressing in
+        isPressed = pressing
+        if pressing {
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        }
+    }, perform: {})
+    .onTapGesture {
+        navigateToDetail()
+    }
+```
+
+**Rules:**
+- Scale down to **0.98x** on press (not up like hover)
+- Trigger **light haptic** on press start
+- Use **medium haptic** for confirmation actions
+- No continuous hover states (iOS limitation)
+
+### 8.2 Navigation Patterns
+
+**Primary Navigation:** Tab bar at bottom (iOS standard)
+- **Home:** Dashboard view (new design)
+- **Income:** Income entry and history
+- **Expenses:** Expense entry and history
+- **Insights:** Detailed charts and analysis
+- **Settings:** App preferences
+
+**Secondary Navigation:** NavigationStack for drill-downs
+- Card tap → Detail view with back button
+- Use `.navigationTitle()` and `.navigationBarTitleDisplayMode(.large)`
+- Swipe from left edge to go back (standard iOS gesture)
+
+**Modal Presentations:** Sheet for input forms
+```swift
+.sheet(isPresented: $showingAddIncome) {
+    AddIncomeView()
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
+}
+```
+
+### 8.3 Pull-to-Refresh
+
+Implement pull-to-refresh for data updates:
+```swift
+ScrollView {
+    // content
+}
+.refreshable {
+    await refreshData()
+}
+```
+
+### 8.4 Context Menus
+
+Long-press on cards shows context menu:
+```swift
+.contextMenu {
+    Button(action: edit) {
+        Label("Edit", systemImage: "pencil")
+    }
+    Button(action: share) {
+        Label("Share", systemImage: "square.and.arrow.up")
+    }
+}
+```
+
+---
+
+## 9. Haptic Feedback
+
+Haptics are critical for iOS interactions (replace web "hover" feedback).
+
+### Haptic Standards
+
+| Action                           | Haptic Type                              | Style      |
+|----------------------------------|------------------------------------------|------------|
+| **Card press/touch down**        | `UIImpactFeedbackGenerator`              | `.light`   |
+| **Button tap (confirmation)**    | `UIImpactFeedbackGenerator`              | `.medium`  |
+| **Toggle switch**                | `UIImpactFeedbackGenerator`              | `.light`   |
+| **Success (goal reached)**       | `UINotificationFeedbackGenerator`        | `.success` |
+| **Error (invalid input)**        | `UINotificationFeedbackGenerator`        | `.error`   |
+| **Warning (budget exceeded)**    | `UINotificationFeedbackGenerator`        | `.warning` |
+| **Selection (picker change)**    | `UISelectionFeedbackGenerator`           | N/A        |
+
+### Implementation:
+```swift
+let impact = UIImpactFeedbackGenerator(style: .light)
+impact.impactOccurred()
+
+let notification = UINotificationFeedbackGenerator()
+notification.notificationOccurred(.success)
+```
+
+---
+
+## 10. Dark Mode Specifications
+
+Full dark mode support is **mandatory**. All colors must have dark mode variants.
+
+### Design Adjustments for Dark Mode
+
+1. **Reduce Contrast:** Slightly reduce opacity of pure whites (90% opacity)
+2. **Shadow Adjustments:** Use lighter shadows with more spread
+3. **True Black:** Use `#000000` for background (OLED optimization)
+4. **Elevated Surfaces:** Cards should be `#1F2937` (not pure black)
+5. **Gradient Adjustments:** Reduce gradient intensity by 20%
+
+### Testing Requirements
+
+- Test every screen in both light and dark mode
+- Verify contrast ratios meet WCAG AA (4.5:1)
+- Check color blindness modes (protanopia, deuteranopia, tritanopia)
+- Use Xcode Accessibility Inspector
+
+---
+
+## 11. Accessibility Requirements
+
+### Mandatory Compliance
+
+1. **VoiceOver Support:**
+   - All interactive elements have `.accessibilityLabel()`
+   - Charts provide textual descriptions: "Your spending increased by 15% this month"
+   - Progress indicators announce percentage: "Health score: 78 out of 100"
+
+2. **Dynamic Type:**
+   - Support up to `.accessibility3` size
+   - Test all layouts at largest text size
+   - Allow text to wrap, not truncate
+
+3. **Color Independence:**
+   - Never rely solely on color to convey information
+   - Use icons + text for trends (not just red/green)
+   - Provide alternative indicators (arrows, labels)
+
+4. **Touch Targets:**
+   - Minimum 44x44pt for all tappable elements
+   - Increase padding if needed to meet requirement
+
+5. **Reduce Motion:**
+   - Provide instant transitions when enabled
+   - Disable animated number counting (show final value immediately)
+
+---
+
+## 12. Component Library Structure
+
+### Recommended File Organization
+
+```
+budgetmeter.ios/
+├── DesignSystem/
+│   ├── Colors/
+│   │   └── BrandColors.swift          # Color extensions
+│   ├── Typography/
+│   │   └── TextStyles.swift           # Text style modifiers
+│   ├── Spacing/
+│   │   └── LayoutTokens.swift         # Spacing constants
+│   ├── Components/
+│   │   ├── Cards/
+│   │   │   ├── HeroNetFlowCard.swift
+│   │   │   ├── HealthScoreCard.swift
+│   │   │   ├── IntervalMetricCard.swift
+│   │   │   └── SavingsGoalCard.swift
+│   │   ├── Charts/
+│   │   │   ├── MiniBarChart.swift
+│   │   │   ├── CircularProgress.swift
+│   │   │   └── HorizontalProgressBar.swift
+│   │   └── Indicators/
+│   │       ├── TrendIndicator.swift
+│   │       └── MilestoneMarker.swift
+│   └── Animations/
+│       └── AnimationCurves.swift      # Standard animations
+```
+
+---
+
+## 13. Performance Guidelines
+
+### Optimization Requirements
+
+1. **60fps Mandate:** All animations and scrolling must maintain 60fps
+2. **Lazy Loading:** Use `LazyVStack` and `LazyHStack` for lists
+3. **Image Optimization:** No images in this design (SF Symbols only)
+4. **Chart Rendering:**
+   - Limit bar chart data points to 50 per view
+   - Use `GeometryReader` sparingly (performance impact)
+5. **State Management:**
+   - Minimize `@State` re-renders
+   - Use `@StateObject` for ViewModels
+   - Debounce rapid updates (e.g., live meter)
+
+### Memory Guidelines
+
+- Avoid creating large arrays in view body
+- Cache formatted strings (currency, dates)
+- Release resources in `onDisappear`
+
+---
+
+## 14. Testing Checklist
+
+Before considering a component complete:
+
+- [ ] Light mode appearance verified
+- [ ] Dark mode appearance verified
+- [ ] VoiceOver labels added and tested
+- [ ] Dynamic Type tested at largest size
+- [ ] Touch targets meet 44pt minimum
+- [ ] Animations respect Reduce Motion
+- [ ] Color contrast meets WCAG AA
+- [ ] Haptic feedback implemented
+- [ ] Performance verified (60fps)
+- [ ] iPhone SE (smallest screen) tested
+- [ ] iPad layout tested
+- [ ] Landscape orientation tested
+
+---
+
+## 15. Migration Notes
+
+### Breaking Changes from v1.0
+
+1. **Color Palette:** Complete overhaul—old brand blue (`#4A90E2`) replaced with green (`#10B981`) for primary
+2. **Corner Radius:** Increased from 12pt to 16pt for cards
+3. **Spacing:** Larger gaps (24pt between cards vs. previous 12pt)
+4. **Typography:** Larger hero metrics (48pt vs. previous 34pt)
+5. **New Components:** Mini charts, horizontal progress bars, trend indicators
+
+### Backwards Compatibility
+
+- Old components should be gradually migrated, not immediately replaced
+- Consider feature flags for gradual rollout
+- Maintain design system version namespaces: `DesignSystemV1` and `DesignSystemV2`
+
+---
+
+## Appendix A: SF Symbols Reference
+
+### Financial Icons
+
+| Category               | Symbol Name                   |
+|------------------------|-------------------------------|
+| Net Flow (Positive)    | `arrow.up.circle.fill`        |
+| Net Flow (Negative)    | `arrow.down.circle.fill`      |
+| Health Score           | `heart.circle.fill`           |
+| Savings Goal           | `target`                      |
+| Income                 | `plus.circle.fill`            |
+| Expense                | `minus.circle.fill`           |
+| Hourly                 | `clock.fill`                  |
+| Daily                  | `calendar.day.fill`           |
+| Monthly                | `calendar.fill`               |
+| Trend Up               | `arrow.up.right`              |
+| Trend Down             | `arrow.down.right`            |
+| Chart/Insights         | `chart.bar.fill`              |
+
+---
+
+## Appendix B: Example Code Snippets
+
+### Adaptive Color Extension
+
+```swift
+extension Color {
+    init(light: Color, dark: Color) {
+        self.init(UIColor { traitCollection in
+            switch traitCollection.userInterfaceStyle {
+            case .dark:
+                return UIColor(dark)
+            default:
+                return UIColor(light)
+            }
+        })
+    }
+}
+```
+
+### Standard Card Modifier
+
+```swift
+extension View {
+    func dashboardCard() -> some View {
+        self
+            .padding(20)
+            .background(Color.cardBackground)
+            .cornerRadius(16)
+            .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 2)
+    }
+}
+```
+
+### Animated Number Text
+
+```swift
+struct AnimatedMetric: View {
+    let value: Double
+    @State private var displayValue: Double = 0
+
+    var body: some View {
+        Text(formatCurrency(displayValue))
+            .font(.system(size: 48, weight: .bold))
+            .monospacedDigit()
+            .onAppear {
+                withAnimation(.spring(response: 1.2, dampingFraction: 0.8)) {
+                    displayValue = value
+                }
+            }
+    }
+}
+```
+
+---
+
+## Version History
+
+- **v2.0 (Current):** Modern Financial Dashboard design language (iOS-adapted)
+- **v1.0:** Apple Native Minimalism (deprecated)
+
+---
+
+**End of Design Rulebook v2.0**
