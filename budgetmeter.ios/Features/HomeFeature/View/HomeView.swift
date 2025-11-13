@@ -2,36 +2,56 @@
 //  HomeView.swift
 //  BudgetMeter
 //
+//  Design System v2.0 - Modern Financial Dashboard
 //  Created by BudgetMeter Team on 17.09.2025.
 //
 
 import SwiftUI
 import CoreData
 
-/// Home screen - Main entry point following Steve Jobs "focus and simplify" philosophy
+/// Home screen - Modern Financial Dashboard
 struct HomeView: View {
-    
+
     @StateObject private var viewModel = HomeViewModel()
-    
+
     var body: some View {
         NavigationView {
-            VStack(spacing: 16) {
-                if viewModel.isLoading {
-                    loadingView
-                } else if !viewModel.hasAnyData {
-                    // First-time user experience
-                    gettingStartedView
-                } else {
-                    // Experienced user - full dashboard
-                    liveMeterHero
-                    quickActionsGrid
-                    snapshotCards
-                    
-                    Spacer()
+            ZStack {
+                Color.appBackground.ignoresSafeArea()
+
+                VStack(spacing: 0) {
+                    if viewModel.isLoading {
+                        loadingView
+                    } else if !viewModel.hasAnyData {
+                        // First-time user experience
+                        gettingStartedView
+                    } else {
+                        // Experienced user - Modern Financial Dashboard
+                        ScrollView(showsIndicators: false) {
+                            VStack(spacing: Spacing.xl) {
+                                // Hero Net Flow Card
+                                heroNetFlowCard
+
+                                // Health Score Card (prominent)
+                                healthScoreCard
+
+                                // Interval Metric Grid (Hourly, Daily, Monthly)
+                                intervalMetricGrid
+
+                                // Savings Goal Card (if goal is set)
+                                if viewModel.savingsGoal > 0 {
+                                    savingsGoalCard
+                                }
+
+                                // Quick Actions
+                                quickActionsGrid
+                            }
+                            .padding(.bottom, Spacing.xl)
+                        }
+                        .padding(.horizontal, Spacing.lg)
+                    }
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
             .navigationTitle("tab.home.title".localized(defaultValue: "Home"))
             .navigationBarTitleDisplayMode(.large)
             .refreshable {
@@ -59,194 +79,169 @@ struct HomeView: View {
             .presentationDragIndicator(.visible)
         }
     }
-    
-    // MARK: - Live Meter Hero
-    
-    private var liveMeterHero: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(alignment: .firstTextBaseline) {
-                Text("home.session.label".localized(defaultValue: "Current Session"))
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.white.opacity(0.9))
-                Spacer()
-                Text(viewModel.sessionDuration)
-                    .font(.caption)
-                    .monospacedDigit()
-                    .foregroundColor(.white.opacity(0.8))
-            }
 
-            HStack(spacing: 8) {
-                Text(viewModel.isPositive ? "+" : "-")
-                    .font(.system(size: 48, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+    // MARK: - Hero Net Flow Card
 
-                Text(viewModel.formattedLiveValue)
-                    .font(.system(size: 48, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-                    .monospacedDigit()
-            }
-
-            Text(viewModel.isPositive ? "home.session.positive".localized(defaultValue: "You're ahead") : "home.session.negative".localized(defaultValue: "You're behind"))
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .foregroundColor(.white.opacity(0.9))
-
-            Divider()
-                .background(Color.white.opacity(0.2))
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text("home.cumulative.label".localized(defaultValue: "Long-Term Total"))
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.white.opacity(0.9))
-
-                Text(viewModel.cumulativeDisplayAmount)
-                    .font(.system(size: 24, weight: .semibold, design: .rounded))
-                    .foregroundColor(viewModel.cumulativeFlowColor.opacity(0.95))
-                    .monospacedDigit()
-
-                Text("home.cumulative.since \(viewModel.cumulativeSinceDateText)".localized(defaultValue: "Since \(viewModel.cumulativeSinceDateText)"))
-                    .font(.footnote)
-                    .foregroundColor(.white.opacity(0.8))
-            }
-            
-            // Savings Goal Section (only show if goal is set)
-            if viewModel.savingsGoal > 0 {
-                Divider()
-                    .background(Color.white.opacity(0.2))
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("home.savings_goal.label".localized(defaultValue: "Savings Goal"))
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white.opacity(0.9))
-                    
-                    HStack {
-                        HStack(spacing: 4) {
-                            Image(systemName: "target")
-                                .font(.system(size: 16))
-                                .foregroundColor(.white.opacity(0.9))
-                            
-                            Text(viewModel.formattedSavingsGoal)
-                                .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                .foregroundColor(.white)
-                                .monospacedDigit()
-                        }
-                        
-                        Spacer()
-                        
-                        if !viewModel.timeToGoal.isEmpty {
-                            Text(viewModel.timeToGoal)
-                                .font(.caption)
-                                .fontWeight(.medium)
-                                .foregroundColor(.white.opacity(0.8))
-                        }
-                    }
-                }
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 24)
-        .padding(.horizontal, 20)
-        .background(
-            LinearGradient(
-                colors: [
-                    Color(hex: "4A90E2"),
-                    Color(hex: "4A90E2").opacity(0.8)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
-        .cornerRadius(12)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(
-            viewModel.savingsGoal > 0 
-                ? "home.session.accessibility.with_goal \(viewModel.formattedLiveValue) \(viewModel.sessionDuration) \(viewModel.cumulativeDisplayAmount) \(viewModel.cumulativeSinceDateText) \(viewModel.formattedSavingsGoal) \(viewModel.timeToGoal)".localized(defaultValue: "Current session: \(viewModel.formattedLiveValue), duration: \(viewModel.sessionDuration), total: \(viewModel.cumulativeDisplayAmount) since \(viewModel.cumulativeSinceDateText), savings goal: \(viewModel.formattedSavingsGoal), time to goal: \(viewModel.timeToGoal)")
-                : "home.session.accessibility \(viewModel.formattedLiveValue) \(viewModel.sessionDuration) \(viewModel.cumulativeDisplayAmount) \(viewModel.cumulativeSinceDateText)".localized(defaultValue: "Current session: \(viewModel.formattedLiveValue), duration: \(viewModel.sessionDuration), total: \(viewModel.cumulativeDisplayAmount) since \(viewModel.cumulativeSinceDateText)")
+    private var heroNetFlowCard: some View {
+        HeroNetFlowCard(
+            value: viewModel.monthlyNetFlow,
+            label: "home.net_flow_this_month".localized(defaultValue: "Net Flow This Month"),
+            trendPercentage: viewModel.netFlowTrendPercentage,
+            currencySymbol: CurrencyHelper.symbol(for: viewModel.currencyCode),
+            onTap: nil
         )
     }
-    
+
+    // MARK: - Health Score Card
+
+    private var healthScoreCard: some View {
+        HealthScoreCard(
+            score: viewModel.financialHealthScore,
+            statusLabel: viewModel.financialHealthText,
+            description: healthScoreDescription,
+            onTap: {
+                // TODO: Navigate to health details
+            }
+        )
+    }
+
+    private var healthScoreDescription: String? {
+        switch viewModel.financialHealthScore {
+        case 70...100:
+            return "home.health.good".localized(defaultValue: "Your financial health is strong")
+        case 40..<70:
+            return "home.health.fair".localized(defaultValue: "Your financial health needs attention")
+        default:
+            return "home.health.poor".localized(defaultValue: "Let's work on improving your health")
+        }
+    }
+
+    // MARK: - Interval Metric Grid
+
+    private var intervalMetricGrid: some View {
+        LazyVGrid(
+            columns: [
+                GridItem(.flexible()),
+                GridItem(.flexible())
+            ],
+            spacing: Spacing.md
+        ) {
+            // Hourly Card
+            IntervalMetricCard(
+                title: "home.interval.hourly".localized(defaultValue: "Hourly"),
+                value: viewModel.hourlyNetFlow,
+                currencySymbol: CurrencyHelper.symbol(for: viewModel.currencyCode),
+                chartData: viewModel.hourlyChartData,
+                onTap: nil
+            )
+
+            // Daily Card
+            IntervalMetricCard(
+                title: "home.interval.daily".localized(defaultValue: "Daily"),
+                value: viewModel.dailyNetFlow,
+                currencySymbol: CurrencyHelper.symbol(for: viewModel.currencyCode),
+                chartData: viewModel.dailyChartData,
+                onTap: nil
+            )
+
+            // Monthly Card (full width)
+            IntervalMetricCard(
+                title: "home.interval.monthly".localized(defaultValue: "Monthly"),
+                value: viewModel.monthlyNetFlow,
+                currencySymbol: CurrencyHelper.symbol(for: viewModel.currencyCode),
+                chartData: viewModel.monthlyChartData,
+                onTap: nil
+            )
+            .gridCellColumns(2) // Full width on grid
+        }
+    }
+
+    // MARK: - Savings Goal Card
+
+    private var savingsGoalCard: some View {
+        SavingsGoalCard(
+            currentAmount: viewModel.liveValue > 0 ? viewModel.liveValue : 0,
+            targetAmount: viewModel.savingsGoal,
+            currencySymbol: CurrencyHelper.symbol(for: viewModel.currencyCode),
+            targetDate: viewModel.timeToGoal.isEmpty ? nil : viewModel.timeToGoal,
+            onTap: {
+                viewModel.showSavingsGoalEntry()
+            }
+        )
+    }
+
     // MARK: - Quick Actions Grid
-    
+
     private var quickActionsGrid: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Spacing.md) {
             HStack {
                 Image(systemName: "bolt.fill")
-                    .foregroundColor(Color(hex: "4A90E2"))
+                    .foregroundColor(.brandProgress)
                 Text("home.quick_actions.title".localized(defaultValue: "Quick Actions"))
-                    .font(.headline)
-                    .fontWeight(.semibold)
+                    .sectionTitleStyle()
                 Spacer()
             }
-            .padding(.horizontal, 4)
-            
-            HStack(spacing: 8) {
+            .padding(.horizontal, Spacing.xs)
+
+            HStack(spacing: Spacing.sm) {
                 // Add Income Button
                 Button(action: viewModel.showIncomeEntry) {
-                    VStack(spacing: 6) {
+                    VStack(spacing: Spacing.sm) {
                         Image(systemName: "plus.circle.fill")
                             .font(.system(size: 28))
-                            .foregroundColor(.green)
-                        
+                            .foregroundColor(.brandPositive)
+
                         Text("home.quick_actions.add_income".localized(defaultValue: "Add Income"))
-                            .font(.caption)
-                            .fontWeight(.medium)
-                            .foregroundColor(.primary)
+                            .cardLabelStyle(color: .textPrimary)
                             .multilineTextAlignment(.center)
                             .lineLimit(2)
                     }
                     .frame(maxWidth: .infinity)
-                    .frame(height: 80)
-                    .background(Color(uiColor: .secondarySystemBackground))
-                    .cornerRadius(12)
+                    .frame(height: TouchTarget.large)
+                    .background(Color.cardBackground)
+                    .cornerRadius(CornerRadius.button)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("home.quick_actions.add_income".localized(defaultValue: "Add Income"))
                 .accessibilityHint("home.quick_actions.add_income.hint".localized(defaultValue: "Tap to add income entry"))
-                
+
                 // Add Expense Button
                 Button(action: viewModel.showExpenseEntry) {
-                    VStack(spacing: 6) {
+                    VStack(spacing: Spacing.sm) {
                         Image(systemName: "minus.circle.fill")
                             .font(.system(size: 28))
-                            .foregroundColor(.red)
-                        
+                            .foregroundColor(.brandExpense)
+
                         Text("home.quick_actions.add_expense".localized(defaultValue: "Add Expense"))
-                            .font(.caption)
-                            .fontWeight(.medium)
-                            .foregroundColor(.primary)
+                            .cardLabelStyle(color: .textPrimary)
                             .multilineTextAlignment(.center)
                             .lineLimit(2)
                     }
                     .frame(maxWidth: .infinity)
-                    .frame(height: 80)
-                    .background(Color(uiColor: .secondarySystemBackground))
-                    .cornerRadius(12)
+                    .frame(height: TouchTarget.large)
+                    .background(Color.cardBackground)
+                    .cornerRadius(CornerRadius.button)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("home.quick_actions.add_expense".localized(defaultValue: "Add Expense"))
                 .accessibilityHint("home.quick_actions.add_expense.hint".localized(defaultValue: "Tap to add expense entry"))
-                
+
                 // Savings Goal Button
                 Button(action: viewModel.showSavingsGoalEntry) {
-                    VStack(spacing: 6) {
+                    VStack(spacing: Spacing.sm) {
                         Image(systemName: "target")
                             .font(.system(size: 28))
-                            .foregroundColor(.purple)
-                        
+                            .foregroundColor(.brandProgress)
+
                         Text(viewModel.savingsGoal > 0 ? "home.quick_actions.goal".localized(defaultValue: "Goal") : "home.quick_actions.set_goal".localized(defaultValue: "Set Goal"))
-                            .font(.caption)
-                            .fontWeight(.medium)
-                            .foregroundColor(.primary)
+                            .cardLabelStyle(color: .textPrimary)
                             .multilineTextAlignment(.center)
                             .lineLimit(2)
                     }
                     .frame(maxWidth: .infinity)
-                    .frame(height: 80)
-                    .background(Color(uiColor: .secondarySystemBackground))
-                    .cornerRadius(12)
+                    .frame(height: TouchTarget.large)
+                    .background(Color.cardBackground)
+                    .cornerRadius(CornerRadius.button)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(viewModel.savingsGoal > 0 ? "home.quick_actions.goal".localized(defaultValue: "Goal") : "home.quick_actions.set_goal".localized(defaultValue: "Set Goal"))
@@ -254,96 +249,33 @@ struct HomeView: View {
             }
         }
     }
-    
-    // MARK: - Today's Snapshot Cards
-    
-    private var snapshotCards: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: "chart.line.uptrend.xyaxis")
-                    .foregroundColor(Color(hex: "4A90E2"))
-                Text("home.snapshot.title".localized(defaultValue: "Today's Snapshot"))
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                Spacer()
-            }
-            .padding(.horizontal, 4)
-            
-            HStack(spacing: 12) {
-                // Daily Flow Card
-                snapshotCard(
-                    title: "home.snapshot.daily".localized(defaultValue: "Daily"),
-                    value: viewModel.dailyNetFlow,
-                    icon: "calendar"
-                )
-                
-                // Monthly Flow Card
-                snapshotCard(
-                    title: "home.snapshot.monthly".localized(defaultValue: "Monthly"),
-                    value: viewModel.monthlyNetFlow,
-                    icon: "calendar.badge.clock"
-                )
-                
-                // Health Score Card (Tappable - navigates to HealthDetailsView)
-                NavigationLink(destination: HealthDetailsView()) {
-                    VStack(spacing: 4) {
-                        Image(systemName: "heart.fill")
-                            .font(.system(size: 20))
-                            .foregroundColor(viewModel.financialHealthColor)
 
-                        Text("home.snapshot.health".localized(defaultValue: "Health"))
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-
-                        HStack(spacing: 4) {
-                            Text("\(viewModel.financialHealthScore)")
-                                .font(.title3)
-                                .fontWeight(.bold)
-                                .foregroundColor(viewModel.financialHealthColor)
-
-                            Image(systemName: "chevron.right")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 70)
-                    .padding(.vertical, 12)
-                    .background(Color(uiColor: .secondarySystemBackground))
-                    .cornerRadius(12)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("home.snapshot.health.accessibility".localized(defaultValue: "Financial Health Score: \(viewModel.financialHealthScore)"))
-                .accessibilityHint("home.snapshot.health.hint".localized(defaultValue: "Tap to see detailed health breakdown and personalized tips"))
-            }
-        }
-    }
-    
     // MARK: - Getting Started View
-    
+
     private var gettingStartedView: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: Spacing.xl) {
             Spacer()
-            
+
             // Welcome Hero
-            VStack(spacing: 16) {
+            VStack(spacing: Spacing.lg) {
                 Image(systemName: "chart.line.uptrend.xyaxis.circle.fill")
                     .font(.system(size: 80))
-                    .foregroundColor(Color(hex: "4A90E2"))
-                
+                    .foregroundColor(.brandProgress)
+
                 Text("home.getting_started.title".localized(defaultValue: "Welcome to BudgetMeter"))
                     .font(.title2)
                     .fontWeight(.bold)
                     .multilineTextAlignment(.center)
-                
+                    .foregroundColor(.textPrimary)
+
                 Text("home.getting_started.subtitle".localized(defaultValue: "Track your financial flow in real-time"))
                     .font(.body)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.textSecondary)
                     .multilineTextAlignment(.center)
             }
-            
+
             // Quick Start Actions
-            VStack(spacing: 12) {
+            VStack(spacing: Spacing.md) {
                 Button(action: viewModel.showIncomeEntry) {
                     HStack {
                         Image(systemName: "plus.circle.fill")
@@ -353,13 +285,13 @@ struct HomeView: View {
                             .fontWeight(.semibold)
                     }
                     .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(Color(hex: "4A90E2"))
+                    .frame(height: TouchTarget.recommended)
+                    .background(Color.brandProgress)
                     .foregroundColor(.white)
-                    .cornerRadius(12)
+                    .cornerRadius(CornerRadius.button)
                 }
                 .buttonStyle(.plain)
-                
+
                 Button(action: viewModel.showExpenseEntry) {
                     HStack {
                         Image(systemName: "minus.circle")
@@ -369,57 +301,33 @@ struct HomeView: View {
                             .fontWeight(.medium)
                     }
                     .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(Color(uiColor: .secondarySystemBackground))
-                    .foregroundColor(.primary)
-                    .cornerRadius(12)
+                    .frame(height: TouchTarget.recommended)
+                    .background(Color.cardBackground)
+                    .foregroundColor(.textPrimary)
+                    .cornerRadius(CornerRadius.button)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color(uiColor: .separator), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: CornerRadius.button)
+                            .stroke(Color.chartInactive, lineWidth: 1)
                     )
                 }
                 .buttonStyle(.plain)
             }
-            
+
             Spacer()
         }
-        .padding(.horizontal, 8)
+        .padding(.horizontal, Spacing.xl)
     }
-    
+
     // MARK: - Loading View
-    
+
     private var loadingView: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: Spacing.lg) {
             ProgressView()
                 .scaleEffect(1.2)
             Text("home.loading".localized(defaultValue: "Loading..."))
-                .foregroundColor(.secondary)
+                .foregroundColor(.textSecondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-    
-    // MARK: - Helper Views
-    
-    private func snapshotCard(title: String, value: Double, icon: String) -> some View {
-        VStack(spacing: 4) {
-            Image(systemName: icon)
-                .font(.system(size: 20))
-                .foregroundColor(viewModel.colorForFlow(value))
-            
-            Text(title)
-                .font(.caption)
-                .foregroundColor(.secondary)
-            
-            Text(viewModel.formatCurrency(value))
-                .font(.title3)
-                .fontWeight(.bold)
-                .foregroundColor(viewModel.colorForFlow(value))
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: 70)
-        .padding(.vertical, 12)
-        .background(Color(uiColor: .secondarySystemBackground))
-        .cornerRadius(12)
     }
 }
 
@@ -428,4 +336,10 @@ struct HomeView: View {
 #Preview {
     HomeView()
         .environment(\.managedObjectContext, PersistenceService.shared.viewContext)
+}
+
+#Preview("Dark Mode") {
+    HomeView()
+        .environment(\.managedObjectContext, PersistenceService.shared.viewContext)
+        .preferredColorScheme(.dark)
 }
