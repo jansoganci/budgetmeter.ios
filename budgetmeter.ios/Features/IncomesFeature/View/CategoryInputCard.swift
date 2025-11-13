@@ -51,7 +51,7 @@ struct CategoryInputCard: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(
                     focusedField.wrappedValue == fieldID
-                        ? Color(hex: "4A90E2")
+                        ? Color.brandProgress
                         : Color.clear,
                     lineWidth: 2
                 )

@@ -50,7 +50,7 @@ struct IncomeView: View {
                     Button("toolbar.done".localized(defaultValue: "Done")) {
                         focusedField = nil
                     }
-                    .foregroundColor(Color(hex: "4A90E2"))
+                    .foregroundColor(.brandProgress)
                     .fontWeight(.semibold)
                 }
             }
@@ -90,7 +90,7 @@ struct IncomeView: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Image(systemName: "chart.line.uptrend.xyaxis")
-                    .foregroundColor(.green)
+                    .foregroundColor(.brandPositive)
                 Text(viewModel.summaryTitle)
                     .font(.headline)
                     .fontWeight(.semibold)
@@ -104,23 +104,23 @@ struct IncomeView: View {
                     title: viewModel.dailyAvgTitle,
                     value: viewModel.dailyAverageIncome,
                     icon: "calendar.day.timeline.left",
-                    color: Color(hex: "32CD32")
+                    color: .brandPositive
                 )
-                
+
                 // Monthly Total Card
                 summaryInfoCard(
                     title: viewModel.monthlyTitle,
                     value: viewModel.totalMonthlyIncome,
                     icon: "calendar",
-                    color: .green
+                    color: .brandPositive
                 )
-                
+
                 // Yearly Projection Card
                 summaryInfoCard(
                     title: viewModel.yearlyTitle,
                     value: viewModel.yearlyProjectionIncome,
                     icon: "chart.line.uptrend.xyaxis",
-                    color: .green.opacity(0.8)
+                    color: .brandPositive.opacity(0.8)
                 )
             }
         }
@@ -140,8 +140,8 @@ struct IncomeView: View {
         VStack(spacing: 16) {
             Image(systemName: "plus.circle")
                 .font(.system(size: 64))
-                .foregroundColor(.green)
-            
+                .foregroundColor(.brandPositive)
+
             Text("empty_state.income.message".localized(defaultValue: "No income yet. Tap the + button to add your first income source."))
                 .font(.headline)
                 .foregroundColor(.secondary)
