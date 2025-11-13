@@ -151,7 +151,7 @@ struct InsightsView: View {
 
             Image(systemName: "chart.bar.doc.horizontal.fill")
                 .font(.system(size: 80))
-                .foregroundColor(.blue)
+                .foregroundColor(.brandProgress)
 
             VStack(spacing: 12) {
                 Text("Premium Feature")
@@ -178,7 +178,7 @@ struct InsightsView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.blue)
+                    .background(Color.brandProgress)
                     .cornerRadius(12)
             }
             .padding(.horizontal)
@@ -207,7 +207,7 @@ struct InsightsView: View {
 
             Image(systemName: "chart.bar.xaxis")
                 .font(.system(size: 80))
-                .foregroundColor(.gray)
+                .foregroundColor(.chartInactive)
 
             VStack(spacing: 12) {
                 Text("No Data Yet")
@@ -262,7 +262,7 @@ struct InsightCardView: View {
             }
         }
         .padding()
-        .background(Color(.systemGray6))
+        .background(Color.cardBackground)
         .cornerRadius(12)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilityText)
@@ -292,10 +292,10 @@ struct InsightCardView: View {
             switch trend {
             case .up:
                 Image(systemName: "arrow.up.right")
-                    .foregroundColor(.green)
+                    .foregroundColor(.brandPositive)
             case .down:
                 Image(systemName: "arrow.down.right")
-                    .foregroundColor(.red)
+                    .foregroundColor(.brandExpense)
             case .neutral:
                 Image(systemName: "arrow.right")
                     .foregroundColor(.orange)
@@ -337,7 +337,7 @@ struct SkeletonInsightCard: View {
                 .frame(maxWidth: .infinity)
         }
         .padding()
-        .background(Color(.systemGray6))
+        .background(Color.cardBackground)
         .cornerRadius(12)
         .opacity(isAnimating ? 0.5 : 1.0)
         .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: isAnimating)
@@ -363,7 +363,7 @@ struct PremiumPaywallView: View {
                 VStack(spacing: 16) {
                     Image(systemName: featureIcon)
                         .font(.system(size: 80))
-                        .foregroundColor(.blue)
+                        .foregroundColor(.brandProgress)
 
                     Text(featureTitle)
                         .font(.title)
@@ -381,7 +381,7 @@ struct PremiumPaywallView: View {
                     ForEach(premiumFeatures, id: \.self) { feature in
                         HStack(spacing: 12) {
                             Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.green)
+                                .foregroundColor(.brandPositive)
                             Text(feature)
                                 .font(.subheadline)
                             Spacer()
@@ -413,7 +413,7 @@ struct PremiumPaywallView: View {
                             .padding()
                     }
                 }
-                .background(Color.blue)
+                .background(Color.brandProgress)
                 .cornerRadius(12)
                 .padding(.horizontal)
                 .disabled(premiumManager.isLoading)
@@ -428,7 +428,7 @@ struct PremiumPaywallView: View {
                 } label: {
                     Text("Restore Purchases")
                         .font(.subheadline)
-                        .foregroundColor(.blue)
+                        .foregroundColor(.brandProgress)
                 }
             }
             .padding()
