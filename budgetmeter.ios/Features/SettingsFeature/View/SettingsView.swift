@@ -244,6 +244,15 @@ struct SettingsView: View {
                 )
             }
 
+            NavigationLink(destination: BillsView()) {
+                PremiumFeatureRow(
+                    title: "settings.premium.bills".localized(defaultValue: "Bill Reminders"),
+                    subtitle: "settings.premium.bills.subtitle".localized(defaultValue: "Track bills and due dates"),
+                    iconName: "doc.text",
+                    premiumFeature: .billReminders
+                )
+            }
+
             NavigationLink(destination: RecurringTransactionsView()) {
                 PremiumFeatureRow(
                     title: "settings.premium.recurring".localized(defaultValue: "Recurring Transactions"),
