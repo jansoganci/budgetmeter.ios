@@ -434,7 +434,7 @@ final class NotificationService {
 
     /// Get pending notifications
     func getPendingNotifications(completion: @escaping ([UNNotificationRequest]) -> Void) {
-        notificationCenter.getPendingNotificationRequests(completion: completion)
+        notificationCenter.getPendingNotificationRequests(completionHandler: completion)
     }
 
     // MARK: - Helper Methods

@@ -8,6 +8,8 @@
 
 import SwiftUI
 import Combine
+import Foundation
+import CoreData
 
 /// ViewModel for Financial Health Details screen
 @MainActor
@@ -81,16 +83,18 @@ final class HealthDetailsViewModel: ObservableObject {
         errorMessage = nil
 
         do {
-            // Fetch current app settings
-            guard let settings = await fetchAppSettings() else {
+            // Fetch financial data
+            let (monthlyIncome, monthlyExpense, savingsGoal) = await fetchFinancialData()
+            
+            guard monthlyIncome > 0 || monthlyExpense > 0 else {
                 throw HealthDetailsError.noDataAvailable
             }
 
             // Calculate health score
             let score = CalculationEngine.calculateFinancialHealthScore(
-                monthlyIncome: settings.monthlyIncome,
-                monthlyExpense: settings.monthlyExpense,
-                savingsGoal: settings.savingsGoal
+                monthlyIncome: monthlyIncome,
+                monthlyExpense: monthlyExpense,
+                savingsGoal: savingsGoal
             )
 
             // Get health text
@@ -98,18 +102,17 @@ final class HealthDetailsViewModel: ObservableObject {
 
             // Calculate breakdown
             let breakdownData = CalculationEngine.calculateHealthScoreBreakdown(
-                monthlyIncome: settings.monthlyIncome,
-                monthlyExpense: settings.monthlyExpense,
-                savingsGoal: settings.savingsGoal,
-                budgetCategories: []  // Will be enhanced when categories are added
+                monthlyIncome: monthlyIncome,
+                monthlyExpense: monthlyExpense,
+                savingsGoal: savingsGoal
             )
 
             // Generate health tips
             let tips = CalculationEngine.generateHealthTips(
-                monthlyIncome: settings.monthlyIncome,
-                monthlyExpense: settings.monthlyExpense,
-                savingsGoal: settings.savingsGoal,
-                healthScore: score
+                breakdown: breakdownData,
+                currentIncome: monthlyIncome,
+                currentExpense: monthlyExpense,
+                savingsGoal: savingsGoal
             )
 
             // Update UI on main thread
@@ -162,10 +165,9 @@ final class HealthDetailsViewModel: ObservableObject {
         My BudgetMeter Financial Health Score: \(healthScore)/100 (\(healthText))
 
         📊 Health Breakdown:
-        • Budget Compliance: \(breakdown?.budgetCompliance ?? 0)%
-        • Savings Rate: \(breakdown?.savingsRate ?? 0)%
-        • Spending Consistency: \(breakdown?.spendingConsistency ?? 0)%
-        • Income Stability: \(breakdown?.incomeStability ?? 0)%
+        • Income Score: \(breakdown?.incomeScore ?? 0)/30
+        • Expense Score: \(breakdown?.expenseScore ?? 0)/30
+        • Savings Score: \(breakdown?.savingsScore ?? 0)/40
 
         Stay on top of your finances with BudgetMeter! 💚
         """
@@ -192,12 +194,51 @@ final class HealthDetailsViewModel: ObservableObject {
 
     // MARK: - Private Methods
 
-    /// Fetch app settings from persistence
-    private func fetchAppSettings() async -> AppSettings? {
+    /// Fetch financial data from persistence
+    private func fetchFinancialData() async -> (monthlyIncome: Double, monthlyExpense: Double, savingsGoal: Double) {
         return await withCheckedContinuation { continuation in
             persistenceService.performBackgroundTask { context in
-                let settings = self.persistenceService.fetchAppSettings(in: context)
-                continuation.resume(returning: settings)
+                // Fetch financial categories
+                let request: NSFetchRequest<FinancialCategory> = FinancialCategory.fetchRequest()
+                
+                do {
+                    let categories = try context.fetch(request)
+                    
+                    let incomeCategories = categories.filter { $0.type == "income" }
+                    let expenseCategories = categories.filter { $0.type == "expense" }
+                    
+                    // Calculate by frequency
+                    let dailyIncome = incomeCategories.filter { $0.frequency == "daily" }.reduce(0) { $0 + $1.amount }
+                    let monthlyIncome = incomeCategories.filter { $0.frequency == "monthly" }.reduce(0) { $0 + $1.amount }
+                    let yearlyIncome = incomeCategories.filter { $0.frequency == "yearly" }.reduce(0) { $0 + $1.amount }
+                    
+                    let dailyExpense = expenseCategories.filter { $0.frequency == "daily" }.reduce(0) { $0 + $1.amount }
+                    let monthlyExpense = expenseCategories.filter { $0.frequency == "monthly" }.reduce(0) { $0 + $1.amount }
+                    let yearlyExpense = expenseCategories.filter { $0.frequency == "yearly" }.reduce(0) { $0 + $1.amount }
+                    
+                    // Convert to monthly equivalents
+                    let totalMonthlyIncome = CalculationEngine.totalMonthlyIncome(
+                        dailyIncomeTotal: dailyIncome,
+                        monthlyIncomeTotal: monthlyIncome,
+                        yearlyIncomeTotal: yearlyIncome
+                    )
+                    
+                    let totalMonthlyExpense = CalculationEngine.totalMonthlyExpense(
+                        dailyTotal: dailyExpense,
+                        monthlyTotal: monthlyExpense,
+                        yearlyTotal: yearlyExpense
+                    )
+                    
+                    // Get savings goal from AppSettings
+                    let settingsRequest: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
+                    let settings = try context.fetch(settingsRequest).first
+                    let savingsGoal = settings?.savingsGoalAmount ?? 0.0
+                    
+                    continuation.resume(returning: (totalMonthlyIncome, totalMonthlyExpense, savingsGoal))
+                } catch {
+                    print("💚 HealthDetails: ❌ Failed to fetch financial data: \(error)")
+                    continuation.resume(returning: (0.0, 0.0, 0.0))
+                }
             }
         }
     }
@@ -234,7 +275,7 @@ final class HealthDetailsViewModel: ObservableObject {
 
     /// Premium tips only (filtered)
     var premiumTips: [HealthTip] {
-        return healthTips.filter { !isPremium }
+        return healthTips.filter { _ in !isPremium }
     }
 
     /// Available tips (free or premium if unlocked)
@@ -250,11 +291,11 @@ final class HealthDetailsViewModel: ObservableObject {
 
 // MARK: - Health Details Error
 
-enum HealthDetailsError: LocalizedError {
+enum HealthDetailsError: Error {
     case noDataAvailable
     case calculationFailed
-
-    var errorDescription: String? {
+    
+    var localizedDescription: String {
         switch self {
         case .noDataAvailable:
             return "No financial data available. Please set up your budget first."

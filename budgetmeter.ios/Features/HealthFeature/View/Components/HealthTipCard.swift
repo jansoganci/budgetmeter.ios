@@ -22,16 +22,16 @@ struct HealthTipCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Priority badge and title
+            // Impact badge and title
             HStack(spacing: 8) {
-                // Priority icon
+                // Impact icon
                 Image(systemName: priorityIcon)
                     .font(.subheadline)
                     .foregroundColor(priorityColor)
                     .accessibilityHidden(true)
 
-                // Priority text
-                Text(tip.priority.rawValue.uppercased())
+                // Impact text
+                Text(tip.impact)
                     .font(.caption)
                     .fontWeight(.bold)
                     .foregroundColor(priorityColor)
@@ -56,19 +56,17 @@ struct HealthTipCard: View {
                 .foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            // Category tag if available
-            if let category = tip.category {
-                HStack(spacing: 4) {
-                    Image(systemName: "tag.fill")
-                        .font(.caption2)
-                        .foregroundColor(.secondary.opacity(0.7))
+            // Impact tag
+            HStack(spacing: 4) {
+                Image(systemName: "arrow.up.circle.fill")
+                    .font(.caption2)
+                    .foregroundColor(.secondary.opacity(0.7))
 
-                    Text(category)
-                        .font(.caption2)
-                        .foregroundColor(.secondary.opacity(0.7))
-                }
-                .padding(.top, 4)
+                Text(tip.impact)
+                    .font(.caption2)
+                    .foregroundColor(.secondary.opacity(0.7))
             }
+            .padding(.top, 4)
         }
         .padding(16)
         .background(backgroundColor)
@@ -86,7 +84,7 @@ struct HealthTipCard: View {
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(tip.priority.rawValue.capitalized) priority tip: \(tip.title)")
+        .accessibilityLabel("Tip: \(tip.title), Impact: \(tip.impact)")
         .accessibilityValue(tip.description)
         .accessibilityHint(isPremium ? "" : "Premium feature. Unlock to see all tips")
     }
@@ -94,12 +92,11 @@ struct HealthTipCard: View {
     // MARK: - Priority Icon
 
     private var priorityIcon: String {
-        switch tip.priority {
-        case .high:
+        if tip.color == .red {
             return "exclamationmark.triangle.fill"
-        case .medium:
+        } else if tip.color == .orange {
             return "exclamationmark.circle.fill"
-        case .low:
+        } else {
             return "info.circle.fill"
         }
     }
@@ -107,27 +104,13 @@ struct HealthTipCard: View {
     // MARK: - Priority Color
 
     private var priorityColor: Color {
-        switch tip.priority {
-        case .high:
-            return .red
-        case .medium:
-            return .orange
-        case .low:
-            return .blue
-        }
+        return tip.color
     }
 
     // MARK: - Background Color
 
     private var backgroundColor: Color {
-        switch tip.priority {
-        case .high:
-            return Color.red.opacity(0.05)
-        case .medium:
-            return Color.orange.opacity(0.05)
-        case .low:
-            return Color.blue.opacity(0.05)
-        }
+        return tip.color.opacity(0.05)
     }
 
     // MARK: - Premium Badge
@@ -156,10 +139,11 @@ struct HealthTipCard: View {
 #Preview("High Priority Tip") {
     HealthTipCard(
         tip: HealthTip(
+            icon: "💸",
             title: "Increase Your Savings Rate",
             description: "You're currently saving only 5% of your income. Aim to increase this to at least 15% to build better financial security. Start by identifying areas where you can cut back on discretionary spending.",
-            priority: .high,
-            category: "Savings"
+            impact: "+10 points",
+            color: .red
         ),
         isPremium: true
     )
@@ -169,10 +153,11 @@ struct HealthTipCard: View {
 #Preview("Medium Priority Tip") {
     HealthTipCard(
         tip: HealthTip(
+            icon: "📊",
             title: "Review Your Spending Patterns",
             description: "Your spending varies significantly week to week. Creating a consistent spending routine can help you better manage your budget and reduce financial stress.",
-            priority: .medium,
-            category: "Budgeting"
+            impact: "+5 points",
+            color: .orange
         ),
         isPremium: true
     )
@@ -182,10 +167,11 @@ struct HealthTipCard: View {
 #Preview("Low Priority Tip - Locked") {
     HealthTipCard(
         tip: HealthTip(
+            icon: "🎯",
             title: "Optimize Your Budget Categories",
             description: "Consider reviewing and adjusting your budget categories to better match your actual spending patterns. This can improve your overall budget compliance.",
-            priority: .low,
-            category: "Optimization"
+            impact: "+3 points",
+            color: .blue
         ),
         isPremium: false
     )
@@ -197,30 +183,33 @@ struct HealthTipCard: View {
         VStack(spacing: 16) {
             HealthTipCard(
                 tip: HealthTip(
+                    icon: "💸",
                     title: "Increase Your Savings Rate",
                     description: "You're currently saving only 5% of your income. Try to reach 15%.",
-                    priority: .high,
-                    category: "Savings"
+                    impact: "+10 points",
+                    color: .red
                 ),
                 isPremium: true
             )
 
             HealthTipCard(
                 tip: HealthTip(
+                    icon: "📊",
                     title: "Review Your Spending Patterns",
                     description: "Your spending varies significantly week to week.",
-                    priority: .medium,
-                    category: "Budgeting"
+                    impact: "+5 points",
+                    color: .orange
                 ),
                 isPremium: true
             )
 
             HealthTipCard(
                 tip: HealthTip(
+                    icon: "🎯",
                     title: "Optimize Your Budget Categories",
                     description: "Consider adjusting your budget categories.",
-                    priority: .low,
-                    category: "Optimization"
+                    impact: "+3 points",
+                    color: .blue
                 ),
                 isPremium: false
             )

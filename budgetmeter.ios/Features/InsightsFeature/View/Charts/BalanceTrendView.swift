@@ -320,7 +320,7 @@ struct BalanceTrendView: View {
 // MARK: - Preview
 
 #Preview {
-    let context = PersistenceService.preview.viewContext
+    let context = PersistenceService.shared.viewContext
     let calendar = Calendar.current
 
     let snapshots = (0..<30).map { day -> FinancialSnapshot in
@@ -330,6 +330,6 @@ struct BalanceTrendView: View {
         return snapshot
     }.reversed()
 
-    return BalanceTrendView(snapshots: Array(snapshots), days: 30)
+    BalanceTrendView(snapshots: Array(snapshots), days: 30)
         .padding()
 }
