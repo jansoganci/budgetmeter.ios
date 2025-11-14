@@ -293,6 +293,7 @@ enum PurchaseState {
 
 enum PremiumFeature: String, CaseIterable {
     case customCategories = "custom_categories"
+    case subscriptionTracking = "subscription_tracking"
     case recurringTransactions = "recurring_transactions"
     case dataExport = "data_export"
     case widgets = "widgets"
@@ -304,6 +305,8 @@ enum PremiumFeature: String, CaseIterable {
         switch self {
         case .customCategories:
             return "Custom Categories"
+        case .subscriptionTracking:
+            return "Subscription Tracking"
         case .recurringTransactions:
             return "Recurring Transactions"
         case .dataExport:
@@ -323,6 +326,8 @@ enum PremiumFeature: String, CaseIterable {
         switch self {
         case .customCategories:
             return "Create unlimited custom income and expense categories with SF Symbols and colors"
+        case .subscriptionTracking:
+            return "Track unlimited subscriptions with renewal reminders and spending insights"
         case .recurringTransactions:
             return "Automate repeating bills, salaries, and subscriptions"
         case .dataExport:
@@ -342,6 +347,8 @@ enum PremiumFeature: String, CaseIterable {
         switch self {
         case .customCategories:
             return "tag.fill"
+        case .subscriptionTracking:
+            return "creditcard"
         case .recurringTransactions:
             return "repeat"
         case .dataExport:

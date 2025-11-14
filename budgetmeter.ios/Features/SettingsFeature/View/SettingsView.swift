@@ -235,6 +235,15 @@ struct SettingsView: View {
 
     private var premiumSection: some View {
         Section {
+            NavigationLink(destination: SubscriptionsView()) {
+                PremiumFeatureRow(
+                    title: "settings.premium.subscriptions".localized(defaultValue: "Subscription Tracking"),
+                    subtitle: "settings.premium.subscriptions.subtitle".localized(defaultValue: "Track and manage all your subscriptions"),
+                    iconName: "creditcard",
+                    premiumFeature: .subscriptionTracking
+                )
+            }
+
             NavigationLink(destination: RecurringTransactionsView()) {
                 PremiumFeatureRow(
                     title: "settings.premium.recurring".localized(defaultValue: "Recurring Transactions"),
