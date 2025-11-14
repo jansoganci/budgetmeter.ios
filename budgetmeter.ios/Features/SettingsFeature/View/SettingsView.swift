@@ -253,6 +253,15 @@ struct SettingsView: View {
                 )
             }
 
+            NavigationLink(destination: SavingsGoalsView()) {
+                PremiumFeatureRow(
+                    title: "settings.premium.savings_goals".localized(defaultValue: "Savings Goals"),
+                    subtitle: "settings.premium.savings_goals.subtitle".localized(defaultValue: "Track multiple goals with visual progress"),
+                    iconName: "target",
+                    premiumFeature: .savingsGoals
+                )
+            }
+
             NavigationLink(destination: RecurringTransactionsView()) {
                 PremiumFeatureRow(
                     title: "settings.premium.recurring".localized(defaultValue: "Recurring Transactions"),

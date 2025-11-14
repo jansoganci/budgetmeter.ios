@@ -295,6 +295,7 @@ enum PremiumFeature: String, CaseIterable {
     case customCategories = "custom_categories"
     case subscriptionTracking = "subscription_tracking"
     case billReminders = "bill_reminders"
+    case savingsGoals = "savings_goals"
     case recurringTransactions = "recurring_transactions"
     case dataExport = "data_export"
     case widgets = "widgets"
@@ -310,6 +311,8 @@ enum PremiumFeature: String, CaseIterable {
             return "Subscription Tracking"
         case .billReminders:
             return "Bill Reminders"
+        case .savingsGoals:
+            return "Savings Goals"
         case .recurringTransactions:
             return "Recurring Transactions"
         case .dataExport:
@@ -333,6 +336,8 @@ enum PremiumFeature: String, CaseIterable {
             return "Track unlimited subscriptions with renewal reminders and spending insights"
         case .billReminders:
             return "Track bills, due dates, and payment history with smart reminders"
+        case .savingsGoals:
+            return "Create and track multiple savings goals with visual progress and pace tracking"
         case .recurringTransactions:
             return "Automate repeating bills, salaries, and subscriptions"
         case .dataExport:
@@ -356,6 +361,8 @@ enum PremiumFeature: String, CaseIterable {
             return "creditcard"
         case .billReminders:
             return "doc.text"
+        case .savingsGoals:
+            return "target"
         case .recurringTransactions:
             return "repeat"
         case .dataExport:
