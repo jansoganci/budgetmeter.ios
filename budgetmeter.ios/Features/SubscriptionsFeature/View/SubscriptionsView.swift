@@ -14,6 +14,7 @@ struct SubscriptionsView: View {
 
     @StateObject private var viewModel = SubscriptionsViewModel()
     @State private var showingAddSubscription = false
+    @State private var subscriptionToEdit: Subscription?
 
     // MARK: - Body
 
@@ -50,8 +51,14 @@ struct SubscriptionsView: View {
                 }
             }
             .sheet(isPresented: $showingAddSubscription) {
-                // TODO: Add SubscriptionInputView here
-                Text("Add Subscription Form")
+                SubscriptionInputView(subscription: nil) {
+                    viewModel.loadSubscriptions()
+                }
+            }
+            .sheet(item: $subscriptionToEdit) { subscription in
+                SubscriptionInputView(subscription: subscription) {
+                    viewModel.loadSubscriptions()
+                }
             }
             .onAppear {
                 viewModel.loadSubscriptions()
@@ -113,6 +120,9 @@ struct SubscriptionsView: View {
             VStack(spacing: Spacing.sm) {
                 ForEach(viewModel.renewingSoon, id: \.id) { subscription in
                     RenewingSoonRow(subscription: subscription, viewModel: viewModel)
+                        .onTapGesture {
+                            subscriptionToEdit = subscription
+                        }
                 }
             }
         }
@@ -153,8 +163,14 @@ struct SubscriptionsView: View {
             } else {
                 VStack(spacing: 0) {
                     ForEach(Array(viewModel.sortedSubscriptions.enumerated()), id: \.element.id) { index, subscription in
-                        SubscriptionRow(subscription: subscription, viewModel: viewModel)
-                            .background(Color.cardBackground)
+                        SubscriptionRow(
+                            subscription: subscription,
+                            viewModel: viewModel,
+                            onTap: {
+                                subscriptionToEdit = subscription
+                            }
+                        )
+                        .background(Color.cardBackground)
 
                         if index < viewModel.sortedSubscriptions.count - 1 {
                             Divider()
@@ -245,6 +261,7 @@ struct RenewingSoonRow: View {
 struct SubscriptionRow: View {
     let subscription: Subscription
     let viewModel: SubscriptionsViewModel
+    let onTap: () -> Void
 
     var body: some View {
         HStack(spacing: Spacing.md) {
@@ -299,6 +316,9 @@ struct SubscriptionRow: View {
         }
         .padding(Spacing.md)
         .contentShape(Rectangle())
+        .onTapGesture {
+            onTap()
+        }
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
             Button(role: .destructive) {
                 viewModel.deleteSubscription(subscription)
