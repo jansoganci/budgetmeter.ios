@@ -634,16 +634,16 @@ struct CalculationEngine {
                 icon: "arrow.down.circle.fill",
                 title: "Increase Your Savings Rate",
                 description: "Try to save at least 10% of your income. Reduce expenses by \(CurrencyHelper.formatAmount(reductionNeeded)) to reach this goal.",
-                priority: .high,
-                category: .savings
+                impact: "+10 points",
+                color: .red
             ))
         } else if savingsRate < 0.20 && currentIncome > 0 {
             tips.append(HealthTip(
                 icon: "arrow.up.circle.fill",
                 title: "Boost Your Savings",
                 description: "You're saving \(String(format: "%.0f", savingsRate * 100))%. Aim for 20% to build wealth faster.",
-                priority: .medium,
-                category: .savings
+                impact: "+5 points",
+                color: .orange
             ))
         }
 
@@ -655,8 +655,8 @@ struct CalculationEngine {
                     icon: "chart.pie.fill",
                     title: "Review Your Expenses",
                     description: "Your expenses are close to your income. Look for categories where you can cut back.",
-                    priority: .high,
-                    category: .expense
+                    impact: "+8 points",
+                    color: .red
                 ))
             }
         }
@@ -667,8 +667,8 @@ struct CalculationEngine {
                 icon: "dollarsign.circle.fill",
                 title: "Add Income Sources",
                 description: "Track all your income sources to get an accurate financial picture.",
-                priority: .high,
-                category: .income
+                impact: "+7 points",
+                color: .red
             ))
         } else if savingsGoal > 0 && savingsAmount > 0 {
             let monthsToGoal = ceil(savingsGoal / savingsAmount)
@@ -677,8 +677,8 @@ struct CalculationEngine {
                     icon: "arrow.up.right.circle.fill",
                     title: "Consider Additional Income",
                     description: "At your current rate, it will take \(Int(monthsToGoal)) months to reach your goal. Extra income could help you get there faster.",
-                    priority: .medium,
-                    category: .income
+                    impact: "+5 points",
+                    color: .orange
                 ))
             }
         }
@@ -691,8 +691,8 @@ struct CalculationEngine {
                     icon: "target",
                     title: "Adjust Your Savings Goal",
                     description: "Your current savings are \(String(format: "%.0f", progress))% of your goal. Consider if your goal is realistic for your income level.",
-                    priority: .low,
-                    category: .goal
+                    impact: "+3 points",
+                    color: .blue
                 ))
             }
         } else if savingsGoal == 0 && savingsAmount > 0 {
@@ -700,8 +700,8 @@ struct CalculationEngine {
                 icon: "flag.fill",
                 title: "Set a Savings Goal",
                 description: "You're saving \(CurrencyHelper.formatAmount(savingsAmount))/month. Set a goal to stay motivated!",
-                priority: .medium,
-                category: .goal
+                impact: "+5 points",
+                color: .orange
             ))
         }
 
@@ -711,15 +711,16 @@ struct CalculationEngine {
                 icon: "star.fill",
                 title: "You're Doing Great!",
                 description: "Your financial health score is \(breakdown.totalScore)/100. Keep up the excellent habits!",
-                priority: .low,
-                category: .general
+                impact: "Excellent",
+                actionable: false,
+                color: .green
             ))
         }
 
-        // Sort by priority and limit to top 5
+        // Sort by color priority (red > orange > blue > green) and limit to top 5
         return tips.sorted { tip1, tip2 in
-            let priority1 = tip1.priority == .high ? 3 : (tip1.priority == .medium ? 2 : 1)
-            let priority2 = tip2.priority == .high ? 3 : (tip2.priority == .medium ? 2 : 1)
+            let priority1 = tip1.color == .red ? 4 : (tip1.color == .orange ? 3 : (tip1.color == .blue ? 2 : 1))
+            let priority2 = tip2.color == .red ? 4 : (tip2.color == .orange ? 3 : (tip2.color == .blue ? 2 : 1))
             return priority1 > priority2
         }.prefix(5).map { $0 }
     }

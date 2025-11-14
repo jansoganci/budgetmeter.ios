@@ -303,14 +303,14 @@ struct MonthComparisonView: View {
 #Preview {
     MonthComparisonView(
         currentMonth: {
-            let snapshot = FinancialSnapshot(context: PersistenceService.preview.viewContext)
+            let snapshot = FinancialSnapshot(context: PersistenceService.shared.viewContext)
             snapshot.totalIncome = 5000
             snapshot.totalExpense = 3500
             snapshot.date = Date()
             return snapshot
         }(),
         previousMonth: {
-            let snapshot = FinancialSnapshot(context: PersistenceService.preview.viewContext)
+            let snapshot = FinancialSnapshot(context: PersistenceService.shared.viewContext)
             snapshot.totalIncome = 4800
             snapshot.totalExpense = 3200
             snapshot.date = Calendar.current.date(byAdding: .month, value: -1, to: Date())
