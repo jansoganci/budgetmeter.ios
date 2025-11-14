@@ -25,7 +25,6 @@ final class SubscriptionManager {
     static let subscriptionAddedNotification = Notification.Name("SubscriptionAdded")
     static let subscriptionUpdatedNotification = Notification.Name("SubscriptionUpdated")
     static let subscriptionDeletedNotification = Notification.Name("SubscriptionDeleted")
-    static let unusedSubscriptionDetectedNotification = Notification.Name("UnusedSubscriptionDetected")
 
     // MARK: - Private Init
     private init() {}
@@ -38,11 +37,8 @@ final class SubscriptionManager {
         name: String,
         amount: Double,
         billingCycle: String,
-        customCycleDays: Int? = nil,
         firstBillDate: Date,
         category: String = "Other",
-        iconName: String? = nil,
-        colorHex: String? = nil,
         notes: String? = nil,
         reminderDaysBefore: Int = 3
     ) -> Subscription? {
@@ -52,16 +48,12 @@ final class SubscriptionManager {
         subscription.name = name
         subscription.amount = amount
         subscription.billingCycle = billingCycle
-        subscription.customCycleDays = Int16(customCycleDays ?? 0)
         subscription.firstBillDate = firstBillDate
-        subscription.nextRenewalDate = calculateNextRenewalDate(from: firstBillDate, cycle: billingCycle, customDays: customCycleDays)
+        subscription.nextRenewalDate = calculateNextRenewalDate(from: firstBillDate, cycle: billingCycle)
         subscription.category = category
-        subscription.iconName = iconName
-        subscription.colorHex = colorHex
         subscription.notes = notes
         subscription.isActive = true
         subscription.isPaused = false
-        subscription.usageReminderEnabled = true
         subscription.reminderDaysBefore = Int16(reminderDaysBefore)
         subscription.createdAt = Date()
         subscription.lastModified = Date()
@@ -87,10 +79,7 @@ final class SubscriptionManager {
         name: String? = nil,
         amount: Double? = nil,
         billingCycle: String? = nil,
-        customCycleDays: Int? = nil,
         category: String? = nil,
-        iconName: String? = nil,
-        colorHex: String? = nil,
         notes: String? = nil,
         reminderDaysBefore: Int? = nil
     ) -> Bool {
@@ -107,14 +96,10 @@ final class SubscriptionManager {
             // Recalculate next renewal date
             subscription.nextRenewalDate = calculateNextRenewalDate(
                 from: subscription.firstBillDate ?? Date(),
-                cycle: billingCycle,
-                customDays: customCycleDays
+                cycle: billingCycle
             )
         }
-        if let customCycleDays = customCycleDays { subscription.customCycleDays = Int16(customCycleDays) }
         if let category = category { subscription.category = category }
-        if let iconName = iconName { subscription.iconName = iconName }
-        if let colorHex = colorHex { subscription.colorHex = colorHex }
         if let notes = notes { subscription.notes = notes }
         if let reminderDaysBefore = reminderDaysBefore { subscription.reminderDaysBefore = Int16(reminderDaysBefore) }
 
@@ -190,23 +175,6 @@ final class SubscriptionManager {
         return true
     }
 
-    /// Cancel a subscription with reason
-    func cancelSubscription(id: UUID, reason: String?) -> Bool {
-        guard let subscription = fetchSubscription(by: id) else { return false }
-
-        subscription.isActive = false
-        subscription.cancelledDate = Date()
-        subscription.cancellationReason = reason
-        subscription.lastModified = Date()
-
-        // Cancel notifications
-        cancelRenewalNotification(for: subscription)
-
-        guard persistence.save() else { return false }
-
-        NotificationCenter.default.post(name: Self.subscriptionUpdatedNotification, object: subscription)
-        return true
-    }
 
     // MARK: - Fetch Operations
 
@@ -258,28 +226,6 @@ final class SubscriptionManager {
         }
     }
 
-    /// Get unused subscriptions (not used in X days)
-    func getUnusedSubscriptions(daysSince: Int = 30) -> [Subscription] {
-        let cutoffDate = Calendar.current.date(byAdding: .day, value: -daysSince, to: Date()) ?? Date()
-
-        let request: NSFetchRequest<Subscription> = Subscription.fetchRequest()
-        request.predicate = NSPredicate(
-            format: "isActive == YES AND (lastUsedDate == nil OR lastUsedDate < %@)",
-            cutoffDate as CVarArg
-        )
-        request.sortDescriptors = [NSSortDescriptor(key: "amount", ascending: false)]
-
-        do {
-            let results = try context.fetch(request)
-            if !results.isEmpty {
-                NotificationCenter.default.post(name: Self.unusedSubscriptionDetectedNotification, object: results)
-            }
-            return results
-        } catch {
-            print("❌ SubscriptionManager: Failed to fetch unused subscriptions: \(error)")
-            return []
-        }
-    }
 
     /// Get subscriptions grouped by category
     func getSubscriptionsByCategory() -> [String: [Subscription]] {
@@ -322,22 +268,10 @@ final class SubscriptionManager {
         }
     }
 
-    // MARK: - Usage Tracking
-
-    /// Mark subscription as used (updates lastUsedDate)
-    func markAsUsed(id: UUID) -> Bool {
-        guard let subscription = fetchSubscription(by: id) else { return false }
-
-        subscription.lastUsedDate = Date()
-        subscription.lastModified = Date()
-
-        return persistence.save()
-    }
-
     // MARK: - Date Calculations
 
     /// Calculate next renewal date based on billing cycle
-    private func calculateNextRenewalDate(from startDate: Date, cycle: String, customDays: Int?) -> Date {
+    private func calculateNextRenewalDate(from startDate: Date, cycle: String) -> Date {
         let calendar = Calendar.current
         let now = Date()
 
@@ -361,13 +295,8 @@ final class SubscriptionManager {
             while nextDate <= now {
                 nextDate = calendar.date(byAdding: .weekOfYear, value: 1, to: nextDate) ?? nextDate
             }
-        case "custom":
-            if let days = customDays, days > 0 {
-                while nextDate <= now {
-                    nextDate = calendar.date(byAdding: .day, value: days, to: nextDate) ?? nextDate
-                }
-            }
         default:
+            // Default to monthly if unknown cycle
             nextDate = calendar.date(byAdding: .month, value: 1, to: startDate) ?? startDate
         }
 

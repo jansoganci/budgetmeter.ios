@@ -79,26 +79,19 @@
         <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
     </entity>
 
-    <!-- NEW ENTITY: Subscription -->
+    <!-- NEW ENTITY: Subscription (Approved Requirements) -->
     <entity name="Subscription" representedClassName="Subscription" syncable="YES" codeGenerationType="class">
         <attribute name="id" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="name" optional="NO" attributeType="String"/>
         <attribute name="amount" optional="NO" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="billingCycle" optional="NO" attributeType="String" defaultValueString="monthly"/>
-        <attribute name="customCycleDays" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="firstBillDate" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="nextRenewalDate" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="category" optional="YES" attributeType="String" defaultValueString="Other"/>
-        <attribute name="iconName" optional="YES" attributeType="String"/>
-        <attribute name="colorHex" optional="YES" attributeType="String"/>
         <attribute name="notes" optional="YES" attributeType="String"/>
+        <attribute name="reminderDaysBefore" optional="YES" attributeType="Integer 16" defaultValueString="3" usesScalarValueType="YES"/>
         <attribute name="isActive" optional="YES" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
         <attribute name="isPaused" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
-        <attribute name="cancelledDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
-        <attribute name="cancellationReason" optional="YES" attributeType="String"/>
-        <attribute name="lastUsedDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
-        <attribute name="usageReminderEnabled" optional="YES" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
-        <attribute name="reminderDaysBefore" optional="YES" attributeType="Integer 16" defaultValueString="3" usesScalarValueType="YES"/>
         <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="lastModified" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="cloudKitRecordID" optional="YES" attributeType="String"/>
