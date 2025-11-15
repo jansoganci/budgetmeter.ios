@@ -394,8 +394,14 @@ struct BillInputView: View {
 
         if let existingBill = bill {
             // Update existing
+            guard let billId = existingBill.id else {
+                errorMessage = "Invalid bill ID. Cannot update bill."
+                showError = true
+                return
+            }
+
             let success = BillManager.shared.updateBill(
-                id: existingBill.id ?? UUID(),
+                id: billId,
                 name: trimmedName,
                 amount: amountValue,
                 dueDate: dueDate,

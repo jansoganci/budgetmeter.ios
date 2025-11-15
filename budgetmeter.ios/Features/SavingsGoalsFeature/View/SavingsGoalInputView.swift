@@ -373,8 +373,14 @@ struct SavingsGoalInputView: View {
 
         if let existingGoal = goal {
             // Update existing
+            guard let goalId = existingGoal.id else {
+                errorMessage = "Invalid goal ID. Cannot update savings goal."
+                showError = true
+                return
+            }
+
             let success = SavingsGoalManager.shared.updateGoal(
-                id: existingGoal.id ?? UUID(),
+                id: goalId,
                 name: trimmedName,
                 targetAmount: targetValue,
                 targetDate: hasTargetDate ? targetDate : nil,
@@ -388,9 +394,9 @@ struct SavingsGoalInputView: View {
             if current != existingGoal.currentAmount {
                 let difference = current - existingGoal.currentAmount
                 if difference > 0 {
-                    _ = SavingsGoalManager.shared.addMoney(to: existingGoal.id ?? UUID(), amount: difference)
+                    _ = SavingsGoalManager.shared.addMoney(to: goalId, amount: difference)
                 } else if difference < 0 {
-                    _ = SavingsGoalManager.shared.withdrawMoney(from: existingGoal.id ?? UUID(), amount: abs(difference))
+                    _ = SavingsGoalManager.shared.withdrawMoney(from: goalId, amount: abs(difference))
                 }
             }
 
