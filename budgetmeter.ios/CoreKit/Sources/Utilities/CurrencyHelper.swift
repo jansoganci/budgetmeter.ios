@@ -152,7 +152,23 @@ enum CurrencyHelper {
     static func symbol(for code: String) -> String {
         locale(for: code).currencySymbol ?? code
     }
-    
+
+    /// Formats amount with currency code
+    /// - Parameters:
+    ///   - amount: The amount to format
+    ///   - currencyCode: The currency code (e.g., "USD", "EUR")
+    /// - Returns: Formatted string (e.g., "$1,234.56")
+    static func format(amount: Double, currencyCode: String) -> String {
+        let formatter = formatter(for: currencyCode)
+        return formatter.string(from: NSNumber(value: amount)) ?? formatFallback(amount, code: currencyCode)
+    }
+
+    /// Fallback formatting if NumberFormatter fails
+    private static func formatFallback(_ amount: Double, code: String) -> String {
+        let currencySymbol = symbol(for: code)
+        return String(format: "%@%.2f", currencySymbol, amount)
+    }
+
     // MARK: - Multi-Language Currency Support
     
     /// Returns the preferred currency code for the current app language
