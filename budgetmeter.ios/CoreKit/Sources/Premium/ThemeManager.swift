@@ -256,13 +256,4 @@ extension View {
     func themedAccent() -> some View {
         self.accentColor(ThemeManager.shared.accentColor)
     }
-
-    /// Makes the view reactive to theme changes
-    /// Automatically updates when theme changes
-    func observeThemeChanges() -> some View {
-        self.onReceive(NotificationCenter.default.publisher(for: ThemeManager.themeDidChangeNotification)) { _ in
-            // View will automatically re-render when theme changes
-            // No additional action needed - SwiftUI handles the update
-        }
-    }
 }
