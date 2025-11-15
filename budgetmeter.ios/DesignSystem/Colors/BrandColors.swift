@@ -39,10 +39,18 @@ extension Color {
 
     /// Primary progress color - Used for progress bars, savings goals, action buttons
     /// Light: #3B82F6 (Blue) | Dark: #60A5FA (Brighter Blue)
+    /// NOTE: This is the default blue color. For theme-aware color, access ThemeManager.shared.accentColor
     static let brandProgress = Color(
         light: Color(hex: "3B82F6"),
         dark: Color(hex: "60A5FA")
     )
+
+    /// Returns the theme-aware accent color from ThemeManager
+    /// Use this in custom components that should adapt to the selected theme
+    @MainActor
+    static func themedAccent() -> Color {
+        return ThemeManager.shared.accentColor
+    }
 
     /// Expense/Negative color - Used for expense values, negative flow, warnings
     /// Light: #EF4444 (Red) | Dark: #F87171 (Softer Red)
