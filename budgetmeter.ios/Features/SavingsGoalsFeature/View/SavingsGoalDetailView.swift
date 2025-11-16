@@ -389,7 +389,7 @@ struct SavingsGoalDetailView: View {
         guard let id = goal.id else { return }
 
         _ = goalManager.addMoney(to: id, amount: amountValue)
-        onUpdate()
+        // onUpdate() removed - notification observer handles UI update
         showingAddMoney = false
     }
 
@@ -399,7 +399,7 @@ struct SavingsGoalDetailView: View {
         guard let id = goal.id else { return }
 
         _ = goalManager.withdrawMoney(from: id, amount: amountValue)
-        onUpdate()
+        // onUpdate() removed - notification observer handles UI update
         showingWithdrawMoney = false
     }
 

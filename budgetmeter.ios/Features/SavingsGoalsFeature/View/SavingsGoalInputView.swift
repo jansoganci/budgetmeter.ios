@@ -401,7 +401,7 @@ struct SavingsGoalInputView: View {
             }
 
             if success {
-                onSave()
+                // onSave() removed - notification observer handles UI update
                 dismiss()
             } else {
                 errorMessage = "Failed to update goal"
@@ -421,7 +421,7 @@ struct SavingsGoalInputView: View {
             )
 
             if newGoal != nil {
-                onSave()
+                // onSave() removed - notification observer handles UI update
                 dismiss()
             } else {
                 errorMessage = "Failed to create goal"
@@ -436,7 +436,7 @@ struct SavingsGoalInputView: View {
         let success = SavingsGoalManager.shared.deleteGoal(id: id)
 
         if success {
-            onSave()
+            // onSave() removed - notification observer handles UI update
             dismiss()
         } else {
             errorMessage = "Failed to delete goal"
