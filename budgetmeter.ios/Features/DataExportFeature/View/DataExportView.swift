@@ -245,16 +245,18 @@ struct DataExportView: View {
     }
     
     private func updateLastExportDate() async {
-        let context = PersistenceService.shared.viewContext
-        let request: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
-        
-        do {
-            if let appSettings = try context.fetch(request).first {
-                appSettings.lastExportDate = Date()
-                PersistenceService.shared.save()
+        await MainActor.run {
+            let context = PersistenceService.shared.viewContext
+            let request: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
+
+            do {
+                if let appSettings = try context.fetch(request).first {
+                    appSettings.lastExportDate = Date()
+                    PersistenceService.shared.save()
+                }
+            } catch {
+                print("Failed to update last export date: \(error)")
             }
-        } catch {
-            print("Failed to update last export date: \(error)")
         }
     }
 }

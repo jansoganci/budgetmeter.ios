@@ -358,8 +358,14 @@ struct SubscriptionInputView: View {
 
         if let existingSubscription = subscription {
             // Update existing
+            guard let subscriptionId = existingSubscription.id else {
+                errorMessage = "Invalid subscription ID. Cannot update subscription."
+                showError = true
+                return
+            }
+
             let success = SubscriptionManager.shared.updateSubscription(
-                id: existingSubscription.id ?? UUID(),
+                id: subscriptionId,
                 name: trimmedName,
                 amount: amountValue,
                 billingCycle: billingCycle.value,
