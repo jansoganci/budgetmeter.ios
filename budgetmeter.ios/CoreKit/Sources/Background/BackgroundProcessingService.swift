@@ -25,7 +25,12 @@ final class BackgroundProcessingService {
     
     private func registerBackgroundTask() {
         BGTaskScheduler.shared.register(forTaskWithIdentifier: backgroundTaskIdentifier, using: nil) { task in
-            self.handleBackgroundTask(task as! BGAppRefreshTask)
+            guard let refreshTask = task as? BGAppRefreshTask else {
+                print("❌ Unexpected task type: \(type(of: task))")
+                task.setTaskCompleted(success: false)
+                return
+            }
+            self.handleBackgroundTask(refreshTask)
         }
     }
     

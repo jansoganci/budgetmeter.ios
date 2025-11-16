@@ -56,7 +56,7 @@ struct BalanceProvider: TimelineProvider {
         let entry = createBalanceEntry(for: currentDate)
         
         // Update every hour
-        let nextUpdate = Calendar.current.date(byAdding: .hour, value: 1, to: currentDate)!
+        let nextUpdate = Calendar.current.date(byAdding: .hour, value: 1, to: currentDate) ?? currentDate.addingTimeInterval(3600)
         let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
         completion(timeline)
     }
@@ -270,7 +270,7 @@ struct SpendingProvider: TimelineProvider {
         let entry = createSpendingEntry(for: currentDate)
         
         // Update every 6 hours
-        let nextUpdate = Calendar.current.date(byAdding: .hour, value: 6, to: currentDate)!
+        let nextUpdate = Calendar.current.date(byAdding: .hour, value: 6, to: currentDate) ?? currentDate.addingTimeInterval(21600)
         let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
         completion(timeline)
     }
@@ -517,7 +517,7 @@ struct SavingsProvider: TimelineProvider {
         let entry = createSavingsEntry(for: currentDate)
         
         // Update every 12 hours
-        let nextUpdate = Calendar.current.date(byAdding: .hour, value: 12, to: currentDate)!
+        let nextUpdate = Calendar.current.date(byAdding: .hour, value: 12, to: currentDate) ?? currentDate.addingTimeInterval(43200)
         let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
         completion(timeline)
     }
