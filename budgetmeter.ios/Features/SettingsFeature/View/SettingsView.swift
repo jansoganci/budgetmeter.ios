@@ -103,17 +103,17 @@ struct SettingsView: View {
             ForEach(SettingsViewModel.AppearanceMode.allCases, id: \.self) { mode in
                 HStack {
                     Image(systemName: iconForAppearanceMode(mode))
-                        .foregroundColor(Color(hex: "4A90E2"))
+                        .foregroundColor(.brandProgress)
                         .frame(width: 24)
-                    
+
                     Text(mode.displayName)
                         .font(.body)
-                    
+
                     Spacer()
-                    
+
                     if viewModel.selectedAppearance == mode {
                         Image(systemName: "checkmark")
-                            .foregroundColor(Color(hex: "4A90E2"))
+                            .foregroundColor(.brandProgress)
                             .font(.system(size: 16, weight: .semibold))
                     }
                 }
@@ -204,7 +204,7 @@ struct SettingsView: View {
             NavigationLink(destination: NotificationSettingsView()) {
                 HStack(spacing: 12) {
                     Image(systemName: "bell.fill")
-                        .foregroundColor(Color(hex: "4A90E2"))
+                        .foregroundColor(.brandProgress)
                         .frame(width: 24)
 
                     VStack(alignment: .leading, spacing: 2) {
@@ -235,6 +235,33 @@ struct SettingsView: View {
 
     private var premiumSection: some View {
         Section {
+            NavigationLink(destination: SubscriptionsView()) {
+                PremiumFeatureRow(
+                    title: "settings.premium.subscriptions".localized(defaultValue: "Subscription Tracking"),
+                    subtitle: "settings.premium.subscriptions.subtitle".localized(defaultValue: "Track and manage all your subscriptions"),
+                    iconName: "creditcard",
+                    premiumFeature: .subscriptionTracking
+                )
+            }
+
+            NavigationLink(destination: BillsView()) {
+                PremiumFeatureRow(
+                    title: "settings.premium.bills".localized(defaultValue: "Bill Reminders"),
+                    subtitle: "settings.premium.bills.subtitle".localized(defaultValue: "Track bills and due dates"),
+                    iconName: "doc.text",
+                    premiumFeature: .billReminders
+                )
+            }
+
+            NavigationLink(destination: SavingsGoalsView()) {
+                PremiumFeatureRow(
+                    title: "settings.premium.savings_goals".localized(defaultValue: "Savings Goals"),
+                    subtitle: "settings.premium.savings_goals.subtitle".localized(defaultValue: "Track multiple goals with visual progress"),
+                    iconName: "target",
+                    premiumFeature: .savingsGoals
+                )
+            }
+
             NavigationLink(destination: RecurringTransactionsView()) {
                 PremiumFeatureRow(
                     title: "settings.premium.recurring".localized(defaultValue: "Recurring Transactions"),
@@ -290,7 +317,7 @@ struct SettingsView: View {
 
                     // DEBUG: Always show as available for testing
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
+                        .foregroundColor(.brandPositive)
                         .font(.caption)
                 }
                 .contentShape(Rectangle())
@@ -319,7 +346,7 @@ struct SettingsView: View {
             Button(action: viewModel.showResetCumulativeConfirmation) {
                 HStack {
                     Image(systemName: "arrow.counterclockwise")
-                        .foregroundColor(Color(hex: "4A90E2"))
+                        .foregroundColor(.brandProgress)
                         .frame(width: 24)
 
                     Text("settings.reset.cumulative.title".localized(defaultValue: "Reset Long-Term Meter"))
@@ -349,7 +376,7 @@ struct SettingsView: View {
             Button(action: viewModel.showPrivacyPolicy) {
                 HStack {
                     Image(systemName: "hand.raised")
-                        .foregroundColor(Color(hex: "4A90E2"))
+                        .foregroundColor(.brandProgress)
                         .frame(width: 24)
                     
                     Text("settings.privacy.title".localized(defaultValue: "Privacy Policy"))
@@ -375,7 +402,7 @@ struct SettingsView: View {
             // App Version
             HStack {
                 Image(systemName: "info.circle")
-                    .foregroundColor(Color(hex: "4A90E2"))
+                    .foregroundColor(.brandProgress)
                     .frame(width: 24)
                 
                 Text("settings.version.title".localized(defaultValue: "Version"))
@@ -392,7 +419,7 @@ struct SettingsView: View {
             Button(action: viewModel.showTermsOfService) {
                 HStack {
                     Image(systemName: "doc.text")
-                        .foregroundColor(Color(hex: "4A90E2"))
+                        .foregroundColor(.brandProgress)
                         .frame(width: 24)
                     
                     Text("settings.terms.title".localized(defaultValue: "Terms of Service"))
@@ -415,7 +442,7 @@ struct SettingsView: View {
             }) {
                 HStack {
                     Image(systemName: "envelope")
-                        .foregroundColor(Color(hex: "4A90E2"))
+                        .foregroundColor(.brandProgress)
                         .frame(width: 24)
                     
                     Text("settings.contact.title".localized(defaultValue: "Contact Support"))
@@ -499,10 +526,10 @@ struct SettingsView: View {
                         Text("For privacy questions: umursoganci@gmail.com")
                             .font(.body)
                     }
-                    
+
                     Spacer()
                 }
-                .padding(16)
+                .padding(Spacing.lg)
             }
             .navigationTitle("settings.privacy.sheet.nav_title".localized(defaultValue: "Privacy Policy"))
             .navigationBarTitleDisplayMode(.inline)
@@ -583,7 +610,7 @@ struct SettingsView: View {
                     
                     Spacer()
                 }
-                .padding(16)
+                .padding(Spacing.lg)
             }
             .navigationTitle("settings.terms.sheet.nav_title".localized(defaultValue: "Terms of Service"))
             .navigationBarTitleDisplayMode(.inline)

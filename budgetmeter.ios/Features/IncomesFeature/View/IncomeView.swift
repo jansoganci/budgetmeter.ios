@@ -22,7 +22,7 @@ struct IncomeView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                LazyVStack(spacing: 24) {
+                LazyVStack(spacing: Spacing.xl) {
                     if viewModel.isLoading {
                         loadingView
                     } else if viewModel.categoryGroups.isEmpty {
@@ -30,14 +30,14 @@ struct IncomeView: View {
                     } else {
                         // Summary Card
                         incomeSummaryCard
-                        
+
                         ForEach(viewModel.categoryGroups, id: \.title) { group in
                             categoryGroupView(group)
                         }
                     }
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
+                .padding(.horizontal, Spacing.lg)
+                .padding(.vertical, Spacing.sm)
             }
             .navigationTitle("tab.income.title".localized(defaultValue: "Income"))
             .navigationBarTitleDisplayMode(.large)
@@ -50,7 +50,7 @@ struct IncomeView: View {
                     Button("toolbar.done".localized(defaultValue: "Done")) {
                         focusedField = nil
                     }
-                    .foregroundColor(Color(hex: "4A90E2"))
+                    .foregroundColor(.brandProgress)
                     .fontWeight(.semibold)
                 }
             }
@@ -87,47 +87,46 @@ struct IncomeView: View {
     // MARK: - Subviews
     
     private var incomeSummaryCard: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Spacing.lg) {
             HStack {
                 Image(systemName: "chart.line.uptrend.xyaxis")
-                    .foregroundColor(.green)
+                    .foregroundColor(.brandPositive)
                 Text(viewModel.summaryTitle)
-                    .font(.headline)
-                    .fontWeight(.semibold)
+                    .sectionTitleStyle()
                 Spacer()
             }
-            .padding(.horizontal, 4)
-            
-            HStack(spacing: 12) {
+            .padding(.horizontal, Spacing.xs)
+
+            HStack(spacing: Spacing.md) {
                 // Daily Average Card
                 summaryInfoCard(
                     title: viewModel.dailyAvgTitle,
                     value: viewModel.dailyAverageIncome,
                     icon: "calendar.day.timeline.left",
-                    color: Color(hex: "32CD32")
+                    color: .brandPositive
                 )
-                
+
                 // Monthly Total Card
                 summaryInfoCard(
                     title: viewModel.monthlyTitle,
                     value: viewModel.totalMonthlyIncome,
                     icon: "calendar",
-                    color: .green
+                    color: .brandPositive
                 )
-                
+
                 // Yearly Projection Card
                 summaryInfoCard(
                     title: viewModel.yearlyTitle,
                     value: viewModel.yearlyProjectionIncome,
                     icon: "chart.line.uptrend.xyaxis",
-                    color: .green.opacity(0.8)
+                    color: .brandPositive.opacity(0.8)
                 )
             }
         }
     }
     
     private var loadingView: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: Spacing.lg) {
             ProgressView()
                 .scaleEffect(1.2)
             Text("income.loading".localized(defaultValue: "Loading income..."))
@@ -137,11 +136,11 @@ struct IncomeView: View {
     }
     
     private var emptyStateView: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: Spacing.lg) {
             Image(systemName: "plus.circle")
                 .font(.system(size: 64))
-                .foregroundColor(.green)
-            
+                .foregroundColor(.brandPositive)
+
             Text("empty_state.income.message".localized(defaultValue: "No income yet. Tap the + button to add your first income source."))
                 .font(.headline)
                 .foregroundColor(.secondary)
@@ -152,21 +151,19 @@ struct IncomeView: View {
     }
     
     private func categoryGroupView(_ group: (title: String, categories: [FinancialCategory], color: Color)) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Spacing.md) {
             // Group Header
             HStack {
                 Image(systemName: "calendar")
                     .foregroundColor(group.color)
                 Text(group.title)
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.primary)
+                    .sectionTitleStyle()
                 Spacer()
             }
-            .padding(.horizontal, 4)
-            
+            .padding(.horizontal, Spacing.xs)
+
             // Category Grid
-            LazyVGrid(columns: createGridColumns(), spacing: 12) {
+            LazyVGrid(columns: createGridColumns(), spacing: Spacing.md) {
                 ForEach(group.categories, id: \.objectID) { category in
                     CategoryInputCard(
                         category: category,
@@ -201,11 +198,10 @@ struct IncomeView: View {
             Image(systemName: icon)
                 .font(.system(size: 18))
                 .foregroundColor(color)
-            
+
             Text(title)
-                .font(.caption)
-                .foregroundColor(.secondary)
-            
+                .cardLabelStyle()
+
             Text(viewModel.formatCurrencyDisplay(value))
                 .font(.system(size: 16, weight: .bold, design: .rounded))
                 .foregroundColor(color)
@@ -214,15 +210,15 @@ struct IncomeView: View {
         }
         .frame(maxWidth: .infinity)
         .frame(height: 80)
-        .padding(.vertical, 12)
-        .background(Color(uiColor: .secondarySystemBackground))
-        .cornerRadius(12)
+        .padding(.vertical, Spacing.md)
+        .background(Color.cardBackground)
+        .cornerRadius(CornerRadius.card)
     }
     
     private func createGridColumns() -> [GridItem] {
         // Responsive grid: 2 columns on iPhone, 3 on iPad
         let columnCount = UIDevice.current.userInterfaceIdiom == .pad ? 3 : 2
-        return Array(repeating: GridItem(.flexible(), spacing: 12), count: columnCount)
+        return Array(repeating: GridItem(.flexible(), spacing: Spacing.md), count: columnCount)
     }
 }
 

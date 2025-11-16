@@ -59,7 +59,7 @@ struct InsightsView: View {
 
     private var contentView: some View {
         ScrollView {
-            VStack(spacing: 24) {
+            VStack(spacing: Spacing.xl) {
                 // Insights Cards Section
                 insightsSection
                     .transition(.opacity.combined(with: .move(edge: .top)))
@@ -70,7 +70,7 @@ struct InsightsView: View {
                         .transition(.opacity.combined(with: .move(edge: .bottom)))
                 }
             }
-            .padding()
+            .padding(Spacing.lg)
             .animation(.easeInOut(duration: 0.3), value: viewModel.insights.count)
         }
         .refreshable {
@@ -81,10 +81,9 @@ struct InsightsView: View {
     // MARK: - Insights Section
 
     private var insightsSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Spacing.lg) {
             Text("Your Financial Insights")
-                .font(.title2)
-                .fontWeight(.bold)
+                .sectionTitleStyle()
 
             if viewModel.insights.isEmpty {
                 if viewModel.isLoading {
@@ -92,7 +91,7 @@ struct InsightsView: View {
                     LazyVGrid(columns: [
                         GridItem(.flexible()),
                         GridItem(.flexible())
-                    ], spacing: 16) {
+                    ], spacing: Spacing.lg) {
                         ForEach(0..<6, id: \.self) { _ in
                             SkeletonInsightCard()
                         }
@@ -107,7 +106,7 @@ struct InsightsView: View {
                 LazyVGrid(columns: [
                     GridItem(.flexible()),
                     GridItem(.flexible())
-                ], spacing: 16) {
+                ], spacing: Spacing.lg) {
                     ForEach(Array(viewModel.insights.enumerated()), id: \.element.id) { index, insight in
                         InsightCardView(insight: insight)
                             .transition(.asymmetric(
@@ -125,7 +124,7 @@ struct InsightsView: View {
 
     @available(iOS 16.0, *)
     private var chartsSection: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: Spacing.xl) {
             // Spending Breakdown Pie Chart
             if !viewModel.spendingBreakdown.isEmpty {
                 SpendingBreakdownView(data: viewModel.spendingBreakdown)
@@ -152,14 +151,14 @@ struct InsightsView: View {
     // MARK: - Paywall View
 
     private var paywallView: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: Spacing.xl) {
             Spacer()
 
             Image(systemName: "chart.bar.doc.horizontal.fill")
                 .font(.system(size: 80))
-                .foregroundColor(.blue)
+                .foregroundColor(.brandProgress)
 
-            VStack(spacing: 12) {
+            VStack(spacing: Spacing.md) {
                 Text("Premium Feature")
                     .font(.title)
                     .fontWeight(.bold)
@@ -184,8 +183,8 @@ struct InsightsView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.blue)
-                    .cornerRadius(12)
+                    .background(Color.brandProgress)
+                    .cornerRadius(CornerRadius.button)
             }
             .padding(.horizontal)
 
@@ -196,7 +195,7 @@ struct InsightsView: View {
     // MARK: - Loading View
 
     private var loadingView: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: Spacing.lg) {
             ProgressView()
             Text("Loading insights...")
                 .font(.subheadline)
@@ -208,14 +207,14 @@ struct InsightsView: View {
     // MARK: - Empty State View
 
     private var emptyStateView: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: Spacing.xl) {
             Spacer()
 
             Image(systemName: "chart.bar.xaxis")
                 .font(.system(size: 80))
-                .foregroundColor(.gray)
+                .foregroundColor(.chartInactive)
 
-            VStack(spacing: 12) {
+            VStack(spacing: Spacing.md) {
                 Text("No Data Yet")
                     .font(.title2)
                     .fontWeight(.bold)
@@ -238,7 +237,7 @@ struct InsightCardView: View {
     let insight: Insight
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
             HStack {
                 Image(systemName: insight.icon)
                     .foregroundColor(insight.color)
@@ -253,8 +252,7 @@ struct InsightCardView: View {
             }
 
             Text(insight.title)
-                .font(.caption)
-                .foregroundColor(.secondary)
+                .cardLabelStyle()
 
             Text(insight.value)
                 .font(.title3)
@@ -268,8 +266,8 @@ struct InsightCardView: View {
             }
         }
         .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(12)
+        .background(Color.cardBackground)
+        .cornerRadius(CornerRadius.card)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilityText)
     }
@@ -298,10 +296,10 @@ struct InsightCardView: View {
             switch trend {
             case .up:
                 Image(systemName: "arrow.up.right")
-                    .foregroundColor(.green)
+                    .foregroundColor(.brandPositive)
             case .down:
                 Image(systemName: "arrow.down.right")
-                    .foregroundColor(.red)
+                    .foregroundColor(.brandExpense)
             case .neutral:
                 Image(systemName: "arrow.right")
                     .foregroundColor(.orange)
@@ -318,7 +316,7 @@ struct SkeletonInsightCard: View {
     @State private var isAnimating = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
             HStack {
                 Circle()
                     .fill(Color.gray.opacity(0.3))
@@ -343,8 +341,8 @@ struct SkeletonInsightCard: View {
                 .frame(maxWidth: .infinity)
         }
         .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(12)
+        .background(Color.cardBackground)
+        .cornerRadius(CornerRadius.card)
         .opacity(isAnimating ? 0.5 : 1.0)
         .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: isAnimating)
         .onAppear {
@@ -352,7 +350,6 @@ struct SkeletonInsightCard: View {
         }
     }
 }
-
 // MARK: - Preview
 
 #Preview {

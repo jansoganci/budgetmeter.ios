@@ -29,7 +29,7 @@ struct NotificationSettingsView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: Spacing.xl) {
                     // Permission banner (if denied)
                     if viewModel.permissionStatus == .denied {
                         permissionBanner
@@ -44,7 +44,7 @@ struct NotificationSettingsView: View {
                     // Info section
                     infoSection
                 }
-                .padding()
+                .padding(Spacing.lg)
             }
             .navigationTitle("Notifications")
             .navigationBarTitleDisplayMode(.large)
@@ -108,7 +108,7 @@ struct NotificationSettingsView: View {
     // MARK: - Notification Types Section
 
     private var notificationTypesSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Spacing.lg) {
             Text("NOTIFICATION TYPES")
                 .font(.caption)
                 .fontWeight(.semibold)
@@ -226,7 +226,7 @@ struct NotificationSettingsView: View {
                 }
             }
             .background(Color(.systemBackground))
-            .cornerRadius(12)
+            .cornerRadius(CornerRadius.card)
             .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
         }
     }
@@ -234,7 +234,7 @@ struct NotificationSettingsView: View {
     // MARK: - Time Pickers
 
     private var weeklyTimePicker: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: Spacing.md) {
             DatePicker(
                 "Weekly Time",
                 selection: $viewModel.weeklyTime,
@@ -254,15 +254,15 @@ struct NotificationSettingsView: View {
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
         }
-        .padding()
+        .padding(Spacing.lg)
         .background(Color(.secondarySystemBackground))
-        .cornerRadius(8)
+        .cornerRadius(CornerRadius.small)
         .padding(.horizontal)
-        .padding(.bottom, 8)
+        .padding(.bottom, Spacing.sm)
     }
 
     private var dailyTimePicker: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: Spacing.md) {
             DatePicker(
                 "Daily Time",
                 selection: $viewModel.dailyTime,
@@ -282,17 +282,17 @@ struct NotificationSettingsView: View {
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
         }
-        .padding()
+        .padding(Spacing.lg)
         .background(Color(.secondarySystemBackground))
-        .cornerRadius(8)
+        .cornerRadius(CornerRadius.small)
         .padding(.horizontal)
-        .padding(.bottom, 8)
+        .padding(.bottom, Spacing.sm)
     }
 
     // MARK: - Test Notification Section
 
     private var testNotificationSection: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: Spacing.md) {
             Button {
                 if viewModel.permissionStatus == .authorized {
                     successFeedback.notificationOccurred(.success)
@@ -314,8 +314,8 @@ struct NotificationSettingsView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(viewModel.permissionStatus == .authorized ? Color.blue : Color.gray)
-                .cornerRadius(10)
+                .background(viewModel.permissionStatus == .authorized ? Color.brandProgress : Color.gray)
+                .cornerRadius(CornerRadius.button)
             }
             .disabled(viewModel.permissionStatus != .authorized)
 
@@ -333,13 +333,13 @@ struct NotificationSettingsView: View {
     // MARK: - Info Section
 
     private var infoSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Spacing.lg) {
             Text("HOW IT WORKS")
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundColor(.secondary)
 
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: Spacing.md) {
                 infoRow(
                     icon: "chart.bar.fill",
                     title: "Weekly Summary",
@@ -364,9 +364,9 @@ struct NotificationSettingsView: View {
                     description: "Start each day with personalized financial tips and motivation. (Premium)"
                 )
             }
-            .padding()
+            .padding(Spacing.lg)
             .background(Color(.systemBackground))
-            .cornerRadius(12)
+            .cornerRadius(CornerRadius.card)
             .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
         }
         .accessibilityElement(children: .contain)
@@ -374,10 +374,10 @@ struct NotificationSettingsView: View {
     }
 
     private func infoRow(icon: String, title: String, description: String) -> some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: Spacing.md) {
             Image(systemName: icon)
                 .font(.title3)
-                .foregroundColor(.blue)
+                .foregroundColor(.brandProgress)
                 .frame(width: 24)
                 .accessibilityHidden(true)
 

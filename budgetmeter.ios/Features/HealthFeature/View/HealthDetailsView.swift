@@ -81,7 +81,7 @@ struct HealthDetailsView: View {
 
     private var mainContent: some View {
         ScrollView {
-            VStack(spacing: 24) {
+            VStack(spacing: Spacing.xl) {
                 // Health Score Card
                 healthScoreSection
 
@@ -91,7 +91,7 @@ struct HealthDetailsView: View {
                 // Health Tips
                 healthTipsSection
             }
-            .padding()
+            .padding(Spacing.lg)
         }
         .refreshable {
             await viewModel.refreshData()
@@ -116,13 +116,13 @@ struct HealthDetailsView: View {
     // MARK: - Breakdown Section
 
     private var breakdownSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Spacing.lg) {
             // Section header
             Text("HEALTH BREAKDOWN")
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundColor(.secondary)
-                .padding(.horizontal, 4)
+                .padding(.horizontal, Spacing.xs)
 
             // Breakdown components card
             VStack(spacing: 0) {
@@ -177,7 +177,7 @@ struct HealthDetailsView: View {
                 }
             }
             .background(Color(.systemBackground))
-            .cornerRadius(12)
+            .cornerRadius(CornerRadius.card)
             .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
         }
         .accessibilityElement(children: .contain)
@@ -187,7 +187,7 @@ struct HealthDetailsView: View {
     // MARK: - Health Tips Section
 
     private var healthTipsSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Spacing.lg) {
             // Section header
             HStack {
                 Text("PERSONALIZED TIPS")
@@ -202,18 +202,18 @@ struct HealthDetailsView: View {
                         hapticFeedback.impactOccurred()
                         viewModel.showPremiumPaywall()
                     } label: {
-                        HStack(spacing: 4) {
+                        HStack(spacing: Spacing.xs) {
                             Image(systemName: "crown.fill")
                                 .font(.caption2)
                             Text("Unlock All")
                                 .font(.caption)
                                 .fontWeight(.semibold)
                         }
-                        .foregroundColor(Color(hex: "FFD700"))
+                        .foregroundColor(.brandProgress)
                     }
                 }
             }
-            .padding(.horizontal, 4)
+            .padding(.horizontal, Spacing.xs)
 
             // Tips list
             if viewModel.healthTips.isEmpty {
@@ -245,7 +245,7 @@ struct HealthDetailsView: View {
     // MARK: - Loading View
 
     private var loadingView: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: Spacing.lg) {
             ProgressView()
                 .scaleEffect(1.2)
 
@@ -259,7 +259,7 @@ struct HealthDetailsView: View {
     // MARK: - Error View
 
     private func errorView(message: String) -> some View {
-        VStack(spacing: 20) {
+        VStack(spacing: Spacing.lg) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 60))
                 .foregroundColor(.orange)
@@ -285,8 +285,8 @@ struct HealthDetailsView: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 24)
                     .padding(.vertical, 12)
-                    .background(Color.blue)
-                    .cornerRadius(10)
+                    .background(Color.brandProgress)
+                    .cornerRadius(CornerRadius.button)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -296,7 +296,7 @@ struct HealthDetailsView: View {
     // MARK: - No Breakdown View
 
     private var noBreakdownView: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: Spacing.md) {
             Image(systemName: "chart.bar.xaxis")
                 .font(.system(size: 40))
                 .foregroundColor(.secondary)
@@ -318,7 +318,7 @@ struct HealthDetailsView: View {
     // MARK: - No Tips View
 
     private var noTipsView: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: Spacing.md) {
             Image(systemName: "lightbulb.fill")
                 .font(.system(size: 40))
                 .foregroundColor(.yellow)
@@ -336,7 +336,7 @@ struct HealthDetailsView: View {
         .padding(.vertical, 40)
         .padding(.horizontal, 20)
         .background(Color(.systemBackground))
-        .cornerRadius(12)
+        .cornerRadius(CornerRadius.card)
         .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
     }
 
@@ -347,13 +347,13 @@ struct HealthDetailsView: View {
             hapticFeedback.impactOccurred()
             viewModel.showPremiumPaywall()
         } label: {
-            VStack(spacing: 12) {
-                HStack(spacing: 12) {
+            VStack(spacing: Spacing.md) {
+                HStack(spacing: Spacing.md) {
                     Image(systemName: "lock.fill")
                         .font(.title2)
-                        .foregroundColor(Color(hex: "FFD700"))
+                        .foregroundColor(.brandProgress)
 
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
                         Text("\(viewModel.healthTips.count - 3) More Premium Tips")
                             .font(.subheadline)
                             .fontWeight(.semibold)
@@ -370,13 +370,13 @@ struct HealthDetailsView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
-                .padding(16)
+                .padding(Spacing.lg)
             }
-            .background(Color(hex: "FFD700").opacity(0.1))
-            .cornerRadius(12)
+            .background(Color.brandProgress.opacity(0.1))
+            .cornerRadius(CornerRadius.card)
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color(hex: "FFD700").opacity(0.3), lineWidth: 1.5)
+                RoundedRectangle(cornerRadius: CornerRadius.card)
+                    .stroke(Color.brandProgress.opacity(0.3), lineWidth: 1.5)
             )
         }
         .buttonStyle(.plain)
@@ -393,7 +393,7 @@ struct HealthDetailsView: View {
         } label: {
             Image(systemName: "square.and.arrow.up")
                 .font(.body)
-                .foregroundColor(.blue)
+                .foregroundColor(.brandProgress)
         }
         .disabled(viewModel.isLoading || !viewModel.hasData)
         .accessibilityLabel("Share health report")
