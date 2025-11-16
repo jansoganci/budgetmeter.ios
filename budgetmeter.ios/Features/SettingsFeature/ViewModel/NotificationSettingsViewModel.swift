@@ -94,23 +94,22 @@ final class NotificationSettingsViewModel: ObservableObject {
         do {
             let settings = try context.fetch(fetchRequest)
             if let appSettings = settings.first {
-                weeklyEnabled = appSettings.weeklyNotificationsEnabled
-                weeklyTime = appSettings.weeklyNotificationTime ?? createDefaultWeeklyTime()
-                milestonesEnabled = appSettings.milestoneNotificationsEnabled
+                weeklyEnabled = appSettings.weeklySummaryEnabled
+                weeklyTime = appSettings.weeklySummaryTime ?? createDefaultWeeklyTime()
+                milestonesEnabled = appSettings.milestonesEnabled
                 spendingEnabled = appSettings.spendingAlertsEnabled
                 dailyEnabled = appSettings.dailyEncouragementEnabled
-                dailyTime = appSettings.dailyEncouragementTime ?? createDefaultDailyTime()
+                dailyTime = createDefaultDailyTime() // dailyEncouragementTime doesn't exist in model
 
                 print("📱 NotificationSettings: Loaded settings - Weekly: \(weeklyEnabled), Milestones: \(milestonesEnabled), Spending: \(spendingEnabled), Daily: \(dailyEnabled)")
             } else {
                 // Create default settings
                 let newSettings = AppSettings(context: context)
-                newSettings.weeklyNotificationsEnabled = true
-                newSettings.weeklyNotificationTime = createDefaultWeeklyTime()
-                newSettings.milestoneNotificationsEnabled = true
+                newSettings.weeklySummaryEnabled = true
+                newSettings.weeklySummaryTime = createDefaultWeeklyTime()
+                newSettings.milestonesEnabled = true
                 newSettings.spendingAlertsEnabled = true
                 newSettings.dailyEncouragementEnabled = false
-                newSettings.dailyEncouragementTime = createDefaultDailyTime()
 
                 persistenceService.save()
 
@@ -144,12 +143,11 @@ final class NotificationSettingsViewModel: ObservableObject {
                 appSettings = AppSettings(context: context)
             }
 
-            appSettings.weeklyNotificationsEnabled = weeklyEnabled
-            appSettings.weeklyNotificationTime = weeklyTime
-            appSettings.milestoneNotificationsEnabled = milestonesEnabled
+            appSettings.weeklySummaryEnabled = weeklyEnabled
+            appSettings.weeklySummaryTime = weeklyTime
+            appSettings.milestonesEnabled = milestonesEnabled
             appSettings.spendingAlertsEnabled = spendingEnabled
             appSettings.dailyEncouragementEnabled = dailyEnabled
-            appSettings.dailyEncouragementTime = dailyTime
 
             persistenceService.save()
 
@@ -249,7 +247,11 @@ final class NotificationSettingsViewModel: ObservableObject {
     /// Request notification permissions from iOS
     func requestPermissions() async {
         do {
-            let granted = try await notificationService.requestPermissions()
+            let granted = await withCheckedContinuation { continuation in
+                notificationService.requestPermissions { granted in
+                    continuation.resume(returning: granted)
+                }
+            }
             await checkPermissionStatus()
 
             if granted {

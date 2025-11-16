@@ -127,64 +127,48 @@ struct HealthDetailsView: View {
             // Breakdown components card
             VStack(spacing: 0) {
                 if let breakdown = viewModel.breakdown {
-                    // Budget Compliance
+                    // Expense Score
                     HealthBreakdownRow(
                         icon: "chart.pie.fill",
-                        title: "Budget Compliance",
-                        score: breakdown.budgetCompliance,
-                        description: "Measures how well you're staying within your budget across all categories. Higher scores indicate better budget adherence and financial discipline.",
-                        isExpanded: viewModel.isExpanded("budgetCompliance"),
+                        title: "Expense Management",
+                        score: breakdown.expenseScore,
+                        description: breakdown.expenseReason,
+                        isExpanded: viewModel.isExpanded("expense"),
                         onTap: {
                             hapticFeedback.impactOccurred()
-                            viewModel.toggleBreakdown("budgetCompliance")
+                            viewModel.toggleBreakdown("expense")
                         }
                     )
 
                     Divider()
                         .padding(.leading, 48)
 
-                    // Savings Rate
+                    // Savings Score
                     HealthBreakdownRow(
                         icon: "banknote.fill",
-                        title: "Savings Rate",
-                        score: breakdown.savingsRate,
-                        description: "Percentage of your income that you're saving each month. A healthy savings rate is typically 15-20% or higher, providing a strong financial cushion.",
-                        isExpanded: viewModel.isExpanded("savingsRate"),
+                        title: "Savings Score",
+                        score: breakdown.savingsScore,
+                        description: breakdown.savingsReason,
+                        isExpanded: viewModel.isExpanded("savings"),
                         onTap: {
                             hapticFeedback.impactOccurred()
-                            viewModel.toggleBreakdown("savingsRate")
+                            viewModel.toggleBreakdown("savings")
                         }
                     )
 
                     Divider()
                         .padding(.leading, 48)
 
-                    // Spending Consistency
-                    HealthBreakdownRow(
-                        icon: "chart.line.uptrend.xyaxis",
-                        title: "Spending Consistency",
-                        score: breakdown.spendingConsistency,
-                        description: "How consistent your spending patterns are over time. Consistent spending makes budgeting easier and reduces financial stress.",
-                        isExpanded: viewModel.isExpanded("spendingConsistency"),
-                        onTap: {
-                            hapticFeedback.impactOccurred()
-                            viewModel.toggleBreakdown("spendingConsistency")
-                        }
-                    )
-
-                    Divider()
-                        .padding(.leading, 48)
-
-                    // Income Stability
+                    // Income Score
                     HealthBreakdownRow(
                         icon: "dollarsign.circle.fill",
-                        title: "Income Stability",
-                        score: breakdown.incomeStability,
-                        description: "Measures the consistency of your income over time. Stable income provides predictability and makes financial planning more reliable.",
-                        isExpanded: viewModel.isExpanded("incomeStability"),
+                        title: "Income Score",
+                        score: breakdown.incomeScore,
+                        description: breakdown.incomeReason,
+                        isExpanded: viewModel.isExpanded("income"),
                         onTap: {
                             hapticFeedback.impactOccurred()
-                            viewModel.toggleBreakdown("incomeStability")
+                            viewModel.toggleBreakdown("income")
                         }
                     )
                 } else {
@@ -424,10 +408,9 @@ struct HealthDetailsView: View {
 
         📊 Health Breakdown:
         \(viewModel.breakdown.map { """
-        • Budget Compliance: \($0.budgetCompliance)%
-        • Savings Rate: \($0.savingsRate)%
-        • Spending Consistency: \($0.spendingConsistency)%
-        • Income Stability: \($0.incomeStability)%
+        • Income Score: \($0.incomeScore)/30
+        • Expense Score: \($0.expenseScore)/30
+        • Savings Score: \($0.savingsScore)/40
         """ } ?? "No breakdown available")
 
         Stay on top of your finances with BudgetMeter! 💚

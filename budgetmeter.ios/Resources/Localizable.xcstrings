@@ -17,7 +17,46 @@
         }
       }
     },
+    "%@ theme has been applied successfully!" : {
+
+    },
+    "%@, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@"
+          }
+        }
+      }
+    },
+    "%@: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@: %2$@"
+          }
+        }
+      }
+    },
+    "%@: %lld percent" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@: %2$lld percent"
+          }
+        }
+      }
+    },
     "%lld" : {
+
+    },
+    "%lld more categories" : {
+
+    },
+    "%lld More Premium Tips" : {
 
     },
     "%lld%%" : {
@@ -65,6 +104,9 @@
     "ACCEPTANCE" : {
 
     },
+    "Active" : {
+
+    },
     "Add %@ Category" : {
 
     },
@@ -77,7 +119,13 @@
     "Add Custom Category Cards" : {
 
     },
-    "Add Widget" : {
+    "Add expenses for at least 2 months" : {
+
+    },
+    "Add financial data to see your balance trend" : {
+
+    },
+    "Add your income and expenses to see insights" : {
 
     },
     "alert.error.title" : {
@@ -216,6 +264,43 @@
     "Apply Theme" : {
 
     },
+    "As you track your finances, we'll provide personalized tips to improve your financial health" : {
+
+    },
+    "Available Widgets" : {
+
+    },
+    "Balance" : {
+
+    },
+    "Balance (Circular)" : {
+
+    },
+    "Balance (Inline)" : {
+
+    },
+    "Balance (Rectangular)" : {
+
+    },
+    "Balance & Savings" : {
+
+    },
+    "Balance Trend" : {
+
+    },
+    "Balance trend chart showing your balance over the last %lld days" : {
+
+    },
+    "Balance: %@, Savings: %@, %lld%% complete" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Balance: %1$@, Savings: %2$@, %3$lld%% complete"
+          }
+        }
+      }
+    },
     "BudgetMeter app and all content are owned by Umurcan Soganci. All rights reserved." : {
 
     },
@@ -229,9 +314,6 @@
 
     },
     "Cancel" : {
-
-    },
-    "Category" : {
 
     },
     "Category Details" : {
@@ -4595,7 +4677,10 @@
         }
       }
     },
-    "Choose from beautiful color themes and custom app icons to personalize your BudgetMeter experience." : {
+    "Check your notifications in a few seconds!" : {
+
+    },
+    "Choose from beautiful color themes to personalize your BudgetMeter experience." : {
 
     },
     "Choose Icon" : {
@@ -4604,7 +4689,13 @@
     "Clear Test Data" : {
 
     },
+    "Compare this month vs last month" : {
+
+    },
     "CONTACT" : {
+
+    },
+    "Control how BudgetMeter notifies you about your financial progress" : {
 
     },
     "currency.symbol" : {
@@ -4672,10 +4763,19 @@
         }
       }
     },
+    "Currently Active" : {
+
+    },
     "Custom Category Flow Test" : {
 
     },
     "Custom Category Test" : {
+
+    },
+    "Daily notification time picker" : {
+
+    },
+    "Daily Time" : {
 
     },
     "DATA CONTROLLER" : {
@@ -5065,6 +5165,28 @@
         }
       }
     },
+    "disabled" : {
+
+    },
+    "Double tap to %@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Double tap to %1$@ %2$@"
+          }
+        }
+      }
+    },
+    "Double tap to expand and see details" : {
+
+    },
+    "Double tap to open Settings and enable notifications" : {
+
+    },
+    "Double tap to view premium upgrade options" : {
+
+    },
     "empty_state.expenses.message" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5260,6 +5382,21 @@
         }
       }
     },
+    "Enable in Settings to receive financial alerts" : {
+
+    },
+    "Enable notifications to send test" : {
+
+    },
+    "enabled" : {
+
+    },
+    "Error" : {
+
+    },
+    "Expanded. Double tap to collapse" : {
+
+    },
     "Expenses" : {
 
     },
@@ -5395,6 +5532,22 @@
     },
     "FINANCIAL DISCLAIMER" : {
 
+    },
+    "Financial Health" : {
+
+    },
+    "Financial Health Score" : {
+
+    },
+    "Financial health score is %lld out of 100, rated as %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Financial health score is %1$lld out of 100, rated as %2$@"
+          }
+        }
+      }
     },
     "Flow Test" : {
 
@@ -5597,7 +5750,16 @@
         }
       }
     },
-    "Health Score" : {
+    "Get automated financial insights, spending breakdowns, and trend analysis to make smarter money decisions." : {
+
+    },
+    "HEALTH BREAKDOWN" : {
+
+    },
+    "Health breakdown section" : {
+
+    },
+    "Health score card" : {
 
     },
     "home.cumulative.label" : {
@@ -7745,6 +7907,15 @@
         }
       }
     },
+    "HOW IT WORKS" : {
+
+    },
+    "How notifications work" : {
+
+    },
+    "How to Add Widgets" : {
+
+    },
     "HOW WE USE DATA" : {
 
     },
@@ -7945,6 +8116,9 @@
           }
         }
       }
+    },
+    "Insights" : {
+
     },
     "insights.chart.health_trends" : {
       "extractionState" : "manual",
@@ -8205,6 +8379,15 @@
     "Invalid Category" : {
 
     },
+    "Last %lld days" : {
+
+    },
+    "Last Expenses" : {
+
+    },
+    "Last Income" : {
+
+    },
     "Last Updated: September 2025" : {
 
     },
@@ -8214,19 +8397,121 @@
     "LIMITATION OF LIABILITY" : {
 
     },
+    "Loading insights..." : {
+
+    },
+    "Loading your health data..." : {
+
+    },
+    "Manage alerts and reminders" : {
+
+    },
     "Manual Tests" : {
 
     },
     "Month" : {
 
     },
+    "Month Comparison" : {
+
+    },
+    "Month comparison chart showing this month versus last month's income and expenses" : {
+
+    },
+    "No Breakdown Available" : {
+
+    },
+    "No Data Yet" : {
+
+    },
+    "No insights available yet. Add your income and expenses to see insights." : {
+
+    },
+    "No spending data" : {
+
+    },
+    "No Tips Yet" : {
+
+    },
+    "No trend data" : {
+
+    },
+    "Not enough data" : {
+
+    },
+    "Notification Failed" : {
+
+    },
+    "Notification permission alert" : {
+
+    },
+    "NOTIFICATION TYPES" : {
+
+    },
+    "Notification will be sent every day at this time" : {
+
+    },
+    "Notification will be sent every Sunday at this time" : {
+
+    },
+    "Notifications" : {
+
+    },
+    "NOTIFICATIONS" : {
+
+    },
+    "Notifications are currently disabled" : {
+
+    },
+    "Notifications are currently disabled for BudgetMeter" : {
+
+    },
+    "Notifications are disabled. Enable them first to send a test notification" : {
+
+    },
+    "Notifications Disabled" : {
+
+    },
     "OK" : {
+
+    },
+    "Open iOS Settings" : {
+
+    },
+    "Open Settings" : {
+
+    },
+    "Opens the Settings app to enable notifications for BudgetMeter" : {
 
     },
     "Our maximum liability is limited to the amount you paid for the app (currently free)." : {
 
     },
+    "PERSONALIZED TIPS" : {
+
+    },
+    "Personalized tips section" : {
+
+    },
+    "Please enable notifications in Settings to receive alerts." : {
+
+    },
     "Premium" : {
+
+    },
+    "PREMIUM" : {
+
+    },
+    "Premium feature" : {
+
+    },
+    "Premium Feature" : {
+
+    },
+    "Premium feature. Double tap to view upgrade options" : {
+
+    },
+    "Premium feature. Unlock to see all tips" : {
 
     },
     "Premium Status: %@" : {
@@ -8241,6 +8526,9 @@
     "Questions about these terms: umursoganci@gmail.com" : {
 
     },
+    "Retry" : {
+
+    },
     "Run All Tests" : {
 
     },
@@ -8248,6 +8536,9 @@
 
     },
     "Save" : {
+
+    },
+    "Savings" : {
 
     },
     "security.auth.button" : {
@@ -8513,6 +8804,18 @@
           }
         }
       }
+    },
+    "Select the time for daily encouragement notifications. Premium feature" : {
+
+    },
+    "Select the time for weekly summary notifications every Sunday" : {
+
+    },
+    "Send a test notification to verify your settings" : {
+
+    },
+    "Send Test Notification" : {
+
     },
     "settings.about.title" : {
       "extractionState" : "manual",
@@ -12024,10 +12327,34 @@
         }
       }
     },
+    "Share health report" : {
+
+    },
+    "Share your financial health score and breakdown" : {
+
+    },
     "Show Income View" : {
 
     },
-    "Spending" : {
+    "Shows your balance and daily flow in a rectangular lock screen widget" : {
+
+    },
+    "Shows your balance in an inline lock screen widget" : {
+
+    },
+    "Shows your current balance and savings progress" : {
+
+    },
+    "Shows your current balance in a circular lock screen widget" : {
+
+    },
+    "Spending Breakdown" : {
+
+    },
+    "Spending breakdown chart showing your expenses by category" : {
+
+    },
+    "Start tracking your budget to see detailed health breakdown" : {
 
     },
     "tab.expenses.title" : {
@@ -12391,6 +12718,12 @@
     "Test Modals" : {
 
     },
+    "Test notification button" : {
+
+    },
+    "Test Notification Sent!" : {
+
+    },
     "Test Premium Status Toggle" : {
 
     },
@@ -12400,10 +12733,29 @@
     "The app is provided 'as-is' without warranties of any kind, express or implied." : {
 
     },
+    "Theme Applied!" : {
+
+    },
     "Themes" : {
 
     },
-    "Time Range" : {
+    "This Expenses" : {
+
+    },
+    "This Income" : {
+
+    },
+    "Tip: %@, Impact: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Tip: %1$@, Impact: %2$@"
+          }
+        }
+      }
+    },
+    "Today:" : {
 
     },
     "Toggle Premium (Debug)" : {
@@ -12474,10 +12826,37 @@
         }
       }
     },
+    "Total" : {
+
+    },
+    "Try Again" : {
+
+    },
     "Umurcan Soganci\nEmail: umursoganci@gmail.com" : {
 
     },
+    "Unable to Load Data" : {
+
+    },
     "Unlock" : {
+
+    },
+    "Unlock %lld more premium tips" : {
+
+    },
+    "Unlock advanced insights and recommendations" : {
+
+    },
+    "Unlock All" : {
+
+    },
+    "Unlock Insights Dashboard with Premium" : {
+
+    },
+    "Updated %@" : {
+
+    },
+    "Upgrade to Premium" : {
 
     },
     "WARRANTY DISCLAIMER" : {
@@ -12489,13 +12868,31 @@
     "We grant you a personal, non-commercial license to use BudgetMeter for managing your personal finances." : {
 
     },
+    "Weekly notification time picker" : {
+
+    },
+    "Weekly Time" : {
+
+    },
     "Widgets" : {
 
     },
     "Widgets Setup" : {
 
     },
+    "Your expenses by category" : {
+
+    },
+    "Your Financial Insights" : {
+
+    },
+    "Your overall financial health based on budget compliance, savings, spending consistency, and income stability" : {
+
+    },
     "YOUR RIGHTS" : {
+
+    },
+    "Zero" : {
 
     }
   },
