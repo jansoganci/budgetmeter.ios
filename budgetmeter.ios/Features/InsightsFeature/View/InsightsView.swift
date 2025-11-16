@@ -40,9 +40,15 @@ struct InsightsView: View {
             .navigationBarTitleDisplayMode(.large)
             .sheet(isPresented: $viewModel.showPaywall) {
                 PremiumPaywallView(
-                    feature: .insightsDashboard,
+                    feature: nil,
                     onDismiss: {
                         viewModel.dismissPaywall()
+                    },
+                    onPurchase: {
+                        // Purchase handled by PremiumManager
+                    },
+                    onRestore: {
+                        // Restore handled by PremiumManager
                     }
                 )
             }
@@ -344,154 +350,6 @@ struct SkeletonInsightCard: View {
         }
     }
 }
-
-// MARK: - Premium Paywall View
-
-struct PremiumPaywallView: View {
-    let feature: PremiumFeatureType
-    let onDismiss: () -> Void
-
-    @StateObject private var premiumManager = PremiumManager.shared
-    @Environment(\.dismiss) var dismiss
-
-    var body: some View {
-        NavigationStack {
-            VStack(spacing: Spacing.xxl) {
-                // Feature icon and description
-                VStack(spacing: Spacing.lg) {
-                    Image(systemName: featureIcon)
-                        .font(.system(size: 80))
-                        .foregroundColor(.brandProgress)
-
-                    Text(featureTitle)
-                        .font(.title)
-                        .fontWeight(.bold)
-
-                    Text(featureDescription)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
-
-                // Premium features list
-                VStack(alignment: .leading, spacing: Spacing.lg) {
-                    ForEach(premiumFeatures, id: \.self) { feature in
-                        HStack(spacing: Spacing.md) {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.brandPositive)
-                            Text(feature)
-                                .font(.subheadline)
-                            Spacer()
-                        }
-                    }
-                }
-                .padding()
-
-                Spacer()
-
-                // Purchase button
-                Button {
-                    Task {
-                        await premiumManager.purchasePremium()
-                        dismiss()
-                        onDismiss()
-                    }
-                } label: {
-                    if premiumManager.isLoading {
-                        ProgressView()
-                            .tint(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                    } else {
-                        Text("Upgrade to Premium - $4.99")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                    }
-                }
-                .background(Color.brandProgress)
-                .cornerRadius(CornerRadius.button)
-                .padding(.horizontal)
-                .disabled(premiumManager.isLoading)
-
-                // Restore purchases
-                Button {
-                    Task {
-                        await premiumManager.restorePurchases()
-                        dismiss()
-                        onDismiss()
-                    }
-                } label: {
-                    Text("Restore Purchases")
-                        .font(.subheadline)
-                        .foregroundColor(.brandProgress)
-                }
-            }
-            .padding()
-            .navigationTitle("Upgrade to Premium")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Close") {
-                        dismiss()
-                        onDismiss()
-                    }
-                }
-            }
-        }
-    }
-
-    // MARK: - Computed Properties
-
-    private var featureIcon: String {
-        switch feature {
-        case .insightsDashboard:
-            return "chart.bar.doc.horizontal.fill"
-        case .advancedNotifications:
-            return "bell.badge.fill"
-        }
-    }
-
-    private var featureTitle: String {
-        switch feature {
-        case .insightsDashboard:
-            return "Insights Dashboard"
-        case .advancedNotifications:
-            return "Smart Notifications"
-        }
-    }
-
-    private var featureDescription: String {
-        switch feature {
-        case .insightsDashboard:
-            return "Get automated insights, spending breakdowns, and trend analysis to make smarter financial decisions."
-        case .advancedNotifications:
-            return "Receive personalized notifications about your financial progress, milestones, and spending alerts."
-        }
-    }
-
-    private var premiumFeatures: [String] {
-        [
-            "Automated Financial Insights",
-            "Spending Breakdown Charts",
-            "Balance Trend Analysis",
-            "Month-over-Month Comparison",
-            "Smart Notifications",
-            "Unlimited Custom Categories",
-            "All Premium Widgets"
-        ]
-    }
-}
-
-// MARK: - Supporting Types
-
-enum PremiumFeatureType {
-    case insightsDashboard
-    case advancedNotifications
-}
-
 // MARK: - Preview
 
 #Preview {
