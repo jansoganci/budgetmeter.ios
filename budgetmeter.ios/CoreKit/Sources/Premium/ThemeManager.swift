@@ -47,6 +47,7 @@ final class ThemeManager: ObservableObject {
     func applyTheme(_ theme: AppTheme) {
         currentTheme = theme
         saveTheme(theme)
+        applyAppIcon(for: theme)
         notifyThemeChange()
     }
 
@@ -58,6 +59,26 @@ final class ThemeManager: ObservableObject {
     /// Get the gradient colors for the current theme
     var gradientColors: [Color] {
         return currentTheme.gradientColors
+    }
+
+    /// Apply app icon for the selected theme
+    /// Note: Requires alternate icons configured in Assets.xcassets and Info.plist
+    private func applyAppIcon(for theme: AppTheme) {
+        guard UIApplication.shared.supportsAlternateIcons else {
+            print("🎨 ThemeManager: ⚠️ Alternate icons not supported")
+            return
+        }
+
+        let iconName = theme.appIconName
+
+        UIApplication.shared.setAlternateIconName(iconName) { error in
+            if let error = error {
+                print("🎨 ThemeManager: ❌ Failed to set app icon: \(error.localizedDescription)")
+            } else {
+                let displayName = iconName ?? "Default"
+                print("🎨 ThemeManager: ✅ App icon set to: \(displayName)")
+            }
+        }
     }
 
     // MARK: - Private Methods
@@ -192,6 +213,20 @@ enum AppTheme: String, CaseIterable {
         case .sunset: return "sun.max.fill"
         case .purple: return "sparkles"
         case .midnight: return "moon.stars.fill"
+        }
+    }
+
+    /// App icon name for alternate icon switching
+    /// Returns nil for default theme (uses primary app icon)
+    /// To enable: Add alternate icon sets to Assets.xcassets and configure Info.plist
+    var appIconName: String? {
+        switch self {
+        case .default: return nil // Primary icon
+        case .ocean: return "AppIcon-Ocean"
+        case .forest: return "AppIcon-Forest"
+        case .sunset: return "AppIcon-Sunset"
+        case .purple: return "AppIcon-Purple"
+        case .midnight: return "AppIcon-Midnight"
         }
     }
 

@@ -26,12 +26,21 @@ final class HomeViewModel: ObservableObject {
     // Today's Snapshot Data
     @Published var dailyNetFlow: Double = 0
     @Published var monthlyNetFlow: Double = 0
+    @Published var hourlyNetFlow: Double = 0
     @Published var financialHealthScore: Int = 0
     @Published var financialHealthText: String = "Getting Started"
     @Published var financialHealthColor: Color = .secondary
     @Published var cumulativeDisplayAmount: String = "$0.00"
     @Published var cumulativeSinceDateText: String = ""
     @Published var cumulativeFlowColor: Color = .secondary
+
+    // Interval Chart Data (for mini bar charts)
+    @Published var hourlyChartData: [Double] = []
+    @Published var dailyChartData: [Double] = []
+    @Published var monthlyChartData: [Double] = []
+
+    // Trend Data
+    @Published var netFlowTrendPercentage: Double? = nil
     
     // Savings Goal Data
     @Published var savingsGoal: Double = 0
@@ -279,6 +288,16 @@ final class HomeViewModel: ObservableObject {
     }
     
     private func calculateSnapshotMetrics() {
+        // Hourly net flow
+        hourlyNetFlow = CalculationEngine.netHourlyFlow(
+            dailyIncomeTotal: dailyIncomeTotal,
+            monthlyIncomeTotal: monthlyIncomeTotal,
+            yearlyIncomeTotal: yearlyIncomeTotal,
+            dailyExpenseTotal: dailyExpenseTotal,
+            monthlyExpenseTotal: monthlyExpenseTotal,
+            yearlyExpenseTotal: yearlyExpenseTotal
+        )
+
         // Daily net flow
         dailyNetFlow = CalculationEngine.netDailyFlow(
             dailyIncomeTotal: dailyIncomeTotal,
@@ -288,34 +307,80 @@ final class HomeViewModel: ObservableObject {
             monthlyExpenseTotal: monthlyExpenseTotal,
             yearlyExpenseTotal: yearlyExpenseTotal
         )
-        
+
         // Monthly net flow
         let totalMonthlyIncome = CalculationEngine.totalMonthlyIncome(
             dailyIncomeTotal: dailyIncomeTotal,
             monthlyIncomeTotal: monthlyIncomeTotal,
             yearlyIncomeTotal: yearlyIncomeTotal
         )
-        
+
         let totalMonthlyExpense = CalculationEngine.totalMonthlyExpense(
             dailyTotal: dailyExpenseTotal,
             monthlyTotal: monthlyExpenseTotal,
             yearlyTotal: yearlyExpenseTotal
         )
-        
+
         monthlyNetFlow = totalMonthlyIncome - totalMonthlyExpense
-        
+
         // Financial health score
         let healthScore = CalculationEngine.financialHealthScore(
             totalMonthlyIncome: totalMonthlyIncome,
             totalMonthlyExpense: totalMonthlyExpense
         )
-        
+
         financialHealthScore = healthScore.score
         financialHealthText = healthScore.text
         financialHealthColor = colorFromString(healthScore.color)
-        
+
+        // Generate chart data for sparklines
+        generateChartData()
+
+        // Calculate trend percentage (compare to previous month - mock for now)
+        calculateTrendPercentage()
+
         // Recalculate time to goal when financial data changes
         calculateTimeToGoal()
+    }
+
+    /// Generates mock historical chart data for interval cards
+    /// TODO: Replace with actual historical data from database
+    private func generateChartData() {
+        // Hourly chart data (last 8 hours)
+        // Generate realistic variations around the hourly flow
+        hourlyChartData = (0..<8).map { index in
+            let variance = Double.random(in: 0.7...1.3)
+            return max(0, abs(hourlyNetFlow) * variance)
+        }
+
+        // Daily chart data (last 15 days)
+        dailyChartData = (0..<15).map { index in
+            let variance = Double.random(in: 0.75...1.25)
+            return max(0, abs(dailyNetFlow) * variance)
+        }
+
+        // Monthly chart data (last 12 months)
+        monthlyChartData = (0..<12).map { index in
+            let variance = Double.random(in: 0.8...1.2)
+            let baseValue = abs(monthlyNetFlow)
+            // Add growth trend
+            let growthFactor = 1.0 + (Double(index) * 0.05)
+            return max(0, baseValue * variance * growthFactor)
+        }
+    }
+
+    /// Calculates trend percentage for hero card
+    /// TODO: Replace with actual comparison to previous period data
+    private func calculateTrendPercentage() {
+        // Mock trend calculation - positive trend if net flow is positive
+        if monthlyNetFlow != 0 {
+            // Generate realistic trend between -20% and +30%
+            let baseTrend = monthlyNetFlow > 0 ? 12.5 : -8.3
+            let variance = Double.random(in: -5...5)
+            netFlowTrendPercentage = baseTrend + variance
+        } else {
+            netFlowTrendPercentage = 0.0
+        }
     }
     
     private func loadAppSettings() {

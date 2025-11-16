@@ -21,14 +21,14 @@ struct SavingsGoalInputView: View {
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 24) {
+            VStack(spacing: Spacing.xl) {
                 Spacer()
-                
+
                 // Header
-                VStack(spacing: 16) {
+                VStack(spacing: Spacing.lg) {
                     Image(systemName: "target")
                         .font(.system(size: 64))
-                        .foregroundColor(.purple)
+                        .foregroundColor(.brandProgress)
                     
                     Text("home.savings_goal_input.title".localized(defaultValue: "Set Savings Goal"))
                         .font(.title2)
@@ -41,12 +41,12 @@ struct SavingsGoalInputView: View {
                 }
                 
                 // Amount Input
-                VStack(spacing: 8) {
+                VStack(spacing: Spacing.sm) {
                     HStack {
                         Text(currencySymbol)
                             .font(.title)
                             .foregroundColor(.secondary)
-                        
+
                         TextField(
                             "home.savings_goal_input.placeholder".localized(defaultValue: "Enter amount"),
                             text: $inputText
@@ -58,10 +58,10 @@ struct SavingsGoalInputView: View {
                         .focused($isInputFocused)
                         .accessibilityLabel("home.savings_goal_input.accessibility".localized(defaultValue: "Savings goal amount input"))
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
+                    .padding(.horizontal, Spacing.lg)
+                    .padding(.vertical, Spacing.lg)
                     .background(Color(uiColor: .secondarySystemBackground))
-                    .cornerRadius(12)
+                    .cornerRadius(CornerRadius.card)
                     
                     if currentGoal > 0 {
                         Text("home.savings_goal_input.current".localized(defaultValue: "Current goal: \(formatCurrency(currentGoal))"))
@@ -73,7 +73,7 @@ struct SavingsGoalInputView: View {
                 Spacer()
                 
                 // Action Buttons
-                VStack(spacing: 12) {
+                VStack(spacing: Spacing.md) {
                     // Save Button
                     Button(action: saveGoal) {
                         Text("home.savings_goal_input.save".localized(defaultValue: "Save"))
@@ -81,9 +81,9 @@ struct SavingsGoalInputView: View {
                             .fontWeight(.semibold)
                             .frame(maxWidth: .infinity)
                             .frame(height: 50)
-                            .background(Color.purple)
+                            .background(Color.brandProgress)
                             .foregroundColor(.white)
-                            .cornerRadius(12)
+                            .cornerRadius(CornerRadius.button)
                     }
                     .disabled(inputText.isEmpty)
                     .opacity(inputText.isEmpty ? 0.6 : 1.0)
@@ -99,7 +99,7 @@ struct SavingsGoalInputView: View {
                     }
                 }
             }
-            .padding(20)
+            .padding(Spacing.lg)
             .navigationTitle("home.savings_goal_input.nav_title".localized(defaultValue: "Savings Goal"))
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
@@ -115,7 +115,7 @@ struct SavingsGoalInputView: View {
                     Button("toolbar.done".localized(defaultValue: "Done")) {
                         isInputFocused = false
                     }
-                    .foregroundColor(Color(hex: "4A90E2"))
+                    .foregroundColor(.brandProgress)
                     .fontWeight(.semibold)
                 }
             }
