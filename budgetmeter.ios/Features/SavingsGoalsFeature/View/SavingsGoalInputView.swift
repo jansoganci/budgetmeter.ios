@@ -454,9 +454,7 @@ struct SavingsGoalInputView: View {
     }
 
     private func formatShortDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM yyyy"
-        return formatter.string(from: date)
+        DateFormattingHelper.shared.formatMonthYear(date)
     }
 }
 
