@@ -121,15 +121,11 @@ final class SavingsGoalsViewModel: ObservableObject {
     }
 
     func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        return formatter.string(from: date)
+        DateFormattingHelper.shared.formatMedium(date)
     }
 
     func formatShortDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM yyyy"
-        return formatter.string(from: date)
+        DateFormattingHelper.shared.formatMonthYear(date)
     }
 
     func timeRemainingText(_ goal: SavingsGoal) -> String {

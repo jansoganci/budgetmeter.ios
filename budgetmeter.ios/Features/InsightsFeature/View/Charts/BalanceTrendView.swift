@@ -157,7 +157,8 @@ struct BalanceTrendView: View {
                     .gesture(
                         DragGesture(minimumDistance: 0)
                             .onChanged { value in
-                                let x = value.location.x - geometry[chartProxy.plotFrame!].origin.x
+                                guard let plotFrame = chartProxy.plotFrame else { return }
+                                let x = value.location.x - geometry[plotFrame].origin.x
                                 if let date: Date = chartProxy.value(atX: x) {
                                     selectedDate = date
                                     if let snapshot = snapshots.first(where: { Calendar.current.isDate($0.date ?? Date(), inSameDayAs: date) }) {

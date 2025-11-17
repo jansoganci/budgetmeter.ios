@@ -144,10 +144,17 @@ struct BillsView: View {
 
             VStack(spacing: Spacing.sm) {
                 ForEach(viewModel.overdueBills, id: \.id) { bill in
-                    OverdueBillRow(bill: bill, viewModel: viewModel)
-                        .onTapGesture {
-                            billToEdit = bill
-                        }
+                    BillRowView(
+                        bill: bill,
+                        viewModel: viewModel,
+                        style: .overdue,
+                        showRecurring: false,
+                        showAutoPay: false,
+                        showPaidStatus: false,
+                        enableSwipeActions: false,
+                        enableBackground: true,
+                        onTap: { billToEdit = bill }
+                    )
                 }
             }
         }
@@ -174,10 +181,17 @@ struct BillsView: View {
 
             VStack(spacing: Spacing.sm) {
                 ForEach(viewModel.dueSoonBills, id: \.id) { bill in
-                    DueSoonBillRow(bill: bill, viewModel: viewModel)
-                        .onTapGesture {
-                            billToEdit = bill
-                        }
+                    BillRowView(
+                        bill: bill,
+                        viewModel: viewModel,
+                        style: .dueSoon,
+                        showRecurring: true,
+                        showAutoPay: false,
+                        showPaidStatus: false,
+                        enableSwipeActions: false,
+                        enableBackground: true,
+                        onTap: { billToEdit = bill }
+                    )
                 }
             }
         }
@@ -235,12 +249,16 @@ struct BillsView: View {
             } else {
                 VStack(spacing: 0) {
                     ForEach(Array(viewModel.sortedAndFilteredBills.enumerated()), id: \.element.id) { index, bill in
-                        BillRow(
+                        BillRowView(
                             bill: bill,
                             viewModel: viewModel,
-                            onTap: {
-                                billToEdit = bill
-                            }
+                            style: .standard,
+                            showRecurring: true,
+                            showAutoPay: true,
+                            showPaidStatus: true,
+                            enableSwipeActions: true,
+                            enableBackground: false,
+                            onTap: { billToEdit = bill }
                         )
                         .background(Color.cardBackground)
 
@@ -280,209 +298,6 @@ struct BillsView: View {
         .padding(Spacing.xxl)
         .background(Color.cardBackground)
         .cornerRadius(CornerRadius.card)
-    }
-}
-
-// MARK: - Overdue Bill Row
-
-struct OverdueBillRow: View {
-    let bill: Bill
-    let viewModel: BillsViewModel
-
-    var body: some View {
-        HStack(spacing: Spacing.md) {
-            // Icon placeholder
-            Text(String(bill.name?.prefix(1).uppercased() ?? "?"))
-                .font(.title3)
-                .fontWeight(.semibold)
-                .foregroundColor(.white)
-                .frame(width: 40, height: 40)
-                .background(Color.red)
-                .cornerRadius(CornerRadius.small)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(bill.name ?? "Unknown")
-                    .font(.body)
-                    .fontWeight(.medium)
-                    .foregroundColor(.textPrimary)
-
-                Text(viewModel.dueDateText(bill))
-                    .font(.caption)
-                    .foregroundColor(.red)
-            }
-
-            Spacer()
-
-            Text(viewModel.formatAmount(bill.amount))
-                .font(.body)
-                .fontWeight(.semibold)
-                .foregroundColor(.textPrimary)
-
-            Image(systemName: "chevron.right")
-                .font(.caption)
-                .foregroundColor(.textSecondary)
-        }
-        .padding(Spacing.md)
-        .background(Color.cardBackground)
-        .cornerRadius(CornerRadius.small)
-    }
-}
-
-// MARK: - Due Soon Bill Row
-
-struct DueSoonBillRow: View {
-    let bill: Bill
-    let viewModel: BillsViewModel
-
-    var body: some View {
-        HStack(spacing: Spacing.md) {
-            // Icon placeholder
-            Text(String(bill.name?.prefix(1).uppercased() ?? "?"))
-                .font(.title3)
-                .fontWeight(.semibold)
-                .foregroundColor(.white)
-                .frame(width: 40, height: 40)
-                .background(Color.orange)
-                .cornerRadius(CornerRadius.small)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(bill.name ?? "Unknown")
-                    .font(.body)
-                    .fontWeight(.medium)
-                    .foregroundColor(.textPrimary)
-
-                HStack(spacing: 4) {
-                    Text(viewModel.dueDateText(bill))
-                        .font(.caption)
-                        .foregroundColor(.orange)
-
-                    if bill.isRecurring {
-                        Text("•")
-                            .font(.caption)
-                            .foregroundColor(.textSecondary)
-
-                        Text(viewModel.frequencyText(bill))
-                            .font(.caption)
-                            .foregroundColor(.textSecondary)
-                    }
-                }
-            }
-
-            Spacer()
-
-            Text(viewModel.formatAmount(bill.amount))
-                .font(.body)
-                .fontWeight(.semibold)
-                .foregroundColor(.textPrimary)
-
-            Image(systemName: "chevron.right")
-                .font(.caption)
-                .foregroundColor(.textSecondary)
-        }
-        .padding(Spacing.md)
-        .background(Color.cardBackground)
-        .cornerRadius(CornerRadius.small)
-    }
-}
-
-// MARK: - Bill Row
-
-struct BillRow: View {
-    let bill: Bill
-    let viewModel: BillsViewModel
-    let onTap: () -> Void
-
-    var body: some View {
-        HStack(spacing: Spacing.md) {
-            // Icon placeholder (first letter of name)
-            Text(String(bill.name?.prefix(1).uppercased() ?? "?"))
-                .font(.title3)
-                .fontWeight(.semibold)
-                .foregroundColor(.white)
-                .frame(width: 40, height: 40)
-                .background(bill.isPaid ? Color.brandProgress : Color.brandProgress.opacity(0.6))
-                .cornerRadius(CornerRadius.small)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(bill.name ?? "Unknown")
-                    .font(.body)
-                    .fontWeight(.medium)
-                    .foregroundColor(.textPrimary)
-
-                HStack(spacing: 4) {
-                    Text(viewModel.dueDateText(bill))
-                        .font(.caption)
-                        .foregroundColor(bill.isPaid ? .brandProgress : .textSecondary)
-
-                    if bill.isRecurring {
-                        Text("•")
-                            .font(.caption)
-                            .foregroundColor(.textSecondary)
-
-                        Text(viewModel.frequencyText(bill))
-                            .font(.caption)
-                            .foregroundColor(.textSecondary)
-                    }
-
-                    if bill.isAutoPay {
-                        Text("•")
-                            .font(.caption)
-                            .foregroundColor(.textSecondary)
-
-                        Text("AutoPay")
-                            .font(.caption)
-                            .foregroundColor(.green)
-                    }
-                }
-            }
-
-            Spacer()
-
-            VStack(alignment: .trailing, spacing: 4) {
-                Text(viewModel.formatAmount(bill.amount))
-                    .font(.body)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.textPrimary)
-
-                if bill.isPaid {
-                    Text("✓ Paid")
-                        .font(.caption)
-                        .foregroundColor(.brandProgress)
-                }
-            }
-
-            Image(systemName: "chevron.right")
-                .font(.caption)
-                .foregroundColor(.textSecondary)
-        }
-        .padding(Spacing.md)
-        .contentShape(Rectangle())
-        .onTapGesture {
-            onTap()
-        }
-        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-            Button(role: .destructive) {
-                viewModel.deleteBill(bill)
-            } label: {
-                Label("Delete", systemImage: "trash")
-            }
-
-            if !bill.isPaid {
-                Button {
-                    viewModel.markAsPaid(bill)
-                } label: {
-                    Label("Paid", systemImage: "checkmark.circle.fill")
-                }
-                .tint(.brandProgress)
-            } else {
-                Button {
-                    viewModel.markAsUnpaid(bill)
-                } label: {
-                    Label("Unpaid", systemImage: "arrow.uturn.backward")
-                }
-                .tint(.orange)
-            }
-        }
     }
 }
 

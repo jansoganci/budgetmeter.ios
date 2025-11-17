@@ -398,16 +398,12 @@ struct NotificationSettingsView: View {
     // MARK: - Computed Properties
 
     private var weeklyDescription: String {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        let timeString = formatter.string(from: viewModel.weeklyTime)
+        let timeString = DateFormattingHelper.shared.formatTime(viewModel.weeklyTime)
         return "Every Sunday at \(timeString)"
     }
 
     private var dailyDescription: String {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        let timeString = formatter.string(from: viewModel.dailyTime)
+        let timeString = DateFormattingHelper.shared.formatTime(viewModel.dailyTime)
         return "Every day at \(timeString)"
     }
 }

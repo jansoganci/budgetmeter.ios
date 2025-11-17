@@ -88,9 +88,7 @@ struct SubscriptionInputView: View {
 
     private var nextRenewalText: String {
         let nextDate = calculateNextRenewal()
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        return "Next renewal: " + formatter.string(from: nextDate)
+        return "Next renewal: " + DateFormattingHelper.shared.formatMedium(nextDate)
     }
 
     // MARK: - Categories
@@ -358,8 +356,14 @@ struct SubscriptionInputView: View {
 
         if let existingSubscription = subscription {
             // Update existing
+            guard let subscriptionId = existingSubscription.id else {
+                errorMessage = "Invalid subscription ID. Cannot update subscription."
+                showError = true
+                return
+            }
+
             let success = SubscriptionManager.shared.updateSubscription(
-                id: existingSubscription.id ?? UUID(),
+                id: subscriptionId,
                 name: trimmedName,
                 amount: amountValue,
                 billingCycle: billingCycle.value,
