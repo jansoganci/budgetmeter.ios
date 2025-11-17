@@ -311,9 +311,7 @@ final class SettingsViewModel: ObservableObject {
     
     /// Gets app build date
     var buildDate: String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        return formatter.string(from: Date())
+        DateFormattingHelper.shared.formatMedium(Date())
     }
     
     // MARK: - Private Methods

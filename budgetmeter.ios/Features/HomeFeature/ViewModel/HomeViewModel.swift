@@ -76,13 +76,6 @@ final class HomeViewModel: ObservableObject {
     private var monthlyExpenseTotal: Double = 0
     private var yearlyExpenseTotal: Double = 0
 
-    private let cumulativeDateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        return formatter
-    }()
-    
     // MARK: - Initialization
     
     init(persistenceService: PersistenceService = .shared) {
@@ -423,7 +416,7 @@ final class HomeViewModel: ObservableObject {
     private func updateCumulativeDisplay(sessionNet: Double = 0) {
         let currentTotal = cumulativeBaseline + sessionNet
         cumulativeDisplayAmount = formatCurrencyWithCents(currentTotal, absoluteValue: false)
-        cumulativeSinceDateText = cumulativeDateFormatter.string(from: cumulativeStartDate)
+        cumulativeSinceDateText = DateFormattingHelper.shared.formatMediumNoTime(cumulativeStartDate)
         cumulativeFlowColor = currentTotal == 0 ? .white : colorForFlow(currentTotal)
     }
     

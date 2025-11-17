@@ -389,7 +389,7 @@ struct SavingsGoalDetailView: View {
         guard let id = goal.id else { return }
 
         _ = goalManager.addMoney(to: id, amount: amountValue)
-        onUpdate()
+        // onUpdate() removed - notification observer handles UI update
         showingAddMoney = false
     }
 
@@ -399,7 +399,7 @@ struct SavingsGoalDetailView: View {
         guard let id = goal.id else { return }
 
         _ = goalManager.withdrawMoney(from: id, amount: amountValue)
-        onUpdate()
+        // onUpdate() removed - notification observer handles UI update
         showingWithdrawMoney = false
     }
 
@@ -413,9 +413,7 @@ struct SavingsGoalDetailView: View {
     }
 
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .long
-        return formatter.string(from: date)
+        DateFormattingHelper.shared.formatLong(date)
     }
 
     private func timeRemainingText(_ date: Date) -> String {

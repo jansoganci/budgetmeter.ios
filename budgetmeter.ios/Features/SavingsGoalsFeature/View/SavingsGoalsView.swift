@@ -53,19 +53,16 @@ struct SavingsGoalsView: View {
                 }
             }
             .sheet(isPresented: $showingAddGoal) {
-                SavingsGoalInputView(goal: nil) {
-                    viewModel.loadGoals()
-                }
+                // Empty callback - notification observer handles UI update
+                SavingsGoalInputView(goal: nil, onSave: {})
             }
             .sheet(item: $goalToEdit) { goal in
-                SavingsGoalInputView(goal: goal) {
-                    viewModel.loadGoals()
-                }
+                // Empty callback - notification observer handles UI update
+                SavingsGoalInputView(goal: goal, onSave: {})
             }
             .sheet(item: $goalToView) { goal in
-                SavingsGoalDetailView(goal: goal) {
-                    viewModel.loadGoals()
-                }
+                // Empty callback - notification observer handles UI update
+                SavingsGoalDetailView(goal: goal, onUpdate: {})
             }
             .onAppear {
                 viewModel.loadGoals()
