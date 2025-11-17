@@ -168,7 +168,11 @@ final class BillManager {
 
         // If recurring, create next bill instance
         if bill.isRecurring, let frequency = bill.frequency {
-            createNextRecurringBill(from: bill, frequency: frequency)
+            let recurringBillCreated = createNextRecurringBill(from: bill, frequency: frequency)
+            if !recurringBillCreated {
+                print("⚠️ BillManager: Bill marked as paid, but failed to create next recurring instance")
+                // Note: We still continue and mark this bill as paid since that operation succeeded
+            }
         }
 
         guard persistence.save() else { return false }
@@ -335,8 +339,19 @@ final class BillManager {
     // MARK: - Helper Methods
 
     /// Create next bill instance for recurring bills
-    private func createNextRecurringBill(from bill: Bill, frequency: String) {
-        guard let originalDueDate = bill.originalDueDate else { return }
+    @discardableResult
+    private func createNextRecurringBill(from bill: Bill, frequency: String) -> Bool {
+        // Validate bill name exists
+        guard let billName = bill.name, !billName.isEmpty else {
+            print("❌ BillManager: Cannot create recurring bill - missing bill name")
+            return false
+        }
+
+        // Validate originalDueDate exists
+        guard let originalDueDate = bill.originalDueDate else {
+            print("❌ BillManager: Cannot create recurring bill '\(billName)' - missing originalDueDate")
+            return false
+        }
 
         let calendar = Calendar.current
         var nextDueDate: Date?
@@ -349,14 +364,18 @@ final class BillManager {
         case "quarterly":
             nextDueDate = calendar.date(byAdding: .month, value: 3, to: originalDueDate)
         default:
-            return
+            print("❌ BillManager: Invalid frequency '\(frequency)' for bill '\(billName)'")
+            return false
         }
 
-        guard let nextDate = nextDueDate else { return }
+        guard let nextDate = nextDueDate else {
+            print("❌ BillManager: Date calculation failed for bill '\(billName)'")
+            return false
+        }
 
         // Create new bill for next cycle
-        createBill(
-            name: bill.name ?? "",
+        guard let newBill = createBill(
+            name: billName,
             amount: bill.amount,
             dueDate: nextDate,
             isRecurring: true,
@@ -367,7 +386,13 @@ final class BillManager {
             isAutoPay: bill.isAutoPay,
             iconName: bill.iconName,
             colorHex: bill.colorHex
-        )
+        ) else {
+            print("❌ BillManager: Failed to create next recurring bill for '\(billName)'")
+            return false
+        }
+
+        print("✅ BillManager: Created next recurring bill '\(billName)' for \(nextDate)")
+        return true
     }
 
     // MARK: - Notifications
