@@ -16,9 +16,9 @@ struct PremiumThemesView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: Spacing.xl) {
                     // Header
-                    VStack(spacing: 8) {
+                    VStack(spacing: Spacing.sm) {
                         Text("Premium Themes")
                             .font(.largeTitle)
                             .fontWeight(.bold)
@@ -28,10 +28,10 @@ struct PremiumThemesView: View {
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, Spacing.lg)
 
                     // Themes Grid
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 16) {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: Spacing.lg) {
                         ForEach(AppTheme.allThemes, id: \.rawValue) { theme in
                             ThemeCard(
                                 theme: theme,
@@ -41,18 +41,18 @@ struct PremiumThemesView: View {
                             )
                         }
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, Spacing.lg)
 
                     // Current Theme Info
                     if themeManager.currentTheme == selectedTheme {
-                        HStack(spacing: 8) {
+                        HStack(spacing: Spacing.sm) {
                             Image(systemName: "checkmark.circle.fill")
                                 .foregroundColor(.green)
                             Text("Currently Active")
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                         }
-                        .padding(.top, 8)
+                        .padding(.top, Spacing.sm)
                     }
 
                     // Apply Button
@@ -62,17 +62,17 @@ struct PremiumThemesView: View {
                             Text("Apply Theme")
                         }
                         .frame(maxWidth: .infinity)
-                        .padding()
+                        .padding(Spacing.lg)
                         .background(selectedTheme.primaryColor)
                         .foregroundColor(.white)
-                        .cornerRadius(12)
+                        .cornerRadius(CornerRadius.button)
                     }
                     .disabled(themeManager.currentTheme == selectedTheme)
                     .opacity(themeManager.currentTheme == selectedTheme ? 0.5 : 1.0)
-                    .padding(.horizontal)
-                    .padding(.top, 8)
+                    .padding(.horizontal, Spacing.lg)
+                    .padding(.top, Spacing.sm)
                 }
-                .padding(.vertical)
+                .padding(.vertical, Spacing.lg)
             }
             .navigationTitle("Themes")
             .navigationBarTitleDisplayMode(.large)
@@ -109,7 +109,7 @@ struct ThemeCard: View {
 
     var body: some View {
         Button(action: onSelect) {
-            VStack(spacing: 12) {
+            VStack(spacing: Spacing.md) {
                 // Icon
                 ZStack {
                     Circle()
@@ -134,7 +134,7 @@ struct ThemeCard: View {
 
                 // Current Badge
                 if isCurrent {
-                    HStack(spacing: 4) {
+                    HStack(spacing: Spacing.xs) {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.caption2)
                         Text("Active")
@@ -143,14 +143,14 @@ struct ThemeCard: View {
                     .foregroundColor(.green)
                 }
             }
-            .frame(height: 140)
+            .frame(height: CardHeight.medium)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
+            .padding(.vertical, Spacing.md)
             .background(
-                RoundedRectangle(cornerRadius: 16)
+                RoundedRectangle(cornerRadius: CornerRadius.card)
                     .fill(theme.primaryColor.opacity(0.08))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 16)
+                        RoundedRectangle(cornerRadius: CornerRadius.card)
                             .stroke(
                                 isSelected ? theme.primaryColor : Color.clear,
                                 lineWidth: 3
