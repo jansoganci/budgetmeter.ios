@@ -295,8 +295,6 @@ final class DataExportService {
     }
     
     private func generateJSONData(_ data: ExportData) throws -> Data {
-        let dateFormatter = ISO8601DateFormatter()
-        
         let financialCategoriesData = data.financialCategories.map { category in
             [
                 "id": category.id?.uuidString ?? "",
@@ -315,35 +313,35 @@ final class DataExportService {
                 "categoryName": transaction.categoryName ?? "",
                 "categoryType": transaction.categoryType ?? "",
                 "frequency": transaction.frequency ?? "",
-                "startDate": transaction.startDate != nil ? dateFormatter.string(from: transaction.startDate!) : NSNull(),
-                "endDate": transaction.endDate != nil ? dateFormatter.string(from: transaction.endDate!) : NSNull(),
-                "nextDueDate": transaction.nextDueDate != nil ? dateFormatter.string(from: transaction.nextDueDate!) : NSNull(),
+                "startDate": transaction.startDate != nil ? DateFormattingHelper.shared.formatISO8601(transaction.startDate!) : NSNull(),
+                "endDate": transaction.endDate != nil ? DateFormattingHelper.shared.formatISO8601(transaction.endDate!) : NSNull(),
+                "nextDueDate": transaction.nextDueDate != nil ? DateFormattingHelper.shared.formatISO8601(transaction.nextDueDate!) : NSNull(),
                 "isActive": transaction.isActive,
                 "notes": transaction.notes ?? "",
-                "createdAt": transaction.createdAt != nil ? dateFormatter.string(from: transaction.createdAt!) : NSNull(),
-                "lastProcessedDate": transaction.lastProcessedDate != nil ? dateFormatter.string(from: transaction.lastProcessedDate!) : NSNull()
+                "createdAt": transaction.createdAt != nil ? DateFormattingHelper.shared.formatISO8601(transaction.createdAt!) : NSNull(),
+                "lastProcessedDate": transaction.lastProcessedDate != nil ? DateFormattingHelper.shared.formatISO8601(transaction.lastProcessedDate!) : NSNull()
             ]
         }
         
         
         let dateRangeData: [String: Any]? = data.dateRange != nil ? [
-            "start": dateFormatter.string(from: data.dateRange!.start),
-            "end": dateFormatter.string(from: data.dateRange!.end)
+            "start": DateFormattingHelper.shared.formatISO8601(data.dateRange!.start),
+            "end": DateFormattingHelper.shared.formatISO8601(data.dateRange!.end)
         ] : nil
         
         let appSettingsData: [String: Any]? = data.appSettings != nil ? [
             "preferredCurrencyCode": data.appSettings!.preferredCurrencyCode ?? "",
             "savingsGoalAmount": data.appSettings!.savingsGoalAmount,
             "isPremiumUser": data.appSettings!.isPremiumUser,
-            "premiumPurchaseDate": data.appSettings!.premiumPurchaseDate != nil ? dateFormatter.string(from: data.appSettings!.premiumPurchaseDate!) : NSNull(),
+            "premiumPurchaseDate": data.appSettings!.premiumPurchaseDate != nil ? DateFormattingHelper.shared.formatISO8601(data.appSettings!.premiumPurchaseDate!) : NSNull(),
             "isBiometricEnabled": data.appSettings!.isBiometricEnabled,
             "selectedTheme": data.appSettings!.selectedTheme ?? "",
             "customAppIcon": data.appSettings!.customAppIcon ?? "",
-            "lastExportDate": data.appSettings!.lastExportDate != nil ? dateFormatter.string(from: data.appSettings!.lastExportDate!) : NSNull()
+            "lastExportDate": data.appSettings!.lastExportDate != nil ? DateFormattingHelper.shared.formatISO8601(data.appSettings!.lastExportDate!) : NSNull()
         ] : nil
         
         let exportObject: [String: Any] = [
-            "exportDate": dateFormatter.string(from: data.exportDate),
+            "exportDate": DateFormattingHelper.shared.formatISO8601(data.exportDate),
             "dateRange": dateRangeData ?? NSNull(),
             "financialCategories": financialCategoriesData,
             "recurringTransactions": recurringTransactionsData,
