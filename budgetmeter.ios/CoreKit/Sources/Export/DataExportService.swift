@@ -376,10 +376,7 @@ final class DataExportService {
     }
     
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
+        DateFormattingHelper.shared.formatMediumWithTime(date)
     }
     
     private func getDocumentsDirectory() -> URL {

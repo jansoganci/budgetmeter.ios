@@ -145,10 +145,7 @@ final class SubscriptionsViewModel: ObservableObject {
 
     /// Format date for display
     func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        return formatter.string(from: date)
+        DateFormattingHelper.shared.formatMediumNoTime(date)
     }
 
     /// Get days until renewal

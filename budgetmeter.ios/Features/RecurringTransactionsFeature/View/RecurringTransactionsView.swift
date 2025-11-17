@@ -148,9 +148,7 @@ struct RecurringTransactionRow: View {
     }
     
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .short
-        return formatter.string(from: date)
+        DateFormattingHelper.shared.formatShort(date)
     }
     
     private func isOverdue(_ date: Date) -> Bool {

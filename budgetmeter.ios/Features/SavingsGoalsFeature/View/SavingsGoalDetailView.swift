@@ -413,9 +413,7 @@ struct SavingsGoalDetailView: View {
     }
 
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .long
-        return formatter.string(from: date)
+        DateFormattingHelper.shared.formatLong(date)
     }
 
     private func timeRemainingText(_ date: Date) -> String {
