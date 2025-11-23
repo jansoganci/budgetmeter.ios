@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="BudgetMeter - Privacy-first budget tracking for iOS">
+    <title>BudgetMeter - Legal & Support</title>
+    <style>
+        :root {
+            /* BudgetMeter Brand Colors */
+            --color-primary: #3B82F6;
+            --color-primary-dark: #60A5FA;
+            --color-positive: #10B981;
+            --color-positive-dark: #34D399;
+            --color-expense: #EF4444;
+            --color-bg-light: #F9FAFB;
+            --color-bg-dark: #000000;
+            --color-card-light: #FFFFFF;
+            --color-card-dark: #1F2937;
+            --color-text-primary-light: #111827;
+            --color-text-primary-dark: #F9FAFB;
+            --color-text-secondary-light: #6B7280;
+            --color-text-secondary-dark: #9CA3AF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: var(--color-bg-light);
+            color: var(--color-text-primary-light);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: var(--color-bg-dark);
+                color: var(--color-text-primary-dark);
+            }
+            .card {
+                background: var(--color-card-dark) !important;
+                border-color: rgba(255, 255, 255, 0.1) !important;
+            }
+            .card:hover {
+                border-color: var(--color-primary-dark) !important;
+            }
+            .subtitle {
+                color: var(--color-text-secondary-dark) !important;
+            }
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .logo {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-positive));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: var(--color-text-secondary-light);
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 40px;
+        }
+
+        .card {
+            background: var(--color-card-light);
+            border-radius: 16px;
+            padding: 32px;
+            border: 2px solid rgba(0, 0, 0, 0.06);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            animation: fadeInUp 0.6s ease-out backwards;
+        }
+
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(2) { animation-delay: 0.2s; }
+        .card:nth-child(3) { animation-delay: 0.3s; }
+
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: var(--color-primary);
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2);
+        }
+
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: inherit;
+        }
+
+        .card-description {
+            font-size: 15px;
+            color: var(--color-text-secondary-light);
+            line-height: 1.6;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .card-description {
+                color: var(--color-text-secondary-dark);
+            }
+        }
+
+        .card-arrow {
+            margin-top: 20px;
+            font-size: 14px;
+            color: var(--color-primary);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .card-arrow {
+                color: var(--color-primary-dark);
+            }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 80px;
+            padding-top: 40px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            color: var(--color-text-secondary-light);
+            font-size: 14px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .footer {
+                border-top-color: rgba(255, 255, 255, 0.1);
+                color: var(--color-text-secondary-dark);
+            }
+        }
+
+        .footer a {
+            color: var(--color-primary);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 30px 16px;
+            }
+            h1 {
+                font-size: 28px;
+            }
+            .subtitle {
+                font-size: 16px;
+            }
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">📊</div>
+            <h1>BudgetMeter</h1>
+            <p class="subtitle">Privacy-first budget tracking for iOS</p>
+        </div>
+
+        <div class="cards-grid">
+            <a href="privacy-policy.html" class="card">
+                <span class="card-icon">🔒</span>
+                <h2 class="card-title">Privacy Policy</h2>
+                <p class="card-description">
+                    Learn how we protect your data. Spoiler: we don't collect any.
+                </p>
+                <div class="card-arrow">
+                    Read Privacy Policy →
+                </div>
+            </a>
+
+            <a href="terms-of-use.html" class="card">
+                <span class="card-icon">📜</span>
+                <h2 class="card-title">Terms of Use</h2>
+                <p class="card-description">
+                    Understand your rights and responsibilities when using BudgetMeter.
+                </p>
+                <div class="card-arrow">
+                    Read Terms of Use →
+                </div>
+            </a>
+
+            <a href="support.html" class="card">
+                <span class="card-icon">💬</span>
+                <h2 class="card-title">Support</h2>
+                <p class="card-description">
+                    Need help? Find answers to common questions and contact information.
+                </p>
+                <div class="card-arrow">
+                    Get Support →
+                </div>
+            </a>
+        </div>
+
+        <div class="footer">
+            <p><strong>BudgetMeter</strong> • Made with ❤️ for iOS</p>
+            <p style="margin-top: 12px;">
+                © 2025 Umurcan Soganci. All rights reserved.
+            </p>
+            <p style="margin-top: 8px;">
+                Contact: <a href="mailto:umursoganci@gmail.com">umursoganci@gmail.com</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

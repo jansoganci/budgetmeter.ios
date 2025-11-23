@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="BudgetMeter Support - Help and frequently asked questions">
+    <title>Support - BudgetMeter</title>
+    <style>
+        :root {
+            --color-primary: #3B82F6;
+            --color-primary-dark: #60A5FA;
+            --color-positive: #10B981;
+            --color-bg-light: #F9FAFB;
+            --color-bg-dark: #000000;
+            --color-card-light: #FFFFFF;
+            --color-card-dark: #1F2937;
+            --color-text-primary-light: #111827;
+            --color-text-primary-dark: #F9FAFB;
+            --color-text-secondary-light: #6B7280;
+            --color-text-secondary-dark: #9CA3AF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+            background: var(--color-bg-light);
+            color: var(--color-text-primary-light);
+            line-height: 1.8;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: var(--color-bg-dark);
+                color: var(--color-text-primary-dark);
+            }
+            .content {
+                background: var(--color-card-dark) !important;
+            }
+            .faq-item {
+                border-color: rgba(255, 255, 255, 0.1) !important;
+                background: rgba(255, 255, 255, 0.02) !important;
+            }
+            .contact-box {
+                background: rgba(59, 130, 246, 0.1) !important;
+            }
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px 80px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--color-primary);
+            text-decoration: none;
+            font-size: 15px;
+            margin-bottom: 32px;
+            transition: transform 0.2s;
+        }
+
+        .back-link:hover {
+            transform: translateX(-4px);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .back-link {
+                color: var(--color-primary-dark);
+            }
+        }
+
+        .content {
+            background: var(--color-card-light);
+            border-radius: 16px;
+            padding: 48px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-positive));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--color-text-secondary-light);
+            font-size: 18px;
+            margin-bottom: 40px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .subtitle {
+                color: var(--color-text-secondary-dark);
+            }
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-top: 48px;
+            margin-bottom: 24px;
+            color: inherit;
+        }
+
+        h2:first-of-type {
+            margin-top: 0;
+        }
+
+        .faq-item {
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+
+        .faq-question {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: inherit;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .faq-question-icon {
+            color: var(--color-primary);
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .faq-question-icon {
+                color: var(--color-primary-dark);
+            }
+        }
+
+        .faq-answer {
+            font-size: 16px;
+            margin-left: 32px;
+        }
+
+        .faq-answer p {
+            margin-bottom: 12px;
+        }
+
+        .faq-answer ul {
+            margin-left: 20px;
+            margin-bottom: 12px;
+        }
+
+        .faq-answer li {
+            margin-bottom: 6px;
+        }
+
+        .contact-box {
+            background: rgba(59, 130, 246, 0.05);
+            border-radius: 12px;
+            padding: 32px;
+            margin-top: 48px;
+            text-align: center;
+        }
+
+        .contact-box h3 {
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+
+        .contact-box p {
+            font-size: 16px;
+            margin-bottom: 24px;
+        }
+
+        .contact-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--color-primary);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .contact-button:hover {
+            background: #2563EB;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .contact-button {
+                background: var(--color-primary-dark);
+            }
+            .contact-button:hover {
+                background: #3B82F6;
+            }
+        }
+
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        .quick-link {
+            padding: 20px;
+            background: rgba(16, 185, 129, 0.05);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 12px;
+            text-align: center;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s;
+        }
+
+        .quick-link:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(16, 185, 129, 0.2);
+            border-color: var(--color-positive);
+        }
+
+        .quick-link-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .quick-link-text {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 24px 16px 60px;
+            }
+            .content {
+                padding: 32px 24px;
+            }
+            h1 {
+                font-size: 28px;
+            }
+            h2 {
+                font-size: 20px;
+            }
+            .faq-answer {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Legal</a>
+
+        <div class="content">
+            <h1>Support</h1>
+            <p class="subtitle">Find answers to common questions and get help with BudgetMeter</p>
+
+            <div class="quick-links">
+                <a href="#getting-started" class="quick-link">
+                    <span class="quick-link-icon">🚀</span>
+                    <span class="quick-link-text">Getting Started</span>
+                </a>
+                <a href="#premium-features" class="quick-link">
+                    <span class="quick-link-icon">💎</span>
+                    <span class="quick-link-text">Premium Features</span>
+                </a>
+                <a href="#troubleshooting" class="quick-link">
+                    <span class="quick-link-icon">🔧</span>
+                    <span class="quick-link-text">Troubleshooting</span>
+                </a>
+            </div>
+
+            <h2 id="getting-started">🚀 Getting Started</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-question-icon">Q:</span>
+                    <span>How do I add my first income or expense?</span>
+                </div>
+                <div class="faq-answer">
+                    <p>
+                        Navigate to the <strong>Income</strong> or <strong>Expenses</strong> tab at the bottom of the screen.
+                        Tap any category card and enter your amount. You can add daily, monthly, or yearly amounts for each category.
+                    </p>
+                    <p>
+                        Your dashboard will update instantly with your live financial meter!
+                    </p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-question-icon">Q:</span>
+                    <span>What do the different frequencies mean (daily, monthly, yearly)?</span>
+                </div>
+                <div class="faq-answer">
+                    <p><strong>Daily:</strong> Recurring daily expenses/income (e.g., daily coffee: $5/day)</p>
+                    <p><strong>Monthly:</strong> Monthly bills or income (e.g., rent: $1,200/month)</p>
+                    <p><strong>Yearly:</strong> Annual expenses/income (e.g., insurance: $1,200/year)</p>
+                    <p>BudgetMeter automatically converts and combines all frequencies to show you accurate totals.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-question-icon">Q:</span>
+                    <span>How does the live meter work?</span>
+                </div>
+                <div class="faq-answer">
+                    <p>
+                        The live meter shows your financial flow accumulating in real-time, second-by-second.
+                        It calculates your net flow (income minus expenses) and displays how much you're earning or spending
+                        since you opened the app.
+                    </p>
+                    <p>It's like watching your financial life in action! 📈</p>
+                </div>
+            </div>
+
+            <h2 id="premium-features">💎 Premium Features</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-question-icon">Q:</span>
+                    <span>What's included in the Premium upgrade?</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Premium unlocks powerful features for <strong>$14.99 (one-time purchase)</strong>:</p>
+                    <ul>
+                        <li>✅ <strong>Custom Categories:</strong> Create unlimited personalized categories</li>
+                        <li>✅ <strong>Bill Reminders:</strong> Never miss a payment</li>
+                        <li>✅ <strong>Subscription Tracking:</strong> Track all your subscriptions</li>
+                        <li>✅ <strong>Savings Goals:</strong> Set and track financial goals</li>
+                        <li>✅ <strong>Recurring Transactions:</strong> Automate repeating entries</li>
+                        <li>✅ <strong>Data Export:</strong> Export to PDF, CSV, or JSON</li>
+                        <li>✅ <strong>Widgets:</strong> Home Screen & Lock Screen widgets</li>
+                        <li>✅ <strong>Spending Insights:</strong> Visual charts and analytics</li>
+                        <li>✅ <strong>Biometric Lock:</strong> Face ID/Touch ID protection</li>
+                        <li>✅ <strong>Premium Themes:</strong> Beautiful color themes and app icons</li>
+                    </ul>
+                    <p><strong>No subscriptions. Pay once, own forever.</strong></p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-question-icon">Q:</span>
+                    <span>How do I restore my Premium purchase on a new device?</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Go to <strong>Settings → Premium → Restore Purchases</strong></p>
+                    <p>Make sure you're signed in with the same Apple ID you used to purchase Premium.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-question-icon">Q:</span>
+                    <span>How do I request a refund?</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Refunds are handled by Apple. To request a refund:</p>
+                    <ol>
+                        <li>Visit <a href="https://support.apple.com/en-us/118223" target="_blank">Apple Support - Request a Refund</a></li>
+                        <li>Sign in with your Apple ID</li>
+                        <li>Find BudgetMeter Premium purchase</li>
+                        <li>Select "Request a Refund" and provide a reason</li>
+                    </ol>
+                    <p>Apple typically responds within 48 hours.</p>
+                </div>
+            </div>
+
+            <h2 id="data-privacy">🔒 Data & Privacy</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-question-icon">Q:</span>
+                    <span>Where is my financial data stored?</span>
+                </div>
+                <div class="faq-answer">
+                    <p>
+                        <strong>All data is stored locally on your device.</strong> We do not collect, transmit, or have access
+                        to any of your financial information.
+                    </p>
+                    <p>
+                        If you enable iCloud sync in Settings, data is backed up to <strong>your private iCloud account</strong>.
+                        We still cannot access this data—it's encrypted and only accessible to you.
+                    </p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-question-icon">Q:</span>
+                    <span>How do I enable iCloud sync?</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Currently, iCloud sync is automatic if you're signed into iCloud on your device.</p>
+                    <p>Your data syncs across all devices using the same Apple ID.</p>
+                    <p><em>To disable sync, you would need to turn off iCloud for BudgetMeter in iOS Settings → Your Name → iCloud.</em></p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-question-icon">Q:</span>
+                    <span>How do I export my data?</span>
+                </div>
+                <div class="faq-answer">
+                    <p><strong>Premium Feature:</strong> Go to <strong>Settings → Data & Privacy → Export Data</strong></p>
+                    <p>Choose from three formats:</p>
+                    <ul>
+                        <li><strong>PDF:</strong> Beautiful formatted report</li>
+                        <li><strong>CSV:</strong> Spreadsheet-compatible format</li>
+                        <li><strong>JSON:</strong> Complete data export for developers</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-question-icon">Q:</span>
+                    <span>How do I delete all my data?</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Go to <strong>Settings → Data & Privacy → Reset All Data</strong></p>
+                    <p>⚠️ This action is <strong>permanent and cannot be undone</strong>. All income, expense, goal, and bill data will be deleted.</p>
+                </div>
+            </div>
+
+            <h2 id="troubleshooting">🔧 Troubleshooting</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-question-icon">Q:</span>
+                    <span>My calculations don't look right. What should I check?</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Verify these settings:</p>
+                    <ul>
+                        <li>Check that amounts are entered in the correct frequency (daily/monthly/yearly)</li>
+                        <li>Ensure your currency is set correctly in <strong>Settings → Currency</strong></li>
+                        <li>Review all categories to make sure amounts are accurate</li>
+                    </ul>
+                    <p>BudgetMeter uses precise calculations with astronomically accurate constants (30.4375 days/month, 365.25 days/year).</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-question-icon">Q:</span>
+                    <span>Face ID/Touch ID isn't working</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Check these steps:</p>
+                    <ol>
+                        <li>Ensure biometric lock is enabled in <strong>Settings → Security</strong></li>
+                        <li>Verify Face ID/Touch ID is set up in iOS Settings</li>
+                        <li>Make sure BudgetMeter has permission to use biometrics</li>
+                        <li>Try disabling and re-enabling the feature</li>
+                    </ol>
+                    <p>If issues persist, restart your device.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-question-icon">Q:</span>
+                    <span>The app crashed or is acting strange</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Try these solutions:</p>
+                    <ol>
+                        <li><strong>Force quit and reopen:</strong> Swipe up from bottom (or double-click Home), swipe BudgetMeter away, reopen</li>
+                        <li><strong>Restart your device:</strong> Turn iPhone/iPad off and back on</li>
+                        <li><strong>Update the app:</strong> Check App Store for updates</li>
+                        <li><strong>Update iOS:</strong> Go to Settings → General → Software Update</li>
+                    </ol>
+                    <p>If problems continue, contact support (see below).</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-question-icon">Q:</span>
+                    <span>How do I change the app language?</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Go to <strong>Settings → Language</strong> and select from 10 available languages:</p>
+                    <ul>
+                        <li>English, Turkish, German, French, Spanish, Italian, Portuguese, Japanese, Chinese (Simplified), Arabic</li>
+                    </ul>
+                    <p>The app will update instantly without restart.</p>
+                </div>
+            </div>
+
+            <h2>💡 Tips & Tricks</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-question-icon">💡</span>
+                    <span>Use widgets to track your finances at a glance</span>
+                </div>
+                <div class="faq-answer">
+                    <p><strong>Premium Feature:</strong> Add BudgetMeter widgets to your Home Screen or Lock Screen!</p>
+                    <p>Long-press your Home Screen → Tap "+" → Search "BudgetMeter" → Choose widget size → Add</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-question-icon">💡</span>
+                    <span>Set realistic savings goals</span>
+                </div>
+                <div class="faq-answer">
+                    <p>
+                        Start with small, achievable goals and gradually increase them. BudgetMeter will show you exactly how long
+                        it will take to reach your goal based on your current net flow.
+                    </p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-question-icon">💡</span>
+                    <span>Review your Financial Health Score regularly</span>
+                </div>
+                <div class="faq-answer">
+                    <p>
+                        Tap the health score card on the Home tab to see a detailed breakdown and personalized tips
+                        for improving your financial health.
+                    </p>
+                </div>
+            </div>
+
+            <div class="contact-box">
+                <h3>Still Need Help?</h3>
+                <p>
+                    We're here to help! Contact us for any questions, issues, or feedback.
+                    We typically respond within 48 hours.
+                </p>
+                <a href="mailto:umursoganci@gmail.com?subject=BudgetMeter%20Support&body=Please%20describe%20your%20issue:%0A%0ADevice:%20%0AiOS%20Version:%20%0AApp%20Version:%201.0%0A%0ADescription:%20" class="contact-button">
+                    <span>📧</span>
+                    <span>Email Support</span>
+                </a>
+                <p style="margin-top: 24px; font-size: 14px; color: var(--color-text-secondary-light);">
+                    <strong>Developer:</strong> Umurcan Soganci<br>
+                    <strong>Email:</strong> umursoganci@gmail.com<br>
+                    <strong>App Version:</strong> 1.0 (Build 3)
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

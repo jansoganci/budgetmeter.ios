@@ -185,13 +185,17 @@ struct PremiumPaywallView: View {
                 
                 HStack(spacing: 16) {
                     Button("premium.terms.link".localized(defaultValue: "Terms")) {
-                        // Open terms
+                        if let url = URL(string: "https://jansoganci.github.io/budgetmeter.ios/terms-of-use.html") {
+                            UIApplication.shared.open(url)
+                        }
                     }
                     .font(.caption)
                     .foregroundColor(Color(hex: "4A90E2"))
-                    
+
                     Button("premium.privacy.link".localized(defaultValue: "Privacy")) {
-                        // Open privacy policy
+                        if let url = URL(string: "https://jansoganci.github.io/budgetmeter.ios/privacy-policy.html") {
+                            UIApplication.shared.open(url)
+                        }
                     }
                     .font(.caption)
                     .foregroundColor(Color(hex: "4A90E2"))

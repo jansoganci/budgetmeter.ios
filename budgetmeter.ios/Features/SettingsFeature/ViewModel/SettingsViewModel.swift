@@ -18,8 +18,6 @@ final class SettingsViewModel: ObservableObject {
     
     @Published var selectedAppearance: AppearanceMode = .system
     @Published var selectedLanguage: LanguageMode = .english
-    @Published var showingPrivacyPolicy = false
-    @Published var showingTermsOfService = false
     @Published var showingResetDataAlert = false
     @Published var showingResetCumulativeAlert = false
     @Published var selectedCurrencyCode: String = CurrencyHelper.defaultCurrencyCode()
@@ -135,14 +133,22 @@ final class SettingsViewModel: ObservableObject {
         LocalizationManager.shared.currentLanguage = language.rawValue
     }
     
-    /// Shows privacy policy
+    /// Opens privacy policy in Safari
     func showPrivacyPolicy() {
-        showingPrivacyPolicy = true
+        guard let url = URL(string: "https://jansoganci.github.io/budgetmeter.ios/privacy-policy.html") else { return }
+        UIApplication.shared.open(url)
     }
-    
-    /// Shows terms of service
+
+    /// Opens terms of service in Safari
     func showTermsOfService() {
-        showingTermsOfService = true
+        guard let url = URL(string: "https://jansoganci.github.io/budgetmeter.ios/terms-of-use.html") else { return }
+        UIApplication.shared.open(url)
+    }
+
+    /// Opens support page in Safari
+    func showSupport() {
+        guard let url = URL(string: "https://jansoganci.github.io/budgetmeter.ios/support.html") else { return }
+        UIApplication.shared.open(url)
     }
     
 

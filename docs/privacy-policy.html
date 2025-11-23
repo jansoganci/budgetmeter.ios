@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="BudgetMeter Privacy Policy - Zero tracking, complete privacy">
+    <title>Privacy Policy - BudgetMeter</title>
+    <style>
+        :root {
+            --color-primary: #3B82F6;
+            --color-primary-dark: #60A5FA;
+            --color-positive: #10B981;
+            --color-bg-light: #F9FAFB;
+            --color-bg-dark: #000000;
+            --color-card-light: #FFFFFF;
+            --color-card-dark: #1F2937;
+            --color-text-primary-light: #111827;
+            --color-text-primary-dark: #F9FAFB;
+            --color-text-secondary-light: #6B7280;
+            --color-text-secondary-dark: #9CA3AF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+            background: var(--color-bg-light);
+            color: var(--color-text-primary-light);
+            line-height: 1.8;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: var(--color-bg-dark);
+                color: var(--color-text-primary-dark);
+            }
+            .content {
+                background: var(--color-card-dark) !important;
+            }
+            .highlight-box {
+                background: rgba(16, 185, 129, 0.1) !important;
+                border-color: var(--color-positive) !important;
+            }
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px 80px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--color-primary);
+            text-decoration: none;
+            font-size: 15px;
+            margin-bottom: 32px;
+            transition: transform 0.2s;
+        }
+
+        .back-link:hover {
+            transform: translateX(-4px);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .back-link {
+                color: var(--color-primary-dark);
+            }
+        }
+
+        .content {
+            background: var(--color-card-light);
+            border-radius: 16px;
+            padding: 48px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-positive));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .last-updated {
+            color: var(--color-text-secondary-light);
+            font-size: 14px;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .last-updated {
+                color: var(--color-text-secondary-dark);
+                border-bottom-color: rgba(255, 255, 255, 0.1);
+            }
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-top: 40px;
+            margin-bottom: 16px;
+            color: inherit;
+        }
+
+        h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            color: inherit;
+        }
+
+        p {
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+
+        ul, ol {
+            margin-bottom: 16px;
+            margin-left: 24px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .highlight-box {
+            background: rgba(16, 185, 129, 0.05);
+            border-left: 4px solid var(--color-positive);
+            padding: 20px;
+            margin: 24px 0;
+            border-radius: 8px;
+        }
+
+        .highlight-box strong {
+            color: var(--color-positive);
+        }
+
+        strong {
+            font-weight: 600;
+        }
+
+        .contact-info {
+            background: rgba(59, 130, 246, 0.05);
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 40px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .contact-info {
+                background: rgba(59, 130, 246, 0.1);
+            }
+        }
+
+        .contact-info a {
+            color: var(--color-primary);
+            text-decoration: none;
+        }
+
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 24px 16px 60px;
+            }
+            .content {
+                padding: 32px 24px;
+            }
+            h1 {
+                font-size: 28px;
+            }
+            h2 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Legal</a>
+
+        <div class="content">
+            <h1>Privacy Policy</h1>
+            <div class="last-updated">Last Updated: November 23, 2025</div>
+
+            <div class="highlight-box">
+                <strong>TL;DR:</strong> BudgetMeter collects ZERO personal data. Everything stays on your device. We don't track you, sell data, or use analytics. Your privacy is absolute.
+            </div>
+
+            <h2>1. Introduction</h2>
+            <p>
+                Welcome to BudgetMeter. This Privacy Policy explains how we handle your data (spoiler: we don't collect any).
+                Your financial information is yours alone, and we're committed to keeping it that way.
+            </p>
+            <p>
+                <strong>Developer:</strong> Umurcan Soganci<br>
+                <strong>Contact:</strong> <a href="mailto:umursoganci@gmail.com">umursoganci@gmail.com</a><br>
+                <strong>App:</strong> BudgetMeter for iOS
+            </p>
+
+            <h2>2. Information We Collect</h2>
+            <p><strong>Short answer: None.</strong></p>
+            <p>
+                BudgetMeter does not collect, transmit, store, or share any personal information or financial data.
+                All your budget tracking data remains exclusively on your device.
+            </p>
+            <p>We do NOT collect:</p>
+            <ul>
+                <li>Personal identification (name, email, phone number)</li>
+                <li>Financial data (income, expenses, savings goals)</li>
+                <li>Location data</li>
+                <li>Device identifiers or advertising IDs</li>
+                <li>Usage analytics or crash reports</li>
+                <li>Contacts, photos, or other device data</li>
+            </ul>
+
+            <h2>3. How We Use Your Information</h2>
+            <p>
+                We don't use your information because we don't have access to it. Your financial data is stored locally on your device using:
+            </p>
+            <ul>
+                <li><strong>iOS UserDefaults:</strong> For app settings and preferences</li>
+                <li><strong>Core Data:</strong> For your financial categories, transactions, and goals</li>
+                <li><strong>Local SQLite database:</strong> Encrypted by iOS, never transmitted</li>
+            </ul>
+
+            <h2>4. iCloud Sync (Optional Feature)</h2>
+            <p>
+                If you enable iCloud sync in Settings, your financial data is stored in <strong>your private iCloud account</strong> using Apple's CloudKit framework.
+            </p>
+            <p><strong>Important points about iCloud sync:</strong></p>
+            <ul>
+                <li>Sync is <strong>optional</strong> and disabled by default</li>
+                <li>Data is stored in <strong>your personal iCloud account</strong>, not our servers</li>
+                <li>We <strong>cannot access</strong> your iCloud data</li>
+                <li>Apple's <a href="https://www.apple.com/legal/privacy/" target="_blank">iCloud Privacy Policy</a> applies to synced data</li>
+                <li>You can disable sync anytime in Settings → Data & Privacy</li>
+                <li>Disabling sync does not delete your data from iCloud; manage this in iOS Settings → Your Name → iCloud</li>
+            </ul>
+
+            <h2>5. Face ID / Touch ID Usage</h2>
+            <p>
+                BudgetMeter uses Face ID, Touch ID, or Optic ID (biometric authentication) to protect your financial data and ensure secure access to the app.
+            </p>
+            <p><strong>How biometric authentication works:</strong></p>
+            <ul>
+                <li>Biometric data is processed <strong>entirely by iOS</strong> and never leaves your device</li>
+                <li>We <strong>never access</strong> your biometric data</li>
+                <li>Authentication is <strong>optional</strong> and can be enabled/disabled in Settings</li>
+                <li>If you disable biometric lock, your data remains on your device</li>
+            </ul>
+
+            <h2>6. Third-Party Services</h2>
+            <p>
+                BudgetMeter does <strong>not</strong> use any third-party services, including:
+            </p>
+            <ul>
+                <li>❌ Analytics services (Google Analytics, Firebase, etc.)</li>
+                <li>❌ Advertising networks</li>
+                <li>❌ Crash reporting tools</li>
+                <li>❌ Social media integrations</li>
+                <li>❌ External databases or servers</li>
+            </ul>
+            <p>
+                The only Apple services we use are:
+            </p>
+            <ul>
+                <li>✅ <strong>StoreKit:</strong> For processing in-app purchases (handled by Apple)</li>
+                <li>✅ <strong>CloudKit (optional):</strong> For iCloud sync (your private account only)</li>
+            </ul>
+
+            <h2>7. In-App Purchases</h2>
+            <p>
+                Premium feature purchases are processed by Apple through StoreKit. We do not collect payment information.
+            </p>
+            <p><strong>What Apple handles:</strong></p>
+            <ul>
+                <li>Payment processing and billing</li>
+                <li>Purchase receipts and verification</li>
+                <li>Refund requests</li>
+            </ul>
+            <p>
+                Apple's <a href="https://www.apple.com/legal/privacy/" target="_blank">Privacy Policy</a> applies to purchase transactions.
+            </p>
+
+            <h2>8. Data Retention and Deletion</h2>
+            <p>
+                Since all data is stored locally on your device, you have complete control:
+            </p>
+            <ul>
+                <li><strong>View all data:</strong> Use Settings → Data & Privacy → Export Data (PDF/CSV/JSON)</li>
+                <li><strong>Delete all data:</strong> Go to Settings → Data & Privacy → Reset All Data</li>
+                <li><strong>Uninstall app:</strong> Deleting BudgetMeter removes all local data immediately</li>
+            </ul>
+            <p>
+                <strong>iCloud data:</strong> If you enabled iCloud sync, delete synced data from iOS Settings → Your Name → iCloud → Manage Storage → BudgetMeter → Delete Data.
+            </p>
+
+            <h2>9. Your Rights (GDPR & CCPA)</h2>
+            <p>
+                Even though we don't collect data, we respect your privacy rights under GDPR (European Union) and CCPA (California):
+            </p>
+
+            <h3>GDPR Rights (EU Users)</h3>
+            <ul>
+                <li><strong>Right to Access:</strong> View all your data via Settings → Data Export</li>
+                <li><strong>Right to Rectification:</strong> Edit any data directly in the app</li>
+                <li><strong>Right to Erasure:</strong> Delete all data via Settings → Reset All Data</li>
+                <li><strong>Right to Data Portability:</strong> Export data in PDF, CSV, or JSON format</li>
+                <li><strong>Right to Object:</strong> Disable iCloud sync anytime</li>
+            </ul>
+
+            <h3>CCPA Rights (California Users)</h3>
+            <ul>
+                <li><strong>Right to Know:</strong> All data is visible within the app</li>
+                <li><strong>Right to Delete:</strong> Use Reset All Data feature</li>
+                <li><strong>Right to Opt-Out of Sale:</strong> Not applicable (we don't sell data)</li>
+            </ul>
+            <p>
+                <strong>Important:</strong> BudgetMeter does not sell, rent, or share your personal information with anyone.
+            </p>
+
+            <h2>10. International Data Transfers</h2>
+            <p>
+                If you enable iCloud sync, your data may be transferred to Apple's servers, which may be located outside your country.
+                Apple complies with GDPR requirements for international data transfers using Standard Contractual Clauses (SCCs).
+            </p>
+
+            <h2>11. Children's Privacy</h2>
+            <p>
+                BudgetMeter is not directed to children under 13 years of age. We do not knowingly collect personal information from children.
+            </p>
+
+            <h2>12. Security</h2>
+            <p>
+                While we don't collect data, we protect your on-device data through:
+            </p>
+            <ul>
+                <li><strong>iOS encryption:</strong> All local data is encrypted by iOS</li>
+                <li><strong>Biometric lock:</strong> Optional Face ID/Touch ID protection</li>
+                <li><strong>No network transmission:</strong> Data never leaves your device (except optional iCloud sync)</li>
+                <li><strong>Secure coding practices:</strong> Following Apple's security guidelines</li>
+            </ul>
+
+            <h2>13. Changes to This Privacy Policy</h2>
+            <p>
+                We may update this Privacy Policy from time to time. Changes will be posted on this page with a new "Last Updated" date.
+            </p>
+            <p>
+                Continued use of BudgetMeter after changes constitutes acceptance of the updated policy.
+            </p>
+
+            <h2>14. Contact Us</h2>
+            <div class="contact-info">
+                <p><strong>Questions about this Privacy Policy?</strong></p>
+                <p>
+                    <strong>Email:</strong> <a href="mailto:umursoganci@gmail.com">umursoganci@gmail.com</a><br>
+                    <strong>Developer:</strong> Umurcan Soganci<br>
+                    <strong>Response Time:</strong> Within 48 hours
+                </p>
+            </div>
+
+            <h2>15. Legal Basis for Processing (GDPR)</h2>
+            <p>
+                For EU users, the legal basis for processing your data (if any) is:
+            </p>
+            <ul>
+                <li><strong>Contract Performance:</strong> To provide app functionality</li>
+                <li><strong>Consent:</strong> For optional iCloud sync (can be withdrawn anytime)</li>
+                <li><strong>Legitimate Interest:</strong> For app operation and security</li>
+            </ul>
+
+            <div class="highlight-box">
+                <strong>Bottom Line:</strong> Your financial data is yours. We built BudgetMeter with privacy as the foundation, not an afterthought. Zero tracking. Zero data collection. Zero compromises.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

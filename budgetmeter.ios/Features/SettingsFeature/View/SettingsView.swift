@@ -69,12 +69,6 @@ struct SettingsView: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
         }
-        .sheet(isPresented: $viewModel.showingPrivacyPolicy) {
-            privacyPolicyView
-        }
-        .sheet(isPresented: $viewModel.showingTermsOfService) {
-            termsOfServiceView
-        }
         .alert(
             "settings.reset.cumulative.title".localized(defaultValue: "Reset Long-Term Meter"),
             isPresented: $viewModel.showingResetCumulativeAlert
@@ -434,6 +428,25 @@ struct SettingsView: View {
                 }
             }
             
+            // Support
+            Button(action: viewModel.showSupport) {
+                HStack {
+                    Image(systemName: "questionmark.circle")
+                        .foregroundColor(.brandProgress)
+                        .frame(width: 24)
+
+                    Text("settings.support.title".localized(defaultValue: "Support & Help"))
+                        .font(.body)
+                        .foregroundColor(.primary)
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.secondary)
+                        .font(.system(size: 14, weight: .medium))
+                }
+            }
+
             // Contact Support
             Button(action: {
                 if let url = URL(string: "mailto:umursoganci@gmail.com?subject=BudgetMeter%20Support&body=Please%20describe%20your%20issue:%0A%0ADevice:%20\(UIDevice.current.model)%0AiOS:%20\(UIDevice.current.systemVersion)%0AApp%20Version:%201.0") {
@@ -444,13 +457,13 @@ struct SettingsView: View {
                     Image(systemName: "envelope")
                         .foregroundColor(.brandProgress)
                         .frame(width: 24)
-                    
+
                     Text("settings.contact.title".localized(defaultValue: "Contact Support"))
                         .font(.body)
                         .foregroundColor(.primary)
-                    
+
                     Spacer()
-                    
+
                     Image(systemName: "chevron.right")
                         .foregroundColor(.secondary)
                         .font(.system(size: 14, weight: .medium))
@@ -460,10 +473,11 @@ struct SettingsView: View {
             Text("settings.about.title".localized(defaultValue: "About"))
         }
     }
-    
-    // MARK: - Sheet Views
-    
-    private var privacyPolicyView: some View {
+
+    // MARK: - Removed Sheet Views (now opening in Safari)
+    // Privacy Policy and Terms of Service now open via UIApplication.shared.open()
+
+    private var _unusedPrivacyPolicyView: some View {
         NavigationView {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
