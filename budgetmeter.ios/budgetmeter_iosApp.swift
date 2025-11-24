@@ -13,6 +13,7 @@ import BackgroundTasks
 struct budgetmeter_iosApp: App {
     @StateObject private var biometricManager = BiometricManager.shared
     @StateObject private var themeManager = ThemeManager.shared
+    @StateObject private var onboardingManager = OnboardingManager.shared
 
     init() {
         // Load and apply stored theme preference before any views render
@@ -33,7 +34,10 @@ struct budgetmeter_iosApp: App {
     var body: some Scene {
         WindowGroup {
             Group {
-                if biometricManager.shouldRequireAuthentication() {
+                if !onboardingManager.hasCompletedOnboarding {
+                    // Show onboarding flow for first-time users
+                    OnboardingContainerView()
+                } else if biometricManager.shouldRequireAuthentication() {
                     BiometricAuthView {
                         // Authentication successful, show main app
                     }
@@ -43,6 +47,7 @@ struct budgetmeter_iosApp: App {
                 }
             }
             .environmentObject(biometricManager)
+            .environmentObject(onboardingManager)
             .accentColor(themeManager.accentColor)
             .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { _ in
                 BackgroundProcessingService.shared.applicationDidEnterBackground()

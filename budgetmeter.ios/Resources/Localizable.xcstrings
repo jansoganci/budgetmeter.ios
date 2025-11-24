@@ -8472,6 +8472,69 @@
     "Notifications Disabled" : {
 
     },
+    "onboarding.live_meter.flowing" : {
+
+    },
+    "onboarding.live_meter.label" : {
+
+    },
+    "onboarding.setup.amount_label" : {
+
+    },
+    "onboarding.setup.continue_button" : {
+
+    },
+    "onboarding.setup.frequency_label" : {
+
+    },
+    "onboarding.setup.hint_daily" : {
+
+    },
+    "onboarding.setup.hint_monthly" : {
+
+    },
+    "onboarding.setup.hint_yearly" : {
+
+    },
+    "onboarding.setup.privacy_note" : {
+
+    },
+    "onboarding.setup.save_button" : {
+
+    },
+    "onboarding.setup.skip_button" : {
+
+    },
+    "onboarding.setup.subtitle" : {
+
+    },
+    "onboarding.setup.title" : {
+
+    },
+    "onboarding.skip" : {
+
+    },
+    "onboarding.welcome.button" : {
+
+    },
+    "onboarding.welcome.feature1" : {
+
+    },
+    "onboarding.welcome.feature2" : {
+
+    },
+    "onboarding.welcome.feature3" : {
+
+    },
+    "onboarding.welcome.skip_hint" : {
+
+    },
+    "onboarding.welcome.subtitle" : {
+
+    },
+    "onboarding.welcome.title" : {
+
+    },
     "OK" : {
 
     },
