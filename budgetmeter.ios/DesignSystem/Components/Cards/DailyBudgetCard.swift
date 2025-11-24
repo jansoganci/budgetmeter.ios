@@ -37,6 +37,7 @@ struct DailyBudgetCard: View {
     @State private var isPressed = false
     @State private var animatedValue: Double = 0
     @Environment(\.accessibilityReduceMotion) var reduceMotion
+    @Environment(\.sizeCategory) var sizeCategory
 
     // MARK: - Computed Properties
 
@@ -126,7 +127,7 @@ struct DailyBudgetCard: View {
                     onInfoTap()
                 }) {
                     Image(systemName: "info.circle")
-                        .font(.system(size: 18, weight: .medium))
+                        .font(.system(size: 18 * sizeCategory.scaleFactor, weight: .medium))
                         .foregroundColor(.white.opacity(0.9))
                 }
                 .accessibilityLabel("Daily budget information")
@@ -137,18 +138,18 @@ struct DailyBudgetCard: View {
 
             // Main Amount (60pt font as specified)
             Text(formattedValue)
-                .font(.system(size: 60, weight: .bold, design: .rounded))
+                .font(.system(size: 60 * sizeCategory.scaleFactor, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             // Subtitle
             Text(subtitleText)
-                .font(.system(size: 14, weight: .regular))
+                .font(.system(size: 14 * sizeCategory.scaleFactor, weight: .regular))
                 .foregroundColor(.white.opacity(0.85))
 
             // Days Left Footer
             Text(daysLeftText)
-                .font(.system(size: 12, weight: .medium))
+                .font(.system(size: 12 * sizeCategory.scaleFactor, weight: .medium))
                 .foregroundColor(.white.opacity(0.75))
 
             Spacer()

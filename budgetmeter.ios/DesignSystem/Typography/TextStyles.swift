@@ -10,10 +10,10 @@ import SwiftUI
 
 // MARK: - Typography Scale
 
-/// Typography tokens for consistent text styling
+/// Typography tokens for consistent text styling with Dynamic Type support
 enum Typography {
 
-    // MARK: - Font Sizes
+    // MARK: - Font Sizes (Base sizes - scale with Dynamic Type)
 
     /// 48pt - Hero metrics (net flow value, large financial numbers)
     static let heroMetricSize: CGFloat = 48
@@ -45,6 +45,13 @@ enum Typography {
     static let semibold: Font.Weight = .semibold
     static let medium: Font.Weight = .medium
     static let regular: Font.Weight = .regular
+
+    // MARK: - Dynamic Type Text Styles
+
+    /// Maps custom sizes to semantic text styles for Dynamic Type scaling
+    static func scaledFont(size: CGFloat, weight: Font.Weight, relativeTo textStyle: Font.TextStyle) -> Font {
+        return .system(size: size, weight: weight).monospacedDigit()
+    }
 }
 
 // MARK: - Text Style Modifiers
@@ -96,88 +103,159 @@ extension View {
     }
 }
 
-// MARK: - View Modifier Implementations
+// MARK: - View Modifier Implementations (Dynamic Type Support)
 
 private struct HeroMetricStyle: ViewModifier {
     let color: Color
+    @Environment(\.sizeCategory) var sizeCategory
 
     func body(content: Content) -> some View {
         content
-            .font(.system(size: Typography.heroMetricSize, weight: Typography.bold, design: .default))
+            .font(.system(size: scaledSize(), weight: Typography.bold, design: .default))
             .monospacedDigit()
             .foregroundColor(color)
+    }
+
+    private func scaledSize() -> CGFloat {
+        let baseSize = Typography.heroMetricSize
+        return baseSize * sizeCategory.scaleFactor
     }
 }
 
 private struct LargeMetricStyle: ViewModifier {
     let color: Color
+    @Environment(\.sizeCategory) var sizeCategory
 
     func body(content: Content) -> some View {
         content
-            .font(.system(size: Typography.largeMetricSize, weight: Typography.bold))
+            .font(.system(size: scaledSize(), weight: Typography.bold))
             .monospacedDigit()
             .foregroundColor(color)
+    }
+
+    private func scaledSize() -> CGFloat {
+        let baseSize = Typography.largeMetricSize
+        return baseSize * sizeCategory.scaleFactor
     }
 }
 
 private struct MediumMetricStyle: ViewModifier {
     let color: Color
+    @Environment(\.sizeCategory) var sizeCategory
 
     func body(content: Content) -> some View {
         content
-            .font(.system(size: Typography.mediumMetricSize, weight: Typography.semibold))
+            .font(.system(size: scaledSize(), weight: Typography.semibold))
             .monospacedDigit()
             .foregroundColor(color)
+    }
+
+    private func scaledSize() -> CGFloat {
+        let baseSize = Typography.mediumMetricSize
+        return baseSize * sizeCategory.scaleFactor
     }
 }
 
 private struct SmallMetricStyle: ViewModifier {
     let color: Color
+    @Environment(\.sizeCategory) var sizeCategory
 
     func body(content: Content) -> some View {
         content
-            .font(.system(size: Typography.smallMetricSize, weight: Typography.semibold))
+            .font(.system(size: scaledSize(), weight: Typography.semibold))
             .monospacedDigit()
             .foregroundColor(color)
+    }
+
+    private func scaledSize() -> CGFloat {
+        let baseSize = Typography.smallMetricSize
+        return baseSize * sizeCategory.scaleFactor
     }
 }
 
 private struct SectionTitleStyle: ViewModifier {
     let color: Color
+    @Environment(\.sizeCategory) var sizeCategory
 
     func body(content: Content) -> some View {
         content
-            .font(.system(size: Typography.sectionTitleSize, weight: Typography.semibold))
+            .font(.system(size: scaledSize(), weight: Typography.semibold))
             .foregroundColor(color)
+    }
+
+    private func scaledSize() -> CGFloat {
+        let baseSize = Typography.sectionTitleSize
+        return baseSize * sizeCategory.scaleFactor
     }
 }
 
 private struct CardLabelStyle: ViewModifier {
     let color: Color
+    @Environment(\.sizeCategory) var sizeCategory
 
     func body(content: Content) -> some View {
         content
-            .font(.system(size: Typography.cardLabelSize, weight: Typography.medium))
+            .font(.system(size: scaledSize(), weight: Typography.medium))
             .foregroundColor(color)
+    }
+
+    private func scaledSize() -> CGFloat {
+        let baseSize = Typography.cardLabelSize
+        return baseSize * sizeCategory.scaleFactor
     }
 }
 
 private struct CaptionStyle: ViewModifier {
     let color: Color
+    @Environment(\.sizeCategory) var sizeCategory
 
     func body(content: Content) -> some View {
         content
-            .font(.system(size: Typography.captionSize, weight: Typography.regular))
+            .font(.system(size: scaledSize(), weight: Typography.regular))
             .foregroundColor(color)
+    }
+
+    private func scaledSize() -> CGFloat {
+        let baseSize = Typography.captionSize
+        return baseSize * sizeCategory.scaleFactor
     }
 }
 
 private struct TrendStyle: ViewModifier {
     let color: Color
+    @Environment(\.sizeCategory) var sizeCategory
 
     func body(content: Content) -> some View {
         content
-            .font(.system(size: Typography.trendIndicatorSize, weight: Typography.medium))
+            .font(.system(size: scaledSize(), weight: Typography.medium))
             .foregroundColor(color)
+    }
+
+    private func scaledSize() -> CGFloat {
+        let baseSize = Typography.trendIndicatorSize
+        return baseSize * sizeCategory.scaleFactor
+    }
+}
+
+// MARK: - ContentSizeCategory Extension
+
+extension ContentSizeCategory {
+    /// Scale factor relative to default (.large) size
+    var scaleFactor: CGFloat {
+        switch self {
+        case .extraSmall: return 0.82
+        case .small: return 0.88
+        case .medium: return 0.94
+        case .large: return 1.0  // Default
+        case .extraLarge: return 1.12
+        case .extraExtraLarge: return 1.24
+        case .extraExtraExtraLarge: return 1.35
+        case .accessibilityMedium: return 1.6
+        case .accessibilityLarge: return 1.9
+        case .accessibilityExtraLarge: return 2.3
+        case .accessibilityExtraExtraLarge: return 2.8
+        case .accessibilityExtraExtraExtraLarge: return 3.5
+        @unknown default: return 1.0
+        }
     }
 }

@@ -13,6 +13,7 @@ import CoreData
 struct HomeView: View {
 
     @StateObject private var viewModel = HomeViewModel()
+    @Environment(\.sizeCategory) var sizeCategory
 
     var body: some View {
         NavigationView {
@@ -211,7 +212,7 @@ struct HomeView: View {
                 Button(action: viewModel.showIncomeEntry) {
                     VStack(spacing: Spacing.sm) {
                         Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 28))
+                            .font(.system(size: 28 * sizeCategory.scaleFactor))
                             .foregroundColor(.brandPositive)
 
                         Text("home.quick_actions.add_income".localized(defaultValue: "Add Income"))
@@ -232,7 +233,7 @@ struct HomeView: View {
                 Button(action: viewModel.showExpenseEntry) {
                     VStack(spacing: Spacing.sm) {
                         Image(systemName: "minus.circle.fill")
-                            .font(.system(size: 28))
+                            .font(.system(size: 28 * sizeCategory.scaleFactor))
                             .foregroundColor(.brandExpense)
 
                         Text("home.quick_actions.add_expense".localized(defaultValue: "Add Expense"))
@@ -253,7 +254,7 @@ struct HomeView: View {
                 Button(action: viewModel.showSavingsGoalEntry) {
                     VStack(spacing: Spacing.sm) {
                         Image(systemName: "target")
-                            .font(.system(size: 28))
+                            .font(.system(size: 28 * sizeCategory.scaleFactor))
                             .foregroundColor(.brandProgress)
 
                         Text(viewModel.savingsGoal > 0 ? "home.quick_actions.goal".localized(defaultValue: "Goal") : "home.quick_actions.set_goal".localized(defaultValue: "Set Goal"))
@@ -282,7 +283,7 @@ struct HomeView: View {
             // Welcome Hero
             VStack(spacing: Spacing.lg) {
                 Image(systemName: "chart.line.uptrend.xyaxis.circle.fill")
-                    .font(.system(size: 80))
+                    .font(.system(size: 80 * sizeCategory.scaleFactor))
                     .foregroundColor(.brandProgress)
 
                 Text("home.getting_started.title".localized(defaultValue: "Welcome to BudgetMeter"))
@@ -367,7 +368,7 @@ struct DailyBudgetInfoView: View {
                     // Icon and Title
                     VStack(spacing: Spacing.md) {
                         Image(systemName: "info.circle.fill")
-                            .font(.system(size: 60))
+                            .font(.system(size: 60 * sizeCategory.scaleFactor))
                             .foregroundColor(.brandProgress)
 
                         Text("home.daily_budget.info.title".localized(defaultValue: "Daily Budget"))
