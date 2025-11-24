@@ -47,7 +47,13 @@ final class HomeViewModel: ObservableObject {
     @Published var formattedSavingsGoal: String = "$0"
     @Published var timeToGoal: String = ""
     @Published var showingSavingsGoalSheet = false
-    
+
+    // Daily Budget Data
+    @Published var dailyBudgetAmount: Double = 0
+    @Published var dailyBudgetColor: Color = .green
+    @Published var daysLeftInMonth: Int = 0
+    @Published var showingDailyBudgetInfo = false
+
     // State Management
     @Published var isLoading = false
     @Published var hasAnyData = false
@@ -332,6 +338,9 @@ final class HomeViewModel: ObservableObject {
         // Calculate trend percentage (compare to previous month - mock for now)
         calculateTrendPercentage()
 
+        // Calculate daily budget
+        calculateDailyBudget()
+
         // Recalculate time to goal when financial data changes
         calculateTimeToGoal()
     }
@@ -375,7 +384,51 @@ final class HomeViewModel: ObservableObject {
             netFlowTrendPercentage = 0.0
         }
     }
-    
+
+    /// Calculates daily budget based on monthly patterns (Approach 3 - Simple Split)
+    private func calculateDailyBudget() {
+        // Calculate monthly income and expenses
+        let totalMonthlyIncome = CalculationEngine.totalMonthlyIncome(
+            dailyIncomeTotal: dailyIncomeTotal,
+            monthlyIncomeTotal: monthlyIncomeTotal,
+            yearlyIncomeTotal: yearlyIncomeTotal
+        )
+
+        let totalMonthlyExpense = CalculationEngine.totalMonthlyExpense(
+            dailyTotal: dailyExpenseTotal,
+            monthlyTotal: monthlyExpenseTotal,
+            yearlyTotal: yearlyExpenseTotal
+        )
+
+        // Calculate monthly net (remaining budget)
+        let monthlyNet = totalMonthlyIncome - totalMonthlyExpense
+
+        // Calculate days left in month
+        let calendar = Calendar.current
+        let today = Date()
+        let daysInMonth = calendar.range(of: .day, in: .month, for: today)?.count ?? 30
+        let currentDay = calendar.component(.day, from: today)
+        let daysLeft = max(1, daysInMonth - currentDay + 1)  // +1 to include today, minimum 1
+
+        // Calculate daily budget
+        dailyBudgetAmount = monthlyNet / Double(daysLeft)
+        daysLeftInMonth = daysLeft
+
+        // Determine color
+        if dailyBudgetAmount > 20 {
+            dailyBudgetColor = .green
+        } else if dailyBudgetAmount > 0 {
+            dailyBudgetColor = .yellow
+        } else {
+            dailyBudgetColor = .red
+        }
+    }
+
+    /// Shows the daily budget info popup
+    func showDailyBudgetInfo() {
+        showingDailyBudgetInfo = true
+    }
+
     private func loadAppSettings() {
         let context = persistenceService.viewContext
         let fetchRequest: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
