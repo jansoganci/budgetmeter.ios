@@ -571,7 +571,14 @@ struct SettingsView: View {
                             .padding(.top, 8)
                         Text("We grant you a personal, non-commercial license to use BudgetMeter for managing your personal finances.")
                             .font(.body)
-                        
+
+                        Text("IN-APP PURCHASES & SUBSCRIPTIONS")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .padding(.top, 8)
+                        Text("• BudgetMeter Premium is available as an auto-renewing subscription\n• Payment will be charged to your Apple ID account at confirmation of purchase\n• Subscription automatically renews unless canceled at least 24 hours before the end of the current period\n• Your account will be charged for renewal within 24 hours prior to the end of the current period\n• You can manage and cancel your subscriptions in your App Store account settings\n• Any unused portion of a free trial period will be forfeited when purchasing a subscription\n• Subscriptions are processed through Apple's App Store - we do not have access to your payment information\n• Refunds are handled by Apple according to their refund policy")
+                            .font(.body)
+
                         Text("FINANCIAL DISCLAIMER")
                             .font(.headline)
                             .fontWeight(.semibold)
@@ -597,7 +604,7 @@ struct SettingsView: View {
                             .font(.headline)
                             .fontWeight(.semibold)
                             .padding(.top, 8)
-                        Text("Our maximum liability is limited to the amount you paid for the app (currently free).")
+                        Text("Our maximum liability is limited to the amount you paid for the app or subscription in the 12 months prior to the claim.")
                             .font(.body)
                         
                         Text("CONTACT")
