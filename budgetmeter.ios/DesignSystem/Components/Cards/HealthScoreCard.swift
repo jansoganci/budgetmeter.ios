@@ -31,6 +31,7 @@ struct HealthScoreCard: View {
     @State private var animatedScore: Double = 0
     @State private var isPressed = false
     @Environment(\.accessibilityReduceMotion) var reduceMotion
+    @Environment(\.sizeCategory) var sizeCategory
 
     // MARK: - Computed Properties
 
@@ -119,7 +120,7 @@ struct HealthScoreCard: View {
                 VStack(spacing: Spacing.xs) {
                     HStack(alignment: .firstTextBaseline, spacing: 2) {
                         Text("\(score)")
-                            .font(.system(size: 34, weight: .bold))
+                            .font(.system(size: 34 * sizeCategory.scaleFactor, weight: .bold))
                             .foregroundColor(.textPrimary)
 
                         Text("/100")
@@ -127,7 +128,7 @@ struct HealthScoreCard: View {
                     }
 
                     Text(displayStatus)
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(.system(size: 15 * sizeCategory.scaleFactor, weight: .semibold))
                         .foregroundColor(scoreColor)
                 }
             }
