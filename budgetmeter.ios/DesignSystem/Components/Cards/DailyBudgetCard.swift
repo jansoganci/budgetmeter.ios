@@ -72,17 +72,8 @@ struct DailyBudgetCard: View {
     }
 
     private var subtitleText: String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.minimumFractionDigits = 0
-        formatter.maximumFractionDigits = 0
-        formatter.groupingSeparator = ","
-
-        let formatted = formatter.string(from: NSNumber(value: abs(monthlyNet))) ?? "0"
-        let sign = monthlyNet >= 0 ? "+" : "-"
-
         return "home.daily_budget.subtitle".localized(
-            defaultValue: "Based on monthly net of \(sign)\(currencySymbol)\(formatted)"
+            defaultValue: "You can spend per day"
         )
     }
 
