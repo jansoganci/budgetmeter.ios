@@ -55,7 +55,7 @@ struct BalanceTrendView: View {
                     .foregroundColor(.blue)
                     .font(.title3)
 
-                Text("Balance Trend")
+                Text("charts.balance_trend.title".localized(defaultValue: "Balance Trend"))
                     .font(.headline)
                     .fontWeight(.semibold)
 
@@ -73,7 +73,7 @@ struct BalanceTrendView: View {
                 }
             }
 
-            Text("Last \(days) days")
+            Text(String(format: "charts.balance_trend.subtitle".localized(defaultValue: "Last %d days"), days))
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
@@ -199,7 +199,7 @@ struct BalanceTrendView: View {
         HStack(spacing: 16) {
             // Highest balance
             statCard(
-                title: "Highest",
+                title: "charts.stat.highest".localized(defaultValue: "Highest"),
                 value: highestBalance,
                 color: .green,
                 icon: "arrow.up.circle.fill"
@@ -210,7 +210,7 @@ struct BalanceTrendView: View {
 
             // Lowest balance
             statCard(
-                title: "Lowest",
+                title: "charts.stat.lowest".localized(defaultValue: "Lowest"),
                 value: lowestBalance,
                 color: lowestBalance >= 0 ? .blue : .red,
                 icon: "arrow.down.circle.fill"
@@ -221,7 +221,7 @@ struct BalanceTrendView: View {
 
             // Average balance
             statCard(
-                title: "Average",
+                title: "charts.stat.average".localized(defaultValue: "Average"),
                 value: averageBalance,
                 color: .orange,
                 icon: "chart.line.flattrend.xyaxis"
@@ -259,11 +259,11 @@ struct BalanceTrendView: View {
                 .font(.system(size: 48))
                 .foregroundColor(.gray.opacity(0.5))
 
-            Text("No trend data")
+            Text("charts.balance_trend.empty.title".localized(defaultValue: "No trend data"))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
 
-            Text("Add financial data to see your balance trend")
+            Text("charts.balance_trend.empty.message".localized(defaultValue: "Add financial data to see your balance trend"))
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -299,11 +299,11 @@ struct BalanceTrendView: View {
         let change = recentAvg - olderAvg
 
         if abs(change) < 10 {
-            return ("arrow.right", "Stable", .orange)
+            return ("arrow.right", "charts.trend.stable".localized(defaultValue: "Stable"), .orange)
         } else if change > 0 {
-            return ("arrow.up.right", "Improving", .green)
+            return ("arrow.up.right", "charts.trend.improving".localized(defaultValue: "Improving"), .green)
         } else {
-            return ("arrow.down.right", "Declining", .red)
+            return ("arrow.down.right", "charts.trend.declining".localized(defaultValue: "Declining"), .red)
         }
     }
 

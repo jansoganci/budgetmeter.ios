@@ -1,5 +1,5 @@
 //
-//  SavingsGoalInputView.swift
+//  QuickSavingsGoalInputView.swift
 //  BudgetMeter
 //
 //  Created by BudgetMeter Team on 19.09.2025.
@@ -8,8 +8,8 @@
 import SwiftUI
 import CoreData
 
-/// Simple input view for setting savings goal amount
-struct SavingsGoalInputView: View {
+/// Simple input view for setting savings goal amount from Home screen
+struct QuickSavingsGoalInputView: View {
     
     let currentGoal: Double
     let currencySymbol: String
@@ -191,7 +191,7 @@ struct SavingsGoalInputView: View {
 // MARK: - Preview
 
 #Preview {
-    SavingsGoalInputView(
+    QuickSavingsGoalInputView(
         currentGoal: 5000,
         currencySymbol: "$",
         onSave: { amount in

@@ -31,6 +31,13 @@ struct LanguagePickerView: View {
             .listStyle(.insetGrouped)
             .navigationTitle("settings.language.picker.title".localized(defaultValue: "Language"))
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("toolbar.done".localized(defaultValue: "Done")) {
+                        dismiss()
+                    }
+                }
+            }
         }
     }
 

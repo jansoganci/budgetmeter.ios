@@ -34,7 +34,9 @@ struct BillInputView: View {
     @State private var showError = false
     @State private var errorMessage = ""
 
-    private let currencySymbol = CurrencyHelper.symbol(for: CurrencyHelper.defaultCurrencyCode())
+    private var currencySymbol: String {
+        CurrencyHelper.symbol(for: CurrencyHelper.currentCurrencyCode())
+    }
 
     // MARK: - Enums
 
@@ -65,9 +67,9 @@ struct BillInputView: View {
 
         var displayText: String {
             switch self {
-            case .oneDay: return "1 day before"
-            case .threeDays: return "3 days before"
-            case .sevenDays: return "7 days before"
+            case .oneDay: return "bill.reminder.one_day".localized(defaultValue: "1 day before")
+            case .threeDays: return "bill.reminder.three_days".localized(defaultValue: "3 days before")
+            case .sevenDays: return "bill.reminder.seven_days".localized(defaultValue: "7 days before")
             }
         }
     }
@@ -79,13 +81,13 @@ struct BillInputView: View {
     }
 
     private var title: String {
-        isEditMode ? "Edit Bill" : "Add Bill"
+        isEditMode ? "bill.title.edit".localized(defaultValue: "Edit Bill") : "bill.title.add".localized(defaultValue: "Add Bill")
     }
 
     private var saveButtonDisabled: Bool {
         billName.trimmingCharacters(in: .whitespaces).isEmpty ||
         amount.trimmingCharacters(in: .whitespaces).isEmpty ||
-        parseAmount(amount) <= 0
+        (parseAmount(amount) ?? 0) <= 0
     }
 
     // MARK: - Categories
@@ -108,12 +110,12 @@ struct BillInputView: View {
                 VStack(spacing: Spacing.xl) {
                     // Bill Name
                     VStack(alignment: .leading, spacing: Spacing.sm) {
-                        Text("Bill Name *")
+                        Text("bill.name".localized(defaultValue: "Bill Name *"))
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.textSecondary)
 
-                        TextField("Electric Bill, Rent, etc.", text: $billName)
+                        TextField("bill.name_placeholder".localized(defaultValue: "Electric Bill, Rent, etc."), text: $billName)
                             .textFieldStyle(.plain)
                             .font(.body)
                             .padding(Spacing.md)
@@ -124,7 +126,7 @@ struct BillInputView: View {
 
                     // Amount
                     VStack(alignment: .leading, spacing: Spacing.sm) {
-                        Text("Amount *")
+                        Text("form.amount".localized(defaultValue: "Amount *"))
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.textSecondary)
@@ -148,13 +150,13 @@ struct BillInputView: View {
 
                     // Due Date
                     VStack(alignment: .leading, spacing: Spacing.sm) {
-                        Text("Due Date *")
+                        Text("bill.due_date".localized(defaultValue: "Due Date *"))
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.textSecondary)
 
                         DatePicker(
-                            "Due Date",
+                            "bill.due_date".localized(defaultValue: "Due Date"),
                             selection: $dueDate,
                             displayedComponents: [.date]
                         )
@@ -169,12 +171,12 @@ struct BillInputView: View {
                     VStack(alignment: .leading, spacing: Spacing.sm) {
                         Toggle(isOn: $isRecurring) {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("Recurring Bill")
+                                Text("bill.recurring".localized(defaultValue: "Recurring Bill"))
                                     .font(.subheadline)
                                     .fontWeight(.medium)
                                     .foregroundColor(.textPrimary)
 
-                                Text("Automatically create next bill when paid")
+                                Text("bill.recurring_description".localized(defaultValue: "Automatically create next bill when paid"))
                                     .font(.caption)
                                     .foregroundColor(.textSecondary)
                             }
@@ -183,7 +185,7 @@ struct BillInputView: View {
 
                         if isRecurring {
                             VStack(alignment: .leading, spacing: Spacing.sm) {
-                                Text("Frequency")
+                                Text("bill.frequency".localized(defaultValue: "Frequency"))
                                     .font(.subheadline)
                                     .fontWeight(.medium)
                                     .foregroundColor(.textSecondary)
@@ -203,7 +205,7 @@ struct BillInputView: View {
 
                     // Category
                     VStack(alignment: .leading, spacing: Spacing.sm) {
-                        Text("Category")
+                        Text("form.category".localized(defaultValue: "Category"))
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.textSecondary)
@@ -223,12 +225,12 @@ struct BillInputView: View {
                     VStack(alignment: .leading, spacing: Spacing.sm) {
                         Toggle(isOn: $isAutoPay) {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("AutoPay Enabled")
+                                Text("bill.autopay".localized(defaultValue: "AutoPay Enabled"))
                                     .font(.subheadline)
                                     .fontWeight(.medium)
                                     .foregroundColor(.textPrimary)
 
-                                Text("This bill is automatically paid")
+                                Text("bill.autopay_description".localized(defaultValue: "This bill is automatically paid"))
                                     .font(.caption)
                                     .foregroundColor(.textSecondary)
                             }
@@ -242,7 +244,7 @@ struct BillInputView: View {
                     // Reminder (only if not autopay)
                     if !isAutoPay {
                         VStack(alignment: .leading, spacing: Spacing.sm) {
-                            Text("Remind me")
+                            Text("bill.remind_me".localized(defaultValue: "Remind me"))
                                 .font(.subheadline)
                                 .fontWeight(.medium)
                                 .foregroundColor(.textSecondary)
@@ -258,7 +260,7 @@ struct BillInputView: View {
 
                     // Notes
                     VStack(alignment: .leading, spacing: Spacing.sm) {
-                        Text("Notes (optional)")
+                        Text("form.notes_optional".localized(defaultValue: "Notes (optional)"))
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.textSecondary)
@@ -273,7 +275,7 @@ struct BillInputView: View {
 
                     // Save Button
                     Button(action: saveBill) {
-                        Text(isEditMode ? "Save Changes" : "Add Bill")
+                        Text(isEditMode ? "form.save_changes".localized(defaultValue: "Save Changes") : "bill.title.add".localized(defaultValue: "Add Bill"))
                             .font(.headline)
                             .fontWeight(.semibold)
                             .foregroundColor(.white)
@@ -292,7 +294,7 @@ struct BillInputView: View {
                                 Button(action: togglePaidStatus) {
                                     HStack {
                                         Image(systemName: currentBill.isPaid ? "arrow.uturn.backward" : "checkmark.circle.fill")
-                                        Text(currentBill.isPaid ? "Mark as Unpaid" : "Mark as Paid")
+                                        Text(currentBill.isPaid ? "bill.mark_unpaid".localized(defaultValue: "Mark as Unpaid") : "bill.mark_paid".localized(defaultValue: "Mark as Paid"))
                                     }
                                     .font(.body)
                                     .fontWeight(.medium)
@@ -304,7 +306,7 @@ struct BillInputView: View {
                             Button(action: { showDeleteConfirmation = true }) {
                                 HStack {
                                     Image(systemName: "trash")
-                                    Text("Delete Bill")
+                                    Text("bill.delete".localized(defaultValue: "Delete Bill"))
                                 }
                                 .font(.body)
                                 .fontWeight(.medium)
@@ -319,30 +321,30 @@ struct BillInputView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                    Button("form.cancel".localized(defaultValue: "Cancel")) {
                         dismiss()
                     }
                 }
 
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
-                    Button("Done") {
+                    Button("form.done".localized(defaultValue: "Done")) {
                         focusedField = nil
                     }
                     .foregroundColor(.brandProgress)
                     .fontWeight(.semibold)
                 }
             }
-            .alert("Delete Bill?", isPresented: $showDeleteConfirmation) {
-                Button("Cancel", role: .cancel) { }
-                Button("Delete", role: .destructive) {
+            .alert("bill.delete_confirm_title".localized(defaultValue: "Delete Bill?"), isPresented: $showDeleteConfirmation) {
+                Button("form.cancel".localized(defaultValue: "Cancel"), role: .cancel) { }
+                Button("bill.delete".localized(defaultValue: "Delete Bill"), role: .destructive) {
                     deleteBill()
                 }
             } message: {
-                Text("This will permanently delete this bill. This action cannot be undone.")
+                Text("bill.delete_confirm_message".localized(defaultValue: "This will permanently delete this bill. This action cannot be undone."))
             }
-            .alert("Error", isPresented: $showError) {
-                Button("OK", role: .cancel) { }
+            .alert("alert.error.title".localized(defaultValue: "Error"), isPresented: $showError) {
+                Button("alert.ok".localized(defaultValue: "OK"), role: .cancel) { }
             } message: {
                 Text(errorMessage)
             }
@@ -358,7 +360,7 @@ struct BillInputView: View {
         guard let bill = bill else { return }
 
         billName = bill.name ?? ""
-        amount = String(format: "%.2f", bill.amount)
+        amount = CurrencyHelper.formatForTextField(bill.amount)
         dueDate = bill.dueDate ?? Date()
         isRecurring = bill.isRecurring
         selectedCategory = bill.category ?? "Other"
@@ -380,14 +382,14 @@ struct BillInputView: View {
 
     private func saveBill() {
         guard let amountValue = parseAmount(amount), amountValue > 0 else {
-            errorMessage = "Please enter a valid amount"
+            errorMessage = "form.error.invalid_amount".localized(defaultValue: "Please enter a valid amount")
             showError = true
             return
         }
 
         let trimmedName = billName.trimmingCharacters(in: .whitespaces)
         guard !trimmedName.isEmpty else {
-            errorMessage = "Please enter a bill name"
+            errorMessage = "bill.error.enter_name".localized(defaultValue: "Please enter a bill name")
             showError = true
             return
         }
@@ -417,7 +419,7 @@ struct BillInputView: View {
                 onSave()
                 dismiss()
             } else {
-                errorMessage = "Failed to update bill"
+                errorMessage = "bill.error.failed_update".localized(defaultValue: "Failed to update bill")
                 showError = true
             }
         } else {
@@ -438,7 +440,7 @@ struct BillInputView: View {
                 onSave()
                 dismiss()
             } else {
-                errorMessage = "Failed to create bill"
+                errorMessage = "bill.error.failed_create".localized(defaultValue: "Failed to create bill")
                 showError = true
             }
         }
@@ -458,7 +460,7 @@ struct BillInputView: View {
             onSave()
             dismiss()
         } else {
-            errorMessage = "Failed to update bill status"
+            errorMessage = "bill.error.failed_update".localized(defaultValue: "Failed to update bill")
             showError = true
         }
     }
@@ -472,7 +474,7 @@ struct BillInputView: View {
             onSave()
             dismiss()
         } else {
-            errorMessage = "Failed to delete bill"
+            errorMessage = "bill.error.failed_delete".localized(defaultValue: "Failed to delete bill")
             showError = true
         }
     }

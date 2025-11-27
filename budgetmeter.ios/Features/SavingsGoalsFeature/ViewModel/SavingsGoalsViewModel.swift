@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreData
 import Combine
 
 @MainActor
@@ -19,12 +20,15 @@ final class SavingsGoalsViewModel: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
     private let goalManager = SavingsGoalManager.shared
-    private let currencyCode = CurrencyHelper.defaultCurrencyCode()
+    private let persistenceService: PersistenceService
+    private var currencyCode: String = CurrencyHelper.defaultCurrencyCode()
 
     // MARK: - Initialization
 
-    init() {
+    init(persistenceService: PersistenceService = .shared) {
+        self.persistenceService = persistenceService
         setupObservers()
+        loadCurrency()
     }
 
     // MARK: - Setup
@@ -52,6 +56,20 @@ final class SavingsGoalsViewModel: ObservableObject {
         NotificationCenter.default.publisher(for: SavingsGoalManager.goalCompletedNotification)
             .sink { [weak self] _ in
                 self?.loadGoals()
+            }
+            .store(in: &cancellables)
+
+        // Listen for currency changes
+        NotificationCenter.default.publisher(for: .currencyDidChange)
+            .sink { [weak self] notification in
+                self?.currencyDidChange(notification)
+            }
+            .store(in: &cancellables)
+
+        // Listen for language changes
+        NotificationCenter.default.publisher(for: .languageDidChange)
+            .sink { [weak self] notification in
+                self?.languageDidChange(notification)
             }
             .store(in: &cancellables)
     }
@@ -113,7 +131,7 @@ final class SavingsGoalsViewModel: ObservableObject {
 
     func formatProgress(_ goal: SavingsGoal) -> String {
         let progress = goalManager.calculateProgress(for: goal)
-        return String(format: "%.0f%%", progress)
+        return PercentageFormatter.formatInteger(progress)
     }
 
     func formatProgressBar(_ goal: SavingsGoal) -> Double {
@@ -130,24 +148,26 @@ final class SavingsGoalsViewModel: ObservableObject {
 
     func timeRemainingText(_ goal: SavingsGoal) -> String {
         guard let targetDate = goal.targetDate else {
-            return "No target date"
+            return "savings.no_target_date".localized(defaultValue: "No target date")
         }
 
         let calendar = Calendar.current
         let now = Date()
 
         if targetDate < now {
-            return "Target date passed"
+            return "savings.target_date_passed".localized(defaultValue: "Target date passed")
         }
 
         let components = calendar.dateComponents([.month, .day], from: now, to: targetDate)
 
         if let months = components.month, months > 0 {
-            return "\(months) month\(months == 1 ? "" : "s") remaining"
+            let formatString = "savings.months_remaining".localized(defaultValue: "\(months) month\(months == 1 ? "" : "s") remaining")
+            return String(format: formatString, months)
         } else if let days = components.day, days > 0 {
-            return "\(days) day\(days == 1 ? "" : "s") remaining"
+            let formatString = "savings.days_remaining".localized(defaultValue: "\(days) day\(days == 1 ? "" : "s") remaining")
+            return String(format: formatString, days)
         } else {
-            return "Due today"
+            return "savings.due_today".localized(defaultValue: "Due today")
         }
     }
 
@@ -157,10 +177,10 @@ final class SavingsGoalsViewModel: ObservableObject {
         }
 
         if required <= 0 {
-            return "Goal reached!"
+            return "savings.goal_reached".localized(defaultValue: "Goal reached!")
         }
 
-        return "Save \(formatAmount(required))/month"
+        return String(format: "savings.save_month".localized(defaultValue: "Save %@/month"), formatAmount(required))
     }
 
     func paceStatusText(_ goal: SavingsGoal) -> String {
@@ -173,6 +193,40 @@ final class SavingsGoalsViewModel: ObservableObject {
 
     func remainingAmountText(_ goal: SavingsGoal) -> String {
         let remaining = max(0, goal.targetAmount - goal.currentAmount)
-        return formatAmount(remaining) + " to go"
+        return formatAmount(remaining) + " " + "savings.to_go".localized(defaultValue: "to go")
+    }
+
+    // MARK: - Currency Management
+
+    func loadCurrency() {
+        let context = persistenceService.viewContext
+        let fetchRequest: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
+        if let settings = try? context.fetch(fetchRequest),
+           let storedCode = settings.first?.preferredCurrencyCode,
+           CurrencyHelper.supportedCurrencyCodes.contains(storedCode) {
+            updateCurrency(code: storedCode)
+        } else {
+            updateCurrency(code: CurrencyHelper.defaultCurrencyCode())
+        }
+    }
+
+    func updateCurrency(code: String) {
+        let resolvedCode = CurrencyHelper.supportedCurrencyCodes.contains(code) ? code : CurrencyHelper.defaultCurrencyCode()
+        currencyCode = resolvedCode
+    }
+
+    @objc func currencyDidChange(_ notification: Notification) {
+        if let code = notification.userInfo?["code"] as? String {
+            updateCurrency(code: code)
+        } else {
+            loadCurrency()
+        }
+    }
+
+    @objc func languageDidChange(_ notification: Notification) {
+        // Trigger UI refresh to re-evaluate localized strings
+        DispatchQueue.main.async {
+            self.objectWillChange.send()
+        }
     }
 }

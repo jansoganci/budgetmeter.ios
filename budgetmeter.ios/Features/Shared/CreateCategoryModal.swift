@@ -19,11 +19,13 @@ struct CreateCategoryModal: View {
     
     @State private var categoryName = ""
     @State private var selectedIcon = "tag.fill"
+    @State private var selectedColor: CategoryColor = .gray
     @State private var showingValidationError = false
     @State private var validationErrorMessage = ""
-    
+
     @Environment(\.managedObjectContext) private var viewContext
     @StateObject private var validationService = CategoryValidationService()
+    @StateObject private var premiumManager = PremiumManager.shared
     
     // MARK: - Body
     
@@ -43,7 +45,7 @@ struct CreateCategoryModal: View {
                         
                         // Name Input
                         TextField(
-                            "Category Name",
+                            "category.modal.name_placeholder".localized(defaultValue: "Category Name"),
                             text: $categoryName
                         )
                         .textFieldStyle(.roundedBorder)
@@ -59,46 +61,68 @@ struct CreateCategoryModal: View {
                         }
                     }
                 } header: {
-                    Text("Category Details")
+                    Text("category.modal.details_header".localized(defaultValue: "Category Details"))
                 }
                 
                 // Icon Selection Section
                 Section {
-                    IconPickerView(selectedIcon: $selectedIcon)
+                    IconPickerView(selectedIcon: $selectedIcon, accentColor: selectedColor.color)
                 } header: {
-                    Text("Choose Icon")
+                    Text("category.modal.choose_icon".localized(defaultValue: "Choose Icon"))
                 }
-                
+
+                // Color Selection Section (Premium)
+                Section {
+                    ColorPickerGrid(
+                        selectedColor: $selectedColor,
+                        isPremium: premiumManager.isPremium
+                    )
+                } header: {
+                    HStack {
+                        Text("category.modal.choose_color".localized(defaultValue: "Choose Color"))
+                        if !premiumManager.isPremium {
+                            Text("category.modal.premium".localized(defaultValue: "Premium"))
+                                .font(.caption2)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.brandProgress)
+                                .cornerRadius(4)
+                        }
+                    }
+                }
+
                 // Preview Section
                 Section {
                     CategoryPreviewCard(
-                        name: categoryName.isEmpty ? "Category Name" : categoryName,
+                        name: categoryName.isEmpty ? "category.modal.name_placeholder".localized(defaultValue: "Category Name") : categoryName,
                         iconName: selectedIcon,
-                        type: type,
+                        color: selectedColor.color,
                         frequency: frequency
                     )
                 } header: {
-                    Text("Preview")
+                    Text("category.modal.preview".localized(defaultValue: "Preview"))
                 }
             }
-            .navigationTitle("Add \(type.capitalized) Category")
+            .navigationTitle(String(format: "category.modal.title.add".localized(defaultValue: "Add %@ Category"), type.capitalized))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                    Button("category.modal.cancel".localized(defaultValue: "Cancel")) {
                         onCancel()
                     }
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
+                    Button("category.modal.save".localized(defaultValue: "Save")) {
                         saveCategory()
                     }
                     .disabled(categoryName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
-            .alert("Invalid Category", isPresented: $showingValidationError) {
-                Button("OK") { }
+            .alert("category.modal.invalid_title".localized(defaultValue: "Invalid Category"), isPresented: $showingValidationError) {
+                Button("alert.ok".localized(defaultValue: "OK")) { }
             } message: {
                 Text(validationErrorMessage)
             }
@@ -121,11 +145,15 @@ struct CreateCategoryModal: View {
             return
         }
         
+        // Only save color for premium users
+        let colorToSave: String? = premiumManager.isPremium ? selectedColor.rawValue : nil
+
         let result = validationService.createCustomCategory(
             name: categoryName,
             type: type,
             frequency: frequency,
             iconName: selectedIcon,
+            colorHex: colorToSave,
             context: viewContext
         )
         
@@ -136,12 +164,12 @@ struct CreateCategoryModal: View {
                 onSave(category)
             } catch {
                 print("❌ Failed to save custom category: \(error)")
-                validationErrorMessage = "Failed to save category. Please try again."
+                validationErrorMessage = "category.modal.save_error".localized(defaultValue: "Failed to save category. Please try again.")
                 showingValidationError = true
             }
             
         case .failure(let error):
-            validationErrorMessage = error.errorMessage ?? "Failed to create category"
+            validationErrorMessage = error.errorMessage ?? "category.modal.create_error".localized(defaultValue: "Failed to create category")
             showingValidationError = true
         }
     }
@@ -150,9 +178,10 @@ struct CreateCategoryModal: View {
 // MARK: - Icon Picker View
 
 struct IconPickerView: View {
-    
+
     @Binding var selectedIcon: String
-    
+    var accentColor: Color = .brandProgress
+
     private let icons = [
         "tag.fill", "house.fill", "car.fill", "fork.knife", "gamecontroller.fill",
         "tv.fill", "music.note", "book.fill", "heart.fill", "star.fill",
@@ -162,7 +191,7 @@ struct IconPickerView: View {
         "laptopcomputer", "desktopcomputer", "play.rectangle.fill", "mic.fill", "link",
         "trophy.fill", "crown.fill", "shield.fill", "building.2.fill", "fuelpump.fill"
     ]
-    
+
     var body: some View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 12) {
             ForEach(icons, id: \.self) { icon in
@@ -171,7 +200,7 @@ struct IconPickerView: View {
                         .font(.system(size: 20, weight: .medium))
                         .foregroundColor(selectedIcon == icon ? .white : .primary)
                         .frame(width: 40, height: 40)
-                        .background(selectedIcon == icon ? Color(hex: "4A90E2") : Color(uiColor: .secondarySystemBackground))
+                        .background(selectedIcon == icon ? accentColor : Color(uiColor: .secondarySystemBackground))
                         .cornerRadius(8)
                 }
                 .buttonStyle(.plain)
@@ -181,33 +210,82 @@ struct IconPickerView: View {
     }
 }
 
+// MARK: - Color Picker Grid
+
+struct ColorPickerGrid: View {
+
+    @Binding var selectedColor: CategoryColor
+    let isPremium: Bool
+
+    @State private var showingPaywall = false
+
+    var body: some View {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 12) {
+            ForEach(CategoryColor.allCases) { color in
+                Button(action: {
+                    if isPremium {
+                        selectedColor = color
+                        Haptics.light()
+                    } else {
+                        showingPaywall = true
+                    }
+                }) {
+                    ZStack {
+                        Circle()
+                            .fill(color.color)
+                            .frame(width: 44, height: 44)
+
+                        if selectedColor == color && isPremium {
+                            Circle()
+                                .strokeBorder(Color.white, lineWidth: 3)
+                                .frame(width: 44, height: 44)
+
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.white)
+                        }
+
+                        if !isPremium {
+                            Circle()
+                                .fill(Color.black.opacity(0.3))
+                                .frame(width: 44, height: 44)
+
+                            Image(systemName: "lock.fill")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.white)
+                        }
+                    }
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.vertical, 8)
+        .sheet(isPresented: $showingPaywall) {
+            PremiumPaywallView(
+                onDismiss: { showingPaywall = false },
+                onPurchase: { showingPaywall = false },
+                onRestore: { showingPaywall = false }
+            )
+        }
+    }
+}
+
 // MARK: - Category Preview Card
 
 struct CategoryPreviewCard: View {
-    
+
     let name: String
     let iconName: String
-    let type: String
+    let color: Color
     let frequency: String
-    
-    private var accentColor: Color {
-        switch type {
-        case "income":
-            return .green
-        case "expense":
-            return .red
-        default:
-            return .gray
-        }
-    }
-    
+
     var body: some View {
         VStack(spacing: 8) {
             // Icon
             Image(systemName: iconName)
                 .font(.system(size: 24, weight: .medium))
-                .foregroundColor(accentColor)
-            
+                .foregroundColor(color)
+
             // Name
             Text(name)
                 .font(.caption)
@@ -215,17 +293,16 @@ struct CategoryPreviewCard: View {
                 .foregroundColor(.primary)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
-            
-            // Amount placeholder
-            HStack(spacing: 4) {
-                Text("$")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                Text("0.00")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
+
+            // Frequency badge
+            Text(frequency.capitalized)
+                .font(.caption2)
+                .fontWeight(.medium)
+                .foregroundColor(.secondary)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 2)
+                .background(Color(uiColor: .tertiarySystemBackground))
+                .cornerRadius(4)
         }
         .frame(maxWidth: .infinity)
         .padding(12)

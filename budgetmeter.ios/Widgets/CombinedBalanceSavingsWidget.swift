@@ -156,7 +156,7 @@ struct CombinedWidgetEntryView: View {
                 // Left side - Balance data
                 VStack(alignment: .leading, spacing: 4) {
                     // Balance label
-                    Text("Balance")
+                    Text("widget.balance".localized(defaultValue: "Balance"))
                         .font(.caption)
                         .foregroundColor(.white.opacity(0.7))
                     
@@ -195,7 +195,7 @@ struct CombinedWidgetEntryView: View {
             VStack(alignment: .leading, spacing: 4) {
                 // Top row - Label and percentage
                 HStack {
-                    Text("Savings")
+                    Text("widget.savings".localized(defaultValue: "Savings"))
                         .font(.caption)
                         .foregroundColor(.white.opacity(0.7))
                     

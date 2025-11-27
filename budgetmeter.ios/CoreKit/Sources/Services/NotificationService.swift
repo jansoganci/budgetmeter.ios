@@ -323,7 +323,7 @@ final class NotificationService {
     private func sendSpendingAlert(thisWeek: Double, lastWeek: Double, percentage: Double) {
         let content = UNMutableNotificationContent()
         content.title = "⚠️ Spending Alert"
-        content.body = "You're spending \(String(format: "%.0f", percentage))% more than last week"
+        content.body = "You're spending \(PercentageFormatter.formatInteger(percentage)) more than last week"
 
         let formattedThis = CurrencyHelper.formatAmount(thisWeek)
         let formattedLast = CurrencyHelper.formatAmount(lastWeek)

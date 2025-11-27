@@ -25,6 +25,7 @@ final class SettingsViewModel: ObservableObject {
     @Published var selectedCurrencyCode: String = CurrencyHelper.defaultCurrencyCode()
     @Published var isCurrencyPickerPresented = false
     @Published var isLanguagePickerPresented = false
+    @Published var isAppearancePickerPresented = false
     
     // MARK: - Private Properties
     
@@ -198,6 +199,21 @@ final class SettingsViewModel: ObservableObject {
 
     var selectedLanguageDisplayText: String {
         return selectedLanguage.displayName
+    }
+
+    // MARK: - Appearance Picker Methods
+
+    func showAppearancePicker() {
+        isAppearancePickerPresented = true
+    }
+
+    func dismissAppearancePicker() {
+        isAppearancePickerPresented = false
+    }
+
+    func selectAppearance(_ mode: AppearanceMode) {
+        updateAppearance(mode)
+        dismissAppearancePicker()
     }
 
     /// Updates preferred currency and notifies observers

@@ -22,7 +22,9 @@ struct SavingsGoalDetailView: View {
     @State private var amount: String = ""
     @FocusState private var amountFieldFocused: Bool
 
-    private let currencySymbol = CurrencyHelper.symbol(for: CurrencyHelper.defaultCurrencyCode())
+    private var currencySymbol: String {
+        CurrencyHelper.symbol(for: CurrencyHelper.currentCurrencyCode())
+    }
     private let goalManager = SavingsGoalManager.shared
 
     // MARK: - Computed Properties
@@ -32,7 +34,7 @@ struct SavingsGoalDetailView: View {
     }
 
     private var progressPercentage: String {
-        String(format: "%.0f%%", goalManager.calculateProgress(for: goal))
+        PercentageFormatter.formatInteger(goalManager.calculateProgress(for: goal))
     }
 
     private var remaining: Double {
@@ -92,17 +94,17 @@ struct SavingsGoalDetailView: View {
                                     .font(.system(size: 32, weight: .bold, design: .rounded))
                                     .foregroundColor(.textPrimary)
 
-                                Text("of \(formatAmount(goal.targetAmount))")
+                                Text(String(format: "savings.of_amount".localized(defaultValue: "of %@"), formatAmount(goal.targetAmount)))
                                     .font(.title3)
                                     .foregroundColor(.textSecondary)
                             }
 
                             if remaining > 0 {
-                                Text("\(formatAmount(remaining)) to go")
+                                Text(String(format: "savings.to_go".localized(defaultValue: "%@ to go"), formatAmount(remaining)))
                                     .font(.subheadline)
                                     .foregroundColor(.textSecondary)
                             } else {
-                                Text("Goal reached! 🎉")
+                                Text("savings.goal_reached_message".localized(defaultValue: "Goal reached! 🎉"))
                                     .font(.subheadline)
                                     .foregroundColor(.brandProgress)
                             }
@@ -409,7 +411,7 @@ struct SavingsGoalDetailView: View {
     }
 
     private func formatAmount(_ amount: Double) -> String {
-        CurrencyHelper.format(amount: amount, currencyCode: CurrencyHelper.defaultCurrencyCode())
+        CurrencyHelper.format(amount: amount, currencyCode: CurrencyHelper.currentCurrencyCode())
     }
 
     private func formatDate(_ date: Date) -> String {

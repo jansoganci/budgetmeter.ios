@@ -2,66 +2,113 @@
 //  ExpenseView.swift
 //  BudgetMeter
 //
-//  Created by BudgetMeter Team on 17.09.2025.
+//  Redesigned with collapsible sections and full-width rows
 //
 
 import SwiftUI
 import CoreData
 
-/// Expense entry screen following the design rulebook specifications
+/// Expense entry screen with collapsible sections
 struct ExpenseView: View {
-    
+
     @StateObject private var viewModel = ExpenseViewModel()
     @StateObject private var localizationManager = LocalizationManager.shared
-    @FocusState private var focusedField: String?
-    
-    // Modal state
+
+    // MARK: - State
+
+    // Section expand state (Daily expanded by default)
+    @State private var isDailyExpanded = true
+    @State private var isMonthlyExpanded = false
+    @State private var isSubscriptionsExpanded = false
+    @State private var isYearlyExpanded = false
+
+    // Edit sheet state
+    @State private var categoryToEdit: FinancialCategory?
+
+    // Create modal state
     @State private var showingCreateModal = false
     @State private var selectedFrequency = ""
-    
+
+    // Subscription sheet state
+    @State private var showingAddSubscription = false
+    @State private var subscriptionToEdit: Subscription?
+
+    // MARK: - Body
+
     var body: some View {
         NavigationView {
             ScrollView {
-                LazyVStack(spacing: Spacing.xl) {
+                VStack(spacing: Spacing.lg) {
                     if viewModel.isLoading {
                         loadingView
-                    } else if viewModel.categoryGroups.isEmpty {
-                        emptyStateView
                     } else {
-                        // Summary Card
-                        expenseSummaryCard
+                        // Hero Summary Card
+                        FinancialSummaryCard(
+                            totalMonthly: viewModel.totalMonthlyExpenses,
+                            dailyAverage: viewModel.dailyAverageExpenses,
+                            yearlyProjection: viewModel.yearlyProjectionExpenses,
+                            currencySymbol: viewModel.currencySymbol,
+                            type: .expense,
+                            sourcesCount: viewModel.activeSourcesCount
+                        )
+                        .padding(.horizontal, Spacing.lg)
 
-                        ForEach(viewModel.categoryGroups, id: \.title) { group in
-                            categoryGroupView(group)
+                        // Collapsible Sections
+                        VStack(spacing: Spacing.md) {
+                            // Daily Expenses Section (expanded by default)
+                            expenseSection(
+                                frequency: "daily",
+                                isExpanded: $isDailyExpanded
+                            )
+
+                            // Monthly Expenses Section
+                            expenseSection(
+                                frequency: "monthly",
+                                isExpanded: $isMonthlyExpanded
+                            )
+
+                            // Subscriptions Section
+                            subscriptionsSection
+
+                            // Yearly Expenses Section
+                            expenseSection(
+                                frequency: "yearly",
+                                isExpanded: $isYearlyExpanded
+                            )
                         }
                     }
                 }
-                .padding(.horizontal, Spacing.lg)
-                .padding(.vertical, Spacing.sm)
+                .padding(.vertical, Spacing.md)
             }
-            .navigationTitle("tab.expenses.title".localized(defaultValue: "Expenses"))
+            .background(Color.appBackground)
+            .navigationTitle(String(localized: "tab.expenses.title", defaultValue: "Expenses"))
             .navigationBarTitleDisplayMode(.large)
             .refreshable {
                 viewModel.refresh()
             }
-            .toolbar {
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("toolbar.done".localized(defaultValue: "Done")) {
-                        focusedField = nil
-                    }
-                    .foregroundColor(.brandProgress)
-                    .fontWeight(.semibold)
-                }
-            }
         }
         .environment(\.locale, localizationManager.currentLocale)
+        .sheet(item: $categoryToEdit) { category in
+            FinancialEditSheet(
+                category: category,
+                currencySymbol: viewModel.currencySymbol,
+                accentColor: .brandExpense,
+                onSave: { amount in
+                    viewModel.updateAmount(for: category, amount: amount)
+                },
+                onDelete: category.isCustom ? {
+                    viewModel.deleteCategory(category)
+                } : nil,
+                onColorChange: category.isCustom ? { color in
+                    viewModel.updateColor(for: category, color: color)
+                } : nil
+            )
+        }
         .sheet(isPresented: $showingCreateModal) {
             CreateCategoryModal(
                 frequency: selectedFrequency,
                 type: "expense",
-                onSave: { category in
-                    // Refresh the view model to show the new category
+                onSave: { _ in
                     viewModel.refresh()
                     showingCreateModal = false
                 },
@@ -70,11 +117,24 @@ struct ExpenseView: View {
                 }
             )
         }
+        .sheet(isPresented: $showingAddSubscription) {
+            QuickSubscriptionPickerView {
+                viewModel.loadSubscriptions()
+            }
+        }
+        .sheet(item: $subscriptionToEdit) { subscription in
+            SubscriptionInputView(subscription: subscription) {
+                viewModel.loadSubscriptions()
+            }
+        }
         .onAppear {
             viewModel.refresh()
         }
-        .alert("alert.error.title".localized(defaultValue: "Error"), isPresented: .constant(viewModel.errorMessage != nil)) {
-            Button("alert.ok".localized(defaultValue: "OK")) {
+        .alert(
+            String(localized: "alert.error.title", defaultValue: "Error"),
+            isPresented: .constant(viewModel.errorMessage != nil)
+        ) {
+            Button(String(localized: "alert.ok", defaultValue: "OK")) {
                 viewModel.errorMessage = nil
             }
         } message: {
@@ -83,148 +143,120 @@ struct ExpenseView: View {
             }
         }
     }
-    
-    // MARK: - Subviews
-    
-    private var expenseSummaryCard: some View {
-        VStack(alignment: .leading, spacing: Spacing.lg) {
-            HStack {
-                Image(systemName: "chart.pie.fill")
-                    .foregroundColor(.brandExpense)
-                Text(viewModel.summaryTitle)
-                    .sectionTitleStyle()
-                Spacer()
-            }
-            .padding(.horizontal, Spacing.xs)
 
-            HStack(spacing: Spacing.md) {
-                // Daily Average Card
-                summaryInfoCard(
-                    title: viewModel.dailyAvgTitle,
-                    value: viewModel.dailyAverageExpenses,
-                    icon: "calendar.day.timeline.left",
-                    color: .brandExpense
-                )
+    // MARK: - Expense Section
 
-                // Monthly Total Card
-                summaryInfoCard(
-                    title: viewModel.monthlyTitle,
-                    value: viewModel.totalMonthlyExpenses,
-                    icon: "calendar",
-                    color: .brandExpense
-                )
+    @ViewBuilder
+    private func expenseSection(frequency: String, isExpanded: Binding<Bool>) -> some View {
+        let categories = viewModel.categoriesForFrequency(frequency)
 
-                // Yearly Projection Card
-                summaryInfoCard(
-                    title: viewModel.yearlyTitle,
-                    value: viewModel.yearlyProjectionExpenses,
-                    icon: "chart.line.uptrend.xyaxis",
-                    color: .brandExpense.opacity(0.8)
-                )
-            }
-        }
-    }
-    
-    private var loadingView: some View {
-        VStack(spacing: Spacing.lg) {
-            ProgressView()
-                .scaleEffect(1.2)
-            Text("expenses.loading".localized(defaultValue: "Loading expenses..."))
-                .foregroundColor(.secondary)
-        }
-        .frame(maxWidth: .infinity, minHeight: 200)
-    }
-
-    private var emptyStateView: some View {
-        VStack(spacing: Spacing.lg) {
-            Image(systemName: "minus.circle")
-                .font(.system(size: 64))
-                .foregroundColor(.brandExpense)
-
-            Text("empty_state.expenses.message".localized(defaultValue: "No expenses yet. Tap the + button to add your first expense."))
-                .font(.headline)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity, minHeight: 200)
-        .padding()
-    }
-    
-    private func categoryGroupView(_ group: (title: String, categories: [FinancialCategory], color: Color)) -> some View {
-        VStack(alignment: .leading, spacing: Spacing.md) {
-            // Group Header
-            HStack {
-                Image(systemName: "calendar")
-                    .foregroundColor(group.color)
-                Text(group.title)
-                    .sectionTitleStyle()
-                Spacer()
-            }
-            .padding(.horizontal, Spacing.xs)
-
-            // Category Grid
-            LazyVGrid(columns: createGridColumns(), spacing: Spacing.md) {
-                ForEach(group.categories, id: \.objectID) { category in
-                    CategoryInputCard(
+        FinancialSection(
+            title: viewModel.sectionTitle(frequency),
+            subtitle: viewModel.formattedSubtotal(frequency),
+            accentColor: .brandExpense,
+            isExpanded: isExpanded
+        ) {
+            VStack(spacing: 0) {
+                // Category rows
+                ForEach(categories, id: \.objectID) { category in
+                    FinancialRowView(
                         category: category,
-                        accentColor: group.color,
-                        onAmountChange: { amount in
-                            viewModel.updateAmount(for: category, amount: amount)
-                        },
                         currencySymbol: viewModel.currencySymbol,
-                        focusedField: $focusedField
+                        accentColor: .brandExpense,
+                        onEditTap: {
+                            categoryToEdit = category
+                        }
                     )
+
+                    // Divider between rows (not after last item)
+                    if category != categories.last {
+                        Divider()
+                            .padding(.leading, 56)
+                    }
                 }
-                
-                // Add Custom Category Card
-                AddCustomCategoryCard(
-                    frequency: group.title.lowercased(),
+
+                // Add row divider if there are categories
+                if !categories.isEmpty {
+                    Divider()
+                        .padding(.leading, 56)
+                }
+
+                // Add new category row
+                AddFinancialItemRow(
+                    frequency: frequency,
                     type: "expense",
-                    accentColor: group.color,
-                    onAddCategory: {
-                        selectedFrequency = group.title.lowercased()
+                    onTap: {
+                        selectedFrequency = frequency
                         showingCreateModal = true
                     }
                 )
             }
         }
     }
-    
-    
-    // MARK: - Helper Methods
-    
-    private func summaryInfoCard(title: String, value: Double, icon: String, color: Color) -> some View {
-        VStack(spacing: 6) {
-            Image(systemName: icon)
-                .font(.system(size: 18))
-                .foregroundColor(color)
 
-            Text(title)
-                .cardLabelStyle()
+    // MARK: - Subscriptions Section
 
-            Text(viewModel.formatCurrencyDisplay(value))
-                .font(.system(size: 16, weight: .bold, design: .rounded))
-                .foregroundColor(color)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
+    private var subscriptionsSection: some View {
+        FinancialSection(
+            title: String(localized: "expense.section.subscriptions", defaultValue: "Subscriptions"),
+            subtitle: viewModel.formattedSubscriptionsSubtotal,
+            accentColor: .brandExpense,
+            isExpanded: $isSubscriptionsExpanded
+        ) {
+            VStack(spacing: 0) {
+                // Subscription rows
+                ForEach(viewModel.subscriptions, id: \.id) { subscription in
+                    SubscriptionRowView(
+                        subscription: subscription,
+                        currencySymbol: viewModel.currencySymbol,
+                        onTap: {
+                            subscriptionToEdit = subscription
+                        }
+                    )
+
+                    // Divider between rows
+                    if subscription != viewModel.subscriptions.last {
+                        Divider()
+                            .padding(.leading, 56)
+                    }
+                }
+
+                // Add row divider if there are subscriptions
+                if !viewModel.subscriptions.isEmpty {
+                    Divider()
+                        .padding(.leading, 56)
+                }
+
+                // Add new subscription row
+                AddSubscriptionRow {
+                    showingAddSubscription = true
+                }
+            }
         }
-        .frame(maxWidth: .infinity)
-        .frame(height: 80)
-        .padding(.vertical, Spacing.md)
-        .background(Color.cardBackground)
-        .cornerRadius(CornerRadius.card)
     }
 
-    private func createGridColumns() -> [GridItem] {
-        // Responsive grid: 2 columns on iPhone, 3 on iPad
-        let columnCount = UIDevice.current.userInterfaceIdiom == .pad ? 3 : 2
-        return Array(repeating: GridItem(.flexible(), spacing: Spacing.md), count: columnCount)
+    // MARK: - Loading View
+
+    private var loadingView: some View {
+        VStack(spacing: Spacing.lg) {
+            ProgressView()
+                .scaleEffect(1.2)
+            Text(String(localized: "expenses.loading", defaultValue: "Loading expenses..."))
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity, minHeight: 200)
     }
 }
 
 // MARK: - Preview
 
-#Preview {
+#Preview("Expense View") {
     ExpenseView()
         .environment(\.managedObjectContext, PersistenceService.shared.viewContext)
+}
+
+#Preview("Dark Mode") {
+    ExpenseView()
+        .environment(\.managedObjectContext, PersistenceService.shared.viewContext)
+        .preferredColorScheme(.dark)
 }

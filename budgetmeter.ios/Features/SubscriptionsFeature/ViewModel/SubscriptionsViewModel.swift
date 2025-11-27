@@ -27,6 +27,13 @@ final class SubscriptionsViewModel: ObservableObject {
     enum SortOption: String, CaseIterable {
         case renewalDate = "Renewal Date"
         case name = "Name"
+        
+        var displayName: String {
+            switch self {
+            case .renewalDate: return "subscriptions.sort.renewal_date".localized(defaultValue: "Renewal Date")
+            case .name: return "subscriptions.sort.name".localized(defaultValue: "Name")
+            }
+        }
     }
 
     // MARK: - Computed Properties
@@ -78,12 +85,15 @@ final class SubscriptionsViewModel: ObservableObject {
     // MARK: - Private Properties
 
     private var cancellables = Set<AnyCancellable>()
+    private let persistenceService: PersistenceService
     private var currencyCode: String = CurrencyHelper.defaultCurrencyCode()
 
     // MARK: - Initialization
 
-    init() {
+    init(persistenceService: PersistenceService = .shared) {
+        self.persistenceService = persistenceService
         setupCurrencyObserver()
+        setupLanguageObserver()
         setupSubscriptionObservers()
         loadCurrency()
         loadSubscriptions()
@@ -110,7 +120,7 @@ final class SubscriptionsViewModel: ObservableObject {
         if success {
             loadSubscriptions() // Reload list
         } else {
-            errorMessage = "Failed to delete subscription"
+            errorMessage = "subscriptions.error.delete_failed".localized(defaultValue: "Failed to delete subscription")
         }
     }
 
@@ -122,7 +132,7 @@ final class SubscriptionsViewModel: ObservableObject {
         if success {
             loadSubscriptions() // Reload list
         } else {
-            errorMessage = "Failed to pause subscription"
+            errorMessage = "subscriptions.error.pause_failed".localized(defaultValue: "Failed to pause subscription")
         }
     }
 
@@ -134,13 +144,13 @@ final class SubscriptionsViewModel: ObservableObject {
         if success {
             loadSubscriptions() // Reload list
         } else {
-            errorMessage = "Failed to resume subscription"
+            errorMessage = "subscriptions.error.resume_failed".localized(defaultValue: "Failed to resume subscription")
         }
     }
 
     /// Format amount for display
     func formatAmount(_ amount: Double) -> String {
-        return CurrencyHelper.formatCurrency(amount, currencyCode: currencyCode)
+        return CurrencyHelper.format(amount: amount, currencyCode: currencyCode)
     }
 
     /// Format date for display
@@ -190,9 +200,18 @@ final class SubscriptionsViewModel: ObservableObject {
 
     private func setupCurrencyObserver() {
         // Listen for currency changes
-        NotificationCenter.default.publisher(for: Notification.Name("CurrencyDidChange"))
-            .sink { [weak self] _ in
-                self?.loadCurrency()
+        NotificationCenter.default.publisher(for: .currencyDidChange)
+            .sink { [weak self] notification in
+                self?.currencyDidChange(notification)
+            }
+            .store(in: &cancellables)
+    }
+
+    private func setupLanguageObserver() {
+        // Listen for language changes
+        NotificationCenter.default.publisher(for: .languageDidChange)
+            .sink { [weak self] notification in
+                self?.languageDidChange(notification)
             }
             .store(in: &cancellables)
     }
@@ -218,8 +237,38 @@ final class SubscriptionsViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    private func loadCurrency() {
-        currencyCode = CurrencyHelper.defaultCurrencyCode()
-        currencySymbol = CurrencyHelper.symbol(for: currencyCode)
+    // MARK: - Currency Management
+
+    func loadCurrency() {
+        let context = persistenceService.viewContext
+        let fetchRequest: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
+        if let settings = try? context.fetch(fetchRequest),
+           let storedCode = settings.first?.preferredCurrencyCode,
+           CurrencyHelper.supportedCurrencyCodes.contains(storedCode) {
+            updateCurrency(code: storedCode)
+        } else {
+            updateCurrency(code: CurrencyHelper.defaultCurrencyCode())
+        }
+    }
+
+    func updateCurrency(code: String) {
+        let resolvedCode = CurrencyHelper.supportedCurrencyCodes.contains(code) ? code : CurrencyHelper.defaultCurrencyCode()
+        currencyCode = resolvedCode
+        currencySymbol = CurrencyHelper.symbol(for: resolvedCode)
+    }
+
+    @objc func currencyDidChange(_ notification: Notification) {
+        if let code = notification.userInfo?["code"] as? String {
+            updateCurrency(code: code)
+        } else {
+            loadCurrency()
+        }
+    }
+
+    @objc func languageDidChange(_ notification: Notification) {
+        // Trigger UI refresh to re-evaluate localized strings
+        DispatchQueue.main.async {
+            self.objectWillChange.send()
+        }
     }
 }

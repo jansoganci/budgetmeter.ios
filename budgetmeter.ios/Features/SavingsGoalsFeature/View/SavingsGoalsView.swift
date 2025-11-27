@@ -225,7 +225,7 @@ struct GoalCard: View {
                     .fontWeight(.bold)
                     .foregroundColor(.textPrimary)
 
-                Text("of \(viewModel.formatAmount(goal.targetAmount))")
+                Text(String(format: "savings.of_amount".localized(defaultValue: "of %@"), viewModel.formatAmount(goal.targetAmount)))
                     .font(.subheadline)
                     .foregroundColor(.textSecondary)
             }
@@ -237,11 +237,11 @@ struct GoalCard: View {
 
                 VStack(alignment: .leading, spacing: Spacing.xs) {
                     HStack {
-                        Text("Target: \(viewModel.formatShortDate(targetDate))")
+                        Text(String(format: "savings.target_label".localized(defaultValue: "Target: %@"), viewModel.formatShortDate(targetDate)))
                             .font(.caption)
                             .foregroundColor(.textSecondary)
 
-                        Text("•")
+                        Text("ui.bullet.point".localized(defaultValue: "•"))
                             .font(.caption)
                             .foregroundColor(.textSecondary)
 
@@ -258,7 +258,7 @@ struct GoalCard: View {
                                 .foregroundColor(.textSecondary)
 
                             if !viewModel.paceStatusText(goal).isEmpty {
-                                Text("•")
+                                Text("ui.bullet.point".localized(defaultValue: "•"))
                                     .font(.caption)
                                     .foregroundColor(.textSecondary)
 
@@ -322,7 +322,7 @@ struct CompletedGoalCard: View {
                 }
 
                 if let completedDate = goal.completedDate {
-                    Text("Completed \(viewModel.formatShortDate(completedDate))")
+                    Text(String(format: "savings.completed_label".localized(defaultValue: "Completed %@"), viewModel.formatShortDate(completedDate)))
                         .font(.caption)
                         .foregroundColor(.textSecondary)
                 }

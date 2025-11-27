@@ -52,7 +52,20 @@ final class HomeViewModel: ObservableObject {
     @Published var dailyBudgetAmount: Double = 0
     @Published var dailyBudgetColor: Color = .green
     @Published var daysLeftInMonth: Int = 0
+    @Published var totalDaysInMonth: Int = 30
     @Published var showingDailyBudgetInfo = false
+
+    // Month Summary Data (for compact layout)
+    @Published var totalMonthlyIncomeDisplay: Double = 0
+    @Published var totalMonthlyExpenseDisplay: Double = 0
+    @Published var incomeTrendPercentage: Double? = nil
+    @Published var expenseTrendPercentage: Double? = nil
+
+    // Primary Savings Goal Data (for compact layout)
+    @Published var primarySavingsGoalName: String? = nil
+    @Published var primarySavingsGoalEmoji: String? = nil
+    @Published var primarySavingsGoalCurrent: Double = 0
+    @Published var primarySavingsGoalTarget: Double = 0
 
     // State Management
     @Published var isLoading = false
@@ -99,8 +112,41 @@ final class HomeViewModel: ObservableObject {
         NotificationCenter.default.removeObserver(self)
     }
     
+    // MARK: - Computed Properties (Greeting)
+
+    /// Time-based greeting text
+    var greetingText: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 5..<12:
+            return String(localized: "home.greeting.morning", defaultValue: "Good morning!")
+        case 12..<17:
+            return String(localized: "home.greeting.afternoon", defaultValue: "Good afternoon!")
+        case 17..<21:
+            return String(localized: "home.greeting.evening", defaultValue: "Good evening!")
+        default:
+            return String(localized: "home.greeting.night", defaultValue: "Good night!")
+        }
+    }
+
+    /// SF Symbol for time-based greeting icon
+    var greetingIcon: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 5..<12: return "sun.max.fill"
+        case 12..<17: return "sun.min.fill"
+        case 17..<21: return "sunset.fill"
+        default: return "moon.stars.fill"
+        }
+    }
+
+    /// Currency symbol for display
+    var currencySymbol: String {
+        CurrencyHelper.symbol(for: currencyCode)
+    }
+
     // MARK: - Public Methods
-    
+
     /// Shows income entry modal
     func showIncomeEntry() {
         showingIncomeSheet = true
@@ -322,6 +368,10 @@ final class HomeViewModel: ObservableObject {
 
         monthlyNetFlow = totalMonthlyIncome - totalMonthlyExpense
 
+        // Store for compact layout display
+        totalMonthlyIncomeDisplay = totalMonthlyIncome
+        totalMonthlyExpenseDisplay = totalMonthlyExpense
+
         // Financial health score
         let healthScore = CalculationEngine.financialHealthScore(
             totalMonthlyIncome: totalMonthlyIncome,
@@ -371,7 +421,7 @@ final class HomeViewModel: ObservableObject {
         }
     }
 
-    /// Calculates trend percentage for hero card
+    /// Calculates trend percentage for hero card and month summary
     /// TODO: Replace with actual comparison to previous period data
     private func calculateTrendPercentage() {
         // Mock trend calculation - positive trend if net flow is positive
@@ -382,6 +432,14 @@ final class HomeViewModel: ObservableObject {
             netFlowTrendPercentage = baseTrend + variance
         } else {
             netFlowTrendPercentage = 0.0
+        }
+
+        // Mock income/expense trends for month summary cards
+        if totalMonthlyIncomeDisplay > 0 {
+            incomeTrendPercentage = Double.random(in: 2...15)
+        }
+        if totalMonthlyExpenseDisplay > 0 {
+            expenseTrendPercentage = Double.random(in: -8...5)
         }
     }
 
@@ -413,6 +471,7 @@ final class HomeViewModel: ObservableObject {
         // Calculate daily budget
         dailyBudgetAmount = monthlyNet / Double(daysLeft)
         daysLeftInMonth = daysLeft
+        totalDaysInMonth = daysInMonth
 
         // Determine color
         if dailyBudgetAmount > 20 {
@@ -568,7 +627,7 @@ final class HomeViewModel: ObservableObject {
     private func loadSavingsGoal() {
         let context = persistenceService.viewContext
         let fetchRequest: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
-        
+
         do {
             let settings = try context.fetch(fetchRequest)
             if let appSettings = settings.first {
@@ -578,6 +637,25 @@ final class HomeViewModel: ObservableObject {
             }
         } catch {
             print("Failed to load savings goal: \(error)")
+        }
+
+        // Also load primary savings goal from SavingsGoalManager
+        loadPrimarySavingsGoal()
+    }
+
+    /// Loads the primary (first active) savings goal from SavingsGoalManager
+    private func loadPrimarySavingsGoal() {
+        let goals = SavingsGoalManager.shared.getActiveGoals()
+        if let primaryGoal = goals.first {
+            primarySavingsGoalName = primaryGoal.name
+            primarySavingsGoalEmoji = primaryGoal.emoji
+            primarySavingsGoalCurrent = primaryGoal.currentAmount
+            primarySavingsGoalTarget = primaryGoal.targetAmount
+        } else {
+            primarySavingsGoalName = nil
+            primarySavingsGoalEmoji = nil
+            primarySavingsGoalCurrent = 0
+            primarySavingsGoalTarget = 0
         }
     }
     

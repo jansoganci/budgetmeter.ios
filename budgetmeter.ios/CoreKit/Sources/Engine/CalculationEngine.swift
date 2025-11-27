@@ -641,7 +641,7 @@ struct CalculationEngine {
             tips.append(HealthTip(
                 icon: "arrow.up.circle.fill",
                 title: "Boost Your Savings",
-                description: "You're saving \(String(format: "%.0f", savingsRate * 100))%. Aim for 20% to build wealth faster.",
+                description: "You're saving \(PercentageFormatter.formatInteger(savingsRate * 100)). Aim for 20% to build wealth faster.",
                 impact: "+5 points",
                 color: .orange
             ))
@@ -690,7 +690,7 @@ struct CalculationEngine {
                 tips.append(HealthTip(
                     icon: "target",
                     title: "Adjust Your Savings Goal",
-                    description: "Your current savings are \(String(format: "%.0f", progress))% of your goal. Consider if your goal is realistic for your income level.",
+                    description: "Your current savings are \(PercentageFormatter.formatInteger(progress)) of your goal. Consider if your goal is realistic for your income level.",
                     impact: "+3 points",
                     color: .blue
                 ))

@@ -81,12 +81,13 @@
 
     <!-- NEW ENTITY: Subscription (Approved Requirements) -->
     <entity name="Subscription" representedClassName="Subscription" syncable="YES" codeGenerationType="class">
-        <attribute name="id" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
-        <attribute name="name" optional="NO" attributeType="String"/>
-        <attribute name="amount" optional="NO" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="billingCycle" optional="NO" attributeType="String" defaultValueString="monthly"/>
-        <attribute name="firstBillDate" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
-        <attribute name="nextRenewalDate" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <attribute name="amount" optional="YES" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="billingCycle" optional="YES" attributeType="String" defaultValueString="monthly"/>
+        <attribute name="customCycleDays" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="firstBillDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="nextRenewalDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="category" optional="YES" attributeType="String" defaultValueString="Other"/>
         <attribute name="notes" optional="YES" attributeType="String"/>
         <attribute name="reminderDaysBefore" optional="YES" attributeType="Integer 16" defaultValueString="3" usesScalarValueType="YES"/>
@@ -99,12 +100,12 @@
 
     <!-- NEW ENTITY: Bill -->
     <entity name="Bill" representedClassName="Bill" syncable="YES" codeGenerationType="class">
-        <attribute name="id" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
-        <attribute name="name" optional="NO" attributeType="String"/>
-        <attribute name="amount" optional="NO" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <attribute name="amount" optional="YES" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="isRecurring" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="frequency" optional="YES" attributeType="String"/>
-        <attribute name="dueDate" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="dueDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="originalDueDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="category" optional="YES" attributeType="String" defaultValueString="Other"/>
         <attribute name="iconName" optional="YES" attributeType="String"/>
@@ -122,12 +123,12 @@
 
     <!-- NEW ENTITY: BillPayment (Payment History) -->
     <entity name="BillPayment" representedClassName="BillPayment" syncable="YES" codeGenerationType="class">
-        <attribute name="id" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
-        <attribute name="billID" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
-        <attribute name="dueDate" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
-        <attribute name="paidDate" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
-        <attribute name="expectedAmount" optional="NO" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="actualAmount" optional="NO" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="billID" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="dueDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="paidDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="expectedAmount" optional="YES" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="actualAmount" optional="YES" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="notes" optional="YES" attributeType="String"/>
         <attribute name="wasLate" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="daysLate" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
@@ -136,9 +137,9 @@
 
     <!-- NEW ENTITY: SavingsGoal -->
     <entity name="SavingsGoal" representedClassName="SavingsGoal" syncable="YES" codeGenerationType="class">
-        <attribute name="id" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
-        <attribute name="name" optional="NO" attributeType="String"/>
-        <attribute name="targetAmount" optional="NO" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <attribute name="targetAmount" optional="YES" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="currentAmount" optional="YES" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="targetDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="emoji" optional="YES" attributeType="String"/>

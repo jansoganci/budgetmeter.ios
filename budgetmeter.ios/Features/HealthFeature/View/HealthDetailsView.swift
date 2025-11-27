@@ -35,7 +35,7 @@ struct HealthDetailsView: View {
                     mainContent
                 }
             }
-            .navigationTitle("Financial Health")
+            .navigationTitle("health.navigation.title".localized(defaultValue: "Financial Health"))
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -62,17 +62,17 @@ struct HealthDetailsView: View {
                     }
                 )
             }
-            .alert("Error", isPresented: $viewModel.showErrorAlert) {
-                Button("OK", role: .cancel) {
+            .alert("alert.error.title".localized(defaultValue: "Error"), isPresented: $viewModel.showErrorAlert) {
+                Button("alert.ok".localized(defaultValue: "OK"), role: .cancel) {
                     viewModel.clearError()
                 }
-                Button("Retry", role: .none) {
+                Button("health.error.try_again".localized(defaultValue: "Retry"), role: .none) {
                     Task {
                         await viewModel.refreshData()
                     }
                 }
             } message: {
-                Text(viewModel.errorMessage ?? "An unexpected error occurred")
+                Text(viewModel.errorMessage ?? "health.error.unexpected".localized(defaultValue: "An unexpected error occurred"))
             }
         }
     }
@@ -102,7 +102,7 @@ struct HealthDetailsView: View {
 
     private var healthScoreSection: some View {
         VStack(spacing: 0) {
-            HealthScoreCard(
+            HealthScoreDetailCard(
                 score: viewModel.healthScore,
                 scoreText: viewModel.healthText,
                 color: viewModel.healthScoreColor,
@@ -118,7 +118,7 @@ struct HealthDetailsView: View {
     private var breakdownSection: some View {
         VStack(alignment: .leading, spacing: Spacing.lg) {
             // Section header
-            Text("HEALTH BREAKDOWN")
+            Text("health.breakdown.title".localized(defaultValue: "HEALTH BREAKDOWN"))
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundColor(.secondary)
@@ -130,7 +130,7 @@ struct HealthDetailsView: View {
                     // Expense Score
                     HealthBreakdownRow(
                         icon: "chart.pie.fill",
-                        title: "Expense Management",
+                        title: "health.breakdown.expense_management".localized(defaultValue: "Expense Management"),
                         score: breakdown.expenseScore,
                         description: breakdown.expenseReason,
                         isExpanded: viewModel.isExpanded("expense"),
@@ -146,7 +146,7 @@ struct HealthDetailsView: View {
                     // Savings Score
                     HealthBreakdownRow(
                         icon: "banknote.fill",
-                        title: "Savings Score",
+                        title: "health.breakdown.savings_score".localized(defaultValue: "Savings Score"),
                         score: breakdown.savingsScore,
                         description: breakdown.savingsReason,
                         isExpanded: viewModel.isExpanded("savings"),
@@ -162,7 +162,7 @@ struct HealthDetailsView: View {
                     // Income Score
                     HealthBreakdownRow(
                         icon: "dollarsign.circle.fill",
-                        title: "Income Score",
+                        title: "health.breakdown.income_score".localized(defaultValue: "Income Score"),
                         score: breakdown.incomeScore,
                         description: breakdown.incomeReason,
                         isExpanded: viewModel.isExpanded("income"),
@@ -190,7 +190,7 @@ struct HealthDetailsView: View {
         VStack(alignment: .leading, spacing: Spacing.lg) {
             // Section header
             HStack {
-                Text("PERSONALIZED TIPS")
+                Text("health.tips.title".localized(defaultValue: "PERSONALIZED TIPS"))
                     .font(.caption)
                     .fontWeight(.semibold)
                     .foregroundColor(.secondary)
@@ -205,7 +205,7 @@ struct HealthDetailsView: View {
                         HStack(spacing: Spacing.xs) {
                             Image(systemName: "crown.fill")
                                 .font(.caption2)
-                            Text("Unlock All")
+                            Text("health.tips.unlock_all".localized(defaultValue: "Unlock All"))
                                 .font(.caption)
                                 .fontWeight(.semibold)
                         }
@@ -249,7 +249,7 @@ struct HealthDetailsView: View {
             ProgressView()
                 .scaleEffect(1.2)
 
-            Text("Loading your health data...")
+            Text("health.loading.message".localized(defaultValue: "Loading your health data..."))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }
@@ -264,7 +264,7 @@ struct HealthDetailsView: View {
                 .font(.system(size: 60))
                 .foregroundColor(.orange)
 
-            Text("Unable to Load Data")
+            Text("health.error.title".localized(defaultValue: "Unable to Load Data"))
                 .font(.headline)
                 .fontWeight(.semibold)
 
@@ -279,7 +279,7 @@ struct HealthDetailsView: View {
                     await viewModel.refreshData()
                 }
             } label: {
-                Text("Try Again")
+                Text("health.error.try_again".localized(defaultValue: "Try Again"))
                     .font(.subheadline)
                     .fontWeight(.semibold)
                     .foregroundColor(.white)
@@ -301,12 +301,12 @@ struct HealthDetailsView: View {
                 .font(.system(size: 40))
                 .foregroundColor(.secondary)
 
-            Text("No Breakdown Available")
+            Text("health.empty.breakdown.title".localized(defaultValue: "No Breakdown Available"))
                 .font(.subheadline)
                 .fontWeight(.semibold)
                 .foregroundColor(.primary)
 
-            Text("Start tracking your budget to see detailed health breakdown")
+            Text("health.empty.breakdown.message".localized(defaultValue: "Start tracking your budget to see detailed health breakdown"))
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -323,12 +323,12 @@ struct HealthDetailsView: View {
                 .font(.system(size: 40))
                 .foregroundColor(.yellow)
 
-            Text("No Tips Yet")
+            Text("health.empty.tips.title".localized(defaultValue: "No Tips Yet"))
                 .font(.subheadline)
                 .fontWeight(.semibold)
                 .foregroundColor(.primary)
 
-            Text("As you track your finances, we'll provide personalized tips to improve your financial health")
+            Text("health.empty.tips.message".localized(defaultValue: "As you track your finances, we'll provide personalized tips to improve your financial health"))
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -354,12 +354,12 @@ struct HealthDetailsView: View {
                         .foregroundColor(.brandProgress)
 
                     VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text("\(viewModel.healthTips.count - 3) More Premium Tips")
+                        Text(String(format: "health.locked.tips.count".localized(defaultValue: "%lld More Premium Tips"), viewModel.healthTips.count - 3))
                             .font(.subheadline)
                             .fontWeight(.semibold)
                             .foregroundColor(.primary)
 
-                        Text("Unlock advanced insights and recommendations")
+                        Text("health.locked.tips.description".localized(defaultValue: "Unlock advanced insights and recommendations"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }

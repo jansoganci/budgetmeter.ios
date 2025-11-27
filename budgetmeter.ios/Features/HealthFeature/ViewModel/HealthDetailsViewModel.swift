@@ -73,6 +73,9 @@ final class HealthDetailsViewModel: ObservableObject {
         // Subscribe to premium changes
         premiumManager.$isPremium
             .assign(to: &$isPremium)
+
+        // Listen for language changes
+        setupLanguageObserver()
     }
 
     // MARK: - Public Methods
@@ -287,6 +290,19 @@ final class HealthDetailsViewModel: ObservableObject {
             return Array(healthTips.prefix(3))
         }
     }
+
+    // MARK: - Language Observer
+
+    private func setupLanguageObserver() {
+        NotificationCenter.default.publisher(for: .languageDidChange)
+            .sink { [weak self] _ in
+                // Trigger UI refresh to re-evaluate localized strings
+                DispatchQueue.main.async {
+                    self?.objectWillChange.send()
+                }
+            }
+            .store(in: &cancellables)
+    }
 }
 
 // MARK: - Health Details Error
@@ -294,13 +310,13 @@ final class HealthDetailsViewModel: ObservableObject {
 enum HealthDetailsError: Error {
     case noDataAvailable
     case calculationFailed
-    
+
     var localizedDescription: String {
         switch self {
         case .noDataAvailable:
-            return "No financial data available. Please set up your budget first."
+            return "health.error.no_data".localized(defaultValue: "No financial data available. Please set up your budget first.")
         case .calculationFailed:
-            return "Failed to calculate health score. Please try again."
+            return "health.error.calculation_failed".localized(defaultValue: "Failed to calculate health score. Please try again.")
         }
     }
 }

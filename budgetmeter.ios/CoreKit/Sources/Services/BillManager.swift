@@ -380,7 +380,7 @@ final class BillManager {
             dueDate: nextDate,
             isRecurring: true,
             frequency: frequency,
-            category: bill.category,
+            category: bill.category ?? "Other",
             notes: bill.notes,
             reminderDaysBefore: Int(bill.reminderDaysBefore),
             isAutoPay: bill.isAutoPay,

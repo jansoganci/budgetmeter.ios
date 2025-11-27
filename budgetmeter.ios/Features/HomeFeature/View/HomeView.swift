@@ -2,14 +2,14 @@
 //  HomeView.swift
 //  BudgetMeter
 //
-//  Design System v2.0 - Modern Financial Dashboard
+//  Design System v2.1 - Compact Financial Dashboard
 //  Created by BudgetMeter Team on 17.09.2025.
 //
 
 import SwiftUI
 import CoreData
 
-/// Home screen - Modern Financial Dashboard
+/// Home screen - Compact Financial Dashboard (v2.1)
 struct HomeView: View {
 
     @StateObject private var viewModel = HomeViewModel()
@@ -27,32 +27,27 @@ struct HomeView: View {
                         // First-time user experience
                         gettingStartedView
                     } else {
-                        // Experienced user - Modern Financial Dashboard
+                        // Compact Financial Dashboard (v2.1)
                         ScrollView(showsIndicators: false) {
-                            VStack(spacing: Spacing.xl) {
-                                // Daily Budget Card
-                                dailyBudgetCard
+                            VStack(spacing: Spacing.lg) {
+                                // 1. Greeting Header
+                                greetingHeader
 
-                                // Hero Net Flow Card
-                                heroNetFlowCard
+                                // 2. Compact Daily Budget Card (100pt)
+                                compactDailyBudgetCard
 
-                                // Health Score Card (prominent)
-                                healthScoreCard
+                                // 3. Month Summary Section (3-column)
+                                monthSummarySection
 
-                                // Interval Metric Grid (Hourly, Daily, Monthly)
-                                intervalMetricGrid
+                                // 4. Health + Savings Row (2-column, 90pt)
+                                healthAndSavingsRow
 
-                                // Savings Goal Card (if goal is set)
-                                if viewModel.savingsGoal > 0 {
-                                    savingsGoalCard
-                                }
-
-                                // Quick Actions
+                                // 5. Quick Actions
                                 quickActionsGrid
                             }
+                            .padding(.horizontal, Spacing.lg)
                             .padding(.bottom, Spacing.xl)
                         }
-                        .padding(.horizontal, Spacing.lg)
                     }
                 }
             }
@@ -72,9 +67,9 @@ struct HomeView: View {
             ExpenseView()
         }
         .sheet(isPresented: $viewModel.showingSavingsGoalSheet) {
-            SavingsGoalInputView(
+            QuickSavingsGoalInputView(
                 currentGoal: viewModel.savingsGoal,
-                currencySymbol: CurrencyHelper.symbol(for: viewModel.currencyCode),
+                currencySymbol: viewModel.currencySymbol,
                 onSave: { amount in
                     viewModel.updateSavingsGoal(amount)
                 }
@@ -89,109 +84,86 @@ struct HomeView: View {
         }
     }
 
-    // MARK: - Daily Budget Card
+    // MARK: - Greeting Header
 
-    private var dailyBudgetCard: some View {
-        DailyBudgetCard(
+    private var greetingHeader: some View {
+        GreetingHeader(
+            greeting: viewModel.greetingText,
+            iconName: viewModel.greetingIcon
+        )
+    }
+
+    // MARK: - Compact Daily Budget Card (100pt)
+
+    private var compactDailyBudgetCard: some View {
+        CompactDailyBudgetCard(
             amount: viewModel.dailyBudgetAmount,
             daysLeft: viewModel.daysLeftInMonth,
-            monthlyNet: viewModel.monthlyNetFlow,
-            currencySymbol: CurrencyHelper.symbol(for: viewModel.currencyCode),
-            color: viewModel.dailyBudgetColor,
+            totalDays: viewModel.totalDaysInMonth,
+            currencySymbol: viewModel.currencySymbol,
+            statusColor: viewModel.dailyBudgetColor,
             onInfoTap: {
                 viewModel.showDailyBudgetInfo()
             }
         )
     }
 
-    // MARK: - Hero Net Flow Card
+    // MARK: - Month Summary Section (3-column)
 
-    private var heroNetFlowCard: some View {
-        HeroNetFlowCard(
-            value: viewModel.monthlyNetFlow,
-            label: "home.net_flow_this_month".localized(defaultValue: "Net Flow This Month"),
-            trendPercentage: viewModel.netFlowTrendPercentage,
-            currencySymbol: CurrencyHelper.symbol(for: viewModel.currencyCode),
-            onTap: nil
-        )
-    }
+    private var monthSummarySection: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            Text(String(localized: "home.section.this_month", defaultValue: "This Month"))
+                .font(.system(size: 14 * sizeCategory.scaleFactor, weight: .semibold))
+                .foregroundColor(.textSecondary)
+                .padding(.leading, Spacing.xs)
 
-    // MARK: - Health Score Card
+            HStack(spacing: Spacing.md) {
+                MonthSummaryCard(
+                    type: .income,
+                    amount: viewModel.totalMonthlyIncomeDisplay,
+                    currencySymbol: viewModel.currencySymbol,
+                    trendPercentage: viewModel.incomeTrendPercentage
+                )
 
-    private var healthScoreCard: some View {
-        HealthScoreCard(
-            score: viewModel.financialHealthScore,
-            statusLabel: viewModel.financialHealthText,
-            description: healthScoreDescription,
-            onTap: {
-                // TODO: Navigate to health details
+                MonthSummaryCard(
+                    type: .expenses,
+                    amount: viewModel.totalMonthlyExpenseDisplay,
+                    currencySymbol: viewModel.currencySymbol,
+                    trendPercentage: viewModel.expenseTrendPercentage
+                )
+
+                MonthSummaryCard(
+                    type: .net,
+                    amount: viewModel.monthlyNetFlow,
+                    currencySymbol: viewModel.currencySymbol,
+                    trendPercentage: viewModel.netFlowTrendPercentage
+                )
             }
-        )
-    }
-
-    private var healthScoreDescription: String? {
-        switch viewModel.financialHealthScore {
-        case 70...100:
-            return "home.health.good".localized(defaultValue: "Your financial health is strong")
-        case 40..<70:
-            return "home.health.fair".localized(defaultValue: "Your financial health needs attention")
-        default:
-            return "home.health.poor".localized(defaultValue: "Let's work on improving your health")
         }
     }
 
-    // MARK: - Interval Metric Grid
+    // MARK: - Health + Savings Row (2-column, 90pt)
 
-    private var intervalMetricGrid: some View {
-        LazyVGrid(
-            columns: [
-                GridItem(.flexible()),
-                GridItem(.flexible())
-            ],
-            spacing: Spacing.md
-        ) {
-            // Hourly Card
-            IntervalMetricCard(
-                title: "home.interval.hourly".localized(defaultValue: "Hourly"),
-                value: viewModel.hourlyNetFlow,
-                currencySymbol: CurrencyHelper.symbol(for: viewModel.currencyCode),
-                chartData: viewModel.hourlyChartData,
-                onTap: nil
+    private var healthAndSavingsRow: some View {
+        HStack(spacing: Spacing.md) {
+            CompactHealthCard(
+                score: viewModel.financialHealthScore,
+                onTap: {
+                    // TODO: Navigate to health details
+                }
             )
 
-            // Daily Card
-            IntervalMetricCard(
-                title: "home.interval.daily".localized(defaultValue: "Daily"),
-                value: viewModel.dailyNetFlow,
-                currencySymbol: CurrencyHelper.symbol(for: viewModel.currencyCode),
-                chartData: viewModel.dailyChartData,
-                onTap: nil
+            CompactSavingsCard(
+                goalName: viewModel.primarySavingsGoalName,
+                emoji: viewModel.primarySavingsGoalEmoji,
+                currentAmount: viewModel.primarySavingsGoalCurrent,
+                targetAmount: viewModel.primarySavingsGoalTarget > 0 ? viewModel.primarySavingsGoalTarget : viewModel.savingsGoal,
+                currencySymbol: viewModel.currencySymbol,
+                onTap: {
+                    viewModel.showSavingsGoalEntry()
+                }
             )
-
-            // Monthly Card (full width)
-            IntervalMetricCard(
-                title: "home.interval.monthly".localized(defaultValue: "Monthly"),
-                value: viewModel.monthlyNetFlow,
-                currencySymbol: CurrencyHelper.symbol(for: viewModel.currencyCode),
-                chartData: viewModel.monthlyChartData,
-                onTap: nil
-            )
-            .gridCellColumns(2) // Full width on grid
         }
-    }
-
-    // MARK: - Savings Goal Card
-
-    private var savingsGoalCard: some View {
-        SavingsGoalCard(
-            currentAmount: viewModel.liveValue > 0 ? viewModel.liveValue : 0,
-            targetAmount: viewModel.savingsGoal,
-            currencySymbol: CurrencyHelper.symbol(for: viewModel.currencyCode),
-            targetDate: viewModel.timeToGoal.isEmpty ? nil : viewModel.timeToGoal,
-            onTap: {
-                viewModel.showSavingsGoalEntry()
-            }
-        )
     }
 
     // MARK: - Quick Actions Grid
@@ -360,6 +332,7 @@ struct HomeView: View {
 /// Information popup explaining how daily budget is calculated
 struct DailyBudgetInfoView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.sizeCategory) private var sizeCategory
 
     var body: some View {
         NavigationView {
@@ -423,7 +396,7 @@ struct DailyBudgetInfoView: View {
                         defaultValue: "Note: This is based on your recurring income and expense patterns, not actual daily spending."
                     ))
                     .font(.caption)
-                    .foregroundColor(.textTertiary)
+                    .foregroundColor(.textSecondary.opacity(0.8))
                     .italic()
                 }
                 .padding(Spacing.lg)
