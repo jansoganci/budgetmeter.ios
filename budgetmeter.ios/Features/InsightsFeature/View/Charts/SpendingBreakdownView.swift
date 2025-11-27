@@ -57,7 +57,7 @@ struct SpendingBreakdownView: View {
                     .foregroundColor(.blue)
                     .font(.title3)
 
-                Text("Spending Breakdown")
+                Text("charts.spending_breakdown.title".localized(defaultValue: "Spending Breakdown"))
                     .font(.headline)
                     .fontWeight(.semibold)
 
@@ -71,7 +71,7 @@ struct SpendingBreakdownView: View {
                 }
             }
 
-            Text("Your expenses by category")
+            Text("charts.spending_breakdown.subtitle".localized(defaultValue: "Your expenses by category"))
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
@@ -105,11 +105,11 @@ struct SpendingBreakdownView: View {
                         Text(CurrencyHelper.formatAmount(item.amount))
                             .font(.title2)
                             .fontWeight(.bold)
-                        Text("\(Int(item.percentage))%")
+                        Text(PercentageFormatter.formatInteger(item.percentage))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     } else {
-                        Text("Total")
+                        Text("charts.spending_breakdown.total".localized(defaultValue: "Total"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                         Text(CurrencyHelper.formatAmount(totalAmount ?? 0))
@@ -156,7 +156,7 @@ struct SpendingBreakdownView: View {
                     Spacer()
 
                     // Percentage
-                    Text("\(Int(item.percentage))%")
+                    Text(PercentageFormatter.formatInteger(item.percentage))
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .frame(width: 40, alignment: .trailing)
@@ -182,7 +182,7 @@ struct SpendingBreakdownView: View {
                         .foregroundColor(.gray)
                         .font(.caption)
 
-                    Text("\(data.count - 5) more categories")
+                    Text(String(format: "charts.spending_breakdown.more_categories".localized(defaultValue: "%d more categories"), data.count - 5))
                         .font(.caption)
                         .foregroundColor(.secondary)
 
@@ -201,7 +201,7 @@ struct SpendingBreakdownView: View {
                 .font(.system(size: 48))
                 .foregroundColor(.gray.opacity(0.5))
 
-            Text("No spending data")
+            Text("charts.spending_breakdown.empty".localized(defaultValue: "No spending data"))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }

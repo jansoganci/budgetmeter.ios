@@ -37,6 +37,13 @@ struct CurrencyPickerView: View {
             .listStyle(.insetGrouped)
             .navigationTitle("settings.currency.picker.title".localized(defaultValue: "Currency"))
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("toolbar.done".localized(defaultValue: "Done")) {
+                        dismiss()
+                    }
+                }
+            }
         }
     }
 

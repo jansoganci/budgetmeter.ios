@@ -32,7 +32,9 @@ struct SubscriptionInputView: View {
     @State private var showError = false
     @State private var errorMessage = ""
 
-    private let currencySymbol = CurrencyHelper.symbol(for: CurrencyHelper.defaultCurrencyCode())
+    private var currencySymbol: String {
+        CurrencyHelper.symbol(for: CurrencyHelper.currentCurrencyCode())
+    }
 
     // MARK: - Enums
 
@@ -63,9 +65,9 @@ struct SubscriptionInputView: View {
 
         var displayText: String {
             switch self {
-            case .oneDay: return "1 day before"
-            case .threeDays: return "3 days before"
-            case .sevenDays: return "7 days before"
+            case .oneDay: return "bill.reminder.one_day".localized(defaultValue: "1 day before")
+            case .threeDays: return "bill.reminder.three_days".localized(defaultValue: "3 days before")
+            case .sevenDays: return "bill.reminder.seven_days".localized(defaultValue: "7 days before")
             }
         }
     }
@@ -77,18 +79,18 @@ struct SubscriptionInputView: View {
     }
 
     private var title: String {
-        isEditMode ? "Edit Subscription" : "Add Subscription"
+        isEditMode ? "subscription.title.edit".localized(defaultValue: "Edit Subscription") : "subscription.title.add".localized(defaultValue: "Add Subscription")
     }
 
     private var saveButtonDisabled: Bool {
         serviceName.trimmingCharacters(in: .whitespaces).isEmpty ||
         amount.trimmingCharacters(in: .whitespaces).isEmpty ||
-        parseAmount(amount) <= 0
+        (parseAmount(amount) ?? 0) <= 0
     }
 
     private var nextRenewalText: String {
         let nextDate = calculateNextRenewal()
-        return "Next renewal: " + DateFormattingHelper.shared.formatMedium(nextDate)
+        return String(format: "subscription.next_renewal".localized(defaultValue: "Next renewal: %@"), DateFormattingHelper.shared.formatMedium(nextDate))
     }
 
     // MARK: - Categories
@@ -111,12 +113,12 @@ struct SubscriptionInputView: View {
                 VStack(spacing: Spacing.xl) {
                     // Service Name
                     VStack(alignment: .leading, spacing: Spacing.sm) {
-                        Text("Service Name *")
+                        Text("subscription.service_name".localized(defaultValue: "Service Name *"))
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.textSecondary)
 
-                        TextField("Netflix, Spotify, etc.", text: $serviceName)
+                        TextField("subscription.service_name_placeholder".localized(defaultValue: "Netflix, Spotify, etc."), text: $serviceName)
                             .textFieldStyle(.plain)
                             .font(.body)
                             .padding(Spacing.md)
@@ -127,7 +129,7 @@ struct SubscriptionInputView: View {
 
                     // Amount
                     VStack(alignment: .leading, spacing: Spacing.sm) {
-                        Text("Amount *")
+                        Text("form.amount".localized(defaultValue: "Amount *"))
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.textSecondary)
@@ -151,7 +153,7 @@ struct SubscriptionInputView: View {
 
                     // Billing Cycle
                     VStack(alignment: .leading, spacing: Spacing.sm) {
-                        Text("How often? *")
+                        Text("subscription.billing_cycle".localized(defaultValue: "How often? *"))
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.textSecondary)
@@ -166,13 +168,13 @@ struct SubscriptionInputView: View {
 
                     // First Payment Date
                     VStack(alignment: .leading, spacing: Spacing.sm) {
-                        Text("First payment date *")
+                        Text("subscription.first_payment_date".localized(defaultValue: "First payment date *"))
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.textSecondary)
 
                         DatePicker(
-                            "First Bill Date",
+                            "subscription.first_payment_date".localized(defaultValue: "First payment date"),
                             selection: $firstBillDate,
                             displayedComponents: [.date]
                         )
@@ -189,7 +191,7 @@ struct SubscriptionInputView: View {
 
                     // Category
                     VStack(alignment: .leading, spacing: Spacing.sm) {
-                        Text("Category")
+                        Text("form.category".localized(defaultValue: "Category"))
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.textSecondary)
@@ -207,7 +209,7 @@ struct SubscriptionInputView: View {
 
                     // Reminder
                     VStack(alignment: .leading, spacing: Spacing.sm) {
-                        Text("Remind me")
+                        Text("bill.remind_me".localized(defaultValue: "Remind me"))
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.textSecondary)
@@ -222,7 +224,7 @@ struct SubscriptionInputView: View {
 
                     // Notes
                     VStack(alignment: .leading, spacing: Spacing.sm) {
-                        Text("Notes (optional)")
+                        Text("form.notes_optional".localized(defaultValue: "Notes (optional)"))
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.textSecondary)
@@ -237,7 +239,7 @@ struct SubscriptionInputView: View {
 
                     // Save Button
                     Button(action: saveSubscription) {
-                        Text(isEditMode ? "Save Changes" : "Add Subscription")
+                        Text(isEditMode ? "form.save_changes".localized(defaultValue: "Save Changes") : "subscription.title.add".localized(defaultValue: "Add Subscription"))
                             .font(.headline)
                             .fontWeight(.semibold)
                             .foregroundColor(.white)
@@ -255,7 +257,7 @@ struct SubscriptionInputView: View {
                             Button(action: pauseSubscription) {
                                 HStack {
                                     Image(systemName: subscription?.isPaused == true ? "play.fill" : "pause.fill")
-                                    Text(subscription?.isPaused == true ? "Resume Subscription" : "Pause Subscription")
+                                    Text(subscription?.isPaused == true ? "subscription.resume".localized(defaultValue: "Resume Subscription") : "subscription.pause".localized(defaultValue: "Pause Subscription"))
                                 }
                                 .font(.body)
                                 .fontWeight(.medium)
@@ -266,7 +268,7 @@ struct SubscriptionInputView: View {
                             Button(action: { showDeleteConfirmation = true }) {
                                 HStack {
                                     Image(systemName: "trash")
-                                    Text("Delete Subscription")
+                                    Text("subscription.delete".localized(defaultValue: "Delete Subscription"))
                                 }
                                 .font(.body)
                                 .fontWeight(.medium)
@@ -281,30 +283,30 @@ struct SubscriptionInputView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                    Button("form.cancel".localized(defaultValue: "Cancel")) {
                         dismiss()
                     }
                 }
 
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
-                    Button("Done") {
+                    Button("form.done".localized(defaultValue: "Done")) {
                         focusedField = nil
                     }
                     .foregroundColor(.brandProgress)
                     .fontWeight(.semibold)
                 }
             }
-            .alert("Delete Subscription?", isPresented: $showDeleteConfirmation) {
-                Button("Cancel", role: .cancel) { }
-                Button("Delete", role: .destructive) {
+            .alert("subscription.delete_confirm_title".localized(defaultValue: "Delete Subscription?"), isPresented: $showDeleteConfirmation) {
+                Button("form.cancel".localized(defaultValue: "Cancel"), role: .cancel) { }
+                Button("subscription.delete".localized(defaultValue: "Delete Subscription"), role: .destructive) {
                     deleteSubscription()
                 }
             } message: {
-                Text("This will permanently delete this subscription. This action cannot be undone.")
+                Text("subscription.delete_confirm_message".localized(defaultValue: "This will permanently delete this subscription. This action cannot be undone."))
             }
-            .alert("Error", isPresented: $showError) {
-                Button("OK", role: .cancel) { }
+            .alert("alert.error.title".localized(defaultValue: "Error"), isPresented: $showError) {
+                Button("alert.ok".localized(defaultValue: "OK"), role: .cancel) { }
             } message: {
                 Text(errorMessage)
             }
@@ -320,7 +322,7 @@ struct SubscriptionInputView: View {
         guard let subscription = subscription else { return }
 
         serviceName = subscription.name ?? ""
-        amount = String(format: "%.2f", subscription.amount)
+        amount = CurrencyHelper.formatForTextField(subscription.amount)
 
         if let cycle = subscription.billingCycle {
             switch cycle {
@@ -342,14 +344,14 @@ struct SubscriptionInputView: View {
 
     private func saveSubscription() {
         guard let amountValue = parseAmount(amount), amountValue > 0 else {
-            errorMessage = "Please enter a valid amount"
+            errorMessage = "form.error.invalid_amount".localized(defaultValue: "Please enter a valid amount")
             showError = true
             return
         }
 
         let trimmedName = serviceName.trimmingCharacters(in: .whitespaces)
         guard !trimmedName.isEmpty else {
-            errorMessage = "Please enter a service name"
+            errorMessage = "subscription.error.enter_name".localized(defaultValue: "Please enter a service name")
             showError = true
             return
         }
@@ -376,7 +378,7 @@ struct SubscriptionInputView: View {
                 onSave()
                 dismiss()
             } else {
-                errorMessage = "Failed to update subscription"
+                errorMessage = "subscription.error.failed_update".localized(defaultValue: "Failed to update subscription")
                 showError = true
             }
         } else {
@@ -395,7 +397,7 @@ struct SubscriptionInputView: View {
                 onSave()
                 dismiss()
             } else {
-                errorMessage = "Failed to create subscription"
+                errorMessage = "subscription.error.failed_create".localized(defaultValue: "Failed to create subscription")
                 showError = true
             }
         }
@@ -415,7 +417,8 @@ struct SubscriptionInputView: View {
             onSave()
             dismiss()
         } else {
-            errorMessage = "Failed to \(subscription.isPaused ? "resume" : "pause") subscription"
+            let action = subscription.isPaused ? "subscription.resume".localized(defaultValue: "resume") : "subscription.pause".localized(defaultValue: "pause")
+            errorMessage = String(format: "Failed to %@ subscription", action)
             showError = true
         }
     }
@@ -429,7 +432,7 @@ struct SubscriptionInputView: View {
             onSave()
             dismiss()
         } else {
-            errorMessage = "Failed to delete subscription"
+            errorMessage = "subscription.error.failed_delete".localized(defaultValue: "Failed to delete subscription")
             showError = true
         }
     }

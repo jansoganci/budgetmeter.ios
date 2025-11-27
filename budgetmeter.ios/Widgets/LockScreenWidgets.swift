@@ -220,7 +220,7 @@ struct LockScreenRectangularView: View {
         VStack(alignment: .leading, spacing: 4) {
             // Title row
             HStack {
-                Text("Balance")
+                Text("widget.balance".localized(defaultValue: "Balance"))
                     .font(.system(size: 12, weight: .semibold))
                 Spacer()
                 Circle()
@@ -236,7 +236,7 @@ struct LockScreenRectangularView: View {
 
             // Daily net flow
             HStack(spacing: 4) {
-                Text("Today:")
+                Text("widget.today".localized(defaultValue: "Today:"))
                     .font(.system(size: 11))
                     .opacity(0.7)
 

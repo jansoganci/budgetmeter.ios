@@ -7,22 +7,22 @@
 
 import SwiftUI
 
-/// Premium paywall view following Apple HIG and design rulebook
+/// Premium paywall view - compact and effective design
 struct PremiumPaywallView: View {
-    
+
     // MARK: - Properties
-    
+
     let feature: PremiumFeature?
     let onDismiss: () -> Void
     let onPurchase: () -> Void
     let onRestore: () -> Void
-    
+
     @StateObject private var premiumManager = PremiumManager.shared
     @State private var showingRestoreAlert = false
     @State private var showingPurchaseAlert = false
-    
+
     // MARK: - Initialization
-    
+
     init(
         feature: PremiumFeature? = nil,
         onDismiss: @escaping () -> Void,
@@ -34,35 +34,41 @@ struct PremiumPaywallView: View {
         self.onPurchase = onPurchase
         self.onRestore = onRestore
     }
-    
+
     // MARK: - Body
-    
+
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(spacing: 24) {
-                    // Header
-                    headerSection
-                    
-                    // Features List
-                    featuresSection
-                    
-                    // Purchase Button
-                    purchaseSection
-                    
-                    // Footer
-                    footerSection
+            VStack(spacing: 0) {
+                ScrollView {
+                    VStack(spacing: Spacing.lg) {
+                        // Header with crown
+                        headerSection
+
+                        // Price card
+                        priceCard
+
+                        // Compact features list
+                        featuresSection
+                    }
+                    .padding(.horizontal, Spacing.lg)
+                    .padding(.top, Spacing.lg)
+                    .padding(.bottom, Spacing.md)
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
+
+                // Fixed bottom section with buttons
+                bottomSection
             }
-            .navigationTitle("premium.title".localized(defaultValue: "BudgetMeter Premium"))
-            .navigationBarTitleDisplayMode(.large)
-            .navigationBarBackButtonHidden(true)
+            .background(Color.appBackground)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("premium.close".localized(defaultValue: "Close")) {
+                    Button {
                         onDismiss()
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title3)
+                            .foregroundColor(.secondary)
                     }
                 }
             }
@@ -78,131 +84,160 @@ struct PremiumPaywallView: View {
             Text("premium.purchase.success.message".localized(defaultValue: "Thank you for upgrading to BudgetMeter Premium!"))
         }
     }
-    
+
     // MARK: - Header Section
-    
+
     private var headerSection: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: Spacing.md) {
             // Crown Icon
             Image(systemName: "crown.fill")
-                .font(.system(size: 48, weight: .medium))
-                .foregroundColor(Color(hex: "4A90E2"))
-            
+                .font(.system(size: 56, weight: .medium))
+                .foregroundColor(.orange)
+
             // Title
-            Text("premium.header.title".localized(defaultValue: "Unlock Premium Features"))
-                .font(.title2)
+            Text("premium.header.title".localized(defaultValue: "BudgetMeter Premium"))
+                .font(.title)
                 .fontWeight(.bold)
                 .multilineTextAlignment(.center)
-            
-            // Subtitle
-            Text("premium.header.subtitle".localized(defaultValue: "Get the most out of BudgetMeter with powerful premium features"))
-                .font(.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
         }
-        .padding(.top, 20)
+        .padding(.top, Spacing.md)
     }
-    
-    // MARK: - Features Section
-    
-    private var featuresSection: some View {
-        VStack(spacing: 16) {
-            ForEach(PremiumFeature.allCases, id: \.self) { premiumFeature in
-                FeatureRowView(feature: premiumFeature)
-            }
-        }
-    }
-    
-    // MARK: - Purchase Section
-    
-    private var purchaseSection: some View {
-        VStack(spacing: 16) {
+
+    // MARK: - Price Card
+
+    private var priceCard: some View {
+        VStack(spacing: Spacing.sm) {
             // Price
-            VStack(spacing: 4) {
-                Text("premium.price".localized(defaultValue: "$4.99"))
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(Color(hex: "4A90E2"))
-                
-                Text("premium.price.subtitle".localized(defaultValue: "One-time purchase • Lifetime access"))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            Text("premium.price".localized(defaultValue: "$4.99"))
+                .font(.system(size: 44, weight: .bold))
+                .foregroundColor(.brandProgress)
+
+            // One-time purchase emphasis
+            Text("premium.price.subtitle".localized(defaultValue: "One-time purchase • Lifetime access"))
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundColor(.brandPositive)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, Spacing.lg)
+        .background(Color.cardBackground)
+        .cornerRadius(CornerRadius.card)
+        .overlay(
+            RoundedRectangle(cornerRadius: CornerRadius.card)
+                .stroke(Color.brandProgress.opacity(0.2), lineWidth: 1)
+        )
+    }
+
+    // MARK: - Features Section
+
+    private var featuresSection: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            Text("premium.features.title".localized(defaultValue: "Everything included:"))
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+                .padding(.bottom, Spacing.xs)
+
+            ForEach(PremiumFeature.allCases, id: \.self) { premiumFeature in
+                featureRow(premiumFeature)
             }
-            
+        }
+        .padding(Spacing.lg)
+        .background(Color.cardBackground)
+        .cornerRadius(CornerRadius.card)
+    }
+
+    private func featureRow(_ feature: PremiumFeature) -> some View {
+        HStack(spacing: Spacing.md) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.body)
+                .foregroundColor(.brandPositive)
+
+            Text(feature.displayName)
+                .font(.body)
+                .fontWeight(.medium)
+                .foregroundColor(.primary)
+
+            Spacer()
+        }
+        .padding(.vertical, Spacing.xs)
+    }
+
+    // MARK: - Bottom Section (Fixed)
+
+    private var bottomSection: some View {
+        VStack(spacing: Spacing.md) {
+            // Error Message
+            if let errorMessage = premiumManager.errorMessage {
+                Text(errorMessage)
+                    .font(.caption)
+                    .foregroundColor(.brandExpense)
+                    .multilineTextAlignment(.center)
+            }
+
             // Purchase Button
             Button(action: handlePurchase) {
-                HStack {
+                HStack(spacing: Spacing.sm) {
                     if premiumManager.isLoading {
                         ProgressView()
                             .progressViewStyle(CircularProgressViewStyle(tint: .white))
                             .scaleEffect(0.8)
                     } else {
                         Image(systemName: "crown.fill")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.body)
                     }
-                    
+
                     Text("premium.purchase.button".localized(defaultValue: "Upgrade to Premium"))
                         .font(.headline)
-                        .fontWeight(.semibold)
+                        .fontWeight(.bold)
                 }
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
-                .frame(height: 50)
-                .background(Color(hex: "4A90E2"))
-                .cornerRadius(12)
+                .frame(height: 54)
+                .background(Color.brandProgress)
+                .cornerRadius(CornerRadius.button)
             }
             .disabled(premiumManager.isLoading)
-            
+
             // Restore Button
             Button(action: handleRestore) {
                 Text("premium.restore.button".localized(defaultValue: "Restore Purchases"))
                     .font(.subheadline)
-                    .foregroundColor(Color(hex: "4A90E2"))
+                    .fontWeight(.medium)
+                    .foregroundColor(.brandProgress)
             }
             .disabled(premiumManager.isLoading)
-        }
-        .padding(.top, 8)
-    }
-    
-    // MARK: - Footer Section
-    
-    private var footerSection: some View {
-        VStack(spacing: 12) {
-            // Error Message
-            if let errorMessage = premiumManager.errorMessage {
-                Text(errorMessage)
-                    .font(.caption)
-                    .foregroundColor(.red)
-                    .multilineTextAlignment(.center)
-            }
-            
-            // Terms
-            VStack(spacing: 4) {
-                Text("premium.terms".localized(defaultValue: "By purchasing, you agree to our Terms of Service and Privacy Policy"))
+
+            // Terms & Privacy
+            HStack(spacing: Spacing.lg) {
+                Button("premium.terms.link".localized(defaultValue: "Terms")) {
+                    // Open terms
+                }
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+                Text("•")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                
-                HStack(spacing: 16) {
-                    Button("premium.terms.link".localized(defaultValue: "Terms")) {
-                        // Open terms
-                    }
-                    .font(.caption)
-                    .foregroundColor(Color(hex: "4A90E2"))
-                    
-                    Button("premium.privacy.link".localized(defaultValue: "Privacy")) {
-                        // Open privacy policy
-                    }
-                    .font(.caption)
-                    .foregroundColor(Color(hex: "4A90E2"))
+
+                Button("premium.privacy.link".localized(defaultValue: "Privacy")) {
+                    // Open privacy policy
                 }
+                .font(.caption)
+                .foregroundColor(.secondary)
             }
         }
-        .padding(.top, 16)
+        .padding(.horizontal, Spacing.lg)
+        .padding(.top, Spacing.md)
+        .padding(.bottom, Spacing.xl)
+        .background(
+            Color.cardBackground
+                .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: -4)
+        )
     }
-    
+
     // MARK: - Actions
-    
+
     private func handlePurchase() {
         Task {
             await premiumManager.purchasePremium()
@@ -212,7 +247,7 @@ struct PremiumPaywallView: View {
             }
         }
     }
-    
+
     private func handleRestore() {
         Task {
             await premiumManager.restorePurchases()
@@ -224,46 +259,23 @@ struct PremiumPaywallView: View {
     }
 }
 
-// MARK: - Feature Row View
-
-struct FeatureRowView: View {
-    let feature: PremiumFeature
-    
-    var body: some View {
-        HStack(spacing: 16) {
-            // Icon
-            Image(systemName: feature.iconName)
-                .font(.system(size: 20, weight: .medium))
-                .foregroundColor(Color(hex: "4A90E2"))
-                .frame(width: 32, height: 32)
-                .background(Color(hex: "4A90E2").opacity(0.1))
-                .cornerRadius(8)
-            
-            // Content
-            VStack(alignment: .leading, spacing: 4) {
-                Text(feature.displayName)
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                
-                Text(feature.description)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            
-            Spacer()
-        }
-        .padding(.vertical, 8)
-    }
-}
-
 // MARK: - Preview
 
-#Preview {
+#Preview("Paywall") {
     PremiumPaywallView(
         feature: .customCategories,
         onDismiss: { },
         onPurchase: { },
         onRestore: { }
     )
+}
+
+#Preview("Dark Mode") {
+    PremiumPaywallView(
+        feature: nil,
+        onDismiss: { },
+        onPurchase: { },
+        onRestore: { }
+    )
+    .preferredColorScheme(.dark)
 }

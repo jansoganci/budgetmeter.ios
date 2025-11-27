@@ -62,6 +62,7 @@ final class RecurringTransactionsViewModel: ObservableObject {
     init(persistenceService: PersistenceService = .shared) {
         self.persistenceService = persistenceService
         setupSubscriptions()
+        setupLanguageObserver()
         fetchRecurringTransactions()
     }
     
@@ -71,6 +72,18 @@ final class RecurringTransactionsViewModel: ObservableObject {
             .debounce(for: .seconds(0.5), scheduler: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.fetchRecurringTransactions()
+            }
+            .store(in: &cancellables)
+    }
+
+    private func setupLanguageObserver() {
+        // Listen for language changes
+        NotificationCenter.default.publisher(for: .languageDidChange)
+            .sink { [weak self] _ in
+                // Trigger UI refresh to re-evaluate localized strings
+                DispatchQueue.main.async {
+                    self?.objectWillChange.send()
+                }
             }
             .store(in: &cancellables)
     }

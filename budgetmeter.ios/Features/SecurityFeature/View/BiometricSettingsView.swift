@@ -21,32 +21,30 @@ struct BiometricSettingsView: View {
         NavigationView {
             List {
                 Section {
-                    HStack {
-                        Image(systemName: biometricManager.biometricType.iconName)
-                            .font(.title2)
-                            .foregroundColor(.accentColor)
-                            .frame(width: 30)
-                        
-                        VStack(alignment: .leading) {
-                            Text("security.settings.biometric.title".localized(defaultValue: "Biometric Authentication"))
-                                .font(.headline)
-                            Text("security.settings.biometric.subtitle".localized(defaultValue: "Protect your financial data with Face ID or Touch ID"))
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        
-                        Spacer()
-                        
-                        Toggle("", isOn: $biometricManager.isBiometricEnabled)
-                            .onChange(of: biometricManager.isBiometricEnabled) { newValue in
-                                if newValue {
-                                    enableBiometric()
-                                } else {
-                                    disableBiometric()
-                                }
+                    Toggle(isOn: $biometricManager.isBiometricEnabled) {
+                        HStack(spacing: 12) {
+                            Image(systemName: biometricManager.biometricType.iconName)
+                                .font(.title2)
+                                .foregroundColor(.accentColor)
+                                .frame(width: 30)
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("security.settings.biometric.title".localized(defaultValue: "Biometric Authentication"))
+                                    .font(.body)
+                                    .foregroundColor(.primary)
+                                Text("security.settings.biometric.subtitle".localized(defaultValue: "Protect your financial data with Face ID or Touch ID"))
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
                             }
+                        }
                     }
-                    .padding(.vertical, 5)
+                    .onChange(of: biometricManager.isBiometricEnabled) { newValue in
+                        if newValue {
+                            enableBiometric()
+                        } else {
+                            disableBiometric()
+                        }
+                    }
                 } header: {
                     Text("security.settings.biometric.header".localized(defaultValue: "Security"))
                 } footer: {

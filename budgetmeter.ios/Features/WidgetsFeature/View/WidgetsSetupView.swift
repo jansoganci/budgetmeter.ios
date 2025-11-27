@@ -17,18 +17,18 @@ struct WidgetsSetupView: View {
                     .font(.system(size: 80))
                     .foregroundColor(.accentColor)
                 
-                Text("Widgets Setup")
+                Text("widgets.setup.title".localized(defaultValue: "Widgets Setup"))
                     .font(.largeTitle)
                     .fontWeight(.bold)
                 
-                Text("Add BudgetMeter widgets to your Home Screen and Lock Screen to quickly view your financial data.")
+                Text("widgets.setup.description".localized(defaultValue: "Add BudgetMeter widgets to your Home Screen and Lock Screen to quickly view your financial data."))
                     .font(.body)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
                 
                 VStack(alignment: .leading, spacing: 15) {
-                    Text("How to Add Widgets")
+                    Text("widgets.setup.how_to_add".localized(defaultValue: "How to Add Widgets"))
                         .font(.headline)
                         .fontWeight(.semibold)
                         .padding(.top, 10)
@@ -68,7 +68,7 @@ struct WidgetsSetupView: View {
                 Spacer()
 
                 VStack(spacing: 12) {
-                    Text("Available Widgets")
+                    Text("widgets.setup.available".localized(defaultValue: "Available Widgets"))
                         .font(.caption)
                         .foregroundColor(.secondary)
 

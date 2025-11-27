@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreData
 import Combine
 
 @MainActor
@@ -21,7 +22,8 @@ final class BillsViewModel: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
     private let billManager = BillManager.shared
-    private let currencyCode = CurrencyHelper.defaultCurrencyCode()
+    private let persistenceService: PersistenceService
+    private var currencyCode: String = CurrencyHelper.defaultCurrencyCode()
 
     // MARK: - Enums
 
@@ -29,18 +31,36 @@ final class BillsViewModel: ObservableObject {
         case dueDate = "Due Date"
         case amount = "Amount"
         case name = "Name"
+        
+        var displayName: String {
+            switch self {
+            case .dueDate: return "bills.sort.due_date".localized(defaultValue: "Due Date")
+            case .amount: return "bills.sort.amount".localized(defaultValue: "Amount")
+            case .name: return "bills.sort.name".localized(defaultValue: "Name")
+            }
+        }
     }
 
     enum FilterOption: String, CaseIterable {
         case all = "All"
         case paid = "Paid"
         case unpaid = "Unpaid"
+        
+        var displayName: String {
+            switch self {
+            case .all: return "bills.filter.all".localized(defaultValue: "All")
+            case .paid: return "bills.filter.paid".localized(defaultValue: "Paid")
+            case .unpaid: return "bills.filter.unpaid".localized(defaultValue: "Unpaid")
+            }
+        }
     }
 
     // MARK: - Initialization
 
-    init() {
+    init(persistenceService: PersistenceService = .shared) {
+        self.persistenceService = persistenceService
         setupObservers()
+        loadCurrency()
     }
 
     // MARK: - Setup
@@ -68,6 +88,20 @@ final class BillsViewModel: ObservableObject {
         NotificationCenter.default.publisher(for: BillManager.billPaidNotification)
             .sink { [weak self] _ in
                 self?.loadBills()
+            }
+            .store(in: &cancellables)
+
+        // Listen for currency changes
+        NotificationCenter.default.publisher(for: .currencyDidChange)
+            .sink { [weak self] notification in
+                self?.currencyDidChange(notification)
+            }
+            .store(in: &cancellables)
+
+        // Listen for language changes
+        NotificationCenter.default.publisher(for: .languageDidChange)
+            .sink { [weak self] notification in
+                self?.languageDidChange(notification)
             }
             .store(in: &cancellables)
     }
@@ -135,19 +169,19 @@ final class BillsViewModel: ObservableObject {
     // MARK: - UI Strings
 
     var summaryTitle: String {
-        "This Month"
+        "bills.summary.title".localized(defaultValue: "This Month")
     }
 
     var overdueSectionTitle: String {
-        "Overdue (\(overdueBills.count))"
+        String(format: "bills.summary.overdue".localized(defaultValue: "Overdue (%d)"), overdueBills.count)
     }
 
     var dueSoonSectionTitle: String {
-        "Due Soon (Next 7 days)"
+        "bills.summary.due_soon".localized(defaultValue: "Due Soon (Next 7 days)")
     }
 
     var allBillsSectionTitle: String {
-        "All Bills"
+        "bills.summary.all_bills".localized(defaultValue: "All Bills")
     }
 
     // MARK: - Public Methods
@@ -169,6 +203,40 @@ final class BillsViewModel: ObservableObject {
     func markAsUnpaid(_ bill: Bill) {
         guard let id = bill.id else { return }
         _ = billManager.markAsUnpaid(id: id)
+    }
+
+    // MARK: - Currency Management
+
+    func loadCurrency() {
+        let context = persistenceService.viewContext
+        let fetchRequest: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
+        if let settings = try? context.fetch(fetchRequest),
+           let storedCode = settings.first?.preferredCurrencyCode,
+           CurrencyHelper.supportedCurrencyCodes.contains(storedCode) {
+            updateCurrency(code: storedCode)
+        } else {
+            updateCurrency(code: CurrencyHelper.defaultCurrencyCode())
+        }
+    }
+
+    func updateCurrency(code: String) {
+        let resolvedCode = CurrencyHelper.supportedCurrencyCodes.contains(code) ? code : CurrencyHelper.defaultCurrencyCode()
+        currencyCode = resolvedCode
+    }
+
+    @objc func currencyDidChange(_ notification: Notification) {
+        if let code = notification.userInfo?["code"] as? String {
+            updateCurrency(code: code)
+        } else {
+            loadCurrency()
+        }
+    }
+
+    @objc func languageDidChange(_ notification: Notification) {
+        // Trigger UI refresh to re-evaluate localized strings
+        DispatchQueue.main.async {
+            self.objectWillChange.send()
+        }
     }
 
     // MARK: - Formatting
@@ -201,28 +269,37 @@ final class BillsViewModel: ObservableObject {
 
     func dueDateText(_ bill: Bill) -> String {
         if bill.isPaid {
-            return "Paid \(formatShortDate(bill.paidDate ?? Date()))"
+            return String(format: "bills.due_date.paid".localized(defaultValue: "Paid %@"), formatShortDate(bill.paidDate ?? Date()))
         }
 
         let days = daysUntilDue(bill)
         if days < 0 {
             let overdue = abs(days)
-            return "\(overdue) day\(overdue == 1 ? "" : "s") overdue"
+            let formatString = "bills.due_date.overdue".localized(defaultValue: "\(overdue) day\(overdue == 1 ? "" : "s") overdue")
+            return String(format: formatString, overdue)
         } else if days == 0 {
-            return "Due today"
+            return "bills.due_date.today".localized(defaultValue: "Due today")
         } else if days == 1 {
-            return "Due tomorrow"
+            return "bills.due_date.tomorrow".localized(defaultValue: "Due tomorrow")
         } else if days <= 7 {
-            return "Due in \(days) days"
+            return String(format: "bills.due_date.in_days".localized(defaultValue: "Due in %d days"), days)
         } else {
-            return "Due \(formatShortDate(bill.dueDate ?? Date()))"
+            return String(format: "bills.due_date.due".localized(defaultValue: "Due %@"), formatShortDate(bill.dueDate ?? Date()))
         }
     }
 
     func frequencyText(_ bill: Bill) -> String {
         guard bill.isRecurring, let frequency = bill.frequency else {
-            return "One-time"
+            return "bills.frequency.one_time".localized(defaultValue: "One-time")
         }
-        return frequency.capitalized
+        
+        switch frequency.lowercased() {
+        case "daily": return "recurring.frequency.daily".localized(defaultValue: "Daily")
+        case "weekly": return "recurring.frequency.weekly".localized(defaultValue: "Weekly")
+        case "monthly": return "recurring.frequency.monthly".localized(defaultValue: "Monthly")
+        case "quarterly": return "recurring.frequency.quarterly".localized(defaultValue: "Quarterly")
+        case "yearly": return "recurring.frequency.yearly".localized(defaultValue: "Yearly")
+        default: return frequency.capitalized
+        }
     }
 }

@@ -26,11 +26,11 @@ struct NotificationPermissionBanner: View {
                     .foregroundColor(.orange)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Notifications Disabled")
+                    Text("notifications.permission.disabled_title".localized(defaultValue: "Notifications Disabled"))
                         .font(.headline)
                         .fontWeight(.semibold)
 
-                    Text("Enable in Settings to receive financial alerts")
+                    Text("notifications.permission.disabled_message".localized(defaultValue: "Enable in Settings to receive financial alerts"))
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
@@ -46,7 +46,7 @@ struct NotificationPermissionBanner: View {
                     Image(systemName: "gearshape.fill")
                         .font(.subheadline)
 
-                    Text("Open Settings")
+                    Text("notifications.permission.open_settings".localized(defaultValue: "Open Settings"))
                         .font(.subheadline)
                         .fontWeight(.medium)
                 }

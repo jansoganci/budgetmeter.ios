@@ -79,12 +79,12 @@ struct SubscriptionsView: View {
                     .font(.system(size: 32, weight: .bold, design: .rounded))
                     .foregroundColor(.textPrimary)
 
-                Text("/month")
+                Text("ui.units.per_month".localized(defaultValue: "/month"))
                     .font(.body)
                     .foregroundColor(.textSecondary)
             }
 
-            Text(viewModel.formatAmount(viewModel.totalYearlyCost) + "/year")
+            Text("\(viewModel.formatAmount(viewModel.totalYearlyCost))\(String(localized: "ui.units.per_year", defaultValue: "/year"))")
                 .font(.body)
                 .foregroundColor(.textSecondary)
 
@@ -304,7 +304,7 @@ struct SubscriptionRow: View {
                     .foregroundColor(.textPrimary)
 
                 if subscription.isPaused {
-                    Text("Paused")
+                    Text("subscriptions.paused".localized(defaultValue: "Paused"))
                         .font(.caption)
                         .foregroundColor(.orange)
                 }

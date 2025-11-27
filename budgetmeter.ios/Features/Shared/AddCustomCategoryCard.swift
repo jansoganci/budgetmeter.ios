@@ -42,7 +42,7 @@ struct AddCustomCategoryCard: View {
                 
                 // Subtitle for free users
                 if !premiumManager.isPremium {
-                    Text("Unlock")
+                    Text("ui.unlock".localized(defaultValue: "Unlock"))
                         .font(.caption2)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)

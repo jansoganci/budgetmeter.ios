@@ -100,7 +100,7 @@ struct NotificationToggleRow: View {
     // MARK: - Premium Badge
 
     private var premiumBadge: some View {
-        Text("PREMIUM")
+        Text("ui.premium".localized(defaultValue: "PREMIUM"))
             .font(.system(size: 9, weight: .bold))
             .foregroundColor(.white)
             .padding(.horizontal, 6)

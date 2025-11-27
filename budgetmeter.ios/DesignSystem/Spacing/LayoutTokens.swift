@@ -69,13 +69,13 @@ enum TouchTarget {
 
 /// Standard card heights for consistency
 enum CardHeight {
-    /// 180pt - Hero card
+    /// 180pt - Hero card (legacy)
     static let hero: CGFloat = 180
 
-    /// 160pt - Health score, savings goal
+    /// 160pt - Health score, savings goal (legacy)
     static let large: CGFloat = 160
 
-    /// 140pt - Interval metric cards
+    /// 140pt - Interval metric cards (legacy)
     static let medium: CGFloat = 140
 
     /// 100pt - Insight cards
@@ -83,6 +83,20 @@ enum CardHeight {
 
     /// 70pt - Snapshot cards
     static let compact: CGFloat = 70
+
+    // MARK: - Compact Dashboard Heights (v2.1)
+
+    /// 100pt - Primary card (Daily Budget)
+    static let primary: CGFloat = 100
+
+    /// 70pt - Summary cards (Income/Expense/Net)
+    static let summary: CGFloat = 70
+
+    /// 90pt - Metric cards (Health + Savings)
+    static let metric: CGFloat = 90
+
+    /// 70pt - Interval cards (Hourly/Daily/Monthly)
+    static let interval: CGFloat = 70
 }
 
 // MARK: - Chart Dimensions
@@ -98,10 +112,10 @@ enum ChartDimensions {
     /// 2pt - Bar spacing
     static let barSpacing: CGFloat = 2
 
-    /// 100pt - Circular progress diameter
+    /// 100pt - Circular progress diameter (legacy)
     static let circularProgressDiameter: CGFloat = 100
 
-    /// 10pt - Circular progress stroke width
+    /// 10pt - Circular progress stroke width (legacy)
     static let circularProgressStroke: CGFloat = 10
 
     /// 12pt - Horizontal progress bar height
@@ -109,6 +123,17 @@ enum ChartDimensions {
 
     /// 6pt - Milestone marker diameter
     static let milestoneMarkerSize: CGFloat = 6
+
+    // MARK: - Compact Dimensions (v2.1)
+
+    /// 50pt - Compact circular progress diameter
+    static let compactCircleDiameter: CGFloat = 50
+
+    /// 5pt - Compact circular progress stroke
+    static let compactCircleStroke: CGFloat = 5
+
+    /// 8pt - Compact progress bar height
+    static let compactProgressHeight: CGFloat = 8
 }
 
 // MARK: - Shadow Styles

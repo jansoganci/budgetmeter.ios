@@ -46,7 +46,7 @@ struct NotificationSettingsView: View {
                 }
                 .padding(Spacing.lg)
             }
-            .navigationTitle("Notifications")
+            .navigationTitle("notifications.nav.title".localized(defaultValue: "Notifications"))
             .navigationBarTitleDisplayMode(.large)
             .sheet(isPresented: $viewModel.showPaywall) {
                 PremiumPaywallView(
@@ -68,15 +68,15 @@ struct NotificationSettingsView: View {
                     }
                 )
             }
-            .alert("Test Notification Sent!", isPresented: $showTestSuccess) {
-                Button("OK", role: .cancel) { }
+            .alert("notifications.test.success.title".localized(defaultValue: "Test Notification Sent!"), isPresented: $showTestSuccess) {
+                Button("alert.ok".localized(defaultValue: "OK"), role: .cancel) { }
             } message: {
-                Text("Check your notifications in a few seconds!")
+                Text("notifications.test.success.message".localized(defaultValue: "Check your notifications in a few seconds!"))
             }
-            .alert("Notification Failed", isPresented: $showTestError) {
-                Button("OK", role: .cancel) { }
+            .alert("notifications.test.failed.title".localized(defaultValue: "Notification Failed"), isPresented: $showTestError) {
+                Button("alert.ok".localized(defaultValue: "OK"), role: .cancel) { }
             } message: {
-                Text("Please enable notifications in Settings to receive alerts.")
+                Text("notifications.test.failed.message".localized(defaultValue: "Please enable notifications in Settings to receive alerts."))
             }
             .alert("Error", isPresented: $viewModel.showErrorAlert) {
                 Button("OK", role: .cancel) {
@@ -109,7 +109,7 @@ struct NotificationSettingsView: View {
 
     private var notificationTypesSection: some View {
         VStack(alignment: .leading, spacing: Spacing.lg) {
-            Text("NOTIFICATION TYPES")
+            Text("notifications.section.types".localized(defaultValue: "NOTIFICATION TYPES"))
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundColor(.secondary)
@@ -119,7 +119,7 @@ struct NotificationSettingsView: View {
                 VStack(spacing: 0) {
                     NotificationToggleRow(
                         icon: "chart.bar.fill",
-                        title: "Weekly Summary",
+                        title: "notifications.weekly.title".localized(defaultValue: "Weekly Summary"),
                         description: weeklyDescription,
                         isOn: $viewModel.weeklyEnabled,
                         onTap: {
@@ -154,8 +154,8 @@ struct NotificationSettingsView: View {
                 // Milestone Alerts
                 NotificationToggleRow(
                     icon: "star.fill",
-                    title: "Milestone Alerts",
-                    description: "Celebrate achievements and positive streaks",
+                    title: "notifications.milestones.title".localized(defaultValue: "Milestone Alerts"),
+                    description: "notifications.milestones.description".localized(defaultValue: "Celebrate achievements and positive streaks"),
                     isOn: $viewModel.milestonesEnabled,
                     onTap: {
                         viewModel.toggleMilestones(!viewModel.milestonesEnabled)
@@ -172,8 +172,8 @@ struct NotificationSettingsView: View {
                 // Spending Alerts
                 NotificationToggleRow(
                     icon: "exclamationmark.triangle.fill",
-                    title: "Spending Alerts",
-                    description: "Get notified when spending increases >20%",
+                    title: "notifications.spending.title".localized(defaultValue: "Spending Alerts"),
+                    description: "notifications.spending.description".localized(defaultValue: "Get notified when spending increases >20%"),
                     isOn: $viewModel.spendingEnabled,
                     onTap: {
                         viewModel.toggleSpending(!viewModel.spendingEnabled)
@@ -191,7 +191,7 @@ struct NotificationSettingsView: View {
                 VStack(spacing: 0) {
                     NotificationToggleRow(
                         icon: "sun.max.fill",
-                        title: "Daily Encouragement",
+                        title: "notifications.daily.title".localized(defaultValue: "Daily Encouragement"),
                         description: dailyDescription,
                         isOn: $viewModel.dailyEnabled,
                         isPremium: true,
@@ -249,7 +249,7 @@ struct NotificationSettingsView: View {
             .accessibilityLabel("Weekly notification time picker")
             .accessibilityHint("Select the time for weekly summary notifications every Sunday")
 
-            Text("Notification will be sent every Sunday at this time")
+            Text("notifications.weekly.time_hint".localized(defaultValue: "Notification will be sent every Sunday at this time"))
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -277,7 +277,7 @@ struct NotificationSettingsView: View {
             .accessibilityLabel("Daily notification time picker")
             .accessibilityHint("Select the time for daily encouragement notifications. Premium feature")
 
-            Text("Notification will be sent every day at this time")
+            Text("notifications.daily.time_hint".localized(defaultValue: "Notification will be sent every day at this time"))
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -307,7 +307,7 @@ struct NotificationSettingsView: View {
                     Image(systemName: "paperplane.fill")
                         .font(.subheadline)
 
-                    Text("Send Test Notification")
+                    Text("notifications.test.button".localized(defaultValue: "Send Test Notification"))
                         .font(.subheadline)
                         .fontWeight(.medium)
                 }
@@ -320,7 +320,7 @@ struct NotificationSettingsView: View {
             .disabled(viewModel.permissionStatus != .authorized)
 
             if viewModel.permissionStatus != .authorized {
-                Text("Enable notifications to send test")
+                Text("notifications.test.disabled_hint".localized(defaultValue: "Enable notifications to send test"))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -334,7 +334,7 @@ struct NotificationSettingsView: View {
 
     private var infoSection: some View {
         VStack(alignment: .leading, spacing: Spacing.lg) {
-            Text("HOW IT WORKS")
+            Text("notifications.section.how_it_works".localized(defaultValue: "HOW IT WORKS"))
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundColor(.secondary)
@@ -342,26 +342,26 @@ struct NotificationSettingsView: View {
             VStack(alignment: .leading, spacing: Spacing.md) {
                 infoRow(
                     icon: "chart.bar.fill",
-                    title: "Weekly Summary",
-                    description: "Get a comprehensive overview of your financial progress every Sunday evening."
+                    title: "notifications.weekly.title".localized(defaultValue: "Weekly Summary"),
+                    description: "notifications.info.weekly".localized(defaultValue: "Get a comprehensive overview of your financial progress every Sunday evening.")
                 )
 
                 infoRow(
                     icon: "star.fill",
-                    title: "Milestone Alerts",
-                    description: "Celebrate positive spending streaks and goal achievements as they happen."
+                    title: "notifications.milestones.title".localized(defaultValue: "Milestone Alerts"),
+                    description: "notifications.info.milestones".localized(defaultValue: "Celebrate positive spending streaks and goal achievements as they happen.")
                 )
 
                 infoRow(
                     icon: "exclamationmark.triangle.fill",
-                    title: "Spending Alerts",
-                    description: "Receive early warnings when your spending increases significantly."
+                    title: "notifications.spending.title".localized(defaultValue: "Spending Alerts"),
+                    description: "notifications.info.spending".localized(defaultValue: "Receive early warnings when your spending increases significantly.")
                 )
 
                 infoRow(
                     icon: "sun.max.fill",
-                    title: "Daily Encouragement",
-                    description: "Start each day with personalized financial tips and motivation. (Premium)"
+                    title: "notifications.daily.title".localized(defaultValue: "Daily Encouragement"),
+                    description: "notifications.info.daily".localized(defaultValue: "Start each day with personalized financial tips and motivation. (Premium)")
                 )
             }
             .padding(Spacing.lg)

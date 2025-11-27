@@ -54,7 +54,7 @@ struct MonthComparisonView: View {
                     .foregroundColor(.blue)
                     .font(.title3)
 
-                Text("Month Comparison")
+                Text("charts.month_comparison.title".localized(defaultValue: "Month Comparison"))
                     .font(.headline)
                     .fontWeight(.semibold)
 
@@ -72,7 +72,7 @@ struct MonthComparisonView: View {
                 }
             }
 
-            Text("Compare this month vs last month")
+            Text("charts.month_comparison.subtitle".localized(defaultValue: "Compare this month vs last month"))
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
@@ -147,7 +147,7 @@ struct MonthComparisonView: View {
                     RoundedRectangle(cornerRadius: 3)
                         .fill(Color.gray)
                         .frame(width: 12, height: 12)
-                    Text("Last Expenses")
+                    Text("charts.legend.last_expenses".localized(defaultValue: "Last Expenses"))
                         .font(.caption)
                 }
 
@@ -155,7 +155,7 @@ struct MonthComparisonView: View {
                     RoundedRectangle(cornerRadius: 3)
                         .fill(Color.green)
                         .frame(width: 12, height: 12)
-                    Text("Last Income")
+                    Text("charts.legend.last_income".localized(defaultValue: "Last Income"))
                         .font(.caption)
                 }
 
@@ -164,7 +164,7 @@ struct MonthComparisonView: View {
                     RoundedRectangle(cornerRadius: 3)
                         .fill(Color.orange)
                         .frame(width: 12, height: 12)
-                    Text("This Expenses")
+                    Text("charts.legend.this_expenses".localized(defaultValue: "This Expenses"))
                         .font(.caption)
                 }
 
@@ -172,7 +172,7 @@ struct MonthComparisonView: View {
                     RoundedRectangle(cornerRadius: 3)
                         .fill(Color.blue)
                         .frame(width: 12, height: 12)
-                    Text("This Income")
+                    Text("charts.legend.this_income".localized(defaultValue: "This Income"))
                         .font(.caption)
                 }
             }
@@ -186,7 +186,7 @@ struct MonthComparisonView: View {
         VStack(spacing: 12) {
             // Expense comparison
             comparisonRow(
-                title: "Expenses",
+                title: "charts.comparison.expenses".localized(defaultValue: "Expenses"),
                 previousValue: previousMonth?.totalExpense ?? 0,
                 currentValue: currentMonth?.totalExpense ?? 0,
                 goodWhenLower: true
@@ -196,7 +196,7 @@ struct MonthComparisonView: View {
 
             // Income comparison
             comparisonRow(
-                title: "Income",
+                title: "charts.comparison.income".localized(defaultValue: "Income"),
                 previousValue: previousMonth?.totalIncome ?? 0,
                 currentValue: currentMonth?.totalIncome ?? 0,
                 goodWhenLower: false
@@ -206,7 +206,7 @@ struct MonthComparisonView: View {
 
             // Net flow comparison
             comparisonRow(
-                title: "Net Flow",
+                title: "charts.comparison.net_flow".localized(defaultValue: "Net Flow"),
                 previousValue: (previousMonth?.totalIncome ?? 0) - (previousMonth?.totalExpense ?? 0),
                 currentValue: (currentMonth?.totalIncome ?? 0) - (currentMonth?.totalExpense ?? 0),
                 goodWhenLower: false
@@ -264,11 +264,11 @@ struct MonthComparisonView: View {
                 .font(.system(size: 48))
                 .foregroundColor(.gray.opacity(0.5))
 
-            Text("Not enough data")
+            Text("charts.month_comparison.empty.title".localized(defaultValue: "Not enough data"))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
 
-            Text("Add expenses for at least 2 months")
+            Text("charts.month_comparison.empty.message".localized(defaultValue: "Add expenses for at least 2 months"))
                 .font(.caption)
                 .foregroundColor(.secondary)
         }

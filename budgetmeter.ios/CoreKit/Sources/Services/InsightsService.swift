@@ -266,7 +266,7 @@ final class InsightsService {
         }
 
         let absChange = abs(percentageChange)
-        let formattedChange = String(format: "%.0f%%", absChange)
+        let formattedChange = PercentageFormatter.formatInteger(absChange)
 
         let trend: Insight.Trend = isImprovement ? .down : .up
         let color: Color = isImprovement ? .green : .orange

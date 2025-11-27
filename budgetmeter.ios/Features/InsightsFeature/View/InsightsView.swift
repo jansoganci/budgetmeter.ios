@@ -36,7 +36,7 @@ struct InsightsView: View {
                     contentView
                 }
             }
-            .navigationTitle("Insights")
+            .navigationTitle("insights.nav.title".localized(defaultValue: "Insights"))
             .navigationBarTitleDisplayMode(.large)
             .sheet(isPresented: $viewModel.showPaywall) {
                 PremiumPaywallView(
@@ -82,7 +82,7 @@ struct InsightsView: View {
 
     private var insightsSection: some View {
         VStack(alignment: .leading, spacing: Spacing.lg) {
-            Text("Your Financial Insights")
+            Text("insights.section.title".localized(defaultValue: "Your Financial Insights"))
                 .sectionTitleStyle()
 
             if viewModel.insights.isEmpty {
@@ -97,7 +97,7 @@ struct InsightsView: View {
                         }
                     }
                 } else {
-                    Text("No insights available yet. Add your income and expenses to see insights.")
+                    Text("insights.empty.message".localized(defaultValue: "No insights available yet. Add your income and expenses to see insights."))
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .padding()
@@ -159,16 +159,16 @@ struct InsightsView: View {
                 .foregroundColor(.brandProgress)
 
             VStack(spacing: Spacing.md) {
-                Text("Premium Feature")
+                Text("insights.premium.title".localized(defaultValue: "Premium Feature"))
                     .font(.title)
                     .fontWeight(.bold)
 
-                Text("Unlock Insights Dashboard with Premium")
+                Text("insights.premium.subtitle".localized(defaultValue: "Unlock Insights Dashboard with Premium"))
                     .font(.headline)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
 
-                Text("Get automated financial insights, spending breakdowns, and trend analysis to make smarter money decisions.")
+                Text("insights.premium.description".localized(defaultValue: "Get automated financial insights, spending breakdowns, and trend analysis to make smarter money decisions."))
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -178,7 +178,7 @@ struct InsightsView: View {
             Button {
                 viewModel.upgradeToPremium()
             } label: {
-                Text("Upgrade to Premium")
+                Text("insights.premium.upgrade_button".localized(defaultValue: "Upgrade to Premium"))
                     .font(.headline)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
@@ -197,7 +197,7 @@ struct InsightsView: View {
     private var loadingView: some View {
         VStack(spacing: Spacing.lg) {
             ProgressView()
-            Text("Loading insights...")
+            Text("insights.loading".localized(defaultValue: "Loading insights..."))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }
@@ -215,11 +215,11 @@ struct InsightsView: View {
                 .foregroundColor(.chartInactive)
 
             VStack(spacing: Spacing.md) {
-                Text("No Data Yet")
+                Text("insights.no_data.title".localized(defaultValue: "No Data Yet"))
                     .font(.title2)
                     .fontWeight(.bold)
 
-                Text("Add your income and expenses to see insights")
+                Text("insights.no_data.message".localized(defaultValue: "Add your income and expenses to see insights"))
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -285,9 +285,9 @@ struct InsightCardView: View {
 
     private func trendAccessibilityText(_ trend: Insight.Trend) -> String {
         switch trend {
-        case .up: return "increasing"
-        case .down: return "decreasing"
-        case .neutral: return "stable"
+        case .up: return "insights.trend.increasing".localized(defaultValue: "increasing")
+        case .down: return "insights.trend.decreasing".localized(defaultValue: "decreasing")
+        case .neutral: return "insights.trend.stable".localized(defaultValue: "stable")
         }
     }
 

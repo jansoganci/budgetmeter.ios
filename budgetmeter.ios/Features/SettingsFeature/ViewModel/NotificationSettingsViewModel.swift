@@ -124,7 +124,7 @@ final class NotificationSettingsViewModel: ObservableObject {
             }
         } catch {
             print("📱 NotificationSettings: ❌ Failed to load settings: \(error)")
-            errorMessage = "Failed to load notification settings"
+            errorMessage = "notifications.error.load_failed".localized(defaultValue: "Failed to load notification settings")
         }
     }
 
@@ -154,7 +154,7 @@ final class NotificationSettingsViewModel: ObservableObject {
             print("📱 NotificationSettings: ✅ Saved settings")
         } catch {
             print("📱 NotificationSettings: ❌ Failed to save settings: \(error)")
-            errorMessage = "Failed to save notification settings"
+            errorMessage = "notifications.error.save_failed".localized(defaultValue: "Failed to save notification settings")
         }
     }
 
@@ -261,7 +261,7 @@ final class NotificationSettingsViewModel: ObservableObject {
             }
         } catch {
             print("📱 NotificationSettings: ❌ Permission request failed: \(error)")
-            errorMessage = "Failed to request notification permissions"
+            errorMessage = "notifications.error.permission_failed".localized(defaultValue: "Failed to request notification permissions")
         }
     }
 
@@ -334,6 +334,16 @@ final class NotificationSettingsViewModel: ObservableObject {
             .sink { [weak self] _ in
                 // Reload settings if changed externally
                 print("📱 NotificationSettings: Core Data changed, reloading...")
+            }
+            .store(in: &cancellables)
+
+        // Listen for language changes
+        NotificationCenter.default.publisher(for: .languageDidChange)
+            .sink { [weak self] _ in
+                // Trigger UI refresh to re-evaluate localized strings
+                DispatchQueue.main.async {
+                    self?.objectWillChange.send()
+                }
             }
             .store(in: &cancellables)
     }

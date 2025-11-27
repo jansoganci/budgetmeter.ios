@@ -33,7 +33,9 @@ struct SavingsGoalInputView: View {
     @State private var showError = false
     @State private var errorMessage = ""
 
-    private let currencySymbol = CurrencyHelper.symbol(for: CurrencyHelper.defaultCurrencyCode())
+    private var currencySymbol: String {
+        CurrencyHelper.symbol(for: CurrencyHelper.currentCurrencyCode())
+    }
 
     // MARK: - Enums
 
@@ -51,13 +53,13 @@ struct SavingsGoalInputView: View {
     }
 
     private var title: String {
-        isEditMode ? "Edit Goal" : "Add Goal"
+        isEditMode ? "savings.title.edit".localized(defaultValue: "Edit Goal") : "savings.title.add".localized(defaultValue: "Add Goal")
     }
 
     private var saveButtonDisabled: Bool {
         goalName.trimmingCharacters(in: .whitespaces).isEmpty ||
         targetAmount.trimmingCharacters(in: .whitespaces).isEmpty ||
-        parseAmount(targetAmount) <= 0
+        (parseAmount(targetAmount) ?? 0) <= 0
     }
 
     private var requiredMonthlyText: String? {
@@ -66,14 +68,14 @@ struct SavingsGoalInputView: View {
         guard let current = parseAmount(currentAmount) else { return nil }
 
         let remaining = max(0, target - current)
-        guard remaining > 0 else { return "Goal reached!" }
+        guard remaining > 0 else { return "savings.goal_reached".localized(defaultValue: "Goal reached!") }
 
         let calendar = Calendar.current
         let months = calendar.dateComponents([.month], from: Date(), to: targetDate).month ?? 0
-        guard months > 0 else { return "Save \(formatAmount(remaining)) immediately" }
+        guard months > 0 else { return String(format: "savings.save_immediately".localized(defaultValue: "Save %@ immediately"), formatAmount(remaining)) }
 
         let monthlyRequired = remaining / Double(months)
-        return "To reach your goal by \(formatShortDate(targetDate)), save \(formatAmount(monthlyRequired))/month"
+        return String(format: "savings.monthly_required".localized(defaultValue: "To reach your goal by %@, save %@/month"), formatShortDate(targetDate), formatAmount(monthlyRequired))
     }
 
     // MARK: - Categories and Emojis
@@ -106,12 +108,12 @@ struct SavingsGoalInputView: View {
                 VStack(spacing: Spacing.xl) {
                     // Goal Name
                     VStack(alignment: .leading, spacing: Spacing.sm) {
-                        Text("Goal Name *")
+                        Text("savings.goal_name".localized(defaultValue: "Goal Name *"))
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.textSecondary)
 
-                        TextField("Vacation Fund, New Car, etc.", text: $goalName)
+                        TextField("savings.goal_name_placeholder".localized(defaultValue: "Vacation Fund, New Car, etc."), text: $goalName)
                             .textFieldStyle(.plain)
                             .font(.body)
                             .padding(Spacing.md)
@@ -122,7 +124,7 @@ struct SavingsGoalInputView: View {
 
                     // Emoji Picker
                     VStack(alignment: .leading, spacing: Spacing.sm) {
-                        Text("Choose Emoji (optional)")
+                        Text("savings.choose_emoji".localized(defaultValue: "Choose Emoji (optional)"))
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.textSecondary)
@@ -150,7 +152,7 @@ struct SavingsGoalInputView: View {
 
                     // Target Amount
                     VStack(alignment: .leading, spacing: Spacing.sm) {
-                        Text("Target Amount *")
+                        Text("savings.target_amount".localized(defaultValue: "Target Amount *"))
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.textSecondary)
@@ -174,7 +176,7 @@ struct SavingsGoalInputView: View {
 
                     // Current Amount
                     VStack(alignment: .leading, spacing: Spacing.sm) {
-                        Text("Current Amount")
+                        Text("savings.current_amount".localized(defaultValue: "Current Amount"))
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.textSecondary)
@@ -200,12 +202,12 @@ struct SavingsGoalInputView: View {
                     VStack(alignment: .leading, spacing: Spacing.sm) {
                         Toggle(isOn: $hasTargetDate) {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("Set Target Date")
+                                Text("savings.set_target_date".localized(defaultValue: "Set Target Date"))
                                     .font(.subheadline)
                                     .fontWeight(.medium)
                                     .foregroundColor(.textPrimary)
 
-                                Text("Track your progress toward a deadline")
+                                Text("savings.target_date_description".localized(defaultValue: "Track your progress toward a deadline"))
                                     .font(.caption)
                                     .foregroundColor(.textSecondary)
                             }
@@ -214,7 +216,7 @@ struct SavingsGoalInputView: View {
 
                         if hasTargetDate {
                             DatePicker(
-                                "Target Date",
+                                "savings.target_date".localized(defaultValue: "Target Date"),
                                 selection: $targetDate,
                                 in: Date()...,
                                 displayedComponents: [.date]
@@ -239,7 +241,7 @@ struct SavingsGoalInputView: View {
 
                     // Category
                     VStack(alignment: .leading, spacing: Spacing.sm) {
-                        Text("Category")
+                        Text("form.category".localized(defaultValue: "Category"))
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.textSecondary)
@@ -257,7 +259,7 @@ struct SavingsGoalInputView: View {
 
                     // Notes
                     VStack(alignment: .leading, spacing: Spacing.sm) {
-                        Text("Notes (optional)")
+                        Text("form.notes_optional".localized(defaultValue: "Notes (optional)"))
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundColor(.textSecondary)
@@ -272,7 +274,7 @@ struct SavingsGoalInputView: View {
 
                     // Save Button
                     Button(action: saveGoal) {
-                        Text(isEditMode ? "Save Changes" : "Create Goal")
+                        Text(isEditMode ? "form.save_changes".localized(defaultValue: "Save Changes") : "savings.create_goal".localized(defaultValue: "Create Goal"))
                             .font(.headline)
                             .fontWeight(.semibold)
                             .foregroundColor(.white)
@@ -289,7 +291,7 @@ struct SavingsGoalInputView: View {
                             Button(action: { showDeleteConfirmation = true }) {
                                 HStack {
                                     Image(systemName: "trash")
-                                    Text("Delete Goal")
+                                    Text("savings.delete_goal".localized(defaultValue: "Delete Goal"))
                                 }
                                 .font(.body)
                                 .fontWeight(.medium)
@@ -304,30 +306,30 @@ struct SavingsGoalInputView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                    Button("form.cancel".localized(defaultValue: "Cancel")) {
                         dismiss()
                     }
                 }
 
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
-                    Button("Done") {
+                    Button("form.done".localized(defaultValue: "Done")) {
                         focusedField = nil
                     }
                     .foregroundColor(.brandProgress)
                     .fontWeight(.semibold)
                 }
             }
-            .alert("Delete Goal?", isPresented: $showDeleteConfirmation) {
-                Button("Cancel", role: .cancel) { }
-                Button("Delete", role: .destructive) {
+            .alert("savings.delete_confirm_title".localized(defaultValue: "Delete Goal?"), isPresented: $showDeleteConfirmation) {
+                Button("form.cancel".localized(defaultValue: "Cancel"), role: .cancel) { }
+                Button("savings.delete_goal".localized(defaultValue: "Delete Goal"), role: .destructive) {
                     deleteGoal()
                 }
             } message: {
-                Text("This will permanently delete this savings goal. This action cannot be undone.")
+                Text("savings.delete_confirm_message".localized(defaultValue: "This will permanently delete this savings goal. This action cannot be undone."))
             }
-            .alert("Error", isPresented: $showError) {
-                Button("OK", role: .cancel) { }
+            .alert("alert.error.title".localized(defaultValue: "Error"), isPresented: $showError) {
+                Button("alert.ok".localized(defaultValue: "OK"), role: .cancel) { }
             } message: {
                 Text(errorMessage)
             }
@@ -343,8 +345,8 @@ struct SavingsGoalInputView: View {
         guard let goal = goal else { return }
 
         goalName = goal.name ?? ""
-        targetAmount = String(format: "%.2f", goal.targetAmount)
-        currentAmount = String(format: "%.2f", goal.currentAmount)
+        targetAmount = CurrencyHelper.formatForTextField(goal.targetAmount)
+        currentAmount = CurrencyHelper.formatForTextField(goal.currentAmount)
         selectedEmoji = goal.emoji ?? ""
         selectedCategory = goal.category ?? "Other"
         notes = goal.notes ?? ""
@@ -357,14 +359,14 @@ struct SavingsGoalInputView: View {
 
     private func saveGoal() {
         guard let targetValue = parseAmount(targetAmount), targetValue > 0 else {
-            errorMessage = "Please enter a valid target amount"
+            errorMessage = "savings.error.invalid_target".localized(defaultValue: "Please enter a valid target amount")
             showError = true
             return
         }
 
         let trimmedName = goalName.trimmingCharacters(in: .whitespaces)
         guard !trimmedName.isEmpty else {
-            errorMessage = "Please enter a goal name"
+            errorMessage = "savings.error.enter_name".localized(defaultValue: "Please enter a goal name")
             showError = true
             return
         }
@@ -404,7 +406,7 @@ struct SavingsGoalInputView: View {
                 // onSave() removed - notification observer handles UI update
                 dismiss()
             } else {
-                errorMessage = "Failed to update goal"
+                errorMessage = "savings.error.failed_update".localized(defaultValue: "Failed to update goal")
                 showError = true
             }
         } else {
@@ -424,7 +426,7 @@ struct SavingsGoalInputView: View {
                 // onSave() removed - notification observer handles UI update
                 dismiss()
             } else {
-                errorMessage = "Failed to create goal"
+                errorMessage = "savings.error.failed_create".localized(defaultValue: "Failed to create goal")
                 showError = true
             }
         }
@@ -439,7 +441,7 @@ struct SavingsGoalInputView: View {
             // onSave() removed - notification observer handles UI update
             dismiss()
         } else {
-            errorMessage = "Failed to delete goal"
+            errorMessage = "savings.error.failed_delete".localized(defaultValue: "Failed to delete goal")
             showError = true
         }
     }
@@ -450,7 +452,7 @@ struct SavingsGoalInputView: View {
     }
 
     private func formatAmount(_ amount: Double) -> String {
-        CurrencyHelper.format(amount: amount, currencyCode: CurrencyHelper.defaultCurrencyCode())
+        CurrencyHelper.format(amount: amount, currencyCode: CurrencyHelper.currentCurrencyCode())
     }
 
     private func formatShortDate(_ date: Date) -> String {

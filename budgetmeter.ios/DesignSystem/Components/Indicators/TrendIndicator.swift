@@ -59,7 +59,7 @@ struct TrendIndicator: View {
     }
 
     private var formattedPercentage: String {
-        String(format: "%+.1f%%", percentage)
+        PercentageFormatter.formatChange(percentage)
     }
 
     private var accessibilityLabel: String {

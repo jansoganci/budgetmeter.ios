@@ -1,5 +1,5 @@
 //
-//  HealthScoreCard.swift
+//  HealthScoreDetailCard.swift
 //  BudgetMeter
 //
 //  Phase 1D: Financial Health Details - Score Card Component
@@ -8,8 +8,8 @@
 
 import SwiftUI
 
-/// Large circular health score display card
-struct HealthScoreCard: View {
+/// Large circular health score display card for Health Details view
+struct HealthScoreDetailCard: View {
 
     // MARK: - Properties
 
@@ -123,7 +123,7 @@ struct HealthScoreCard: View {
 // MARK: - Preview
 
 #Preview("Excellent Score") {
-    HealthScoreCard(
+    HealthScoreDetailCard(
         score: 92,
         scoreText: "Excellent",
         color: .green,
@@ -133,7 +133,7 @@ struct HealthScoreCard: View {
 }
 
 #Preview("Good Score") {
-    HealthScoreCard(
+    HealthScoreDetailCard(
         score: 68,
         scoreText: "Good",
         color: .yellow,
@@ -143,7 +143,7 @@ struct HealthScoreCard: View {
 }
 
 #Preview("Needs Improvement") {
-    HealthScoreCard(
+    HealthScoreDetailCard(
         score: 35,
         scoreText: "Needs Improvement",
         color: .red,

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreData
 
 struct CurrencyOption: Identifiable, Equatable {
     let id: String
@@ -128,6 +129,19 @@ enum CurrencyHelper {
         return "USD"
     }
 
+    /// Returns the current currency code from user settings (stored in AppSettings)
+    /// Falls back to defaultCurrencyCode if not set
+    static func currentCurrencyCode() -> String {
+        let context = PersistenceService.shared.viewContext
+        let fetchRequest: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
+        if let settings = try? context.fetch(fetchRequest),
+           let storedCode = settings.first?.preferredCurrencyCode,
+           supportedCurrencyCodes.contains(storedCode) {
+            return storedCode
+        }
+        return defaultCurrencyCode()
+    }
+
     static func locale(for code: String) -> Locale {
         if let overrideIdentifier = currencyLocaleOverrides[code] {
             return Locale(identifier: overrideIdentifier)
@@ -166,7 +180,13 @@ enum CurrencyHelper {
     /// Fallback formatting if NumberFormatter fails
     private static func formatFallback(_ amount: Double, code: String) -> String {
         let currencySymbol = symbol(for: code)
-        return String(format: "%@%.2f", currencySymbol, amount)
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.minimumFractionDigits = 2
+        formatter.maximumFractionDigits = 2
+        formatter.locale = LocalizationManager.shared.currentLocale
+        let formatted = formatter.string(from: NSNumber(value: amount)) ?? String(format: "%.2f", amount)
+        return "\(currencySymbol)\(formatted)"
     }
 
     // MARK: - Multi-Language Currency Support
@@ -210,6 +230,18 @@ enum CurrencyHelper {
     static func formatAmount(_ amount: Double, for languageCode: String) -> String {
         let formatter = formatterForLanguage(languageCode)
         return formatter.string(from: NSNumber(value: amount)) ?? "\(languageSymbolMappings[languageCode] ?? "$")\(amount)"
+    }
+    
+    /// Formats a number for text field input (locale-aware decimal formatting)
+    /// - Parameter value: The numeric value to format
+    /// - Returns: Formatted string suitable for text field input (e.g., "1234.56")
+    static func formatForTextField(_ value: Double) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.minimumFractionDigits = 2
+        formatter.maximumFractionDigits = 2
+        formatter.locale = LocalizationManager.shared.currentLocale
+        return formatter.string(from: NSNumber(value: value)) ?? String(format: "%.2f", value)
     }
 }
 

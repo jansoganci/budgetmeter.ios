@@ -12,31 +12,23 @@ struct SettingsView: View {
     
     @StateObject private var viewModel = SettingsViewModel()
     @StateObject private var premiumManager = PremiumManager.shared
-    
+    @State private var showingPremiumPaywall = false
+
     var body: some View {
         NavigationView {
             List {
-                // Appearance Section
-                appearanceSection
-                
-                // Language & Region Section
-                languageSection
-
-                // Currency Section
-                currencySection
-
-                // Notifications Section
-                notificationsSection
-
-                // Premium Section
+                // Premium Section (top priority - revenue generating)
                 premiumSection
-                
+
+                // General Section (Notifications, Language, Currency, Appearance combined)
+                generalSection
+
                 // Data & Privacy Section
                 dataPrivacySection
-                
+
                 // About Section
                 aboutSection
-                
+
                 // Debug Section (DEBUG builds only)
                 #if DEBUG
                 debugSection
@@ -69,6 +61,16 @@ struct SettingsView: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
         }
+        .sheet(isPresented: $viewModel.isAppearancePickerPresented) {
+            AppearancePickerView(
+                selectedAppearance: viewModel.selectedAppearance,
+                onSelect: { mode in
+                    viewModel.updateAppearance(mode)
+                }
+            )
+            .presentationDetents([.height(280)])
+            .presentationDragIndicator(.visible)
+        }
         .sheet(isPresented: $viewModel.showingPrivacyPolicy) {
             privacyPolicyView
         }
@@ -96,43 +98,28 @@ struct SettingsView: View {
         }
     }
     
-    // MARK: - Appearance Section
-    
-    private var appearanceSection: some View {
-        Section {
-            ForEach(SettingsViewModel.AppearanceMode.allCases, id: \.self) { mode in
-                HStack {
-                    Image(systemName: iconForAppearanceMode(mode))
-                        .foregroundColor(.brandProgress)
-                        .frame(width: 24)
+    // MARK: - General Section (Notifications, Language, Currency, Appearance combined)
 
-                    Text(mode.displayName)
-                        .font(.body)
+    private var generalSection: some View {
+        Section {
+            // Notifications Row
+            NavigationLink(destination: NotificationSettingsView()) {
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("settings.notifications.title".localized(defaultValue: "Notifications"))
+                            .font(.body)
+                            .foregroundColor(.primary)
+                        Text("settings.notifications.subtitle".localized(defaultValue: "Manage alerts and reminders"))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
 
                     Spacer()
-
-                    if viewModel.selectedAppearance == mode {
-                        Image(systemName: "checkmark")
-                            .foregroundColor(.brandProgress)
-                            .font(.system(size: 16, weight: .semibold))
-                    }
                 }
                 .contentShape(Rectangle())
-                .onTapGesture {
-                    viewModel.updateAppearance(mode)
-                }
             }
-        } header: {
-            Text("settings.appearance.title".localized(defaultValue: "Appearance"))
-        } footer: {
-            Text("settings.appearance.footer".localized(defaultValue: "Choose how the app looks on your device."))
-        }
-    }
-    
-    // MARK: - Language Section
-    
-    private var languageSection: some View {
-        Section {
+
+            // Language Row
             Button {
                 viewModel.showLanguagePicker()
             } label: {
@@ -155,17 +142,8 @@ struct SettingsView: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("settings.language.title".localized(defaultValue: "Language"))
-            .accessibilityValue(viewModel.selectedLanguageDisplayText)
-        } footer: {
-            Text("settings.language.footer".localized(defaultValue: "Change the app's display language. This setting is independent of your device's system language."))
-        }
-    }
 
-    // MARK: - Currency Section
-
-    private var currencySection: some View {
-        Section {
+            // Currency Row
             Button {
                 viewModel.showCurrencyPicker()
             } label: {
@@ -188,30 +166,17 @@ struct SettingsView: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("settings.currency.row.accessibility_label".localized(defaultValue: "Currency"))
-            .accessibilityValue(viewModel.selectedCurrencyDisplayText)
-        } header: {
-            Text("settings.currency.title".localized(defaultValue: "Currency"))
-        } footer: {
-            Text("settings.currency.footer".localized(defaultValue: "Select your preferred currency for displaying amounts."))
-        }
-    }
 
-    // MARK: - Notifications Section
-
-    private var notificationsSection: some View {
-        Section {
-            NavigationLink(destination: NotificationSettingsView()) {
+            // Appearance Row
+            Button {
+                viewModel.showAppearancePicker()
+            } label: {
                 HStack(spacing: 12) {
-                    Image(systemName: "bell.fill")
-                        .foregroundColor(.brandProgress)
-                        .frame(width: 24)
-
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Notifications")
+                        Text("settings.appearance.title".localized(defaultValue: "Appearance"))
                             .font(.body)
                             .foregroundColor(.primary)
-                        Text("Manage alerts and reminders")
+                        Text(viewModel.selectedAppearance.displayName)
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -224,120 +189,119 @@ struct SettingsView: View {
                 }
                 .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
         } header: {
-            Text("NOTIFICATIONS")
-        } footer: {
-            Text("Control how BudgetMeter notifies you about your financial progress")
+            Text("settings.general.title".localized(defaultValue: "General"))
         }
     }
 
-    // MARK: - Premium Section
+    // MARK: - Premium Section (Non-Premium Users)
 
+    @ViewBuilder
     private var premiumSection: some View {
-        Section {
-            NavigationLink(destination: SubscriptionsView()) {
-                PremiumFeatureRow(
-                    title: "settings.premium.subscriptions".localized(defaultValue: "Subscription Tracking"),
-                    subtitle: "settings.premium.subscriptions.subtitle".localized(defaultValue: "Track and manage all your subscriptions"),
-                    iconName: "creditcard",
-                    premiumFeature: .subscriptionTracking
-                )
-            }
-
-            NavigationLink(destination: BillsView()) {
-                PremiumFeatureRow(
-                    title: "settings.premium.bills".localized(defaultValue: "Bill Reminders"),
-                    subtitle: "settings.premium.bills.subtitle".localized(defaultValue: "Track bills and due dates"),
-                    iconName: "doc.text",
-                    premiumFeature: .billReminders
-                )
-            }
-
-            NavigationLink(destination: SavingsGoalsView()) {
-                PremiumFeatureRow(
-                    title: "settings.premium.savings_goals".localized(defaultValue: "Savings Goals"),
-                    subtitle: "settings.premium.savings_goals.subtitle".localized(defaultValue: "Track multiple goals with visual progress"),
-                    iconName: "target",
-                    premiumFeature: .savingsGoals
-                )
-            }
-
-            NavigationLink(destination: RecurringTransactionsView()) {
-                PremiumFeatureRow(
-                    title: "settings.premium.recurring".localized(defaultValue: "Recurring Transactions"),
-                    subtitle: "settings.premium.recurring.subtitle".localized(defaultValue: "Automate repeating transactions"),
-                    iconName: "repeat",
-                    premiumFeature: .recurringTransactions
-                )
-            }
-            
-            NavigationLink(destination: DataExportView()) {
-                PremiumFeatureRow(
-                    title: "settings.premium.export".localized(defaultValue: "Data Export"),
-                    subtitle: "settings.premium.export.subtitle".localized(defaultValue: "Export your data in multiple formats"),
-                    iconName: "square.and.arrow.up",
-                    premiumFeature: .dataExport
-                )
-            }
-            
-            NavigationLink(destination: WidgetsSetupView()) {
-                PremiumFeatureRow(
-                    title: "settings.premium.widgets".localized(defaultValue: "Widgets"),
-                    subtitle: "settings.premium.widgets.subtitle".localized(defaultValue: "Display data on Home Screen"),
-                    iconName: "rectangle.3.group",
-                    premiumFeature: .widgets
-                )
-            }
-            
-            NavigationLink(destination: InsightsView()) {
-                PremiumFeatureRow(
-                    title: "settings.premium.insights".localized(defaultValue: "Spending Insights"),
-                    subtitle: "settings.premium.insights.subtitle".localized(defaultValue: "Visual charts and analytics"),
-                    iconName: "chart.bar.fill",
-                    premiumFeature: .spendingInsights
-                )
-            }
-            
-            NavigationLink(destination: BiometricSettingsView()) {
-                HStack {
-                    Image(systemName: "faceid")
-                        .foregroundColor(.accentColor)
-                        .frame(width: 24)
-
-                    VStack(alignment: .leading) {
-                        Text("settings.premium.biometric".localized(defaultValue: "Biometric Lock"))
-                            .font(.body)
-                            .foregroundColor(.primary)
-                        Text("settings.premium.biometric.subtitle".localized(defaultValue: "Protect with Face ID or Touch ID"))
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-
-                    Spacer()
-
-                    // DEBUG: Always show as available for testing
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.brandPositive)
-                        .font(.caption)
+        if premiumManager.isPremium {
+            // Premium user: Show categorized feature sections
+            trackingAndGoalsSection
+            customizationSection
+            securitySection
+        } else {
+            // Non-premium user: Show only the upgrade banner
+            Section {
+                PremiumUpgradeBanner {
+                    showingPremiumPaywall = true
                 }
-                .contentShape(Rectangle())
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
+            } header: {
+                Text("settings.premium.title".localized(defaultValue: "Premium Features"))
             }
-            
-            NavigationLink(destination: PremiumThemesView()) {
-                PremiumFeatureRow(
-                    title: "settings.premium.themes".localized(defaultValue: "Premium Themes"),
-                    subtitle: "settings.premium.themes.subtitle".localized(defaultValue: "Beautiful themes and app icons"),
-                    iconName: "paintbrush.fill",
-                    premiumFeature: .premiumThemes
+            .sheet(isPresented: $showingPremiumPaywall) {
+                PremiumPaywallView(
+                    feature: .subscriptionTracking,
+                    onDismiss: { showingPremiumPaywall = false },
+                    onPurchase: { showingPremiumPaywall = false },
+                    onRestore: { showingPremiumPaywall = false }
+                )
+            }
+        }
+    }
+
+    // MARK: - Tracking & Goals Section (Premium)
+
+    private var trackingAndGoalsSection: some View {
+        Section {
+            NavigationLink(destination: SavingsGoalsView()) {
+                premiumFeatureRowSimple(
+                    title: "settings.premium.savings_goals".localized(defaultValue: "Savings Goals"),
+                    iconName: "target"
                 )
             }
         } header: {
-            Text("settings.premium.title".localized(defaultValue: "Premium Features"))
-        } footer: {
-            Text("settings.premium.footer".localized(defaultValue: "Unlock all premium features with a one-time purchase of $4.99"))
+            Text("settings.premium.tracking.title".localized(defaultValue: "Tracking & Goals"))
         }
     }
-    
+
+    // MARK: - Customization Section (Premium)
+
+    private var customizationSection: some View {
+        Section {
+            NavigationLink(destination: PremiumThemesView()) {
+                premiumFeatureRowSimple(
+                    title: "settings.premium.themes".localized(defaultValue: "Premium Themes"),
+                    iconName: "paintbrush.fill"
+                )
+            }
+
+            NavigationLink(destination: WidgetsSetupView()) {
+                premiumFeatureRowSimple(
+                    title: "settings.premium.widgets".localized(defaultValue: "Widgets"),
+                    iconName: "rectangle.3.group"
+                )
+            }
+
+            NavigationLink(destination: DataExportView()) {
+                premiumFeatureRowSimple(
+                    title: "settings.premium.export".localized(defaultValue: "Data Export"),
+                    iconName: "square.and.arrow.up"
+                )
+            }
+        } header: {
+            Text("settings.premium.customization.title".localized(defaultValue: "Customization"))
+        }
+    }
+
+    // MARK: - Security Section (Premium)
+
+    private var securitySection: some View {
+        Section {
+            NavigationLink(destination: BiometricSettingsView()) {
+                premiumFeatureRowSimple(
+                    title: "settings.premium.biometric".localized(defaultValue: "Biometric Lock"),
+                    iconName: "faceid"
+                )
+            }
+        } header: {
+            Text("settings.premium.security.title".localized(defaultValue: "Security"))
+        }
+    }
+
+    // MARK: - Premium Feature Row Helper
+
+    private func premiumFeatureRowSimple(title: String, iconName: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: iconName)
+                .foregroundColor(.brandProgress)
+                .frame(width: 24)
+
+            Text(title)
+                .font(.body)
+                .foregroundColor(.primary)
+
+            Spacer()
+        }
+        .contentShape(Rectangle())
+    }
+
     // MARK: - Data & Privacy Section
     
     private var dataPrivacySection: some View {
@@ -467,63 +431,63 @@ struct SettingsView: View {
         NavigationView {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("BudgetMeter Privacy Policy")
+                    Text("settings.privacy.policy.title".localized(defaultValue: "BudgetMeter Privacy Policy"))
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .padding(.bottom, 8)
                     
-                    Text("Last Updated: September 2025")
+                    Text("settings.privacy.policy.last_updated".localized(defaultValue: "Last Updated: September 2025"))
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .padding(.bottom, 8)
                     
                     Group {
-                        Text("DATA CONTROLLER")
+                        Text("settings.privacy.policy.data_controller.title".localized(defaultValue: "DATA CONTROLLER"))
                             .font(.headline)
                             .fontWeight(.semibold)
-                        Text("Umurcan Soganci\nEmail: umursoganci@gmail.com")
+                        Text("settings.privacy.policy.data_controller.content".localized(defaultValue: "Umurcan Soganci\nEmail: umursoganci@gmail.com"))
                             .font(.body)
                         
-                        Text("DATA WE COLLECT")
+                        Text("settings.privacy.policy.data_collect.title".localized(defaultValue: "DATA WE COLLECT"))
                             .font(.headline)
                             .fontWeight(.semibold)
                             .padding(.top, 8)
-                        Text("• Financial data (income, expenses, categories) - stored locally on your device\n• App preferences (currency, language) - stored locally\n• iCloud sync data (when enabled) - stored in your personal iCloud account")
+                        Text("settings.privacy.policy.data_collect.content".localized(defaultValue: "• Financial data (income, expenses, categories) - stored locally on your device\n• App preferences (currency, language) - stored locally\n• iCloud sync data (when enabled) - stored in your personal iCloud account"))
                             .font(.body)
                         
-                        Text("HOW WE USE DATA")
+                        Text("settings.privacy.policy.data_use.title".localized(defaultValue: "HOW WE USE DATA"))
                             .font(.headline)
                             .fontWeight(.semibold)
                             .padding(.top, 8)
-                        Text("• To provide financial tracking functionality\n• To sync across your devices via iCloud (optional)\n• All processing happens locally on your device")
+                        Text("settings.privacy.policy.data_use.content".localized(defaultValue: "• To provide financial tracking functionality\n• To sync across your devices via iCloud (optional)\n• All processing happens locally on your device"))
                             .font(.body)
                         
-                        Text("DATA SHARING")
+                        Text("settings.privacy.policy.data_sharing.title".localized(defaultValue: "DATA SHARING"))
                             .font(.headline)
                             .fontWeight(.semibold)
                             .padding(.top, 8)
-                        Text("We do not share, sell, or transmit your personal data to any third parties.")
+                        Text("settings.privacy.policy.data_sharing.content".localized(defaultValue: "We do not share, sell, or transmit your personal data to any third parties."))
                             .font(.body)
                         
-                        Text("DATA STORAGE")
+                        Text("settings.privacy.policy.data_storage.title".localized(defaultValue: "DATA STORAGE"))
                             .font(.headline)
                             .fontWeight(.semibold)
                             .padding(.top, 8)
-                        Text("• Local: Core Data database on your device\n• Cloud: Your private iCloud account (optional)\n• No external servers or third-party databases")
+                        Text("settings.privacy.policy.data_storage.content".localized(defaultValue: "• Local: Core Data database on your device\n• Cloud: Your private iCloud account (optional)\n• No external servers or third-party databases"))
                             .font(.body)
                         
-                        Text("YOUR RIGHTS")
+                        Text("settings.privacy.policy.your_rights.title".localized(defaultValue: "YOUR RIGHTS"))
                             .font(.headline)
                             .fontWeight(.semibold)
                             .padding(.top, 8)
-                        Text("• Access: View all your data within the app\n• Delete: Reset all data via Settings\n• Control: Disable iCloud sync anytime")
+                        Text("settings.privacy.policy.your_rights.content".localized(defaultValue: "• Access: View all your data within the app\n• Delete: Reset all data via Settings\n• Control: Disable iCloud sync anytime"))
                             .font(.body)
                         
-                        Text("CONTACT")
+                        Text("settings.privacy.policy.contact.title".localized(defaultValue: "CONTACT"))
                             .font(.headline)
                             .fontWeight(.semibold)
                             .padding(.top, 8)
-                        Text("For privacy questions: umursoganci@gmail.com")
+                        Text("settings.privacy.policy.contact.content".localized(defaultValue: "For privacy questions: umursoganci@gmail.com"))
                             .font(.body)
                     }
 
@@ -548,70 +512,70 @@ struct SettingsView: View {
         NavigationView {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("BudgetMeter Terms of Service")
+                    Text("settings.terms.policy.title".localized(defaultValue: "BudgetMeter Terms of Service"))
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .padding(.bottom, 8)
                     
-                    Text("Last Updated: September 2025")
+                    Text("settings.terms.policy.last_updated".localized(defaultValue: "Last Updated: September 2025"))
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .padding(.bottom, 8)
                     
                     Group {
-                        Text("ACCEPTANCE")
+                        Text("settings.terms.policy.acceptance.title".localized(defaultValue: "ACCEPTANCE"))
                             .font(.headline)
                             .fontWeight(.semibold)
-                        Text("By downloading and using BudgetMeter, you agree to these terms of service.")
+                        Text("settings.terms.policy.acceptance.content".localized(defaultValue: "By downloading and using BudgetMeter, you agree to these terms of service."))
                             .font(.body)
                         
-                        Text("LICENSE")
+                        Text("settings.terms.policy.license.title".localized(defaultValue: "LICENSE"))
                             .font(.headline)
                             .fontWeight(.semibold)
                             .padding(.top, 8)
-                        Text("We grant you a personal, non-commercial license to use BudgetMeter for managing your personal finances.")
+                        Text("settings.terms.policy.license.content".localized(defaultValue: "We grant you a personal, non-commercial license to use BudgetMeter for managing your personal finances."))
                             .font(.body)
 
-                        Text("IN-APP PURCHASES & SUBSCRIPTIONS")
+                        Text("settings.terms.policy.iap.title".localized(defaultValue: "IN-APP PURCHASES & SUBSCRIPTIONS"))
                             .font(.headline)
                             .fontWeight(.semibold)
                             .padding(.top, 8)
-                        Text("• BudgetMeter Premium is available as an auto-renewing subscription\n• Payment will be charged to your Apple ID account at confirmation of purchase\n• Subscription automatically renews unless canceled at least 24 hours before the end of the current period\n• Your account will be charged for renewal within 24 hours prior to the end of the current period\n• You can manage and cancel your subscriptions in your App Store account settings\n• Any unused portion of a free trial period will be forfeited when purchasing a subscription\n• Subscriptions are processed through Apple's App Store - we do not have access to your payment information\n• Refunds are handled by Apple according to their refund policy")
+                        Text("settings.terms.policy.iap.content".localized(defaultValue: "• BudgetMeter Premium is available as an auto-renewing subscription\n• Payment will be charged to your Apple ID account at confirmation of purchase\n• Subscription automatically renews unless canceled at least 24 hours before the end of the current period\n• Your account will be charged for renewal within 24 hours prior to the end of the current period\n• You can manage and cancel your subscriptions in your App Store account settings\n• Any unused portion of a free trial period will be forfeited when purchasing a subscription\n• Subscriptions are processed through Apple's App Store - we do not have access to your payment information\n• Refunds are handled by Apple according to their refund policy"))
                             .font(.body)
 
-                        Text("FINANCIAL DISCLAIMER")
+                        Text("settings.terms.policy.financial_disclaimer.title".localized(defaultValue: "FINANCIAL DISCLAIMER"))
                             .font(.headline)
                             .fontWeight(.semibold)
                             .padding(.top, 8)
-                        Text("• BudgetMeter is for informational purposes only\n• This app does not provide professional financial advice\n• We are not liable for financial decisions made using this app\n• Calculations may contain errors - verify important figures")
+                        Text("settings.terms.policy.financial_disclaimer.content".localized(defaultValue: "• BudgetMeter is for informational purposes only\n• This app does not provide professional financial advice\n• We are not liable for financial decisions made using this app\n• Calculations may contain errors - verify important figures"))
                             .font(.body)
                         
-                        Text("INTELLECTUAL PROPERTY")
+                        Text("settings.terms.policy.intellectual_property.title".localized(defaultValue: "INTELLECTUAL PROPERTY"))
                             .font(.headline)
                             .fontWeight(.semibold)
                             .padding(.top, 8)
-                        Text("BudgetMeter app and all content are owned by Umurcan Soganci. All rights reserved.")
+                        Text("settings.terms.policy.intellectual_property.content".localized(defaultValue: "BudgetMeter app and all content are owned by Umurcan Soganci. All rights reserved."))
                             .font(.body)
                         
-                        Text("WARRANTY DISCLAIMER")
+                        Text("settings.terms.policy.warranty.title".localized(defaultValue: "WARRANTY DISCLAIMER"))
                             .font(.headline)
                             .fontWeight(.semibold)
                             .padding(.top, 8)
-                        Text("The app is provided 'as-is' without warranties of any kind, express or implied.")
+                        Text("settings.terms.policy.warranty.content".localized(defaultValue: "The app is provided 'as-is' without warranties of any kind, express or implied."))
                             .font(.body)
                         
-                        Text("LIMITATION OF LIABILITY")
+                        Text("settings.terms.policy.liability.title".localized(defaultValue: "LIMITATION OF LIABILITY"))
                             .font(.headline)
                             .fontWeight(.semibold)
                             .padding(.top, 8)
-                        Text("Our maximum liability is limited to the amount you paid for the app or subscription in the 12 months prior to the claim.")
+                        Text("settings.terms.policy.liability.content".localized(defaultValue: "Our maximum liability is limited to the amount you paid for the app or subscription in the 12 months prior to the claim."))
                             .font(.body)
                         
-                        Text("CONTACT")
+                        Text("settings.terms.policy.contact.title".localized(defaultValue: "CONTACT"))
                             .font(.headline)
                             .fontWeight(.semibold)
                             .padding(.top, 8)
-                        Text("Questions about these terms: umursoganci@gmail.com")
+                        Text("settings.terms.policy.contact.content".localized(defaultValue: "Questions about these terms: umursoganci@gmail.com"))
                             .font(.body)
                     }
                     
@@ -638,27 +602,25 @@ struct SettingsView: View {
     #if DEBUG
     private var debugSection: some View {
         Section {
-            HStack {
-                Image(systemName: "crown.fill")
-                    .foregroundColor(.yellow)
-                    .frame(width: 24)
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("debug.premium.title".localized(defaultValue: "Premium Mode"))
-                        .font(.headline)
-                    Text("debug.premium.subtitle".localized(defaultValue: "Toggle premium features for testing"))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                
-                Spacer()
-                
-                Toggle("", isOn: $premiumManager.isPremium)
-                    .onChange(of: premiumManager.isPremium) { newValue in
-                        premiumManager.setDebugPremiumStatus(newValue)
+            Toggle(isOn: $premiumManager.isPremium) {
+                HStack(spacing: 12) {
+                    Image(systemName: "crown.fill")
+                        .foregroundColor(.yellow)
+                        .frame(width: 24)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("debug.premium.title".localized(defaultValue: "Premium Mode"))
+                            .font(.body)
+                            .foregroundColor(.primary)
+                        Text("debug.premium.subtitle".localized(defaultValue: "Toggle premium features for testing"))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
+                }
             }
-            .padding(.vertical, 5)
+            .onChange(of: premiumManager.isPremium) { newValue in
+                premiumManager.setDebugPremiumStatus(newValue)
+            }
         } header: {
             Text("debug.section.title".localized(defaultValue: "Debug"))
         } footer: {
@@ -666,16 +628,6 @@ struct SettingsView: View {
         }
     }
     #endif
-    
-    // MARK: - Helper Methods
-    
-    private func iconForAppearanceMode(_ mode: SettingsViewModel.AppearanceMode) -> String {
-        switch mode {
-        case .light: return "sun.max"
-        case .dark: return "moon"
-        case .system: return "circle.lefthalf.filled"
-        }
-    }
 }
 
 // MARK: - Preview

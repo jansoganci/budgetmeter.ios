@@ -51,6 +51,7 @@ final class InsightsViewModel: ObservableObject {
     private let premiumManager: PremiumManager
     private let persistenceService: PersistenceService
     private var cancellables = Set<AnyCancellable>()
+    private var currencyCode: String = CurrencyHelper.defaultCurrencyCode()
 
     // MARK: - Initialization
 
@@ -66,6 +67,7 @@ final class InsightsViewModel: ObservableObject {
         self.persistenceService = persistenceService
 
         setupObservers()
+        loadCurrency()
         loadData()
     }
 
@@ -106,7 +108,8 @@ final class InsightsViewModel: ObservableObject {
                 print("📊 InsightsViewModel: Loaded \(generatedInsights.count) insights")
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to load insights: \(error.localizedDescription)"
+                    let errorFormat = "insights.error.load_failed".localized(defaultValue: "Failed to load insights: %@")
+                    self.errorMessage = String(format: errorFormat, error.localizedDescription)
                     self.isLoading = false
                 }
                 print("📊 InsightsViewModel: ❌ Error loading data: \(error)")
@@ -191,6 +194,60 @@ final class InsightsViewModel: ObservableObject {
                 self.loadData()
             }
             .store(in: &cancellables)
+
+        // Listen for language changes
+        NotificationCenter.default.publisher(for: .languageDidChange)
+            .sink { [weak self] _ in
+                // Trigger UI refresh to re-evaluate localized strings
+                DispatchQueue.main.async {
+                    self?.objectWillChange.send()
+                }
+            }
+            .store(in: &cancellables)
+
+        // Listen for currency changes
+        NotificationCenter.default.publisher(for: .currencyDidChange)
+            .sink { [weak self] notification in
+                self?.currencyDidChange(notification)
+            }
+            .store(in: &cancellables)
+    }
+
+    // MARK: - Currency Management
+
+    func loadCurrency() {
+        let context = persistenceService.viewContext
+        let fetchRequest: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
+        if let settings = try? context.fetch(fetchRequest),
+           let storedCode = settings.first?.preferredCurrencyCode,
+           CurrencyHelper.supportedCurrencyCodes.contains(storedCode) {
+            updateCurrency(code: storedCode)
+        } else {
+            updateCurrency(code: CurrencyHelper.defaultCurrencyCode())
+        }
+    }
+
+    func updateCurrency(code: String) {
+        let resolvedCode = CurrencyHelper.supportedCurrencyCodes.contains(code) ? code : CurrencyHelper.defaultCurrencyCode()
+        currencyCode = resolvedCode
+    }
+
+    @objc func currencyDidChange(_ notification: Notification) {
+        if let code = notification.userInfo?["code"] as? String {
+            updateCurrency(code: code)
+        } else {
+            loadCurrency()
+        }
+        // Trigger UI refresh
+        DispatchQueue.main.async {
+            self.objectWillChange.send()
+        }
+    }
+
+    // MARK: - Formatting
+
+    func formatAmount(_ amount: Double) -> String {
+        CurrencyHelper.format(amount: amount, currencyCode: currencyCode)
     }
 }
 
@@ -212,8 +269,8 @@ extension InsightsViewModel {
         }
 
         return [
-            ("Last Month", previous.totalExpense),
-            ("This Month", current.totalExpense)
+            ("insights.chart.last_month".localized(defaultValue: "Last Month"), previous.totalExpense),
+            ("insights.chart.this_month".localized(defaultValue: "This Month"), current.totalExpense)
         ]
     }
 

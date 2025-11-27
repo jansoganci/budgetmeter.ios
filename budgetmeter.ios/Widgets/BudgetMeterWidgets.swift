@@ -2,6 +2,7 @@ import WidgetKit
 import SwiftUI
 import CoreData
 
+@main
 struct BudgetMeterWidgets: WidgetBundle {
     var body: some Widget {
         // Home Screen Widgets

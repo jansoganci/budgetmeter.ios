@@ -46,6 +46,12 @@ final class IncomeViewModel: ObservableObject {
     var yearlyProjectionIncome: Double {
         return totalMonthlyIncome * 12
     }
+
+    /// Number of income sources with amounts > 0
+    var activeSourcesCount: Int {
+        let allCategories = dailyIncomes + monthlyIncomes + yearlyIncomes
+        return allCategories.filter { $0.amount > 0 }.count
+    }
     
     // MARK: - Localized Summary Titles
     
@@ -92,8 +98,21 @@ final class IncomeViewModel: ObservableObject {
         category.amount = amount
         persistenceService.save()
 
+        // Reload data to reflect changes immediately
+        loadIncomeCategories()
+
         // Reload widgets to show updated income data
         WidgetCenter.shared.reloadAllTimelines()
+    }
+
+    /// Updates the color for a custom category
+    func updateColor(for category: FinancialCategory, color: CategoryColor) {
+        guard category.isCustom else { return }
+        category.customColorHex = color.rawValue
+        persistenceService.save()
+
+        // Reload to reflect changes
+        loadIncomeCategories()
     }
     
     /// Formats amount for display in input field (no live formatting during input)
@@ -165,7 +184,22 @@ final class IncomeViewModel: ObservableObject {
     func refresh() {
         loadIncomeCategories()
     }
-    
+
+    /// Deletes a custom income category
+    func deleteCategory(_ category: FinancialCategory) {
+        guard category.isCustom else { return }
+
+        let context = persistenceService.viewContext
+        context.delete(category)
+        persistenceService.save()
+
+        // Reload to update UI
+        loadIncomeCategories()
+
+        // Reload widgets
+        WidgetCenter.shared.reloadAllTimelines()
+    }
+
     // MARK: - Private Methods
     
     private func loadIncomeCategories() {
@@ -200,7 +234,7 @@ final class IncomeViewModel: ObservableObject {
 // MARK: - Category Grouping Helper
 
 extension IncomeViewModel {
-    
+
     /// Groups categories by frequency for easier UI rendering
     var categoryGroups: [(title: String, categories: [FinancialCategory], color: Color)] {
         [
@@ -221,12 +255,80 @@ extension IncomeViewModel {
             )
         ]
     }
-    
+
     /// Checks if any income categories have been entered
     var hasIncomeData: Bool {
         let allCategories = dailyIncomes + monthlyIncomes + yearlyIncomes
         return allCategories.contains { category in
             return category.amount > 0
+        }
+    }
+
+    // MARK: - Subtotal Methods for Collapsible Sections
+
+    /// Returns the raw subtotal for a given frequency
+    func subtotalForFrequency(_ frequency: String) -> Double {
+        switch frequency {
+        case "daily":
+            return dailyIncomes.reduce(0) { $0 + $1.amount }
+        case "monthly":
+            return monthlyIncomes.reduce(0) { $0 + $1.amount }
+        case "yearly":
+            return yearlyIncomes.reduce(0) { $0 + $1.amount }
+        default:
+            return 0
+        }
+    }
+
+    /// Returns formatted subtitle for section header (e.g., "$150/day", "$5,983/mo", "$71,796/yr")
+    func formattedSubtotal(_ frequency: String) -> String {
+        let total = subtotalForFrequency(frequency)
+
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.minimumFractionDigits = 0
+        formatter.maximumFractionDigits = 0
+        formatter.groupingSeparator = ","
+
+        let formatted = formatter.string(from: NSNumber(value: total)) ?? "0"
+
+        switch frequency {
+        case "daily":
+            return "\(currencySymbol)\(formatted)/day"
+        case "monthly":
+            return "\(currencySymbol)\(formatted)/mo"
+        case "yearly":
+            return "\(currencySymbol)\(formatted)/yr"
+        default:
+            return "\(currencySymbol)\(formatted)"
+        }
+    }
+
+    /// Returns section title for a given frequency
+    func sectionTitle(_ frequency: String) -> String {
+        switch frequency {
+        case "daily":
+            return String(localized: "income.section.daily", defaultValue: "Daily Income")
+        case "monthly":
+            return String(localized: "income.section.monthly", defaultValue: "Monthly Income")
+        case "yearly":
+            return String(localized: "income.section.yearly", defaultValue: "Yearly Income")
+        default:
+            return String(localized: "income.section.other", defaultValue: "Other Income")
+        }
+    }
+
+    /// Returns categories for a given frequency
+    func categoriesForFrequency(_ frequency: String) -> [FinancialCategory] {
+        switch frequency {
+        case "daily":
+            return dailyIncomes
+        case "monthly":
+            return monthlyIncomes
+        case "yearly":
+            return yearlyIncomes
+        default:
+            return []
         }
     }
 }
