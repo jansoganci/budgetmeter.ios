@@ -1,66 +1,22 @@
-# 💰 BudgetMeter iOS
+# BudgetMeter iOS
+BudgetMeter is a privacy-first iOS app for people who want to track income, expenses, and savings goals with live financial feedback, and it is currently in active development (not publicly live yet).
 
-**A minimalist, privacy-first personal finance app for iOS**
+## What it does
+- Calculates your live money flow in real time while the app is open, so you can see how your budget changes moment by moment.
+- Lets you log income and expenses by category with daily, monthly, and yearly frequencies for consistent tracking.
+- Shows a financial dashboard with net flow, health scoring, and day/month snapshots from your stored data.
+- Tracks savings goals with progress indicators and time-to-goal estimates based on your current financial patterns.
+- Supports 21+ currencies and 10 languages, while keeping data local-first with private iCloud sync.
 
-[![iOS](https://img.shields.io/badge/iOS-17.0+-blue.svg)](https://developer.apple.com/ios/)
-[![Swift](https://img.shields.io/badge/Swift-5.9-orange.svg)](https://swift.org)
-[![SwiftUI](https://img.shields.io/badge/SwiftUI-5.0-green.svg)](https://developer.apple.com/xcode/swiftui/)
-[![Core Data](https://img.shields.io/badge/Core%20Data-CloudKit-red.svg)](https://developer.apple.com/documentation/coredata)
+## How I built this
+I built this project with an AI-orchestrated workflow using Cursor for implementation speed, Claude for architecture and edge-case reasoning, and Copilot for in-editor code completion during SwiftUI and ViewModel work. I used AI to draft view structures, service scaffolding, and repetitive localization/test patterns, then personally reviewed business logic, data flow boundaries, and all finance-related calculations before keeping changes. Final technical decisions around module boundaries, persistence behavior, and user experience trade-offs were made manually.
 
-## 🎯 Overview
-
-BudgetMeter is a native iOS application that provides a **real-time, continuous view** of your financial flow. Built with privacy-first principles, all your financial data stays on your device and syncs privately through your personal iCloud account.
-
-### ✨ Key Features
-
-- **📊 Live Financial Meter** - Real-time tracking of your money flow since app launch
-- **💸 Income & Expense Tracking** - Simple category-based financial input
-- **📈 Smart Dashboard** - Comprehensive financial health overview
-- **🎯 Savings Goal Tracking** - Set targets and track progress with time-to-goal projections
-- **💰 Multi-Currency Support** - 21+ currencies with automatic language-based selection
-- **🌍 Multi-Language Interface** - 10 languages including English, Turkish, German, French, Spanish, Italian, Portuguese, Japanese, Chinese, and Arabic
-- **🔒 Complete Privacy** - No external servers, no tracking, no data collection
-- **☁️ Private iCloud Sync** - Your data syncs securely across your devices
-- **🎨 Native iOS Experience** - Built with SwiftUI, follows Apple's Human Interface Guidelines
-
-## 📱 Screenshots
-
-*Coming soon - App Store screenshots will be added here*
-
-## 🏗️ Architecture
-
-BudgetMeter follows a **modular, feature-based architecture** built entirely on Apple's native frameworks:
-
-### 🧩 Tech Stack
-
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| **UI Framework** | SwiftUI | Modern, declarative iOS interface |
-| **Architecture** | MVVM Pattern | Clean separation of concerns |
-| **Data Layer** | Core Data + CloudKit | Local storage with private cloud sync |
-| **Concurrency** | Swift Concurrency | Responsive UI with async operations |
-| **Localization** | String Catalogs (.xcstrings) | Multi-language support |
-
-### 📁 Project Structure
-
-```
-BudgetMeter.app/
-├── 📱 App/
-│   ├── BudgetMeterApp.swift          # Main app entry point
-│   └── ContentView.swift             # Root view with tab navigation
-│
-├── 🔧 CoreKit/                       # Core business logic
-│   ├── Models/                       # Core Data entities
-│   ├── Engine/                       # Financial calculation engine
-│   ├── Persistence/                  # Data management services
-│   └── Utilities/                    # Shared utilities and extensions
-│
-└── 🎯 Features/                      # Feature-based modules
-    ├── HomeFeature/                  # Dashboard and live meter
-    ├── IncomesFeature/               # Income tracking interface
-    ├── ExpensesFeature/              # Expense tracking interface
-    └── SettingsFeature/              # App configuration
-```
+## Tech Stack
+- **Frontend:** SwiftUI (iOS 17.0+), Swift 5.9, MVVM, Swift Concurrency (`async/await`)
+- **Backend:** No external backend (local-first architecture on device)
+- **Database:** Core Data with CloudKit private database sync
+- **Integrations:** iCloud/CloudKit, Apple localization via String Catalogs (`.xcstrings`)
+- **Deployment:** Xcode 15+ build pipeline, iOS app target (`budgetmeter.ios`)
 
 ## 🚀 Getting Started
 
