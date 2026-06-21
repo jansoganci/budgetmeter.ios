@@ -18,6 +18,7 @@ struct BillRowView: View {
         case standard
     }
 
+
     // MARK: - Properties
 
     let bill: Bill
