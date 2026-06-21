@@ -553,7 +553,7 @@
   - some token naming consistency
   - some screen polish consistency
   - some accessibility coverage consistency
-  - some legacy-styled feature surfaces
+  - some legacy-styled feature surfaces 
 
   Design generation should reduce consistency debt, not create more.
 
