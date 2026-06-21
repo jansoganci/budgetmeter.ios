@@ -1,0 +1,36 @@
+# Xcode build output
+build/
+DerivedData/
+*.xcuserstate
+*.xcuserdatad
+xcuserdata/
+
+# Swift Package Manager (local checkouts when using custom derived data)
+.build/
+SourcePackages/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Supabase CLI temp
+supabase/.temp/
+
+# Archives & dSYM
+*.xcarchive
+*.dSYM.zip
+*.dSYM
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Code injection / previews
+__preview.dylib
