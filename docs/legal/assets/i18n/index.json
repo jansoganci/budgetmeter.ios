@@ -1,0 +1,24 @@
+{
+  "en": {
+    "title": "Legal",
+    "intro": "Public legal documents for the BudgetMeter iOS app.",
+    "links": [
+      { "label": "Privacy Policy", "href": "privacy/" },
+      { "label": "Terms of Service", "href": "terms/" },
+      { "label": "Account Deletion", "href": "account-deletion/" },
+      { "label": "Data Retention", "href": "data-retention/" },
+      { "label": "Support & Contact", "href": "support/" }
+    ]
+  },
+  "tr": {
+    "title": "Yasal Belgeler",
+    "intro": "BudgetMeter iOS uygulaması için herkese açık yasal belgeler.",
+    "links": [
+      { "label": "Gizlilik Politikası", "href": "privacy/" },
+      { "label": "Kullanım Koşulları", "href": "terms/" },
+      { "label": "Hesap Silme", "href": "account-deletion/" },
+      { "label": "Veri Saklama", "href": "data-retention/" },
+      { "label": "Destek ve İletişim", "href": "support/" }
+    ]
+  }
+}

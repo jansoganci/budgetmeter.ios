@@ -2,7 +2,7 @@
 //  ExpenseView.swift
 //  BudgetMeter
 //
-//  Redesigned with collapsible sections and full-width rows
+//  Expense entry screen with collapsible sections (v2 transformation).
 //
 
 import SwiftUI
@@ -13,74 +13,47 @@ struct ExpenseView: View {
 
     @StateObject private var viewModel = ExpenseViewModel()
     @StateObject private var localizationManager = LocalizationManager.shared
+    @StateObject private var premiumManager = PremiumManager.shared
 
-    // MARK: - State
-
-    // Section expand state (Daily expanded by default)
     @State private var isDailyExpanded = true
     @State private var isMonthlyExpanded = false
     @State private var isSubscriptionsExpanded = false
     @State private var isYearlyExpanded = false
+    @State private var isOneTimeExpanded = false
 
-    // Edit sheet state
     @State private var categoryToEdit: FinancialCategory?
-
-    // Create modal state
     @State private var showingCreateModal = false
     @State private var selectedFrequency = ""
 
-    // Subscription sheet state
     @State private var showingAddSubscription = false
+    @State private var showingSubscriptionPaywall = false
     @State private var subscriptionToEdit: Subscription?
-
-    // MARK: - Body
 
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(spacing: Spacing.lg) {
-                    if viewModel.isLoading {
-                        loadingView
-                    } else {
-                        // Hero Summary Card
-                        FinancialSummaryCard(
-                            totalMonthly: viewModel.totalMonthlyExpenses,
-                            dailyAverage: viewModel.dailyAverageExpenses,
-                            yearlyProjection: viewModel.yearlyProjectionExpenses,
-                            currencySymbol: viewModel.currencySymbol,
-                            type: .expense,
-                            sourcesCount: viewModel.activeSourcesCount
-                        )
-                        .padding(.horizontal, Spacing.lg)
+            ZStack {
+                AppBackground()
 
-                        // Collapsible Sections
-                        VStack(spacing: Spacing.md) {
-                            // Daily Expenses Section (expanded by default)
-                            expenseSection(
-                                frequency: "daily",
-                                isExpanded: $isDailyExpanded
-                            )
+                ScrollView {
+                    VStack(spacing: LayoutSpacing.sectionGap) {
+                        if viewModel.isLoading {
+                            loadingView
+                        } else {
+                            summaryHeroCard
 
-                            // Monthly Expenses Section
-                            expenseSection(
-                                frequency: "monthly",
-                                isExpanded: $isMonthlyExpanded
-                            )
+                            if viewModel.activeSourcesCount == 0 {
+                                emptyStateSection
+                            } else {
+                                secondaryAddButton
+                            }
 
-                            // Subscriptions Section
-                            subscriptionsSection
-
-                            // Yearly Expenses Section
-                            expenseSection(
-                                frequency: "yearly",
-                                isExpanded: $isYearlyExpanded
-                            )
+                            sectionsStack
                         }
                     }
+                    .padding(.vertical, Spacing.md)
+                    .padding(.horizontal, LayoutSpacing.screenPadding)
                 }
-                .padding(.vertical, Spacing.md)
             }
-            .background(Color.appBackground)
             .navigationTitle(String(localized: "tab.expenses.title", defaultValue: "Expenses"))
             .navigationBarTitleDisplayMode(.large)
             .refreshable {
@@ -116,11 +89,19 @@ struct ExpenseView: View {
                     showingCreateModal = false
                 }
             )
+            .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showingAddSubscription) {
             QuickSubscriptionPickerView {
                 viewModel.loadSubscriptions()
             }
+        }
+        .sheet(isPresented: $showingSubscriptionPaywall) {
+            PremiumPaywallView(
+                onDismiss: { showingSubscriptionPaywall = false },
+                onPurchase: { showingSubscriptionPaywall = false },
+                onRestore: { showingSubscriptionPaywall = false }
+            )
         }
         .sheet(item: $subscriptionToEdit) { subscription in
             SubscriptionInputView(subscription: subscription) {
@@ -144,7 +125,61 @@ struct ExpenseView: View {
         }
     }
 
-    // MARK: - Expense Section
+    // MARK: - Summary Hero
+
+    private var summaryHeroCard: some View {
+        SummaryHeroCard(
+            totalMonthly: viewModel.totalMonthlyExpenses,
+            dailyAverage: viewModel.dailyAverageExpenses,
+            yearlyProjection: viewModel.yearlyProjectionExpenses,
+            currencySymbol: viewModel.currencySymbol,
+            type: .expense,
+            sourcesCount: viewModel.activeSourcesCount
+        )
+    }
+
+    // MARK: - Empty State
+
+    private var emptyStateSection: some View {
+        VStack(spacing: LayoutSpacing.cardInternalGap) {
+            EmptyStateCard(
+                message: String(
+                    localized: "expense.empty.message",
+                    defaultValue: "Add your expenses to see your monthly total and pace."
+                )
+            )
+
+            PrimaryCTAButton(
+                title: "expense.add.primary".localized(defaultValue: "Add expense"),
+                action: { presentCreateModal(frequency: "monthly") }
+            )
+        }
+    }
+
+    private var secondaryAddButton: some View {
+        SecondaryCTAButton(
+            title: "expense.add.primary".localized(defaultValue: "Add expense"),
+            action: { presentCreateModal(frequency: "monthly") }
+        )
+    }
+
+    // MARK: - Sections
+
+    private var sectionsStack: some View {
+        VStack(spacing: Spacing.md) {
+            expenseSection(frequency: "daily", isExpanded: $isDailyExpanded)
+            expenseSection(frequency: "monthly", isExpanded: $isMonthlyExpanded)
+
+            if premiumManager.hasAccess(to: BudgetMeterCapability.subscriptionTracking) {
+                subscriptionsSection
+            } else {
+                lockedSubscriptionsSection
+            }
+
+            expenseSection(frequency: "yearly", isExpanded: $isYearlyExpanded)
+            oneTimeSection
+        }
+    }
 
     @ViewBuilder
     private func expenseSection(frequency: String, isExpanded: Binding<Bool>) -> some View {
@@ -156,45 +191,57 @@ struct ExpenseView: View {
             accentColor: .brandExpense,
             isExpanded: isExpanded
         ) {
-            VStack(spacing: 0) {
-                // Category rows
-                ForEach(categories, id: \.objectID) { category in
-                    FinancialRowView(
-                        category: category,
-                        currencySymbol: viewModel.currencySymbol,
-                        accentColor: .brandExpense,
-                        onEditTap: {
-                            categoryToEdit = category
-                        }
-                    )
-
-                    // Divider between rows (not after last item)
-                    if category != categories.last {
-                        Divider()
-                            .padding(.leading, 56)
-                    }
-                }
-
-                // Add row divider if there are categories
-                if !categories.isEmpty {
-                    Divider()
-                        .padding(.leading, 56)
-                }
-
-                // Add new category row
-                AddFinancialItemRow(
-                    frequency: frequency,
-                    type: "expense",
-                    onTap: {
-                        selectedFrequency = frequency
-                        showingCreateModal = true
-                    }
-                )
-            }
+            categoryList(
+                categories: categories,
+                frequency: frequency,
+                type: "expense",
+                accentColor: .brandExpense
+            )
         }
     }
 
-    // MARK: - Subscriptions Section
+    private var lockedSubscriptionsSection: some View {
+        FinancialSection(
+            title: String(localized: "expense.section.subscriptions", defaultValue: "Subscriptions"),
+            subtitle: String(localized: "expense.subscriptions.premium_required", defaultValue: "Premium required"),
+            accentColor: .brandExpense,
+            isExpanded: $isSubscriptionsExpanded
+        ) {
+            Button {
+                showingSubscriptionPaywall = true
+            } label: {
+                HStack(spacing: Spacing.md) {
+                    Image(systemName: "lock.fill")
+                        .font(.title2)
+                        .foregroundColor(.brandExpense)
+
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
+                        Text(String(localized: "expense.subscriptions.locked.title", defaultValue: "Subscription tracking is premium"))
+                            .statusTitleStyle()
+
+                        Text(String(localized: "expense.subscriptions.locked.message", defaultValue: "Unlock subscriptions to track recurring expenses."))
+                            .captionStyle()
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .captionStyle()
+                }
+                .padding(LayoutSpacing.cardPadding)
+                .background(Color.surfaceCard)
+                .clipShape(RoundedRectangle(cornerRadius: CornerRadius.card, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: CornerRadius.card, style: .continuous)
+                        .stroke(Color.borderSubtle, lineWidth: 1)
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(
+                String(localized: "expense.subscriptions.locked.accessibility", defaultValue: "Subscription tracking is premium. Double tap to view upgrade options.", table: "UI")
+            )
+        }
+    }
 
     private var subscriptionsSection: some View {
         FinancialSection(
@@ -204,7 +251,6 @@ struct ExpenseView: View {
             isExpanded: $isSubscriptionsExpanded
         ) {
             VStack(spacing: 0) {
-                // Subscription rows
                 ForEach(viewModel.subscriptions, id: \.id) { subscription in
                     SubscriptionRowView(
                         subscription: subscription,
@@ -214,20 +260,17 @@ struct ExpenseView: View {
                         }
                     )
 
-                    // Divider between rows
                     if subscription != viewModel.subscriptions.last {
                         Divider()
                             .padding(.leading, 56)
                     }
                 }
 
-                // Add row divider if there are subscriptions
                 if !viewModel.subscriptions.isEmpty {
                     Divider()
                         .padding(.leading, 56)
                 }
 
-                // Add new subscription row
                 AddSubscriptionRow {
                     showingAddSubscription = true
                 }
@@ -235,16 +278,80 @@ struct ExpenseView: View {
         }
     }
 
-    // MARK: - Loading View
+    private var oneTimeSection: some View {
+        FinancialSection(
+            title: viewModel.oneTimeSectionTitle,
+            subtitle: viewModel.formattedOneTimeSubtotal(),
+            accentColor: .brandExpense,
+            isExpanded: $isOneTimeExpanded
+        ) {
+            categoryList(
+                categories: viewModel.oneTimeExpenses,
+                frequency: "monthly",
+                type: "expense",
+                accentColor: .brandExpense
+            )
+        }
+    }
+
+    @ViewBuilder
+    private func categoryList(
+        categories: [FinancialCategory],
+        frequency: String,
+        type: String,
+        accentColor: Color
+    ) -> some View {
+        VStack(spacing: 0) {
+            ForEach(categories, id: \.objectID) { category in
+                FinanceListRow(
+                    category: category,
+                    currencySymbol: viewModel.currencySymbol,
+                    accentColor: accentColor,
+                    onEditTap: {
+                        categoryToEdit = category
+                    }
+                )
+
+                if category != categories.last {
+                    Divider()
+                        .padding(.leading, 56)
+                }
+            }
+
+            if !categories.isEmpty {
+                Divider()
+                    .padding(.leading, 56)
+            }
+
+            AddFinancialItemRow(
+                frequency: frequency,
+                type: type,
+                onTap: {
+                    presentCreateModal(frequency: frequency)
+                }
+            )
+        }
+    }
+
+    // MARK: - Loading
 
     private var loadingView: some View {
         VStack(spacing: Spacing.lg) {
             ProgressView()
                 .scaleEffect(1.2)
             Text(String(localized: "expenses.loading", defaultValue: "Loading expenses..."))
-                .foregroundColor(.secondary)
+                .captionStyle()
         }
         .frame(maxWidth: .infinity, minHeight: 200)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(String(localized: "expenses.loading", defaultValue: "Loading expenses"))
+    }
+
+    // MARK: - Actions
+
+    private func presentCreateModal(frequency: String) {
+        selectedFrequency = frequency
+        showingCreateModal = true
     }
 }
 

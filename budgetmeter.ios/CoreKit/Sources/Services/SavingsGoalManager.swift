@@ -15,7 +15,7 @@ final class SavingsGoalManager {
     static let shared = SavingsGoalManager()
 
     // MARK: - Properties
-    private let persistence = PersistenceService.shared
+    private let persistence: PersistenceService
     private var context: NSManagedObjectContext {
         persistence.viewContext
     }
@@ -26,8 +26,10 @@ final class SavingsGoalManager {
     static let goalDeletedNotification = Notification.Name("SavingsGoalDeleted")
     static let goalCompletedNotification = Notification.Name("SavingsGoalCompleted")
 
-    // MARK: - Private Init
-    private init() {}
+    // MARK: - Init
+    init(persistence: PersistenceService = .shared) {
+        self.persistence = persistence
+    }
 
     // MARK: - CRUD Operations
 
@@ -41,8 +43,13 @@ final class SavingsGoalManager {
         emoji: String? = nil,
         colorHex: String? = nil,
         category: String? = nil,
-        notes: String? = nil
+        notes: String? = nil,
+        enforceFreeGoalLimit: Bool = true
     ) -> SavingsGoal? {
+        if enforceFreeGoalLimit && !canCreateGoalUnderFreeBoundary(in: context) {
+            print("❌ SavingsGoalManager: Free goal limit reached")
+            return nil
+        }
 
         let goal = SavingsGoal(context: context)
         goal.id = UUID()
@@ -55,6 +62,7 @@ final class SavingsGoalManager {
         goal.category = category
         goal.notes = notes
         goal.isArchived = false
+        goal.priority = 0
         goal.createdAt = Date()
         goal.lastModified = Date()
 
@@ -215,17 +223,51 @@ final class SavingsGoalManager {
     func getActiveGoals() -> [SavingsGoal] {
         let request: NSFetchRequest<SavingsGoal> = SavingsGoal.fetchRequest()
         request.predicate = NSPredicate(format: "isArchived == NO")
-        request.sortDescriptors = [
-            NSSortDescriptor(key: "completedDate", ascending: true), // Completed goals last
-            NSSortDescriptor(key: "targetDate", ascending: true)
-        ]
 
         do {
-            return try context.fetch(request)
+            return Self.sortedGoals(try context.fetch(request))
         } catch {
             print("❌ SavingsGoalManager: Failed to fetch active goals: \(error)")
             return []
         }
+    }
+
+    /// Get the deterministic primary active savings goal used by Home and summary calculations.
+    func getPrimaryActiveGoal() -> SavingsGoal? {
+        Self.primaryActiveGoal(in: context)
+    }
+
+    /// Fetch the deterministic primary active savings goal from a supplied context.
+    static func primaryActiveGoal(in context: NSManagedObjectContext) -> SavingsGoal? {
+        let request: NSFetchRequest<SavingsGoal> = SavingsGoal.fetchRequest()
+        request.predicate = NSPredicate(format: "isArchived == NO")
+
+        do {
+            let nonArchivedGoals = try context.fetch(request)
+            let inProgressGoals = nonArchivedGoals.filter { $0.completedDate == nil }
+            if let inProgressPrimary = sortedGoals(inProgressGoals).first {
+                return inProgressPrimary
+            }
+
+            let completedGoals = nonArchivedGoals.filter { $0.completedDate != nil }
+            return sortedGoals(completedGoals).first
+        } catch {
+            print("❌ SavingsGoalManager: Failed to fetch primary active goal: \(error)")
+            return nil
+        }
+    }
+
+    /// Resolves savings target/current using the canonical source-of-truth rule.
+    /// Priority: primary active goal -> AppSettings fallback target, current defaults to 0.
+    static func resolvedSavingsTargetAndCurrent(in context: NSManagedObjectContext) -> (target: Double, current: Double) {
+        if let primary = primaryActiveGoal(in: context) {
+            return (target: primary.targetAmount, current: primary.currentAmount)
+        }
+
+        let settingsRequest: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
+        settingsRequest.fetchLimit = 1
+        let legacyTarget = (try? context.fetch(settingsRequest).first?.savingsGoalAmount) ?? 0
+        return (target: legacyTarget, current: 0)
     }
 
     /// Get completed goals
@@ -309,7 +351,7 @@ final class SavingsGoalManager {
     }
 
     /// Calculate if goal is on pace to meet target date
-    func isPaceStatus(for goal: SavingsGoal) -> PaceStatus {
+    func isPaceStatus(for goal: SavingsGoal) -> SavingsGoalPaceStatus {
         guard let required = calculateRequiredMonthlyContribution(for: goal) else {
             return .unknown
         }
@@ -351,6 +393,38 @@ final class SavingsGoalManager {
         return getActiveGoals().reduce(0) { $0 + $1.targetAmount }
     }
 
+    /// Creates or updates the free basic savings goal used by Home quick entry.
+    @discardableResult
+    func upsertPrimaryBasicGoal(
+        targetAmount: Double,
+        name: String = "My Savings Goal"
+    ) -> SavingsGoal? {
+        let clampedTarget = max(0, targetAmount)
+
+        if let existing = getPrimaryActiveGoal() {
+            existing.targetAmount = clampedTarget
+            existing.lastModified = Date()
+            guard persistence.save() else { return nil }
+            NotificationCenter.default.post(name: Self.goalUpdatedNotification, object: existing)
+            return existing
+        }
+
+        let goal = SavingsGoal(context: context)
+        goal.id = UUID()
+        goal.name = name
+        goal.targetAmount = clampedTarget
+        goal.currentAmount = 0
+        goal.isArchived = false
+        goal.priority = 0
+        goal.emoji = "🎯"
+        goal.createdAt = Date()
+        goal.lastModified = Date()
+
+        guard persistence.save() else { return nil }
+        NotificationCenter.default.post(name: Self.goalAddedNotification, object: goal)
+        return goal
+    }
+
     // MARK: - Private Methods
 
     private func completeGoal(_ goal: SavingsGoal) {
@@ -358,11 +432,61 @@ final class SavingsGoalManager {
         goal.completedDate = Date()
         goal.lastModified = Date()
     }
+
+    private func canCreateGoalUnderFreeBoundary(in context: NSManagedObjectContext) -> Bool {
+        if isPremiumUser(in: context) {
+            return true
+        }
+
+        let request: NSFetchRequest<SavingsGoal> = SavingsGoal.fetchRequest()
+        request.predicate = NSPredicate(format: "isArchived == NO")
+        let count = (try? context.count(for: request)) ?? 0
+        return count == 0
+    }
+
+    private func isPremiumUser(in context: NSManagedObjectContext) -> Bool {
+        let settingsRequest: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
+        settingsRequest.fetchLimit = 1
+        return (try? context.fetch(settingsRequest).first?.isPremiumUser) ?? false
+    }
+
+    private static func sortedGoals(_ goals: [SavingsGoal]) -> [SavingsGoal] {
+        goals.sorted(by: compareGoals)
+    }
+
+    private static func compareGoals(_ lhs: SavingsGoal, _ rhs: SavingsGoal) -> Bool {
+        let lhsPriority = normalizedPriority(for: lhs)
+        let rhsPriority = normalizedPriority(for: rhs)
+        if lhsPriority != rhsPriority { return lhsPriority < rhsPriority }
+
+        let lhsCreatedAt = lhs.createdAt ?? .distantFuture
+        let rhsCreatedAt = rhs.createdAt ?? .distantFuture
+        if lhsCreatedAt != rhsCreatedAt { return lhsCreatedAt < rhsCreatedAt }
+
+        let lhsTargetDate = lhs.targetDate ?? .distantFuture
+        let rhsTargetDate = rhs.targetDate ?? .distantFuture
+        if lhsTargetDate != rhsTargetDate { return lhsTargetDate < rhsTargetDate }
+
+        let lhsName = lhs.name?.lowercased() ?? "\u{10FFFF}"
+        let rhsName = rhs.name?.lowercased() ?? "\u{10FFFF}"
+        if lhsName != rhsName { return lhsName < rhsName }
+
+        let lhsID = lhs.id?.uuidString ?? "zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz"
+        let rhsID = rhs.id?.uuidString ?? "zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz"
+        return lhsID < rhsID
+    }
+
+    private static func normalizedPriority(for goal: SavingsGoal) -> Int {
+        if let number = goal.primitiveValue(forKey: "priority") as? NSNumber {
+            return number.intValue
+        }
+        return Int(Int16.max)
+    }
 }
 
 // MARK: - Supporting Types
 
-enum PaceStatus {
+enum SavingsGoalPaceStatus {
     case ahead
     case onPace
     case behind
@@ -372,13 +496,13 @@ enum PaceStatus {
     var displayText: String {
         switch self {
         case .ahead:
-            return "Ahead of pace!"
+            return String(localized: "savings.pace.ahead", defaultValue: "Ahead of pace!", table: "UI")
         case .onPace:
-            return "On pace"
+            return String(localized: "savings.pace.on_pace", defaultValue: "On pace", table: "UI")
         case .behind:
-            return "Behind pace"
+            return String(localized: "savings.pace.behind", defaultValue: "Behind pace", table: "UI")
         case .completed:
-            return "Goal reached!"
+            return String(localized: "savings.goal_reached", defaultValue: "Goal reached!", table: "UI")
         case .unknown:
             return ""
         }

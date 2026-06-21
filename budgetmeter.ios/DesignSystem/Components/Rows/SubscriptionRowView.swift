@@ -35,31 +35,38 @@ struct SubscriptionRowView: View {
                 // Name and billing cycle
                 VStack(alignment: .leading, spacing: 2) {
                     Text(subscription.name ?? "Unknown")
-                        .font(.body)
-                        .fontWeight(.medium)
-                        .foregroundColor(.primary)
+                        .bodyStyle()
 
                     Text(billingCycleText)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                        .captionStyle()
                 }
 
                 Spacer()
 
                 // Amount
                 Text(formattedAmount)
-                    .font(.body)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.brandExpense)
+                    .metricCompactStyle(color: .brandExpense)
             }
             .padding(.horizontal, Spacing.lg)
             .padding(.vertical, Spacing.md)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(accessibilityLabel)
     }
 
     // MARK: - Computed Properties
+
+    private var accessibilityLabel: String {
+        let name = subscription.name ?? String(localized: "subscription.unknown", defaultValue: "Unknown")
+        return String(
+            format: String(localized: "subscription.row.accessibility", defaultValue: "%@, %@, %@", table: "UI"),
+            name,
+            billingCycleText,
+            formattedAmount
+        )
+    }
 
     private var formattedAmount: String {
         let amount = subscription.amount
@@ -131,6 +138,8 @@ struct AddSubscriptionRow: View {
             .padding(.vertical, Spacing.md)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(String(localized: "subscription.add", defaultValue: "Add Subscription"))
+        .accessibilityHint(String(localized: "subscription.add.hint", defaultValue: "Double tap to add a new subscription", table: "UI"))
     }
 }
 

@@ -39,6 +39,9 @@ final class PremiumManager: ObservableObject {
     private init(persistenceService: PersistenceService = .shared) {
         self.persistenceService = persistenceService
         loadPremiumStatus()
+        #if DEBUG
+        applyDebugPremiumOverrideIfNeeded()
+        #endif
         setupTransactionListener()
         Task {
             await loadProducts()
@@ -51,14 +54,37 @@ final class PremiumManager: ObservableObject {
     
     // MARK: - Feature Access
 
+    static func hasAccess(to capability: BudgetMeterCapability, isPremium: Bool) -> Bool {
+        switch capability.accessLevel {
+        case .free:
+            return true
+        case .premium:
+            return isPremium
+        case .postponed:
+            return false
+        }
+    }
+
+    func hasAccess(to capability: BudgetMeterCapability) -> Bool {
+        Self.hasAccess(to: capability, isPremium: isPremium)
+    }
+
+    func hasAccess(to feature: PremiumFeature) -> Bool {
+        hasAccess(to: feature.capability)
+    }
+
     /// Check if user has access to Insights Dashboard
     var hasInsights: Bool {
-        return isPremium
+        hasAccess(to: BudgetMeterCapability.spendingInsights)
     }
 
     /// Check if user has access to Advanced Notifications
     var hasAdvancedNotifications: Bool {
-        return isPremium
+        hasAccess(to: BudgetMeterCapability.advancedNotifications)
+    }
+
+    var premiumDisplayPrice: String? {
+        product?.displayPrice
     }
 
     // MARK: - Public Methods
@@ -72,7 +98,8 @@ final class PremiumManager: ObservableObject {
     func purchasePremium() async {
         guard let product = product else {
             await MainActor.run {
-                errorMessage = "Product not available"
+                purchaseState = .failed
+                errorMessage = String(localized: "premium.error.product_unavailable", defaultValue: "Premium is not available right now. Please try again later.", table: "UI")
             }
             return
         }
@@ -93,22 +120,27 @@ final class PremiumManager: ObservableObject {
                 
             case .userCancelled:
                 await MainActor.run {
-                    errorMessage = "Purchase cancelled"
+                    purchaseState = .notPurchased
+                    errorMessage = String(localized: "premium.error.purchase_cancelled", defaultValue: "Purchase cancelled.", table: "UI")
                 }
                 
             case .pending:
                 await MainActor.run {
-                    errorMessage = "Purchase pending approval"
+                    purchaseState = .pending
+                    errorMessage = String(localized: "premium.error.purchase_pending", defaultValue: "Purchase pending approval.", table: "UI")
                 }
                 
             @unknown default:
                 await MainActor.run {
-                    errorMessage = "Unknown purchase result"
+                    purchaseState = .failed
+                    errorMessage = String(localized: "premium.error.purchase_unknown", defaultValue: "Purchase could not be completed.", table: "UI")
                 }
             }
         } catch {
             await MainActor.run {
-                errorMessage = "Purchase failed: \(error.localizedDescription)"
+                purchaseState = .failed
+                let format = String(localized: "premium.error.purchase_failed", defaultValue: "Purchase failed: %@", table: "UI")
+                errorMessage = String(format: format, error.localizedDescription)
             }
         }
         
@@ -126,10 +158,18 @@ final class PremiumManager: ObservableObject {
         
         do {
             try await AppStore.sync()
-            await checkForValidTransactions()
+            let didRestore = await checkForValidTransactions()
+            await MainActor.run {
+                if !didRestore {
+                    purchaseState = .notPurchased
+                    errorMessage = String(localized: "premium.restore.none_found", defaultValue: "No previous BudgetMeter Premium purchase was found.", table: "UI")
+                }
+            }
         } catch {
             await MainActor.run {
-                errorMessage = "Restore failed: \(error.localizedDescription)"
+                purchaseState = .failed
+                let format = String(localized: "premium.error.restore_failed", defaultValue: "Restore failed: %@", table: "UI")
+                errorMessage = String(format: format, error.localizedDescription)
             }
         }
         
@@ -172,6 +212,11 @@ final class PremiumManager: ObservableObject {
         do {
             let products = try await Product.products(for: [premiumProductID])
             product = products.first
+            if product == nil {
+                await MainActor.run {
+                    purchaseState = .notPurchased
+                }
+            }
         } catch {
             print("Failed to load products: \(error)")
         }
@@ -210,29 +255,44 @@ final class PremiumManager: ObservableObject {
             await MainActor.run {
                 isPremium = true
                 purchaseState = .purchased
+                WidgetSnapshotService.refreshFromCurrentData(
+                    context: persistenceService.viewContext,
+                    isPremium: true
+                )
             }
         } catch {
             print("Failed to update premium status: \(error)")
         }
     }
     
-    private func checkForValidTransactions() async {
+    private func checkForValidTransactions() async -> Bool {
         for await result in Transaction.currentEntitlements {
             do {
                 let transaction = try checkVerified(result)
                 if transaction.productID == premiumProductID {
                     await updatePremiumStatus(transaction: transaction)
-                    break
+                    return true
                 }
             } catch {
                 print("Transaction verification failed: \(error)")
             }
         }
+
+        return false
     }
     
     // MARK: - Debug Methods
     
     #if DEBUG
+    static let debugPremiumOverrideKey = "debug_premium_override"
+
+    private func applyDebugPremiumOverrideIfNeeded() {
+        let override = UserDefaults.standard.bool(forKey: Self.debugPremiumOverrideKey)
+        if override != isPremium {
+            setDebugPremiumStatus(override)
+        }
+    }
+
     /// Sets premium status for debugging purposes (DEBUG builds only)
     func setDebugPremiumStatus(_ isPremium: Bool) {
         let context = persistenceService.viewContext
@@ -268,15 +328,19 @@ enum PremiumError: Error {
     case unverifiedTransaction
     case productNotAvailable
     case purchaseFailed
+    case featureLocked(PremiumFeature)
     
     var localizedDescription: String {
         switch self {
         case .unverifiedTransaction:
-            return "Transaction could not be verified"
+            return String(localized: "premium.error.unverified_transaction", defaultValue: "Transaction could not be verified", table: "UI")
         case .productNotAvailable:
-            return "Premium product is not available"
+            return String(localized: "premium.error.product_not_available", defaultValue: "Premium product is not available", table: "UI")
         case .purchaseFailed:
-            return "Purchase failed"
+            return String(localized: "premium.error.purchase_failed_short", defaultValue: "Purchase failed", table: "UI")
+        case .featureLocked(let feature):
+            let format = String(localized: "premium.error.feature_locked", defaultValue: "%@ requires BudgetMeter Premium", table: "UI")
+            return String(format: format, feature.displayName)
         }
     }
 }
@@ -287,6 +351,75 @@ enum PurchaseState {
     case notPurchased
     case pending
     case failed
+}
+
+// MARK: - Feature Gate Matrix
+
+enum FeatureAccessLevel: Equatable {
+    case free
+    case premium
+    case postponed
+}
+
+enum BudgetMeterCapability: String, CaseIterable {
+    case homeDashboard
+    case sharedFinancialSummary
+    case incomeEntry
+    case expenseEntry
+    case oneTimeEntry
+    case basicRecurringEntry
+    case oneBasicSavingsGoal
+    case defaultTheme
+    case customCategories
+    case subscriptionTracking
+    case billReminders
+    case multipleSavingsGoals
+    case recurringAutomation
+    case dataExport
+    case widgets
+    case spendingInsights
+    case biometricLock
+    case premiumThemes
+    case advancedNotifications
+    case advancedHistoryReporting
+    case forecasting
+    case backupSync
+    case adsFree
+
+    var accessLevel: FeatureAccessLevel {
+        switch self {
+        case .homeDashboard,
+             .sharedFinancialSummary,
+             .incomeEntry,
+             .expenseEntry,
+             .oneTimeEntry,
+             .basicRecurringEntry,
+             .oneBasicSavingsGoal,
+             .defaultTheme:
+            return .free
+        case .customCategories,
+             .subscriptionTracking,
+             .billReminders,
+             .multipleSavingsGoals,
+             .recurringAutomation,
+             .dataExport,
+             .widgets,
+             .spendingInsights,
+             .biometricLock,
+             .premiumThemes,
+             .advancedNotifications,
+             .advancedHistoryReporting,
+             .forecasting,
+             .backupSync:
+            return .premium
+        case .adsFree:
+            return .postponed
+        }
+    }
+
+    var requiresPremium: Bool {
+        accessLevel == .premium
+    }
 }
 
 // MARK: - Premium Features
@@ -302,54 +435,83 @@ enum PremiumFeature: String, CaseIterable {
     case spendingInsights = "spending_insights"
     case biometricLock = "biometric_lock"
     case premiumThemes = "premium_themes"
+
+    var capability: BudgetMeterCapability {
+        switch self {
+        case .customCategories:
+            return .customCategories
+        case .subscriptionTracking:
+            return .subscriptionTracking
+        case .billReminders:
+            return .billReminders
+        case .savingsGoals:
+            return .multipleSavingsGoals
+        case .recurringTransactions:
+            return .recurringAutomation
+        case .dataExport:
+            return .dataExport
+        case .widgets:
+            return .widgets
+        case .spendingInsights:
+            return .spendingInsights
+        case .biometricLock:
+            return .biometricLock
+        case .premiumThemes:
+            return .premiumThemes
+        }
+    }
+
+    var requiresPremium: Bool {
+        capability.requiresPremium
+    }
     
     var displayName: String {
         switch self {
         case .customCategories:
-            return "Custom Categories"
+            return String(localized: "premium.feature.custom_categories.name", defaultValue: "Custom Categories", table: "UI")
         case .subscriptionTracking:
-            return "Subscription Tracking"
+            return String(localized: "premium.feature.subscription_tracking.name", defaultValue: "Subscription Tracking", table: "UI")
         case .billReminders:
-            return "Bill Reminders"
+            return String(localized: "premium.feature.bill_reminders.name", defaultValue: "Bill Reminders", table: "UI")
         case .savingsGoals:
-            return "Savings Goals"
+            return String(localized: "premium.feature.savings_goals.name", defaultValue: "Savings Goals", table: "UI")
         case .recurringTransactions:
-            return "Recurring Transactions"
+            return String(localized: "premium.feature.recurring_transactions.name", defaultValue: "Recurring Transactions", table: "UI")
         case .dataExport:
-            return "Data Export"
+            return String(localized: "premium.feature.data_export.name", defaultValue: "Data Export", table: "UI")
         case .widgets:
-            return "Widgets"
+            return String(localized: "premium.feature.widgets.name", defaultValue: "Widgets", table: "UI")
         case .spendingInsights:
-            return "Spending Insights"
+            return String(localized: "premium.feature.spending_insights.name", defaultValue: "Spending Insights", table: "UI")
         case .biometricLock:
-            return "Biometric Lock"
+            return String(localized: "premium.feature.biometric_lock.name", defaultValue: "Biometric Lock", table: "UI")
         case .premiumThemes:
-            return "Premium Themes"
+            return String(localized: "premium.feature.premium_themes.name", defaultValue: "Premium Themes", table: "UI")
         }
     }
     
     var description: String {
         switch self {
         case .customCategories:
-            return "Create unlimited custom income and expense categories with SF Symbols and colors"
+            return String(localized: "premium.feature.custom_categories.description", defaultValue: "Create unlimited custom income and expense categories with SF Symbols and colors", table: "UI")
         case .subscriptionTracking:
-            return "Track unlimited subscriptions with renewal reminders and spending insights"
+            return String(localized: "premium.feature.subscription_tracking.description", defaultValue: "Track unlimited subscriptions with renewal reminders and spending insights", table: "UI")
         case .billReminders:
-            return "Track bills, due dates, and payment history with smart reminders"
+            return String(localized: "premium.feature.bill_reminders.description", defaultValue: "Track bills, due dates, and payment history with smart reminders", table: "UI")
         case .savingsGoals:
-            return "Create and track multiple savings goals with visual progress and pace tracking"
+            return String(localized: "premium.feature.savings_goals.description", defaultValue: "Create and track multiple savings goals with visual progress and pace tracking", table: "UI")
         case .recurringTransactions:
-            return "Automate repeating bills, salaries, and subscriptions"
+            return String(localized: "premium.feature.recurring_transactions.description", defaultValue: "Automate repeating bills, salaries, and subscriptions", table: "UI")
         case .dataExport:
-            return "Export your data in PDF, CSV, or JSON format"
+            return String(localized: "premium.feature.data_export.description", defaultValue: "Export your data in PDF, CSV, or JSON format", table: "UI")
         case .widgets:
-            return "Display your financial data on Home and Lock Screen"
+            return String(localized: "premium.feature.widgets.description", defaultValue: "Home Screen widget with your net daily pace", table: "UI")
         case .spendingInsights:
-            return "Visual charts and insights into your spending patterns"
+            return String(localized: "premium.feature.spending_insights.description", defaultValue: "Visual charts and insights into your spending patterns", table: "UI")
         case .biometricLock:
-            return "Protect your financial data with Face ID or Touch ID"
+            return String(localized: "premium.feature.biometric_lock.description", defaultValue: "Protect your financial data with Face ID or Touch ID", table: "UI")
         case .premiumThemes:
-            return "Unlock beautiful color themes and custom app icons"
+            return String(localized: "premium.feature.premium_themes.description", defaultValue: "Unlock beautiful color themes and custom app icons", table: "UI")
         }
     }
     

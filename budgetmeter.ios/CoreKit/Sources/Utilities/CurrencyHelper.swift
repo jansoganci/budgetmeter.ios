@@ -245,6 +245,110 @@ enum CurrencyHelper {
     }
 }
 
+// MARK: - v2 Display Contract
+
+/// Shared locale-aware currency display formatting for UI and widgets.
+/// Does not alter stored or calculated numeric values.
+enum CurrencyDisplay {
+    /// Formats a currency amount for on-screen display.
+    /// - Parameters:
+    ///   - amount: The amount to format.
+    ///   - currencyCode: ISO 4217 currency code (defaults to user setting).
+    ///   - locale: Locale for separators and symbol placement (defaults to app locale).
+    /// - Returns: Locale-aware currency string (e.g. "$1,234" or "€99,50").
+    static func format(
+        amount: Decimal,
+        currencyCode: String? = nil,
+        locale: Locale? = nil
+    ) -> String {
+        let resolvedCode = resolvedCurrencyCode(currencyCode)
+        let resolvedLocale = locale ?? LocalizationManager.shared.currentLocale
+        let formatter = displayFormatter(
+            for: resolvedCode,
+            locale: resolvedLocale,
+            amount: amount
+        )
+
+        if let formatted = formatter.string(from: NSDecimalNumber(decimal: amount)) {
+            return formatted
+        }
+
+        return displayFallback(amount: amount, currencyCode: resolvedCode, locale: resolvedLocale)
+    }
+
+    static func format(
+        amount: Double,
+        currencyCode: String? = nil,
+        locale: Locale? = nil
+    ) -> String {
+        format(amount: Decimal(amount), currencyCode: currencyCode, locale: locale)
+    }
+
+    /// Decimal places for display: 0 when |amount| >= 100, otherwise 2.
+    static func fractionDigits(for amount: Decimal) -> Int {
+        abs(NSDecimalNumber(decimal: amount).doubleValue) >= 100 ? 0 : 2
+    }
+
+    static func fractionDigits(for amount: Double) -> Int {
+        abs(amount) >= 100 ? 0 : 2
+    }
+
+    private static func resolvedCurrencyCode(_ currencyCode: String?) -> String {
+        guard let currencyCode,
+              CurrencyHelper.supportedCurrencyCodes.contains(currencyCode) else {
+            return CurrencyHelper.currentCurrencyCode()
+        }
+        return currencyCode
+    }
+
+    private static func displayFormatter(
+        for currencyCode: String,
+        locale: Locale,
+        amount: Decimal
+    ) -> NumberFormatter {
+        let fractionDigits = fractionDigits(for: amount)
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = currencyCode
+        formatter.locale = locale
+        formatter.minimumFractionDigits = fractionDigits
+        formatter.maximumFractionDigits = fractionDigits
+        return formatter
+    }
+
+    private static func displayFallback(
+        amount: Decimal,
+        currencyCode: String,
+        locale: Locale
+    ) -> String {
+        let fractionDigits = fractionDigits(for: amount)
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .decimal
+        numberFormatter.minimumFractionDigits = fractionDigits
+        numberFormatter.maximumFractionDigits = fractionDigits
+        numberFormatter.locale = locale
+
+        let formattedNumber = numberFormatter.string(from: NSDecimalNumber(decimal: amount))
+            ?? String(format: fractionDigits == 0 ? "%.0f" : "%.2f", NSDecimalNumber(decimal: amount).doubleValue)
+
+        let symbol = CurrencyHelper.symbol(for: currencyCode)
+        if localeCurrencySymbolIsSuffix(currencyCode: currencyCode, locale: locale) {
+            return "\(formattedNumber)\(symbol)"
+        }
+        return "\(symbol)\(formattedNumber)"
+    }
+
+    private static func localeCurrencySymbolIsSuffix(currencyCode: String, locale: Locale) -> Bool {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = currencyCode
+        formatter.locale = locale
+        guard let sample = formatter.string(from: 1) else { return false }
+        let symbol = CurrencyHelper.symbol(for: currencyCode)
+        return sample.hasSuffix(symbol)
+    }
+}
+
 extension Notification.Name {
     static let currencyDidChange = Notification.Name("CurrencyDidChangeNotification")
 }

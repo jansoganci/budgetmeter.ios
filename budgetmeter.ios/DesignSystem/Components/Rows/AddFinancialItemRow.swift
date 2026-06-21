@@ -38,7 +38,7 @@ struct AddFinancialItemRow: View {
     }
 
     private var accessibilityLabel: String {
-        if premiumManager.isPremium {
+        if premiumManager.hasAccess(to: BudgetMeterCapability.customCategories) {
             return buttonText
         } else {
             return "\(buttonText). Premium feature. Double tap to unlock."
@@ -51,26 +51,24 @@ struct AddFinancialItemRow: View {
         Button(action: handleTap) {
             HStack(spacing: Spacing.md) {
                 // Icon
-                Image(systemName: premiumManager.isPremium ? "plus.circle.fill" : "crown.fill")
+                Image(systemName: premiumManager.hasAccess(to: BudgetMeterCapability.customCategories) ? "plus.circle.fill" : "crown.fill")
                     .font(.system(size: 20 * sizeCategory.scaleFactor, weight: .medium))
                     .foregroundColor(.brandProgress)
                     .frame(width: 32, height: 32)
 
                 // Text
                 Text(buttonText)
-                    .font(.system(size: 16 * sizeCategory.scaleFactor, weight: .medium))
-                    .foregroundColor(.brandProgress)
+                    .bodyStyle(color: .brandProgress)
 
                 Spacer()
 
-                if !premiumManager.isPremium {
+                if !premiumManager.hasAccess(to: BudgetMeterCapability.customCategories) {
                     Text(String(localized: "premium.badge", defaultValue: "Premium"))
-                        .font(.system(size: 11 * sizeCategory.scaleFactor, weight: .semibold))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
+                        .badgeStyle(color: .white)
+                        .padding(.horizontal, Spacing.sm)
+                        .padding(.vertical, Spacing.xs)
                         .background(Color.brandProgress)
-                        .cornerRadius(CornerRadius.tiny)
+                        .clipShape(RoundedRectangle(cornerRadius: CornerRadius.tiny, style: .continuous))
                 }
             }
             .padding(.horizontal, Spacing.md)
@@ -82,6 +80,7 @@ struct AddFinancialItemRow: View {
         .accessibilityLabel(accessibilityLabel)
         .sheet(isPresented: $showingPaywall) {
             PremiumPaywallView(
+                feature: .customCategories,
                 onDismiss: { showingPaywall = false },
                 onPurchase: { showingPaywall = false },
                 onRestore: { showingPaywall = false }
@@ -93,7 +92,7 @@ struct AddFinancialItemRow: View {
 
     private func handleTap() {
         Haptics.light()
-        if premiumManager.isPremium {
+        if premiumManager.hasAccess(to: BudgetMeterCapability.customCategories) {
             onTap()
         } else {
             showingPaywall = true

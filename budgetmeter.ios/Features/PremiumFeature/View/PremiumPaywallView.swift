@@ -2,15 +2,13 @@
 //  PremiumPaywallView.swift
 //  BudgetMeter
 //
-//  Created by BudgetMeter Team on 17.09.2025.
+//  Premium paywall — v2 DesignSystem layout (calm premium fintech).
 //
 
 import SwiftUI
 
-/// Premium paywall view - compact and effective design
+/// Premium paywall sheet — purchase, restore, and feature overview.
 struct PremiumPaywallView: View {
-
-    // MARK: - Properties
 
     let feature: PremiumFeature?
     let onDismiss: () -> Void
@@ -20,8 +18,6 @@ struct PremiumPaywallView: View {
     @StateObject private var premiumManager = PremiumManager.shared
     @State private var showingRestoreAlert = false
     @State private var showingPurchaseAlert = false
-
-    // MARK: - Initialization
 
     init(
         feature: PremiumFeature? = nil,
@@ -35,205 +31,213 @@ struct PremiumPaywallView: View {
         self.onRestore = onRestore
     }
 
-    // MARK: - Body
-
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
-                ScrollView {
-                    VStack(spacing: Spacing.lg) {
-                        // Header with crown
-                        headerSection
+            ZStack {
+                AppBackground()
 
-                        // Price card
-                        priceCard
-
-                        // Compact features list
-                        featuresSection
+                VStack(spacing: 0) {
+                    ScrollView {
+                        VStack(spacing: LayoutSpacing.sectionGap) {
+                            heroSection
+                            priceSection
+                            featuresSection
+                        }
+                        .padding(.horizontal, LayoutSpacing.screenPadding)
+                        .padding(.top, Spacing.md)
+                        .padding(.bottom, Spacing.md)
                     }
-                    .padding(.horizontal, Spacing.lg)
-                    .padding(.top, Spacing.lg)
-                    .padding(.bottom, Spacing.md)
-                }
 
-                // Fixed bottom section with buttons
-                bottomSection
+                    bottomSection
+                }
             }
-            .background(Color.appBackground)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         onDismiss()
                     } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.title3)
-                            .foregroundColor(.secondary)
+                        Image(systemName: "xmark")
+                            .font(.body.weight(.medium))
+                            .foregroundColor(.textSecondary)
+                            .frame(width: TouchTarget.minimum, height: TouchTarget.minimum)
+                    }
+                    .accessibilityLabel(
+                        String(localized: "premium.dismiss", defaultValue: "Close", table: "UI")
+                    )
+                }
+            }
+        }
+        .alert(String(localized: "premium.restore.success", defaultValue: "Purchases Restored", table: "UI"), isPresented: $showingRestoreAlert) {
+            Button(String(localized: "premium.ok", defaultValue: "OK", table: "UI")) { }
+        } message: {
+            Text(String(localized: "premium.restore.success.message", defaultValue: "Your previous purchases have been restored successfully.", table: "UI"))
+        }
+        .alert(String(localized: "premium.purchase.success", defaultValue: "Welcome to Premium!", table: "UI"), isPresented: $showingPurchaseAlert) {
+            Button(String(localized: "premium.ok", defaultValue: "OK", table: "UI")) { }
+        } message: {
+            Text(String(localized: "premium.purchase.success.message", defaultValue: "Thank you for upgrading to BudgetMeter Premium!", table: "UI"))
+        }
+    }
+
+    // MARK: - Hero (Pulsey slot + value proposition)
+
+    private var heroSection: some View {
+        GlassCard {
+            VStack(spacing: LayoutSpacing.cardInternalGap) {
+                PremiumBadge(locked: false)
+
+                HStack {
+                    Spacer(minLength: 0)
+                    pulseyHeroSlot
+                    Spacer(minLength: 0)
+                }
+
+                VStack(spacing: Spacing.xs) {
+                    Text(String(localized: "premium.header.title", defaultValue: "Make BudgetMeter yours", table: "UI"))
+                        .sectionTitleStyle()
+                        .multilineTextAlignment(.center)
+
+                    Text(String(
+                        localized: "premium.header.subtitle",
+                        defaultValue: "Continue with themes, widgets, and deeper insights.",
+                        table: "UI"
+                    ))
+                    .bodyStyle(color: .textSecondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .frame(maxWidth: .infinity)
+        }
+    }
+
+    /// Reserved hero slot for future Pulsey mascot — no assets in this phase.
+    private var pulseyHeroSlot: some View {
+        RoundedRectangle(cornerRadius: CornerRadius.card, style: .continuous)
+            .fill(Color.surfaceInset.opacity(0.45))
+            .frame(width: 80, height: 80)
+            .overlay(
+                RoundedRectangle(cornerRadius: CornerRadius.card, style: .continuous)
+                    .stroke(Color.borderSubtle, lineWidth: 1)
+            )
+            .accessibilityHidden(true)
+    }
+
+    // MARK: - Price
+
+    private var priceSection: some View {
+        GlassCard {
+            VStack(spacing: Spacing.sm) {
+                Text(displayPrice)
+                    .heroMetricStyle(color: .accentPrimary)
+
+                Text(String(localized: "premium.price.subtitle", defaultValue: "One-time purchase • Lifetime access", table: "UI"))
+                    .captionStyle(color: .textSecondary)
+                    .multilineTextAlignment(.center)
+            }
+            .frame(maxWidth: .infinity)
+        }
+    }
+
+    private var displayPrice: String {
+        premiumManager.premiumDisplayPrice ?? String(localized: "premium.price", defaultValue: "$4.99", table: "UI")
+    }
+
+    // MARK: - Features
+
+    private var featuresSection: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: LayoutSpacing.cardInternalGap) {
+                SectionHeader(
+                    title: String(localized: "premium.features.title", defaultValue: "Everything included", table: "UI")
+                )
+
+                VStack(spacing: Spacing.sm) {
+                    ForEach(PremiumFeature.allCases, id: \.self) { premiumFeature in
+                        featureRow(premiumFeature)
                     }
                 }
             }
         }
-        .alert("premium.restore.success".localized(defaultValue: "Purchases Restored"), isPresented: $showingRestoreAlert) {
-            Button("premium.ok".localized(defaultValue: "OK")) { }
-        } message: {
-            Text("premium.restore.success.message".localized(defaultValue: "Your previous purchases have been restored successfully."))
-        }
-        .alert("premium.purchase.success".localized(defaultValue: "Welcome to Premium!"), isPresented: $showingPurchaseAlert) {
-            Button("premium.ok".localized(defaultValue: "OK")) { }
-        } message: {
-            Text("premium.purchase.success.message".localized(defaultValue: "Thank you for upgrading to BudgetMeter Premium!"))
-        }
-    }
-
-    // MARK: - Header Section
-
-    private var headerSection: some View {
-        VStack(spacing: Spacing.md) {
-            // Crown Icon
-            Image(systemName: "crown.fill")
-                .font(.system(size: 56, weight: .medium))
-                .foregroundColor(.orange)
-
-            // Title
-            Text("premium.header.title".localized(defaultValue: "BudgetMeter Premium"))
-                .font(.title)
-                .fontWeight(.bold)
-                .multilineTextAlignment(.center)
-        }
-        .padding(.top, Spacing.md)
-    }
-
-    // MARK: - Price Card
-
-    private var priceCard: some View {
-        VStack(spacing: Spacing.sm) {
-            // Price
-            Text("premium.price".localized(defaultValue: "$4.99"))
-                .font(.system(size: 44, weight: .bold))
-                .foregroundColor(.brandProgress)
-
-            // One-time purchase emphasis
-            Text("premium.price.subtitle".localized(defaultValue: "One-time purchase • Lifetime access"))
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundColor(.brandPositive)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, Spacing.lg)
-        .background(Color.cardBackground)
-        .cornerRadius(CornerRadius.card)
-        .overlay(
-            RoundedRectangle(cornerRadius: CornerRadius.card)
-                .stroke(Color.brandProgress.opacity(0.2), lineWidth: 1)
-        )
-    }
-
-    // MARK: - Features Section
-
-    private var featuresSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("premium.features.title".localized(defaultValue: "Everything included:"))
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundColor(.secondary)
-                .padding(.bottom, Spacing.xs)
-
-            ForEach(PremiumFeature.allCases, id: \.self) { premiumFeature in
-                featureRow(premiumFeature)
-            }
-        }
-        .padding(Spacing.lg)
-        .background(Color.cardBackground)
-        .cornerRadius(CornerRadius.card)
     }
 
     private func featureRow(_ feature: PremiumFeature) -> some View {
-        HStack(spacing: Spacing.md) {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.body)
-                .foregroundColor(.brandPositive)
+        HStack(alignment: .top, spacing: Spacing.md) {
+            Image(systemName: feature.iconName)
+                .font(.body.weight(.medium))
+                .foregroundColor(.accentPrimary)
+                .frame(width: 32, height: 32)
+                .background(Color.accentPrimary.opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: CornerRadius.small, style: .continuous))
+                .accessibilityHidden(true)
 
-            Text(feature.displayName)
-                .font(.body)
-                .fontWeight(.medium)
-                .foregroundColor(.primary)
+            VStack(alignment: .leading, spacing: Spacing.xs) {
+                Text(feature.displayName)
+                    .cardLabelStyle(color: .textPrimary)
 
-            Spacer()
+                Text(feature.description)
+                    .captionStyle(color: .textSecondary)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer(minLength: 0)
         }
         .padding(.vertical, Spacing.xs)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(feature.displayName). \(feature.description)")
     }
 
-    // MARK: - Bottom Section (Fixed)
+    // MARK: - Bottom CTA
 
     private var bottomSection: some View {
         VStack(spacing: Spacing.md) {
-            // Error Message
             if let errorMessage = premiumManager.errorMessage {
                 Text(errorMessage)
-                    .font(.caption)
-                    .foregroundColor(.brandExpense)
+                    .captionStyle(color: .financialNegative)
                     .multilineTextAlignment(.center)
             }
 
-            // Purchase Button
-            Button(action: handlePurchase) {
-                HStack(spacing: Spacing.sm) {
-                    if premiumManager.isLoading {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            .scaleEffect(0.8)
-                    } else {
-                        Image(systemName: "crown.fill")
-                            .font(.body)
-                    }
+            PrimaryCTAButton(
+                title: String(localized: "premium.purchase.button", defaultValue: "Upgrade to Premium", table: "UI"),
+                isLoading: premiumManager.isLoading,
+                action: handlePurchase
+            )
 
-                    Text("premium.purchase.button".localized(defaultValue: "Upgrade to Premium"))
-                        .font(.headline)
-                        .fontWeight(.bold)
-                }
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 54)
-                .background(Color.brandProgress)
-                .cornerRadius(CornerRadius.button)
-            }
+            SecondaryCTAButton(
+                title: String(localized: "premium.restore.button", defaultValue: "Restore Purchases", table: "UI"),
+                action: handleRestore
+            )
             .disabled(premiumManager.isLoading)
 
-            // Restore Button
-            Button(action: handleRestore) {
-                Text("premium.restore.button".localized(defaultValue: "Restore Purchases"))
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(.brandProgress)
-            }
-            .disabled(premiumManager.isLoading)
-
-            // Terms & Privacy
             HStack(spacing: Spacing.lg) {
-                Button("premium.terms.link".localized(defaultValue: "Terms")) {
+                Button(String(localized: "premium.terms.link", defaultValue: "Terms", table: "UI")) {
                     // Open terms
                 }
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(.textTertiary)
 
                 Text("•")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.textTertiary)
+                    .accessibilityHidden(true)
 
-                Button("premium.privacy.link".localized(defaultValue: "Privacy")) {
+                Button(String(localized: "premium.privacy.link", defaultValue: "Privacy", table: "UI")) {
                     // Open privacy policy
                 }
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(.textTertiary)
             }
         }
-        .padding(.horizontal, Spacing.lg)
+        .padding(.horizontal, LayoutSpacing.screenPadding)
         .padding(.top, Spacing.md)
         .padding(.bottom, Spacing.xl)
-        .background(
-            Color.cardBackground
-                .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: -4)
-        )
+        .background(AppBackground(ignoresSafeArea: false))
+        .overlay(alignment: .top) {
+            Divider()
+                .background(Color.borderSubtle)
+        }
     }
 
     // MARK: - Actions
@@ -258,8 +262,6 @@ struct PremiumPaywallView: View {
         }
     }
 }
-
-// MARK: - Preview
 
 #Preview("Paywall") {
     PremiumPaywallView(

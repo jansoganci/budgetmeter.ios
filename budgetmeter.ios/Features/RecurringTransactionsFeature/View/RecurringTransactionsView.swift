@@ -8,7 +8,7 @@ struct RecurringTransactionsView: View {
         NavigationView {
             List {
                 if !viewModel.getOverdueTransactions().isEmpty {
-                    Section("recurring.overdue.title".localized(defaultValue: "Overdue")) {
+                    Section(String(localized: "recurring.overdue.title", defaultValue: "Overdue", table: "UI")) {
                         ForEach(viewModel.getOverdueTransactions(), id: \.id) { transaction in
                             RecurringTransactionRow(transaction: transaction) {
                                 viewModel.editTransaction(transaction)
@@ -24,7 +24,7 @@ struct RecurringTransactionsView: View {
                 }
                 
                 if !viewModel.getUpcomingTransactions().isEmpty {
-                    Section("recurring.upcoming.title".localized(defaultValue: "Upcoming")) {
+                    Section(String(localized: "recurring.upcoming.title", defaultValue: "Upcoming", table: "UI")) {
                         ForEach(viewModel.getUpcomingTransactions(), id: \.id) { transaction in
                             RecurringTransactionRow(transaction: transaction) {
                                 viewModel.editTransaction(transaction)
@@ -39,7 +39,7 @@ struct RecurringTransactionsView: View {
                     }
                 }
                 
-                Section("recurring.all.title".localized(defaultValue: "All Recurring Transactions")) {
+                Section(String(localized: "recurring.all.title", defaultValue: "All Recurring Transactions", table: "UI")) {
                     ForEach(viewModel.recurringTransactions, id: \.id) { transaction in
                         RecurringTransactionRow(transaction: transaction) {
                             viewModel.editTransaction(transaction)
@@ -52,11 +52,11 @@ struct RecurringTransactionsView: View {
                     }
                 }
             }
-            .navigationTitle("recurring.nav_title".localized(defaultValue: "Recurring Transactions"))
+            .navigationTitle(String(localized: "recurring.nav_title", defaultValue: "Recurring Transactions", table: "UI"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("toolbar.close".localized(defaultValue: "Close")) {
+                    Button(String(localized: "toolbar.close", defaultValue: "Close", table: "UI")) {
                         dismiss()
                     }
                 }
@@ -86,9 +86,9 @@ struct RecurringTransactionsView: View {
             }
             .alert(item: $viewModel.errorMessage) { errorMessage in
                 Alert(
-                    title: Text("error.title".localized(defaultValue: "Error")),
+                    title: Text(String(localized: "error.title", defaultValue: "Error", table: "UI")),
                     message: Text(errorMessage.message),
-                    dismissButton: .default(Text("alert.ok".localized(defaultValue: "OK")))
+                    dismissButton: .default(Text(String(localized: "alert.ok", defaultValue: "OK", table: "UI")))
                 )
             }
             .refreshable {
@@ -105,13 +105,13 @@ struct RecurringTransactionRow: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text(transaction.title ?? "Unknown Transaction")
+                Text(transaction.title ?? String(localized: "recurring.unknown_transaction", defaultValue: "Unknown Transaction", table: "UI"))
                     .font(.body)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
                 
                 HStack {
-                    Text(transaction.categoryName ?? "Unknown Category")
+                    Text(transaction.categoryName ?? String(localized: "recurring.unknown_category", defaultValue: "Unknown Category", table: "UI"))
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
@@ -133,7 +133,7 @@ struct RecurringTransactionRow: View {
                     .fontWeight(.semibold)
                     .foregroundColor(transaction.categoryType == "income" ? .green : .red)
                 
-                Text(RecurringFrequency(rawValue: transaction.frequency ?? "monthly")?.displayName ?? "Monthly")
+                Text(RecurringFrequency(rawValue: transaction.frequency ?? "monthly")?.displayName ?? String(localized: "recurring.frequency.monthly", defaultValue: "Monthly", table: "UI"))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -187,12 +187,12 @@ struct EditRecurringTransactionView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section("edit_recurring.details.title".localized(defaultValue: "Transaction Details")) {
-                    TextField("edit_recurring.title_placeholder".localized(defaultValue: "Transaction Title"), text: $title)
+                Section(String(localized: "edit_recurring.details.title", defaultValue: "Transaction Details", table: "UI")) {
+                    TextField(String(localized: "edit_recurring.title_placeholder", defaultValue: "Transaction Title", table: "UI"), text: $title)
                         .autocapitalization(.words)
                     
                     HStack {
-                        Text("edit_recurring.amount_label".localized(defaultValue: "Amount"))
+                        Text(String(localized: "edit_recurring.amount_label", defaultValue: "Amount", table: "UI"))
                         Spacer()
                         TextField("0.00", text: $amount)
                             .keyboardType(.decimalPad)
@@ -200,10 +200,10 @@ struct EditRecurringTransactionView: View {
                     }
                 }
                 
-                Section("edit_recurring.category.title".localized(defaultValue: "Category")) {
-                    Picker("edit_recurring.category_type_label".localized(defaultValue: "Type"), selection: $categoryType) {
-                        Text("edit_recurring.type_income".localized(defaultValue: "Income")).tag("income")
-                        Text("edit_recurring.type_expense".localized(defaultValue: "Expense")).tag("expense")
+                Section(String(localized: "edit_recurring.category.title", defaultValue: "Category", table: "UI")) {
+                    Picker(String(localized: "edit_recurring.category_type_label", defaultValue: "Type", table: "UI"), selection: $categoryType) {
+                        Text(String(localized: "edit_recurring.type_income", defaultValue: "Income", table: "UI")).tag("income")
+                        Text(String(localized: "edit_recurring.type_expense", defaultValue: "Expense", table: "UI")).tag("expense")
                     }
                     .pickerStyle(.segmented)
                     
@@ -211,9 +211,11 @@ struct EditRecurringTransactionView: View {
                         showingCategoryPicker = true
                     } label: {
                         HStack {
-                            Text("edit_recurring.category_name_label".localized(defaultValue: "Category"))
+                            Text(String(localized: "edit_recurring.category_name_label", defaultValue: "Category", table: "UI"))
                             Spacer()
-                            Text(categoryName.isEmpty ? "edit_recurring.select_category".localized(defaultValue: "Select Category") : categoryName)
+                            Text(categoryName.isEmpty
+                                 ? String(localized: "edit_recurring.select_category", defaultValue: "Select Category", table: "UI")
+                                 : categoryName)
                                 .foregroundColor(categoryName.isEmpty ? .secondary : .primary)
                             Image(systemName: "chevron.right")
                                 .foregroundColor(.secondary)
@@ -222,12 +224,12 @@ struct EditRecurringTransactionView: View {
                     }
                 }
                 
-                Section("edit_recurring.schedule.title".localized(defaultValue: "Schedule")) {
+                Section(String(localized: "edit_recurring.schedule.title", defaultValue: "Schedule", table: "UI")) {
                     Button {
                         showingFrequencyPicker = true
                     } label: {
                         HStack {
-                            Text("edit_recurring.frequency_label".localized(defaultValue: "Frequency"))
+                            Text(String(localized: "edit_recurring.frequency_label", defaultValue: "Frequency", table: "UI"))
                             Spacer()
                             Text(frequency.displayName)
                                 .foregroundColor(.primary)
@@ -237,30 +239,32 @@ struct EditRecurringTransactionView: View {
                         }
                     }
                     
-                    DatePicker("edit_recurring.start_date_label".localized(defaultValue: "Start Date"), selection: $startDate, displayedComponents: .date)
+                    DatePicker(String(localized: "edit_recurring.start_date_label", defaultValue: "Start Date", table: "UI"), selection: $startDate, displayedComponents: .date)
                     
-                    Toggle("edit_recurring.has_end_date".localized(defaultValue: "Has End Date"), isOn: $hasEndDate)
+                    Toggle(String(localized: "edit_recurring.has_end_date", defaultValue: "Has End Date", table: "UI"), isOn: $hasEndDate)
                     
                     if hasEndDate {
-                        DatePicker("edit_recurring.end_date_label".localized(defaultValue: "End Date"), selection: $endDate, displayedComponents: .date)
+                        DatePicker(String(localized: "edit_recurring.end_date_label", defaultValue: "End Date", table: "UI"), selection: $endDate, displayedComponents: .date)
                     }
                 }
                 
-                Section("edit_recurring.notes.title".localized(defaultValue: "Notes")) {
-                    TextField("edit_recurring.notes_placeholder".localized(defaultValue: "Optional notes..."), text: $notes, axis: .vertical)
+                Section(String(localized: "edit_recurring.notes.title", defaultValue: "Notes", table: "UI")) {
+                    TextField(String(localized: "edit_recurring.notes_placeholder", defaultValue: "Optional notes...", table: "UI"), text: $notes, axis: .vertical)
                         .lineLimit(3...6)
                 }
             }
-            .navigationTitle(isEditing ? "edit_recurring.edit_title".localized(defaultValue: "Edit Recurring Transaction") : "edit_recurring.add_title".localized(defaultValue: "Add Recurring Transaction"))
+            .navigationTitle(isEditing
+                             ? String(localized: "edit_recurring.edit_title", defaultValue: "Edit Recurring Transaction", table: "UI")
+                             : String(localized: "edit_recurring.add_title", defaultValue: "Add Recurring Transaction", table: "UI"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("toolbar.cancel".localized(defaultValue: "Cancel")) {
+                    Button(String(localized: "toolbar.cancel", defaultValue: "Cancel", table: "UI")) {
                         isPresented = false
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("toolbar.save".localized(defaultValue: "Save")) {
+                    Button(String(localized: "toolbar.save", defaultValue: "Save", table: "UI")) {
                         saveTransaction()
                     }
                     .disabled(!isFormValid)
@@ -359,11 +363,11 @@ struct CategoryPickerView: View {
                     }
                 }
             }
-            .navigationTitle("category_picker.nav_title".localized(defaultValue: "Select Category"))
+            .navigationTitle(String(localized: "category_picker.nav_title", defaultValue: "Select Category", table: "UI"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("toolbar.cancel".localized(defaultValue: "Cancel")) {
+                    Button(String(localized: "toolbar.cancel", defaultValue: "Cancel", table: "UI")) {
                         dismiss()
                     }
                 }
@@ -396,11 +400,11 @@ struct FrequencyPickerView: View {
                     }
                 }
             }
-            .navigationTitle("frequency_picker.nav_title".localized(defaultValue: "Select Frequency"))
+            .navigationTitle(String(localized: "frequency_picker.nav_title", defaultValue: "Select Frequency", table: "UI"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("toolbar.cancel".localized(defaultValue: "Cancel")) {
+                    Button(String(localized: "toolbar.cancel", defaultValue: "Cancel", table: "UI")) {
                         dismiss()
                     }
                 }

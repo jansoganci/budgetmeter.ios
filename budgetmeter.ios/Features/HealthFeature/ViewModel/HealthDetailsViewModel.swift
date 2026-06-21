@@ -72,6 +72,7 @@ final class HealthDetailsViewModel: ObservableObject {
 
         // Subscribe to premium changes
         premiumManager.$isPremium
+            .map { PremiumManager.hasAccess(to: BudgetMeterCapability.spendingInsights, isPremium: $0) }
             .assign(to: &$isPremium)
 
         // Listen for language changes

@@ -49,14 +49,18 @@ struct HealthScoreCard: View {
 
     private var defaultStatusLabel: String {
         switch score {
-        case 70...100: return "Good"
-        case 40..<70: return "Fair"
-        default: return "Poor"
+        case 70...100: return String(localized: "health.rating.good", defaultValue: "Good", table: "UI")
+        case 40..<70: return String(localized: "health.rating.fair", defaultValue: "Fair", table: "UI")
+        default: return String(localized: "health.rating.poor", defaultValue: "Poor", table: "UI")
         }
     }
 
     private var accessibilityLabel: String {
-        var label = "Financial Health Score: \(score) out of 100, \(displayStatus)"
+        var label = String(
+            format: String(localized: "health.a11y.score", defaultValue: "Financial Health Score: %lld out of 100, %@", table: "UI"),
+            score,
+            displayStatus
+        )
         if let desc = description {
             label += ". \(desc)"
         }
@@ -82,7 +86,7 @@ struct HealthScoreCard: View {
     var body: some View {
         VStack(spacing: Spacing.lg) {
             // Title
-            Text("Financial Health Score")
+            Text(String(localized: "health.score.title", defaultValue: "Financial Health Score", table: "UI"))
                 .sectionTitleStyle()
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -143,7 +147,8 @@ struct HealthScoreCard: View {
             }
         }
         .frame(height: description != nil ? CardHeight.large + 40 : CardHeight.large)
-        .dashboardCard()
+        .padding(LayoutSpacing.cardPadding)
+        .glassSurface()
         .pressEffect(isPressed: $isPressed, haptic: true)
         .onTapGesture {
             if let action = onTap {

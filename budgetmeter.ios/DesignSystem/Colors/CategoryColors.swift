@@ -2,8 +2,9 @@
 //  CategoryColors.swift
 //  BudgetMeter
 //
-//  Design System v2.1 - Category Color Palette
-//  Color-coded icons for financial categories
+//  Design System v4 — Category color palette (icon chips only)
+//  Purple/pink/orange here are category identifiers, not brand accents.
+//  Use BrandColors financial/accent tokens for UI chrome and financial states.
 //
 
 import SwiftUI

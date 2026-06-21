@@ -2,8 +2,7 @@
 //  AnimationCurves.swift
 //  BudgetMeter
 //
-//  Design System v2.0 - Standard Animation System
-//  Consistent timing curves and durations
+//  Design System v4 — Standard animation curves and durations
 //
 
 import SwiftUI
@@ -29,6 +28,14 @@ enum AnimationCurve {
 
     /// Slow spring - 1.5s (hero elements, circular progress, health score)
     static let slowSpring = Animation.spring(response: 1.5, dampingFraction: 0.7)
+
+    // MARK: - v4 semantic aliases
+
+    static let buttonPress = quickSpring
+    static let cardReveal = mediumSpring
+    static let paceUpdate = progressSpring
+    static let heroReveal = slowSpring
+    static let chartBar = chartSpring
 
     // MARK: - Ease Animations
 

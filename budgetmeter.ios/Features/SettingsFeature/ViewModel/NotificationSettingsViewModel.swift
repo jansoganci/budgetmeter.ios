@@ -319,10 +319,10 @@ final class NotificationSettingsViewModel: ObservableObject {
         // Observe premium status changes
         premiumManager.$isPremium
             .sink { [weak self] isPremium in
-                self?.isPremium = isPremium
+                self?.isPremium = PremiumManager.hasAccess(to: BudgetMeterCapability.advancedNotifications, isPremium: isPremium)
 
                 // Auto-enable daily encouragement if user upgrades
-                if isPremium, let self = self {
+                if PremiumManager.hasAccess(to: BudgetMeterCapability.advancedNotifications, isPremium: isPremium), let self = self {
                     print("📱 NotificationSettings: User upgraded to premium")
                 }
             }

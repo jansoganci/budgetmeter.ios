@@ -24,13 +24,13 @@ final class CalculationEngineTests: XCTestCase {
     }
 
     func testTotalMonthlyExpense_OnlyDaily() {
-        // $10/day should equal $300/month (10 * 30)
+        // $10/day should normalize through the shared average month length.
         let result = CalculationEngine.totalMonthlyExpense(
             dailyTotal: 10,
             monthlyTotal: 0,
             yearlyTotal: 0
         )
-        XCTAssertEqual(result, 300, accuracy: 0.01, "Daily * 30 should equal monthly")
+        XCTAssertEqual(result, 10 * CalculationEngine.daysPerMonth, accuracy: 0.01, "Daily normalization should use the shared month length")
     }
 
     func testTotalMonthlyExpense_OnlyMonthly() {
@@ -53,16 +53,16 @@ final class CalculationEngineTests: XCTestCase {
     }
 
     func testTotalMonthlyExpense_Mixed() {
-        // Daily: $50 * 30 = $1500
+        // Daily uses the shared average month length.
         // Monthly: $1000
         // Yearly: $1200 / 12 = $100
-        // Total: $2600
+        let expected = (50 * CalculationEngine.daysPerMonth) + 1000 + (1200 / 12)
         let result = CalculationEngine.totalMonthlyExpense(
             dailyTotal: 50,
             monthlyTotal: 1000,
             yearlyTotal: 1200
         )
-        XCTAssertEqual(result, 2600, accuracy: 0.01, "Mixed frequencies should sum correctly")
+        XCTAssertEqual(result, expected, accuracy: 0.01, "Mixed frequencies should sum correctly")
     }
 
     func testTotalMonthlyExpense_WithDecimals() {
@@ -72,8 +72,8 @@ final class CalculationEngineTests: XCTestCase {
             monthlyTotal: 125.50,
             yearlyTotal: 999.99
         )
-        // (33.33 * 30) + 125.50 + (999.99 / 12) = 999.9 + 125.50 + 83.3325 = 1208.7325
-        XCTAssertEqual(result, 1208.73, accuracy: 0.01, "Decimal calculations should be precise")
+        let expected = (33.33 * CalculationEngine.daysPerMonth) + 125.50 + (999.99 / 12)
+        XCTAssertEqual(result, expected, accuracy: 0.01, "Decimal calculations should be precise")
     }
 
     // MARK: - Daily Expense Calculations
@@ -98,15 +98,14 @@ final class CalculationEngineTests: XCTestCase {
 
     func testDailyExpenseTotal_Mixed() {
         // Daily: $50
-        // Monthly: $900 / 30 = $30
-        // Yearly: $3650 / 365 = $10
-        // Total: $90/day
+        // Monthly and yearly use shared average period lengths.
         let result = CalculationEngine.dailyExpenseTotal(
             dailyTotal: 50,
             monthlyTotal: 900,
             yearlyTotal: 3650
         )
-        XCTAssertEqual(result, 90, accuracy: 0.01, "Daily conversion should be accurate")
+        let expected = 50 + (900 / CalculationEngine.daysPerMonth) + (3650 / CalculationEngine.daysPerYear)
+        XCTAssertEqual(result, expected, accuracy: 0.01, "Daily conversion should be accurate")
     }
 
     // MARK: - Hourly Expense Calculations
@@ -122,13 +121,13 @@ final class CalculationEngineTests: XCTestCase {
     }
 
     func testHourlyExpense_FromMonthly() {
-        // $900/month = $30/day = $1.25/hour
+        // $900/month normalizes through the shared average month length.
         let result = CalculationEngine.hourlyExpense(
             dailyTotal: 0,
             monthlyTotal: 900,
             yearlyTotal: 0
         )
-        XCTAssertEqual(result, 1.25, accuracy: 0.01)
+        XCTAssertEqual(result, 900 / CalculationEngine.daysPerMonth / CalculationEngine.hoursPerDay, accuracy: 0.01)
     }
 
     // MARK: - Weekly Expense Calculations
@@ -175,31 +174,30 @@ final class CalculationEngineTests: XCTestCase {
     }
 
     func testTotalMonthlyIncome_Mixed() {
-        // Daily gig: $100/day * 30 = $3000
+        // Daily gig normalizes through the shared average month length.
         // Monthly salary: $2000
         // Yearly bonus: $12000 / 12 = $1000
-        // Total: $6000/month
+        let expected = (100 * CalculationEngine.daysPerMonth) + 2000 + (12000 / 12)
         let result = CalculationEngine.totalMonthlyIncome(
             dailyIncomeTotal: 100,
             monthlyIncomeTotal: 2000,
             yearlyIncomeTotal: 12000
         )
-        XCTAssertEqual(result, 6000, accuracy: 0.01)
+        XCTAssertEqual(result, expected, accuracy: 0.01)
     }
 
     // MARK: - Daily Income Calculations
 
     func testDailyIncomeTotalConverted_Mixed() {
         // Daily: $50
-        // Monthly: $600 / 30 = $20
-        // Yearly: $3650 / 365 = $10
-        // Total: $80/day
+        // Monthly and yearly use shared average period lengths.
         let result = CalculationEngine.dailyIncomeTotalConverted(
             dailyIncomeTotal: 50,
             monthlyIncomeTotal: 600,
             yearlyIncomeTotal: 3650
         )
-        XCTAssertEqual(result, 80, accuracy: 0.01)
+        let expected = 50 + (600 / CalculationEngine.daysPerMonth) + (3650 / CalculationEngine.daysPerYear)
+        XCTAssertEqual(result, expected, accuracy: 0.01)
     }
 
     // MARK: - Hourly Income Calculations
@@ -269,9 +267,8 @@ final class CalculationEngineTests: XCTestCase {
     }
 
     func testNetFlow_Complex() {
-        // Income: Daily $100 * 30 + Monthly $2000 + Yearly $12000/12 = $3000 + $2000 + $1000 = $6000
-        // Expense: Daily $50 * 30 + Monthly $1000 + Yearly $6000/12 = $1500 + $1000 + $500 = $3000
-        // Net: $3000
+        let expectedIncome = (100 * CalculationEngine.daysPerMonth) + 2000 + (12000 / 12)
+        let expectedExpense = (50 * CalculationEngine.daysPerMonth) + 1000 + (6000 / 12)
         let result = CalculationEngine.netFlow(
             dailyIncomeTotal: 100,
             monthlyIncomeTotal: 2000,
@@ -280,7 +277,7 @@ final class CalculationEngineTests: XCTestCase {
             monthlyExpenseTotal: 1000,
             yearlyExpenseTotal: 6000
         )
-        XCTAssertEqual(result, 3000, accuracy: 0.01)
+        XCTAssertEqual(result, expectedIncome - expectedExpense, accuracy: 0.01)
     }
 
     // MARK: - Net Daily Flow
@@ -366,9 +363,8 @@ final class CalculationEngineTests: XCTestCase {
     }
 
     func testNetYearlyFlow_Mixed() {
-        // Income: (100 * 365) + (2000 * 12) + 12000 = 36500 + 24000 + 12000 = $72,500
-        // Expense: (50 * 365) + (1000 * 12) + 6000 = 18250 + 12000 + 6000 = $36,250
-        // Net: $36,250
+        let expectedIncome = (100 * CalculationEngine.daysPerYear) + (2000 * 12) + 12000
+        let expectedExpense = (50 * CalculationEngine.daysPerYear) + (1000 * 12) + 6000
         let result = CalculationEngine.netYearlyFlow(
             dailyIncomeTotal: 100,
             monthlyIncomeTotal: 2000,
@@ -377,7 +373,7 @@ final class CalculationEngineTests: XCTestCase {
             monthlyExpenseTotal: 1000,
             yearlyExpenseTotal: 6000
         )
-        XCTAssertEqual(result, 36250, accuracy: 0.01)
+        XCTAssertEqual(result, expectedIncome - expectedExpense, accuracy: 0.01)
     }
 
     // MARK: - Financial Health Score
@@ -538,10 +534,12 @@ final class CalculationEngineTests: XCTestCase {
             yearlyTotal: 3650,
             sessionSeconds: 3600
         )
-        // (24/(24*60*60) + 900/(30*24*60*60) + 3650/(365*24*60*60)) * 3600
-        // = (0.000277778 + 0.000347222 + 0.000115741) * 3600
-        // = 0.000740741 * 3600 = 2.67
-        XCTAssertEqual(result, 2.67, accuracy: 0.01)
+        let expected = (
+            24 / CalculationEngine.secondsPerDay
+            + 900 / CalculationEngine.secondsPerMonth
+            + 3650 / CalculationEngine.secondsPerYear
+        ) * 3600
+        XCTAssertEqual(result, expected, accuracy: 0.01)
     }
 
     func testCalculateLiveExpense_RoundingToCents() {
@@ -580,8 +578,12 @@ final class CalculationEngineTests: XCTestCase {
             yearlyIncomeTotal: 12000,
             sessionSeconds: 3600
         )
-        // This should equal approximately $10/hour
-        XCTAssertEqual(result, 10, accuracy: 0.1)
+        let expected = (
+            100 / CalculationEngine.secondsPerDay
+            + 3000 / CalculationEngine.secondsPerMonth
+            + 12000 / CalculationEngine.secondsPerYear
+        ) * 3600
+        XCTAssertEqual(result, expected, accuracy: 0.01)
     }
 
     // MARK: - Live Net Flow
@@ -619,8 +621,8 @@ final class CalculationEngineTests: XCTestCase {
             monthlyIncomeTotal: 5000000,
             yearlyIncomeTotal: 100000000
         )
-        // (1M * 30) + 5M + (100M / 12) = 30M + 5M + 8.33M = 43.33M
-        XCTAssertEqual(result, 43333333.33, accuracy: 100, "Should handle large numbers")
+        let expected = (1_000_000 * CalculationEngine.daysPerMonth) + 5_000_000 + (100_000_000 / 12)
+        XCTAssertEqual(result, expected, accuracy: 100, "Should handle large numbers")
     }
 
     func testSmallDecimals() {
@@ -645,7 +647,6 @@ final class CalculationEngineTests: XCTestCase {
             monthlyExpenseTotal: 0,
             yearlyExpenseTotal: 0
         )
-        // (100 * 30) - (150 * 30) = 3000 - 4500 = -1500
-        XCTAssertEqual(result, -1500, accuracy: 0.01)
+        XCTAssertEqual(result, -50 * CalculationEngine.daysPerMonth, accuracy: 0.01)
     }
 }

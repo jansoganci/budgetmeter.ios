@@ -24,7 +24,10 @@ class LocalizationManager: ObservableObject {
     private var bundle: Bundle
 
     private init() {
-        let savedLanguage = UserDefaults.standard.string(forKey: "AppLanguage") ?? "en"
+        // Settings stores LanguageMode; keep AppLanguage in sync for legacy installs.
+        let savedLanguage = UserDefaults.standard.string(forKey: "LanguageMode")
+            ?? UserDefaults.standard.string(forKey: "AppLanguage")
+            ?? "en"
         self.currentLocale = Locale(identifier: savedLanguage)
         self.bundle = Bundle.main
 
@@ -41,7 +44,14 @@ class LocalizationManager: ObservableObject {
     }
     
     /// Gets localized string for current language from all available string catalogs
-    func localizedString(for key: String, defaultValue: String = "") -> String {
+    func localizedString(for key: String, defaultValue: String = "", table: String? = nil) -> String {
+        if let table {
+            let tableValue = bundle.localizedString(forKey: key, value: defaultValue, table: table)
+            if tableValue != key && tableValue != defaultValue {
+                return tableValue
+            }
+        }
+
         // Try to find the string in the appropriate bundle for current language
         let localizedValue = bundle.localizedString(forKey: key, value: defaultValue, table: nil)
         
@@ -75,6 +85,7 @@ class LocalizationManager: ObservableObject {
 
             if persistSelection {
                 UserDefaults.standard.set(resolution.code, forKey: "AppLanguage")
+                UserDefaults.standard.set(resolution.code, forKey: "LanguageMode")
             }
 
             NotificationCenter.default.post(name: .languageDidChange, object: nil)
@@ -125,8 +136,12 @@ class LocalizationManager: ObservableObject {
 /// Custom String extension for app-controlled localization
 extension String {
     /// Gets localized string using LocalizationManager instead of system locale
-    func localized(defaultValue: String? = nil) -> String {
-        return LocalizationManager.shared.localizedString(for: self, defaultValue: defaultValue ?? self)
+    func localized(defaultValue: String? = nil, table: String? = nil) -> String {
+        return LocalizationManager.shared.localizedString(
+            for: self,
+            defaultValue: defaultValue ?? self,
+            table: table
+        )
     }
 }
 

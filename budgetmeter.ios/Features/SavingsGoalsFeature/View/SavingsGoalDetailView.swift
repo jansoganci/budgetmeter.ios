@@ -13,6 +13,7 @@ struct SavingsGoalDetailView: View {
     // MARK: - Properties
 
     let goal: SavingsGoal
+    var sharedPaceETAText: String? = nil
     let onUpdate: () -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -58,10 +59,8 @@ struct SavingsGoalDetailView: View {
                                 .foregroundColor(.brandProgress)
                         }
 
-                        Text(goal.name ?? "Unknown")
-                            .font(.title)
-                            .fontWeight(.bold)
-                            .foregroundColor(.textPrimary)
+                        Text(goal.name ?? String(localized: "savings.unknown", defaultValue: "Unknown", table: "UI", comment: "Unknown goal name"))
+                            .sectionTitleStyle()
                     }
 
                     // Progress Card
@@ -70,11 +69,11 @@ struct SavingsGoalDetailView: View {
                         VStack(spacing: Spacing.sm) {
                             GeometryReader { geometry in
                                 ZStack(alignment: .leading) {
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(Color.gray.opacity(0.2))
+                                    RoundedRectangle(cornerRadius: CornerRadius.badge)
+                                        .fill(Color.chartTrack)
                                         .frame(height: 16)
 
-                                    RoundedRectangle(cornerRadius: 8)
+                                    RoundedRectangle(cornerRadius: CornerRadius.badge)
                                         .fill(Color.brandProgress)
                                         .frame(width: geometry.size.width * progress, height: 16)
                                 }
@@ -82,9 +81,7 @@ struct SavingsGoalDetailView: View {
                             .frame(height: 16)
 
                             Text(progressPercentage)
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .foregroundColor(.brandProgress)
+                                .metricMediumStyle(color: .brandProgress)
                         }
 
                         // Amounts
@@ -94,26 +91,56 @@ struct SavingsGoalDetailView: View {
                                     .font(.system(size: 32, weight: .bold, design: .rounded))
                                     .foregroundColor(.textPrimary)
 
-                                Text(String(format: "savings.of_amount".localized(defaultValue: "of %@"), formatAmount(goal.targetAmount)))
+                                Text(String(format: String(localized: "savings.of_amount", defaultValue: "of %@", table: "UI"), formatAmount(goal.targetAmount)))
                                     .font(.title3)
                                     .foregroundColor(.textSecondary)
                             }
 
                             if remaining > 0 {
-                                Text(String(format: "savings.to_go".localized(defaultValue: "%@ to go"), formatAmount(remaining)))
+                                Text(String(format: String(localized: "savings.to_go", defaultValue: "%@ to go", table: "UI"), formatAmount(remaining)))
                                     .font(.subheadline)
                                     .foregroundColor(.textSecondary)
                             } else {
-                                Text("savings.goal_reached_message".localized(defaultValue: "Goal reached! 🎉"))
+                                Text(String(localized: "savings.goal_reached_message", defaultValue: "Goal reached! 🎉", table: "UI"))
                                     .font(.subheadline)
                                     .foregroundColor(.brandProgress)
                             }
                         }
                     }
                     .padding(Spacing.lg)
-                    .background(Color.cardBackground)
-                    .cornerRadius(CornerRadius.card)
-                    .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+                    .glassSurface()
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel(
+                        String(
+                            format: String(localized: "savings.detail.progress.accessibility", defaultValue: "Goal progress %@. %@ saved out of %@.", table: "UI"),
+                            progressPercentage,
+                            formatAmount(goal.currentAmount),
+                            formatAmount(goal.targetAmount)
+                        )
+                    )
+
+                    if let sharedPaceETAText, !sharedPaceETAText.isEmpty {
+                        VStack(alignment: .leading, spacing: Spacing.sm) {
+                            Text(String(localized: "savings.eta.shared_pace_title", defaultValue: "Shared pace estimate"))
+                                .font(.caption)
+                                .foregroundColor(.textSecondary)
+
+                            Text(sharedPaceETAText)
+                                .font(.body)
+                                .fontWeight(.medium)
+                                .foregroundColor(.textPrimary)
+                                .accessibilityLabel(
+                                    String(
+                                        localized: "savings.eta.accessibility",
+                                        defaultValue: "Estimated time to goal: \(sharedPaceETAText)"
+                                    )
+                                )
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(Spacing.lg)
+                        .padding(Spacing.lg)
+                        .glassSurface()
+                    }
 
                     // Target Date and Pace Info
                     if let targetDate = goal.targetDate {
@@ -124,7 +151,7 @@ struct SavingsGoalDetailView: View {
                                     .frame(width: 24)
 
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text("Target Date")
+                                    Text(String(localized: "savings.target_date", defaultValue: "Target Date", table: "UI"))
                                         .font(.caption)
                                         .foregroundColor(.textSecondary)
 
@@ -150,7 +177,7 @@ struct SavingsGoalDetailView: View {
                                         .frame(width: 24)
 
                                     VStack(alignment: .leading, spacing: 4) {
-                                        Text("Required Monthly")
+                                        Text(String(localized: "savings.required_monthly", defaultValue: "Required Monthly", table: "UI"))
                                             .font(.caption)
                                             .foregroundColor(.textSecondary)
 
@@ -169,9 +196,8 @@ struct SavingsGoalDetailView: View {
                             }
                         }
                         .padding(Spacing.lg)
-                        .background(Color.cardBackground)
-                        .cornerRadius(CornerRadius.card)
-                        .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+                        .padding(Spacing.lg)
+                        .glassSurface()
                     }
 
                     // Quick Actions
@@ -180,39 +206,41 @@ struct SavingsGoalDetailView: View {
                             Button(action: { showingAddMoney = true }) {
                                 HStack {
                                     Image(systemName: "plus.circle.fill")
-                                    Text("Add Money")
+                                    Text(String(localized: "savings.add_money", defaultValue: "Add Money", table: "UI"))
                                 }
                                 .font(.headline)
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
-                                .frame(height: 50)
+                                .frame(height: LayoutSpacing.buttonHeight)
                                 .background(Color.brandProgress)
-                                .cornerRadius(CornerRadius.button)
+                                .clipShape(RoundedRectangle(cornerRadius: CornerRadius.button, style: .continuous))
                             }
+                            .accessibilityHint(String(localized: "savings.add_money.hint", defaultValue: "Double tap to add funds to this goal", table: "UI"))
 
                             Button(action: { showingWithdrawMoney = true }) {
                                 HStack {
                                     Image(systemName: "minus.circle.fill")
-                                    Text("Withdraw")
+                                    Text(String(localized: "savings.withdraw", defaultValue: "Withdraw", table: "UI"))
                                 }
                                 .font(.headline)
                                 .foregroundColor(.brandProgress)
                                 .frame(maxWidth: .infinity)
-                                .frame(height: 50)
-                                .background(Color.cardBackground)
-                                .cornerRadius(CornerRadius.button)
+                                .frame(height: LayoutSpacing.buttonHeight)
+                                .padding(LayoutSpacing.cardPadding)
+                                .glassSurface()
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: CornerRadius.button)
+                                    RoundedRectangle(cornerRadius: CornerRadius.card, style: .continuous)
                                         .stroke(Color.brandProgress, lineWidth: 2)
                                 )
                             }
+                            .accessibilityHint(String(localized: "savings.withdraw.hint", defaultValue: "Double tap to withdraw funds from this goal", table: "UI"))
                         }
                     }
 
                     // Notes
                     if let notes = goal.notes, !notes.isEmpty {
                         VStack(alignment: .leading, spacing: Spacing.sm) {
-                            Text("Notes")
+                            Text(String(localized: "savings.notes", defaultValue: "Notes", table: "UI"))
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
                                 .foregroundColor(.textPrimary)
@@ -223,8 +251,8 @@ struct SavingsGoalDetailView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(Spacing.lg)
-                        .background(Color.cardBackground)
-                        .cornerRadius(CornerRadius.card)
+                        .padding(Spacing.lg)
+                        .glassSurface()
                     }
                 }
                 .padding(Spacing.lg)
@@ -233,13 +261,13 @@ struct SavingsGoalDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Done") {
+                    Button(String(localized: "Done", defaultValue: "Done", comment: "Dismiss detail view")) {
                         dismiss()
                     }
                 }
 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Edit") {
+                    Button(String(localized: "Edit", defaultValue: "Edit", comment: "Edit savings goal")) {
                         showingEdit = true
                     }
                 }
@@ -262,51 +290,37 @@ struct SavingsGoalDetailView: View {
 
     private var addMoneySheet: some View {
         NavigationView {
-            VStack(spacing: Spacing.xl) {
-                Spacer()
+            ZStack {
+                AppBackground()
 
-                VStack(spacing: Spacing.sm) {
-                    Text("Add Money to Goal")
-                        .font(.headline)
-                        .foregroundColor(.textPrimary)
+                VStack(spacing: LayoutSpacing.sectionGap) {
+                    SectionHeader(
+                        title: String(localized: "savings.add_money_to_goal", defaultValue: "Add Money to Goal", table: "UI")
+                    )
 
-                    HStack(spacing: Spacing.sm) {
-                        Text(currencySymbol)
-                            .font(.system(size: 40, weight: .bold))
-                            .foregroundColor(.textSecondary)
+                    FinancialAmountField(
+                        label: nil,
+                        currencySymbol: currencySymbol,
+                        text: $amount,
+                        accentColor: .accentPrimary,
+                        alignment: .center,
+                        focused: $amountFieldFocused
+                    )
 
-                        TextField("0.00", text: $amount)
-                            .keyboardType(.decimalPad)
-                            .textFieldStyle(.plain)
-                            .font(.system(size: 40, weight: .bold))
-                            .focused($amountFieldFocused)
-                            .multilineTextAlignment(.center)
-                    }
-                    .padding(Spacing.lg)
-                    .background(Color.cardBackground)
-                    .cornerRadius(CornerRadius.card)
+                    Spacer(minLength: Spacing.md)
+
+                    PrimaryCTAButton(
+                        title: String(localized: "savings.add", defaultValue: "Add", table: "UI"),
+                        isDisabled: parseAmount(amount) ?? 0 <= 0,
+                        action: performAddMoney
+                    )
                 }
-
-                Button(action: performAddMoney) {
-                    Text("Add")
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 50)
-                        .background(Color.brandProgress)
-                        .cornerRadius(CornerRadius.button)
-                }
-                .disabled(parseAmount(amount) ?? 0 <= 0)
-
-                Spacer()
+                .padding(LayoutSpacing.screenPadding)
             }
-            .padding(Spacing.lg)
-            .navigationTitle("Add Money")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                    Button(String(localized: "Cancel", defaultValue: "Cancel", comment: "Cancel add money")) {
                         showingAddMoney = false
                     }
                 }
@@ -317,61 +331,45 @@ struct SavingsGoalDetailView: View {
             }
         }
         .presentationDetents([.medium])
+        .presentationDragIndicator(.visible)
     }
 
     // MARK: - Withdraw Money Sheet
 
     private var withdrawMoneySheet: some View {
         NavigationView {
-            VStack(spacing: Spacing.xl) {
-                Spacer()
+            ZStack {
+                AppBackground()
 
-                VStack(spacing: Spacing.sm) {
-                    Text("Withdraw from Goal")
-                        .font(.headline)
-                        .foregroundColor(.textPrimary)
+                VStack(spacing: LayoutSpacing.sectionGap) {
+                    SectionHeader(
+                        title: String(localized: "savings.withdraw_from_goal", defaultValue: "Withdraw from Goal", table: "UI"),
+                        subtitle: String(format: String(localized: "savings.available_amount", defaultValue: "Available: %@", table: "UI"), formatAmount(goal.currentAmount))
+                    )
 
-                    Text("Available: \(formatAmount(goal.currentAmount))")
-                        .font(.caption)
-                        .foregroundColor(.textSecondary)
+                    FinancialAmountField(
+                        label: nil,
+                        currencySymbol: currencySymbol,
+                        text: $amount,
+                        accentColor: .financialCaution,
+                        alignment: .center,
+                        focused: $amountFieldFocused
+                    )
 
-                    HStack(spacing: Spacing.sm) {
-                        Text(currencySymbol)
-                            .font(.system(size: 40, weight: .bold))
-                            .foregroundColor(.textSecondary)
+                    Spacer(minLength: Spacing.md)
 
-                        TextField("0.00", text: $amount)
-                            .keyboardType(.decimalPad)
-                            .textFieldStyle(.plain)
-                            .font(.system(size: 40, weight: .bold))
-                            .focused($amountFieldFocused)
-                            .multilineTextAlignment(.center)
-                    }
-                    .padding(Spacing.lg)
-                    .background(Color.cardBackground)
-                    .cornerRadius(CornerRadius.card)
+                    PrimaryCTAButton(
+                        title: String(localized: "savings.withdraw", defaultValue: "Withdraw", table: "UI"),
+                        isDisabled: (parseAmount(amount) ?? 0) <= 0 || (parseAmount(amount) ?? 0) > goal.currentAmount,
+                        action: performWithdrawMoney
+                    )
                 }
-
-                Button(action: performWithdrawMoney) {
-                    Text("Withdraw")
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 50)
-                        .background(Color.orange)
-                        .cornerRadius(CornerRadius.button)
-                }
-                .disabled((parseAmount(amount) ?? 0) <= 0 || (parseAmount(amount) ?? 0) > goal.currentAmount)
-
-                Spacer()
+                .padding(LayoutSpacing.screenPadding)
             }
-            .padding(Spacing.lg)
-            .navigationTitle("Withdraw Money")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                    Button(String(localized: "Cancel", defaultValue: "Cancel", comment: "Cancel withdraw money")) {
                         showingWithdrawMoney = false
                     }
                 }
@@ -382,6 +380,7 @@ struct SavingsGoalDetailView: View {
             }
         }
         .presentationDetents([.medium])
+        .presentationDragIndicator(.visible)
     }
 
     // MARK: - Private Methods
@@ -423,17 +422,19 @@ struct SavingsGoalDetailView: View {
         let now = Date()
 
         if date < now {
-            return "Past due"
+            return String(localized: "savings.target_date_passed", defaultValue: "Target date passed", table: "UI")
         }
 
         let components = calendar.dateComponents([.month, .day], from: now, to: date)
 
         if let months = components.month, months > 0 {
-            return "\(months) month\(months == 1 ? "" : "s")"
+            let formatString = String(localized: "savings.months_remaining", defaultValue: "\(months) month\(months == 1 ? "" : "s") remaining", table: "UI")
+            return String(format: formatString, months)
         } else if let days = components.day, days > 0 {
-            return "\(days) day\(days == 1 ? "" : "s")"
+            let formatString = String(localized: "savings.days_remaining", defaultValue: "\(days) day\(days == 1 ? "" : "s") remaining", table: "UI")
+            return String(format: formatString, days)
         } else {
-            return "Today"
+            return String(localized: "savings.due_today", defaultValue: "Due today", table: "UI")
         }
     }
 

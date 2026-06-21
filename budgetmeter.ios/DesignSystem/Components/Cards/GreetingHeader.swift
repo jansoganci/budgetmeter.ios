@@ -71,8 +71,7 @@ struct GreetingHeader: View {
                 .foregroundColor(iconColor)
 
             Text(greeting)
-                .font(.system(size: 20 * sizeCategory.scaleFactor, weight: .semibold))
-                .foregroundColor(.textPrimary)
+                .sectionTitleStyle()
 
             Spacer()
         }

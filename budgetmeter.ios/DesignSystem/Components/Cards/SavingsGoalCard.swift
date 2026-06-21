@@ -144,7 +144,8 @@ struct SavingsGoalCard: View {
             }
         }
         .frame(height: CardHeight.large)
-        .dashboardCard()
+        .padding(LayoutSpacing.cardPadding)
+        .glassSurface()
         .pressEffect(isPressed: $isPressed, haptic: true)
         .onTapGesture {
             if let action = onTap {

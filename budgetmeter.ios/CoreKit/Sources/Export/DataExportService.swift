@@ -12,9 +12,9 @@ enum ExportFormat: String, CaseIterable, Identifiable {
     
     var displayName: String {
         switch self {
-        case .pdf: return "export.format.pdf".localized(defaultValue: "PDF Report")
-        case .csv: return "export.format.csv".localized(defaultValue: "CSV Data")
-        case .json: return "export.format.json".localized(defaultValue: "JSON Data")
+        case .pdf: return String(localized: "export.format.pdf", defaultValue: "PDF Report", table: "UI")
+        case .csv: return String(localized: "export.format.csv", defaultValue: "CSV Data", table: "UI")
+        case .json: return String(localized: "export.format.json", defaultValue: "JSON Data", table: "UI")
         }
     }
     
@@ -53,6 +53,13 @@ final class DataExportService {
     }
     
     func exportData(format: ExportFormat, dateRange: DateInterval? = nil) async throws -> URL {
+        let canExport = await MainActor.run {
+            PremiumManager.shared.hasAccess(to: BudgetMeterCapability.dataExport)
+        }
+        guard canExport else {
+            throw PremiumError.featureLocked(.dataExport)
+        }
+
         let exportData = try await gatherExportData(dateRange: dateRange)
         
         switch format {

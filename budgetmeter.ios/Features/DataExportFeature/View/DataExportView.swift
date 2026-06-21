@@ -26,11 +26,11 @@ struct DataExportView: View {
         
         var displayName: String {
             switch self {
-            case .all: return "export.date_range.all".localized(defaultValue: "All Time")
-            case .lastMonth: return "export.date_range.last_month".localized(defaultValue: "Last Month")
-            case .last3Months: return "export.date_range.last_3_months".localized(defaultValue: "Last 3 Months")
-            case .lastYear: return "export.date_range.last_year".localized(defaultValue: "Last Year")
-            case .custom: return "export.date_range.custom".localized(defaultValue: "Custom Range")
+            case .all: return String(localized: "export.date_range.all", defaultValue: "All Time", table: "UI")
+            case .lastMonth: return String(localized: "export.date_range.last_month", defaultValue: "Last Month", table: "UI")
+            case .last3Months: return String(localized: "export.date_range.last_3_months", defaultValue: "Last 3 Months", table: "UI")
+            case .lastYear: return String(localized: "export.date_range.last_year", defaultValue: "Last Year", table: "UI")
+            case .custom: return String(localized: "export.date_range.custom", defaultValue: "Custom Range", table: "UI")
             }
         }
     }
@@ -38,7 +38,7 @@ struct DataExportView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section("export.format.title".localized(defaultValue: "Export Format")) {
+                Section(String(localized: "export.format.title", defaultValue: "Export Format", table: "UI")) {
                     ForEach(ExportFormat.allCases) { format in
                         HStack {
                             Image(systemName: formatIcon(for: format))
@@ -68,7 +68,7 @@ struct DataExportView: View {
                     }
                 }
                 
-                Section("export.date_range.title".localized(defaultValue: "Date Range")) {
+                Section(String(localized: "export.date_range.title", defaultValue: "Date Range", table: "UI")) {
                     ForEach(DateRangeOption.allCases) { option in
                         HStack {
                             Text(option.displayName)
@@ -89,8 +89,8 @@ struct DataExportView: View {
                     }
                     
                     if selectedDateRange == .custom {
-                        DatePicker("export.start_date".localized(defaultValue: "Start Date"), selection: $customStartDate, displayedComponents: .date)
-                        DatePicker("export.end_date".localized(defaultValue: "End Date"), selection: $customEndDate, displayedComponents: .date)
+                        DatePicker(String(localized: "export.start_date", defaultValue: "Start Date", table: "UI"), selection: $customStartDate, displayedComponents: .date)
+                        DatePicker(String(localized: "export.end_date", defaultValue: "End Date", table: "UI"), selection: $customEndDate, displayedComponents: .date)
                     }
                 }
                 
@@ -109,7 +109,9 @@ struct DataExportView: View {
                                 Image(systemName: "square.and.arrow.up")
                             }
                             
-                            Text(isExporting ? "export.exporting".localized(defaultValue: "Exporting...") : "export.export_button".localized(defaultValue: "Export Data"))
+                            Text(isExporting
+                                 ? String(localized: "export.exporting", defaultValue: "Exporting...", table: "UI")
+                                 : String(localized: "export.export_button", defaultValue: "Export Data", table: "UI"))
                                 .fontWeight(.semibold)
                         }
                         .foregroundColor(.white)
@@ -126,17 +128,17 @@ struct DataExportView: View {
                     }
                 }
                 
-                Section("export.info.title".localized(defaultValue: "Export Information")) {
+                Section(String(localized: "export.info.title", defaultValue: "Export Information", table: "UI")) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("export.info.description".localized(defaultValue: "Your data will be exported in the selected format. The export includes:"))
+                        Text(String(localized: "export.info.description", defaultValue: "Your data will be exported in the selected format. The export includes:", table: "UI"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                         
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("• Financial categories and amounts")
-                            Text("• Recurring transactions")
-                            Text("• Custom categories")
-                            Text("• App settings and preferences")
+                            Text(String(localized: "export.info.item.categories", defaultValue: "• Financial categories and amounts", table: "UI"))
+                            Text(String(localized: "export.info.item.recurring", defaultValue: "• Recurring transactions", table: "UI"))
+                            Text(String(localized: "export.info.item.custom_categories", defaultValue: "• Custom categories", table: "UI"))
+                            Text(String(localized: "export.info.item.settings", defaultValue: "• App settings and preferences", table: "UI"))
                         }
                         .font(.caption)
                         .foregroundColor(.secondary)
@@ -144,11 +146,11 @@ struct DataExportView: View {
                     .padding(.vertical, 4)
                 }
             }
-            .navigationTitle("export.nav_title".localized(defaultValue: "Export Data"))
+            .navigationTitle(String(localized: "export.nav_title", defaultValue: "Export Data", table: "UI"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("toolbar.close".localized(defaultValue: "Close")) {
+                    Button(String(localized: "toolbar.close", defaultValue: "Close", table: "UI")) {
                         dismiss()
                     }
                 }
@@ -158,10 +160,10 @@ struct DataExportView: View {
                     ShareSheet(activityItems: [fileURL])
                 }
             }
-            .alert("error.title".localized(defaultValue: "Error"), isPresented: $showingError) {
-                Button("alert.ok".localized(defaultValue: "OK")) { }
+            .alert(String(localized: "error.title", defaultValue: "Error", table: "UI"), isPresented: $showingError) {
+                Button(String(localized: "alert.ok", defaultValue: "OK", table: "UI")) { }
             } message: {
-                Text(errorMessage ?? "export.error.unknown".localized(defaultValue: "An unknown error occurred"))
+                Text(errorMessage ?? String(localized: "export.error.unknown", defaultValue: "An unknown error occurred", table: "UI"))
             }
         }
     }
@@ -176,9 +178,9 @@ struct DataExportView: View {
     
     private func formatDescription(for format: ExportFormat) -> String {
         switch format {
-        case .pdf: return "export.format.pdf.description".localized(defaultValue: "Formatted report with charts and summaries")
-        case .csv: return "export.format.csv.description".localized(defaultValue: "Spreadsheet-compatible data format")
-        case .json: return "export.format.json.description".localized(defaultValue: "Machine-readable data format")
+        case .pdf: return String(localized: "export.format.pdf.description", defaultValue: "Formatted report with charts and summaries", table: "UI")
+        case .csv: return String(localized: "export.format.csv.description", defaultValue: "Spreadsheet-compatible data format", table: "UI")
+        case .json: return String(localized: "export.format.json.description", defaultValue: "Machine-readable data format", table: "UI")
         }
     }
     
@@ -208,7 +210,10 @@ struct DataExportView: View {
             DataExportService.shared.cleanupOldExports()
             
         } catch {
-            errorMessage = "export.error.failed".localized(defaultValue: "Export failed: \(error.localizedDescription)")
+            errorMessage = String(
+                format: String(localized: "export.error.failed", defaultValue: "Export failed: %@", table: "UI"),
+                error.localizedDescription
+            )
             showingError = true
         }
         

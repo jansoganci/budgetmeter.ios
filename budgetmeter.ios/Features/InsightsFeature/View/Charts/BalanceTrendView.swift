@@ -2,81 +2,47 @@
 //  BalanceTrendView.swift
 //  BudgetMeter
 //
-//  Phase 1B: Insights Dashboard - Chart Component
-//  Created by BudgetMeter Team on 17.09.2025.
+//  Balance trend line chart — ChartCard wrapper, calm presentation.
 //
 
 import SwiftUI
 import Charts
 
-/// Line chart view showing balance trend over time
+/// Line chart showing balance trend over time.
 struct BalanceTrendView: View {
-
-    // MARK: - Properties
 
     let snapshots: [FinancialSnapshot]
     let days: Int
+
     @State private var selectedDate: Date?
     @State private var selectedBalance: Double?
 
-    // MARK: - Body
-
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // Header
-            headerView
-
+        ChartCard(
+            title: "charts.balance_trend.title".localized(defaultValue: "Balance Trend"),
+            subtitle: String(format: "charts.balance_trend.subtitle".localized(defaultValue: "Last %d days"), days)
+        ) {
             if snapshots.isEmpty {
-                emptyStateView
+                compactEmptyState
             } else {
-                VStack(spacing: 20) {
-                    // Line chart
+                VStack(spacing: Spacing.lg) {
+                    if let trend = trendDirection {
+                        HStack {
+                            StatusBadge(label: trend.text, style: trend.style, iconName: trend.icon)
+                            Spacer()
+                        }
+                    }
+
                     lineChartView
 
-                    // Stats summary
                     statsView
                 }
             }
         }
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(16)
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
         .accessibilityElement(children: .contain)
-        .accessibilityLabel("Balance trend chart showing your balance over the last \(days) days")
-    }
-
-    // MARK: - Header
-
-    private var headerView: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Image(systemName: "chart.line.uptrend.xyaxis")
-                    .foregroundColor(.blue)
-                    .font(.title3)
-
-                Text("charts.balance_trend.title".localized(defaultValue: "Balance Trend"))
-                    .font(.headline)
-                    .fontWeight(.semibold)
-
-                Spacer()
-
-                if let trend = trendDirection {
-                    HStack(spacing: 4) {
-                        Image(systemName: trend.icon)
-                            .font(.caption)
-                        Text(trend.text)
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                    }
-                    .foregroundColor(trend.color)
-                }
-            }
-
-            Text(String(format: "charts.balance_trend.subtitle".localized(defaultValue: "Last %d days"), days))
-                .font(.caption)
-                .foregroundColor(.secondary)
-        }
+        .accessibilityLabel(
+            "charts.balance_trend.title".localized(defaultValue: "Balance Trend")
+        )
     }
 
     // MARK: - Line Chart
@@ -85,16 +51,14 @@ struct BalanceTrendView: View {
         Chart {
             ForEach(Array(snapshots.enumerated()), id: \.offset) { _, snapshot in
                 if let date = snapshot.date {
-                    // Line mark
                     LineMark(
                         x: .value("Date", date),
                         y: .value("Balance", snapshot.balance)
                     )
-                    .foregroundStyle(snapshot.balance >= 0 ? Color.green.gradient : Color.red.gradient)
-                    .lineStyle(StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
+                    .foregroundStyle(snapshot.balance >= 0 ? Color.financialPositive : Color.financialNegative)
+                    .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
                     .interpolationMethod(.catmullRom)
 
-                    // Area mark
                     AreaMark(
                         x: .value("Date", date),
                         y: .value("Balance", snapshot.balance)
@@ -102,7 +66,9 @@ struct BalanceTrendView: View {
                     .foregroundStyle(
                         LinearGradient(
                             colors: [
-                                snapshot.balance >= 0 ? Color.green.opacity(0.3) : Color.red.opacity(0.3),
+                                snapshot.balance >= 0
+                                    ? Color.financialPositive.opacity(0.12)
+                                    : Color.financialNegative.opacity(0.12),
                                 Color.clear
                             ],
                             startPoint: .top,
@@ -111,27 +77,25 @@ struct BalanceTrendView: View {
                     )
                     .interpolationMethod(.catmullRom)
 
-                    // Point mark for selected date
                     if let selectedDate = selectedDate,
                        Calendar.current.isDate(date, inSameDayAs: selectedDate) {
                         PointMark(
                             x: .value("Date", date),
                             y: .value("Balance", snapshot.balance)
                         )
-                        .foregroundStyle(snapshot.balance >= 0 ? Color.green : Color.red)
-                        .symbolSize(100)
+                        .foregroundStyle(snapshot.balance >= 0 ? Color.financialPositive : Color.financialNegative)
+                        .symbolSize(80)
                     }
                 }
             }
 
-            // Zero line
             RuleMark(y: .value("Zero", 0))
-                .foregroundStyle(Color.gray.opacity(0.3))
+                .foregroundStyle(Color.chartTrack.opacity(0.7))
                 .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 5]))
         }
-        .frame(height: 250)
+        .frame(height: ChartDimensions.miniChartHeight + 80)
         .chartXAxis {
-            AxisMarks(values: .stride(by: .day, count: max(days / 5, 1))) { value in
+            AxisMarks(values: .stride(by: .day, count: max(days / 5, 1))) { _ in
                 AxisValueLabel(format: .dateTime.month(.abbreviated).day())
                     .font(.caption)
             }
@@ -139,7 +103,7 @@ struct BalanceTrendView: View {
         .chartYAxis {
             AxisMarks(position: .leading) { value in
                 AxisGridLine()
-                    .foregroundStyle(Color.gray.opacity(0.2))
+                    .foregroundStyle(Color.chartTrack.opacity(0.6))
                 AxisValueLabel {
                     if let amount = value.as(Double.self) {
                         Text(formatShortAmount(amount))
@@ -161,7 +125,9 @@ struct BalanceTrendView: View {
                                 let x = value.location.x - geometry[plotFrame].origin.x
                                 if let date: Date = chartProxy.value(atX: x) {
                                     selectedDate = date
-                                    if let snapshot = snapshots.first(where: { Calendar.current.isDate($0.date ?? Date(), inSameDayAs: date) }) {
+                                    if let snapshot = snapshots.first(where: {
+                                        Calendar.current.isDate($0.date ?? Date(), inSameDayAs: date)
+                                    }) {
                                         selectedBalance = snapshot.balance
                                     }
                                 }
@@ -177,109 +143,56 @@ struct BalanceTrendView: View {
             if let selectedDate = selectedDate, let selectedBalance = selectedBalance {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(selectedDate, format: .dateTime.month().day().year())
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                        .captionStyle()
                     Text(CurrencyHelper.formatAmount(selectedBalance))
-                        .font(.headline)
-                        .fontWeight(.bold)
-                        .foregroundColor(selectedBalance >= 0 ? .green : .red)
+                        .metricCompactStyle(
+                            color: selectedBalance >= 0 ? .financialPositive : .financialNegative
+                        )
                 }
-                .padding(8)
-                .background(Color(.systemBackground))
-                .cornerRadius(8)
-                .shadow(radius: 4)
-                .padding()
+                .padding(Spacing.sm)
+                .glassSurface()
+                .padding(Spacing.sm)
             }
         }
     }
 
-    // MARK: - Stats View
+    // MARK: - Stats
 
     private var statsView: some View {
-        HStack(spacing: 16) {
-            // Highest balance
-            statCard(
-                title: "charts.stat.highest".localized(defaultValue: "Highest"),
-                value: highestBalance,
-                color: .green,
-                icon: "arrow.up.circle.fill"
+        HStack(spacing: Spacing.md) {
+            MetricCard(
+                label: "charts.stat.highest".localized(defaultValue: "Highest"),
+                amount: highestBalance,
+                accentColor: .financialPositive
             )
-
-            Divider()
-                .frame(height: 50)
-
-            // Lowest balance
-            statCard(
-                title: "charts.stat.lowest".localized(defaultValue: "Lowest"),
-                value: lowestBalance,
-                color: lowestBalance >= 0 ? .blue : .red,
-                icon: "arrow.down.circle.fill"
+            MetricCard(
+                label: "charts.stat.lowest".localized(defaultValue: "Lowest"),
+                amount: lowestBalance,
+                accentColor: lowestBalance >= 0 ? .financialPositiveCalm : .financialNegative
             )
-
-            Divider()
-                .frame(height: 50)
-
-            // Average balance
-            statCard(
-                title: "charts.stat.average".localized(defaultValue: "Average"),
-                value: averageBalance,
-                color: .orange,
-                icon: "chart.line.flattrend.xyaxis"
+            MetricCard(
+                label: "charts.stat.average".localized(defaultValue: "Average"),
+                amount: averageBalance,
+                accentColor: .financialNeutral
             )
         }
-        .padding()
-        .background(Color(.secondarySystemBackground))
-        .cornerRadius(12)
     }
 
-    private func statCard(title: String, value: Double, color: Color, icon: String) -> some View {
-        VStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.title3)
-                .foregroundColor(color)
-
-            Text(title)
-                .font(.caption)
-                .foregroundColor(.secondary)
-
-            Text(CurrencyHelper.formatAmount(value))
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-        }
-        .frame(maxWidth: .infinity)
+  private var compactEmptyState: some View {
+        Text("charts.balance_trend.empty.message".localized(defaultValue: "Add financial data to see your balance trend"))
+            .captionStyle(color: .textSecondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, Spacing.md)
     }
 
-    // MARK: - Empty State
-
-    private var emptyStateView: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "chart.line.downtrend.xyaxis")
-                .font(.system(size: 48))
-                .foregroundColor(.gray.opacity(0.5))
-
-            Text("charts.balance_trend.empty.title".localized(defaultValue: "No trend data"))
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-
-            Text("charts.balance_trend.empty.message".localized(defaultValue: "Add financial data to see your balance trend"))
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(height: 200)
-        .frame(maxWidth: .infinity)
-    }
-
-    // MARK: - Computed Properties
+    // MARK: - Computed
 
     private var highestBalance: Double {
-        snapshots.map { $0.balance }.max() ?? 0
+        snapshots.map(\.balance).max() ?? 0
     }
 
     private var lowestBalance: Double {
-        snapshots.map { $0.balance }.min() ?? 0
+        snapshots.map(\.balance).min() ?? 0
     }
 
     private var averageBalance: Double {
@@ -287,27 +200,36 @@ struct BalanceTrendView: View {
         return snapshots.reduce(0) { $0 + $1.balance } / Double(snapshots.count)
     }
 
-    private var trendDirection: (icon: String, text: String, color: Color)? {
+    private var trendDirection: (icon: String, text: String, style: StatusBadgeStyle)? {
         guard snapshots.count >= 2 else { return nil }
 
-        let recentBalances = snapshots.suffix(7).map { $0.balance }
-        let olderBalances = snapshots.prefix(7).map { $0.balance }
+        let recentBalances = snapshots.suffix(7).map(\.balance)
+        let olderBalances = snapshots.prefix(7).map(\.balance)
 
         let recentAvg = recentBalances.reduce(0, +) / Double(recentBalances.count)
         let olderAvg = olderBalances.reduce(0, +) / Double(olderBalances.count)
-
         let change = recentAvg - olderAvg
 
         if abs(change) < 10 {
-            return ("arrow.right", "charts.trend.stable".localized(defaultValue: "Stable"), .orange)
+            return (
+                "arrow.right",
+                "charts.trend.stable".localized(defaultValue: "Stable"),
+                .neutral
+            )
         } else if change > 0 {
-            return ("arrow.up.right", "charts.trend.improving".localized(defaultValue: "Improving"), .green)
+            return (
+                "arrow.up.right",
+                "charts.trend.improving".localized(defaultValue: "Improving"),
+                .positive
+            )
         } else {
-            return ("arrow.down.right", "charts.trend.declining".localized(defaultValue: "Declining"), .red)
+            return (
+                "arrow.down.right",
+                "charts.trend.declining".localized(defaultValue: "Declining"),
+                .negative
+            )
         }
     }
-
-    // MARK: - Helper Methods
 
     private func formatShortAmount(_ amount: Double) -> String {
         let absAmount = abs(amount)
@@ -318,8 +240,6 @@ struct BalanceTrendView: View {
     }
 }
 
-// MARK: - Preview
-
 #Preview {
     let context = PersistenceService.shared.viewContext
     let calendar = Calendar.current
@@ -327,10 +247,11 @@ struct BalanceTrendView: View {
     let snapshots = (0..<30).map { day -> FinancialSnapshot in
         let snapshot = FinancialSnapshot(context: context)
         snapshot.date = calendar.date(byAdding: .day, value: -day, to: Date())
-        snapshot.balance = Double.random(in: -500...2000) + (Double(30 - day) * 30) // Upward trend
+        snapshot.balance = Double.random(in: -500...2000) + (Double(30 - day) * 30)
         return snapshot
     }.reversed()
 
     BalanceTrendView(snapshots: Array(snapshots), days: 30)
         .padding()
+        .background(Color.appBackground)
 }

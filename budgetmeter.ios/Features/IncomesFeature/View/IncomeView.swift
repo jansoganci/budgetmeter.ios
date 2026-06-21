@@ -2,7 +2,7 @@
 //  IncomeView.swift
 //  BudgetMeter
 //
-//  Redesigned with collapsible sections and full-width rows
+//  Income entry screen with collapsible sections (v2 transformation).
 //
 
 import SwiftUI
@@ -14,65 +14,40 @@ struct IncomeView: View {
     @StateObject private var viewModel = IncomeViewModel()
     @StateObject private var localizationManager = LocalizationManager.shared
 
-    // MARK: - State
-
-    // Section expand state (Daily expanded by default)
     @State private var isDailyExpanded = true
     @State private var isMonthlyExpanded = false
     @State private var isYearlyExpanded = false
+    @State private var isOneTimeExpanded = false
 
-    // Edit sheet state
     @State private var categoryToEdit: FinancialCategory?
-
-    // Create modal state
     @State private var showingCreateModal = false
     @State private var selectedFrequency = ""
 
-    // MARK: - Body
-
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(spacing: Spacing.lg) {
-                    if viewModel.isLoading {
-                        loadingView
-                    } else {
-                        // Hero Summary Card
-                        FinancialSummaryCard(
-                            totalMonthly: viewModel.totalMonthlyIncome,
-                            dailyAverage: viewModel.dailyAverageIncome,
-                            yearlyProjection: viewModel.yearlyProjectionIncome,
-                            currencySymbol: viewModel.currencySymbol,
-                            type: .income,
-                            sourcesCount: viewModel.activeSourcesCount
-                        )
-                        .padding(.horizontal, Spacing.lg)
+            ZStack {
+                AppBackground()
 
-                        // Collapsible Sections
-                        VStack(spacing: Spacing.md) {
-                            // Daily Income Section (expanded by default)
-                            incomeSection(
-                                frequency: "daily",
-                                isExpanded: $isDailyExpanded
-                            )
+                ScrollView {
+                    VStack(spacing: LayoutSpacing.sectionGap) {
+                        if viewModel.isLoading {
+                            loadingView
+                        } else {
+                            summaryHeroCard
 
-                            // Monthly Income Section
-                            incomeSection(
-                                frequency: "monthly",
-                                isExpanded: $isMonthlyExpanded
-                            )
+                            if viewModel.activeSourcesCount == 0 {
+                                emptyStateSection
+                            } else {
+                                secondaryAddButton
+                            }
 
-                            // Yearly Income Section
-                            incomeSection(
-                                frequency: "yearly",
-                                isExpanded: $isYearlyExpanded
-                            )
+                            sectionsStack
                         }
                     }
+                    .padding(.vertical, Spacing.md)
+                    .padding(.horizontal, LayoutSpacing.screenPadding)
                 }
-                .padding(.vertical, Spacing.md)
             }
-            .background(Color.appBackground)
             .navigationTitle(String(localized: "tab.income.title", defaultValue: "Income"))
             .navigationBarTitleDisplayMode(.large)
             .refreshable {
@@ -108,6 +83,7 @@ struct IncomeView: View {
                     showingCreateModal = false
                 }
             )
+            .presentationDragIndicator(.visible)
         }
         .onAppear {
             viewModel.refresh()
@@ -126,7 +102,54 @@ struct IncomeView: View {
         }
     }
 
-    // MARK: - Income Section
+    // MARK: - Summary Hero
+
+    private var summaryHeroCard: some View {
+        SummaryHeroCard(
+            totalMonthly: viewModel.totalMonthlyIncome,
+            dailyAverage: viewModel.dailyAverageIncome,
+            yearlyProjection: viewModel.yearlyProjectionIncome,
+            currencySymbol: viewModel.currencySymbol,
+            type: .income,
+            sourcesCount: viewModel.activeSourcesCount
+        )
+    }
+
+    // MARK: - Empty State
+
+    private var emptyStateSection: some View {
+        VStack(spacing: LayoutSpacing.cardInternalGap) {
+            EmptyStateCard(
+                message: String(
+                    localized: "income.empty.message",
+                    defaultValue: "Add your income sources to see your monthly total and pace."
+                )
+            )
+
+            PrimaryCTAButton(
+                title: "income.add.primary".localized(defaultValue: "Add income"),
+                action: { presentCreateModal(frequency: "monthly") }
+            )
+        }
+    }
+
+    private var secondaryAddButton: some View {
+        SecondaryCTAButton(
+            title: "income.add.primary".localized(defaultValue: "Add income"),
+            action: { presentCreateModal(frequency: "monthly") }
+        )
+    }
+
+    // MARK: - Sections
+
+    private var sectionsStack: some View {
+        VStack(spacing: Spacing.md) {
+            incomeSection(frequency: "daily", isExpanded: $isDailyExpanded)
+            incomeSection(frequency: "monthly", isExpanded: $isMonthlyExpanded)
+            incomeSection(frequency: "yearly", isExpanded: $isYearlyExpanded)
+            oneTimeSection
+        }
+    }
 
     @ViewBuilder
     private func incomeSection(frequency: String, isExpanded: Binding<Bool>) -> some View {
@@ -138,54 +161,89 @@ struct IncomeView: View {
             accentColor: .brandPositive,
             isExpanded: isExpanded
         ) {
-            VStack(spacing: 0) {
-                // Category rows
-                ForEach(categories, id: \.objectID) { category in
-                    FinancialRowView(
-                        category: category,
-                        currencySymbol: viewModel.currencySymbol,
-                        accentColor: .brandPositive,
-                        onEditTap: {
-                            categoryToEdit = category
-                        }
-                    )
-
-                    // Divider between rows (not after last item)
-                    if category != categories.last {
-                        Divider()
-                            .padding(.leading, 56)
-                    }
-                }
-
-                // Add row divider if there are categories
-                if !categories.isEmpty {
-                    Divider()
-                        .padding(.leading, 56)
-                }
-
-                // Add new category row
-                AddFinancialItemRow(
-                    frequency: frequency,
-                    type: "income",
-                    onTap: {
-                        selectedFrequency = frequency
-                        showingCreateModal = true
-                    }
-                )
-            }
+            categoryList(
+                categories: categories,
+                frequency: frequency,
+                type: "income",
+                accentColor: .brandPositive
+            )
         }
     }
 
-    // MARK: - Loading View
+    private var oneTimeSection: some View {
+        FinancialSection(
+            title: viewModel.oneTimeSectionTitle,
+            subtitle: viewModel.formattedOneTimeSubtotal(),
+            accentColor: .brandPositive,
+            isExpanded: $isOneTimeExpanded
+        ) {
+            categoryList(
+                categories: viewModel.oneTimeIncomes,
+                frequency: "monthly",
+                type: "income",
+                accentColor: .brandPositive
+            )
+        }
+    }
+
+    @ViewBuilder
+    private func categoryList(
+        categories: [FinancialCategory],
+        frequency: String,
+        type: String,
+        accentColor: Color
+    ) -> some View {
+        VStack(spacing: 0) {
+            ForEach(categories, id: \.objectID) { category in
+                FinanceListRow(
+                    category: category,
+                    currencySymbol: viewModel.currencySymbol,
+                    accentColor: accentColor,
+                    onEditTap: {
+                        categoryToEdit = category
+                    }
+                )
+
+                if category != categories.last {
+                    Divider()
+                        .padding(.leading, 56)
+                }
+            }
+
+            if !categories.isEmpty {
+                Divider()
+                    .padding(.leading, 56)
+            }
+
+            AddFinancialItemRow(
+                frequency: frequency,
+                type: type,
+                onTap: {
+                    presentCreateModal(frequency: frequency)
+                }
+            )
+        }
+    }
+
+    // MARK: - Loading
 
     private var loadingView: some View {
         VStack(spacing: Spacing.lg) {
             ProgressView()
                 .scaleEffect(1.2)
             Text(String(localized: "income.loading", defaultValue: "Loading income..."))
-                .foregroundColor(.secondary)
+                .captionStyle()
         }
         .frame(maxWidth: .infinity, minHeight: 200)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(String(localized: "income.loading", defaultValue: "Loading income"))
+    }
+
+    // MARK: - Actions
+
+    private func presentCreateModal(frequency: String) {
+        selectedFrequency = frequency
+        showingCreateModal = true
     }
 }
 

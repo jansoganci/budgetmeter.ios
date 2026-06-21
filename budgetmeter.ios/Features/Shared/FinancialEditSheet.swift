@@ -2,35 +2,28 @@
 //  FinancialEditSheet.swift
 //  BudgetMeter
 //
-//  Sheet for editing a financial category (amount + delete option)
+//  Sheet for editing a financial category (amount + delete option) — v2 input flow.
 //
 
 import SwiftUI
 
 /// Sheet for editing a financial category
-/// Shows amount input, category info, and delete button for custom categories
 struct FinancialEditSheet: View {
-
-    // MARK: - Properties
 
     let category: FinancialCategory
     let currencySymbol: String
     let accentColor: Color
     let onSave: (Double) -> Void
     let onDelete: (() -> Void)?
-    var onColorChange: ((CategoryColor) -> Void)?  // Optional callback for color changes
+    var onColorChange: ((CategoryColor) -> Void)?
 
     @Environment(\.dismiss) private var dismiss
     @StateObject private var premiumManager = PremiumManager.shared
-
-    // MARK: - State
 
     @State private var amountText: String = ""
     @State private var selectedColor: CategoryColor = .gray
     @State private var showDeleteConfirmation = false
     @FocusState private var isAmountFocused: Bool
-
-    // MARK: - Computed Properties
 
     private var categoryName: String {
         DataSeedingService.displayName(for: category)
@@ -41,8 +34,12 @@ struct FinancialEditSheet: View {
     }
 
     private var frequencyLabel: String {
+        if FinancialCategoryWriteSupport.isOneTimeDisplayCategory(category) {
+            return String(localized: "financial.entry.one_time", defaultValue: "One-Time")
+        }
         switch category.frequency {
         case "daily": return String(localized: "frequency.daily", defaultValue: "Daily")
+        case "weekly": return String(localized: "frequency.weekly", defaultValue: "Weekly")
         case "monthly": return String(localized: "frequency.monthly", defaultValue: "Monthly")
         case "yearly": return String(localized: "frequency.yearly", defaultValue: "Yearly")
         default: return category.frequency?.capitalized ?? "Monthly"
@@ -63,14 +60,12 @@ struct FinancialEditSheet: View {
     }
 
     private var canEditColor: Bool {
-        category.isCustom && premiumManager.isPremium
+        category.isCustom && premiumManager.hasAccess(to: BudgetMeterCapability.customCategories)
     }
 
     private var currentCategoryColor: Color {
         DataSeedingService.color(for: category)
     }
-
-    // MARK: - Initialization
 
     init(
         category: FinancialCategory,
@@ -88,31 +83,43 @@ struct FinancialEditSheet: View {
         self.onColorChange = onColorChange
     }
 
-    // MARK: - Body
-
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(spacing: Spacing.xl) {
-                    // Category Info
-                    categoryInfoSection
+            ZStack {
+                AppBackground()
 
-                    // Amount Input
-                    amountInputSection
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: LayoutSpacing.sectionGap) {
+                        categoryInfoSection
 
-                    // Color Picker (custom categories + premium only)
-                    if category.isCustom {
-                        colorPickerSection
+                        GlassCard {
+                            FinancialAmountField(
+                                label: String(localized: "financial.edit.amount", defaultValue: "Amount"),
+                                currencySymbol: currencySymbol,
+                                text: $amountText,
+                                accentColor: accentColor,
+                                focused: $isAmountFocused
+                            )
+                        }
+
+                        if category.isCustom {
+                            colorPickerSection
+                        }
+
+                        if canDelete {
+                            deleteSection
+                        }
+
+                        PrimaryCTAButton(
+                            title: String(localized: "button.save", defaultValue: "Save"),
+                            isDisabled: saveButtonDisabled,
+                            action: saveChanges
+                        )
                     }
-
-                    // Delete Button (custom categories only)
-                    if canDelete {
-                        deleteSection
-                    }
+                    .padding(.horizontal, LayoutSpacing.screenPadding)
+                    .padding(.vertical, Spacing.md)
                 }
-                .padding(Spacing.lg)
             }
-            .background(Color.appBackground)
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -122,27 +129,19 @@ struct FinancialEditSheet: View {
                     }
                 }
 
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(String(localized: "button.save", defaultValue: "Save")) {
-                        saveChanges()
-                    }
-                    .fontWeight(.semibold)
-                    .disabled(saveButtonDisabled)
-                }
-
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
                     Button(String(localized: "button.done", defaultValue: "Done")) {
                         isAmountFocused = false
                     }
-                    .foregroundColor(.brandProgress)
+                    .foregroundColor(accentColor)
                     .fontWeight(.semibold)
                 }
             }
         }
+        .presentationDragIndicator(.visible)
         .onAppear {
             loadData()
-            // Auto-focus after short delay
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 isAmountFocused = true
             }
@@ -160,108 +159,55 @@ struct FinancialEditSheet: View {
         }
     }
 
-    // MARK: - Sections
-
     private var categoryInfoSection: some View {
         VStack(spacing: Spacing.md) {
-            // Icon - use selected color for custom categories
             Image(systemName: categoryIcon)
                 .font(.system(size: 48, weight: .medium))
                 .foregroundColor(category.isCustom ? selectedColor.color : currentCategoryColor)
 
-            // Name
             Text(categoryName)
-                .font(.title2)
-                .fontWeight(.semibold)
-                .foregroundColor(.textPrimary)
+                .sectionTitleStyle()
 
-            // Frequency Badge
             Text(frequencyLabel)
-                .font(.caption)
-                .fontWeight(.semibold)
-                .foregroundColor(.white)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
+                .badgeStyle(color: .white)
+                .padding(.horizontal, Spacing.md)
+                .padding(.vertical, Spacing.sm)
                 .background(category.isCustom ? selectedColor.color : currentCategoryColor)
-                .cornerRadius(CornerRadius.small)
+                .clipShape(RoundedRectangle(cornerRadius: CornerRadius.small, style: .continuous))
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, Spacing.lg)
-    }
-
-    private var amountInputSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text(String(localized: "financial.edit.amount", defaultValue: "Amount"))
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .foregroundColor(.textSecondary)
-
-            HStack(spacing: Spacing.sm) {
-                Text(currencySymbol)
-                    .font(.title)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.textSecondary)
-
-                TextField("0", text: $amountText)
-                    .keyboardType(.decimalPad)
-                    .font(.system(size: 32, weight: .bold, design: .rounded))
-                    .foregroundColor(.textPrimary)
-                    .focused($isAmountFocused)
-                    .multilineTextAlignment(.leading)
-            }
-            .padding(Spacing.lg)
-            .background(Color.cardBackground)
-            .cornerRadius(CornerRadius.card)
-        }
+        .padding(.vertical, Spacing.md)
     }
 
     private var colorPickerSection: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            HStack {
-                Text(String(localized: "financial.edit.color", defaultValue: "Color"))
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(.textSecondary)
-
-                if !premiumManager.isPremium {
-                    Text(String(localized: "premium.badge", defaultValue: "Premium"))
-                        .font(.caption2)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(Color.brandProgress)
-                        .cornerRadius(4)
+            SectionHeader(title: String(localized: "financial.edit.color", defaultValue: "Color")) {
+                if !premiumManager.hasAccess(to: BudgetMeterCapability.customCategories) {
+                    PremiumBadge(locked: true)
                 }
             }
 
-            ColorPickerGrid(
-                selectedColor: $selectedColor,
-                isPremium: premiumManager.isPremium
-            )
-            .padding(Spacing.md)
-            .background(Color.cardBackground)
-            .cornerRadius(CornerRadius.card)
+            GlassCard {
+                ColorPickerGrid(
+                    selectedColor: $selectedColor,
+                    isPremium: premiumManager.hasAccess(to: BudgetMeterCapability.customCategories)
+                )
+            }
         }
     }
 
     private var deleteSection: some View {
-        Button(action: {
-            showDeleteConfirmation = true
-        }) {
+        Button(action: { showDeleteConfirmation = true }) {
             HStack {
                 Image(systemName: "trash")
                 Text(String(localized: "financial.delete.button", defaultValue: "Delete Category"))
             }
-            .font(.body)
-            .fontWeight(.medium)
-            .foregroundColor(.red)
+            .bodyStyle(color: .financialNegative)
             .frame(maxWidth: .infinity)
             .padding(Spacing.md)
         }
+        .buttonStyle(.plain)
     }
-
-    // MARK: - Actions
 
     private func loadData() {
         if category.amount > 0 {
@@ -270,7 +216,6 @@ struct FinancialEditSheet: View {
             amountText = ""
         }
 
-        // Load current color for custom categories
         if category.isCustom {
             selectedColor = DataSeedingService.categoryColor(for: category)
         }
@@ -280,8 +225,7 @@ struct FinancialEditSheet: View {
         let amount = parseAmount(amountText) ?? 0
         onSave(amount)
 
-        // Save color change for custom categories (premium only)
-        if category.isCustom && premiumManager.isPremium {
+        if category.isCustom && premiumManager.hasAccess(to: BudgetMeterCapability.customCategories) {
             onColorChange?(selectedColor)
         }
 
@@ -293,8 +237,6 @@ struct FinancialEditSheet: View {
         onDelete?()
         dismiss()
     }
-
-    // MARK: - Helpers
 
     private func formatAmount(_ amount: Double) -> String {
         let formatter = NumberFormatter()
@@ -311,39 +253,15 @@ struct FinancialEditSheet: View {
     }
 }
 
-// MARK: - Preview
-
 #Preview("Income Edit") {
     FinancialEditSheet(
         category: PreviewHelper.mockCategory(name: "Salary", amount: 4000, type: "income"),
         currencySymbol: "$",
         accentColor: .brandPositive,
-        onSave: { amount in print("Save: \(amount)") },
-        onDelete: nil  // Predefined category
-    )
-}
-
-#Preview("Custom Category (Deletable)") {
-    FinancialEditSheet(
-        category: PreviewHelper.mockCustomCategory(name: "Side Gig", amount: 250, type: "income"),
-        currencySymbol: "$",
-        accentColor: .brandPositive,
-        onSave: { amount in print("Save: \(amount)") },
-        onDelete: { print("Delete") }
-    )
-}
-
-#Preview("Expense Edit") {
-    FinancialEditSheet(
-        category: PreviewHelper.mockCategory(name: "Rent", amount: 1500, type: "expense"),
-        currencySymbol: "€",
-        accentColor: .brandExpense,
-        onSave: { amount in print("Save: \(amount)") },
+        onSave: { _ in },
         onDelete: nil
     )
 }
-
-// MARK: - Preview Helper
 
 private enum PreviewHelper {
     static func mockCategory(name: String, amount: Double, type: String) -> FinancialCategory {
@@ -356,19 +274,6 @@ private enum PreviewHelper {
         category.frequency = "monthly"
         category.isCustom = false
         category.customIconName = type == "income" ? "dollarsign.circle.fill" : "cart.fill"
-        return category
-    }
-
-    static func mockCustomCategory(name: String, amount: Double, type: String) -> FinancialCategory {
-        let context = PersistenceService.shared.viewContext
-        let category = FinancialCategory(context: context)
-        category.id = UUID()
-        category.customName = name
-        category.amount = amount
-        category.type = type
-        category.frequency = "monthly"
-        category.isCustom = true
-        category.customIconName = "star.circle.fill"
         return category
     }
 }

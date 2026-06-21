@@ -98,14 +98,11 @@ struct CompactSavingsCard: View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             // Header: Title
             Text(displayTitle)
-                .font(.system(size: 13 * sizeCategory.scaleFactor, weight: .medium))
-                .foregroundColor(.textSecondary)
+                .captionStyle()
                 .lineLimit(1)
 
-            // Amount: Current / Target
             Text(formattedProgress)
-                .font(.system(size: 17 * sizeCategory.scaleFactor, weight: .bold, design: .rounded))
-                .foregroundColor(.textPrimary)
+                .metricCompactStyle(color: .textPrimary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
 
@@ -116,12 +113,11 @@ struct CompactSavingsCard: View {
                 ZStack(alignment: .leading) {
                     // Background track
                     RoundedRectangle(cornerRadius: CornerRadius.tiny)
-                        .fill(Color.chartInactive)
+                        .fill(Color.chartTrack)
                         .frame(height: ChartDimensions.compactProgressHeight)
 
-                    // Progress fill
                     RoundedRectangle(cornerRadius: CornerRadius.tiny)
-                        .fill(LinearGradient.progress)
+                        .fill(Color.accentPrimary)
                         .frame(
                             width: geometry.size.width * progress,
                             height: ChartDimensions.compactProgressHeight
@@ -136,19 +132,11 @@ struct CompactSavingsCard: View {
 
             // Percentage
             Text("\(progressPercentage)%")
-                .font(.system(size: 11 * sizeCategory.scaleFactor, weight: .semibold))
-                .foregroundColor(.brandProgress)
+                .badgeStyle(color: .accentPrimary)
         }
-        .frame(height: CardHeight.metric)
+        .frame(minHeight: CardHeight.metric)
         .padding(Spacing.md)
-        .background(Color.cardBackground)
-        .cornerRadius(CornerRadius.card)
-        .shadow(
-            color: ShadowStyle.card.color,
-            radius: ShadowStyle.card.radius,
-            x: ShadowStyle.card.offset.width,
-            y: ShadowStyle.card.offset.height
-        )
+        .glassSurface()
         .pressEffect(isPressed: $isPressed, haptic: onTap != nil)
         .onTapGesture {
             if let action = onTap {

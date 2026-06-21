@@ -21,19 +21,28 @@ struct LanguagePickerView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                Section {
-                    ForEach(sortedLanguages, id: \.self) { language in
-                        languageRow(for: language)
+            ZStack {
+                AppBackground()
+
+                ScrollView {
+                    SettingsSection {
+                        ForEach(Array(sortedLanguages.enumerated()), id: \.element) { index, language in
+                            languageRow(for: language)
+
+                            if index != sortedLanguages.count - 1 {
+                                SettingsDivider()
+                            }
+                        }
                     }
+                    .padding(.horizontal, LayoutSpacing.screenPadding)
+                    .padding(.vertical, Spacing.md)
                 }
             }
-            .listStyle(.insetGrouped)
-            .navigationTitle("settings.language.picker.title".localized(defaultValue: "Language"))
+            .navigationTitle("settings.language.picker.title".localized(defaultValue: "Language", table: "UI"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("toolbar.done".localized(defaultValue: "Done")) {
+                    Button("toolbar.done".localized(defaultValue: "Done", table: "UI")) {
                         dismiss()
                     }
                 }
@@ -43,25 +52,34 @@ struct LanguagePickerView: View {
 
     @ViewBuilder
     private func languageRow(for language: SettingsViewModel.LanguageMode) -> some View {
-        HStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 2) {
+        HStack(spacing: Spacing.md) {
+            Image(systemName: "globe")
+                .font(.system(size: 19, weight: .medium))
+                .foregroundColor(.accentPrimary)
+                .frame(width: 32, height: 32)
+                .background(Color.accentPrimary.opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: CornerRadius.small, style: .continuous))
+                .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text(language.displayName)
-                    .font(.body)
-                    .foregroundColor(.primary)
+                    .bodyStyle()
                 Text(language.rawValue.uppercased())
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    .captionStyle()
             }
 
             Spacer()
 
             if selectedLanguage == language {
                 Image(systemName: "checkmark")
-                    .foregroundColor(Color(hex: "4A90E2"))
+                    .foregroundColor(.accentPrimary)
                     .font(.system(size: 16, weight: .semibold))
                     .accessibilityHidden(true)
             }
         }
+        .padding(.horizontal, Spacing.md)
+        .padding(.vertical, Spacing.sm)
+        .frame(minHeight: LayoutSpacing.rowHeight)
         .contentShape(Rectangle())
         .onTapGesture {
             onSelect(language)
@@ -69,7 +87,7 @@ struct LanguagePickerView: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilityLabel(for: language))
-        .accessibilityValue(selectedLanguage == language ? "settings.language.row.accessibility_selected".localized(defaultValue: "Selected") : "")
+        .accessibilityValue(selectedLanguage == language ? "settings.language.row.accessibility_selected".localized(defaultValue: "Selected", table: "UI") : "")
     }
 
     private func accessibilityLabel(for language: SettingsViewModel.LanguageMode) -> String {

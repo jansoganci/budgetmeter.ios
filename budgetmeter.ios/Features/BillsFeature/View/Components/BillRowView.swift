@@ -92,7 +92,7 @@ struct BillRowView: View {
                 .cornerRadius(CornerRadius.small)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(bill.name ?? "Unknown")
+                Text(bill.name ?? String(localized: "bills.unknown", defaultValue: "Unknown", table: "UI"))
                     .font(.body)
                     .fontWeight(.medium)
                     .foregroundColor(.textPrimary)
@@ -117,7 +117,7 @@ struct BillRowView: View {
                             .font(.caption)
                             .foregroundColor(.textSecondary)
 
-                        Text("AutoPay")
+                        Text(String(localized: "bills.autopay", defaultValue: "AutoPay", table: "UI"))
                             .font(.caption)
                             .foregroundColor(.green)
                     }
@@ -133,7 +133,7 @@ struct BillRowView: View {
                     .foregroundColor(.textPrimary)
 
                 if showPaidStatus && bill.isPaid {
-                    Text("✓ Paid")
+                    Text(String(localized: "bills.status.paid", defaultValue: "✓ Paid", table: "UI"))
                         .font(.caption)
                         .foregroundColor(.brandProgress)
                 }
@@ -146,7 +146,7 @@ struct BillRowView: View {
         .padding(Spacing.md)
         .applyIf(enableBackground) { view in
             view
-                .background(Color.cardBackground)
+                .background(Color.surfaceCard)
                 .cornerRadius(CornerRadius.small)
         }
         .applyIf(onTap != nil) { view in
@@ -160,21 +160,21 @@ struct BillRowView: View {
                 Button(role: .destructive) {
                     viewModel.deleteBill(bill)
                 } label: {
-                    Label("Delete", systemImage: "trash")
+                    Label(String(localized: "bills.action.delete", defaultValue: "Delete", table: "UI"), systemImage: "trash")
                 }
 
                 if !bill.isPaid {
                     Button {
                         viewModel.markAsPaid(bill)
                     } label: {
-                        Label("Paid", systemImage: "checkmark.circle.fill")
+                        Label(String(localized: "bills.action.mark_paid", defaultValue: "Paid", table: "UI"), systemImage: "checkmark.circle.fill")
                     }
                     .tint(.brandProgress)
                 } else {
                     Button {
                         viewModel.markAsUnpaid(bill)
                     } label: {
-                        Label("Unpaid", systemImage: "arrow.uturn.backward")
+                        Label(String(localized: "bills.action.mark_unpaid", defaultValue: "Unpaid", table: "UI"), systemImage: "arrow.uturn.backward")
                     }
                     .tint(.orange)
                 }

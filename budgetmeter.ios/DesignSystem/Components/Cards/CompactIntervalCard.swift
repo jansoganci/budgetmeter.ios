@@ -140,14 +140,7 @@ struct CompactIntervalCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .frame(height: CardHeight.interval)
         .padding(Spacing.md)
-        .background(Color.cardBackground)
-        .cornerRadius(CornerRadius.button)
-        .shadow(
-            color: ShadowStyle.small.color,
-            radius: ShadowStyle.small.radius,
-            x: ShadowStyle.small.offset.width,
-            y: ShadowStyle.small.offset.height
-        )
+        .glassSurface()
         .pressEffect(isPressed: $isPressed, haptic: onTap != nil)
         .onTapGesture {
             if let action = onTap {

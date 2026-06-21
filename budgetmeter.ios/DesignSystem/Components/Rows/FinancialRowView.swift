@@ -73,16 +73,13 @@ struct FinancialRowView: View {
 
             // Category Name
             Text(categoryName)
-                .font(.system(size: 16 * sizeCategory.scaleFactor, weight: .regular))
-                .foregroundColor(.textPrimary)
+                .bodyStyle()
                 .lineLimit(1)
 
             Spacer()
 
-            // Amount
             Text(hasAmount ? formattedAmount : "-")
-                .font(.system(size: 16 * sizeCategory.scaleFactor, weight: .semibold, design: .rounded))
-                .foregroundColor(hasAmount ? .textPrimary : .textSecondary)
+                .metricCompactStyle(color: hasAmount ? .textPrimary : .textSecondary)
                 .lineLimit(1)
 
             // Edit Button

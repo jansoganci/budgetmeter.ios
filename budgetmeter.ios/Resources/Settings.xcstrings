@@ -2347,61 +2347,61 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "iCloud sync only occurs if you enable it."
+            "value": "Premium users can optionally back up encrypted data to Supabase. Legacy iCloud sync may still apply for existing users."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تتم مزامنة iCloud فقط إذا فعّلتها."
+            "value": "يمكن للمستخدمين المميزين اختيارياً نسخ البيانات المشفرة احتياطياً إلى Supabase. قد تظل مزامنة iCloud القديمة سارية للمستخدمين الحاليين."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "iCloud-Synchronisierung erfolgt nur, wenn du sie aktivierst."
+            "value": "Premium-Nutzer können optional verschlüsselte Daten zu Supabase sichern. Legacy-iCloud-Sync kann für bestehende Nutzer weiterhin gelten."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "La sincronización con iCloud ocurre solo si la activas."
+            "value": "Los usuarios Premium pueden hacer copia de seguridad opcional de datos cifrados en Supabase. La sincronización heredada de iCloud puede seguir aplicándose a usuarios existentes."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "La synchronisation iCloud n'a lieu que si vous l'activez."
+            "value": "Les utilisateurs Premium peuvent optionnellement sauvegarder des données chiffrées sur Supabase. La synchronisation iCloud héritée peut encore s'appliquer aux utilisateurs existants."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "La sincronizzazione iCloud avviene solo se la abiliti."
+            "value": "Gli utenti Premium possono eseguire opzionalmente il backup di dati crittografati su Supabase. La sincronizzazione iCloud legacy può ancora applicarsi agli utenti esistenti."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "iCloud 同期は有効にした場合にのみ行われます。"
+            "value": "プレミアムユーザーは任意で暗号化データをSupabaseにバックアップできます。既存ユーザーにはレガシーiCloud同期が適用される場合があります。"
           }
         },
         "pt": {
           "stringUnit": {
             "state": "translated",
-            "value": "A sincronização com o iCloud ocorre apenas se você ativá-la."
+            "value": "Usuários Premium podem fazer backup opcional de dados criptografados no Supabase. A sincronização legada do iCloud pode ainda se aplicar a usuários existentes."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "iCloud eşitlemesi yalnızca etkinleştirirsen gerçekleşir."
+            "value": "Premium kullanıcılar isteğe bağlı olarak şifreli verileri Supabase'e yedekleyebilir. Mevcut kullanıcılar için eski iCloud eşitlemesi geçerli olabilir."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "仅在您启用时才会进行 iCloud 同步。"
+            "value": "高级用户可选择将加密数据备份到 Supabase。现有用户可能仍适用旧版 iCloud 同步。"
           }
         }
       }
@@ -2412,61 +2412,61 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your financial data stays on this device."
+            "value": "Free users: your financial data stays on this device with no cloud storage."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تبقى بياناتك المالية على هذا الجهاز."
+            "value": "المستخدمون المجانيون: تبقى بياناتك المالية على هذا الجهاز دون تخزين سحابي."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Deine Finanzdaten bleiben auf diesem Gerät."
+            "value": "Kostenlose Nutzer: Deine Finanzdaten bleiben auf diesem Gerät ohne Cloud-Speicherung."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tus datos financieros permanecen en este dispositivo."
+            "value": "Usuarios gratuitos: tus datos financieros permanecen en este dispositivo sin almacenamiento en la nube."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vos données financières restent sur cet appareil."
+            "value": "Utilisateurs gratuits : vos données financières restent sur cet appareil sans stockage cloud."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "I tuoi dati finanziari restano su questo dispositivo."
+            "value": "Utenti gratuiti: i tuoi dati finanziari restano su questo dispositivo senza archiviazione cloud."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "財務データはこのデバイスに保存されます。"
+            "value": "無料ユーザー：財務データはクラウド保存なしでこのデバイスに残ります。"
           }
         },
         "pt": {
           "stringUnit": {
             "state": "translated",
-            "value": "Seus dados financeiros permanecem neste dispositivo."
+            "value": "Usuários gratuitos: seus dados financeiros permanecem neste dispositivo sem armazenamento na nuvem."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Finansal verilerin bu cihazda kalır."
+            "value": "Ücretsiz kullanıcılar: finansal verilerin bulut depolama olmadan bu cihazda kalır."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "您的财务数据保留在此设备上。"
+            "value": "免费用户：您的财务数据保留在此设备上，不使用云存储。"
           }
         }
       }
@@ -2607,61 +2607,61 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "We built BudgetMeter with privacy-first safeguards."
+            "value": "Your data is stored locally on your device. Premium users can optionally back up to Supabase, a secure cloud database."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "صممنا BudgetMeter مع حماية للخصوصية في المقام الأول."
+            "value": "يتم تخزين بياناتك محلياً على جهازك. يمكن للمستخدمين المميزين اختيارياً النسخ الاحتياطي إلى Supabase، قاعدة بيانات سحابية آمنة."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wir haben BudgetMeter mit Datenschutz als höchste Priorität entwickelt."
+            "value": "Deine Daten werden lokal auf deinem Gerät gespeichert. Premium-Nutzer können optional zu Supabase, einer sicheren Cloud-Datenbank, sichern."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Creamos BudgetMeter con protecciones de privacidad desde el inicio."
+            "value": "Tus datos se almacenan localmente en tu dispositivo. Los usuarios Premium pueden hacer copia de seguridad opcionalmente en Supabase, una base de datos en la nube segura."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nous avons conçu BudgetMeter avec une priorité absolue à la confidentialité."
+            "value": "Vos données sont stockées localement sur votre appareil. Les utilisateurs Premium peuvent optionnellement sauvegarder sur Supabase, une base de données cloud sécurisée."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Abbiamo creato BudgetMeter con la privacy come priorità assoluta."
+            "value": "I tuoi dati sono memorizzati localmente sul tuo dispositivo. Gli utenti Premium possono eseguire opzionalmente il backup su Supabase, un database cloud sicuro."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "BudgetMeter はプライバシーを最優先に設計されています。"
+            "value": "データはデバイスにローカル保存されます。プレミアムユーザーは任意でSupabaseという安全なクラウドデータベースにバックアップできます。"
           }
         },
         "pt": {
           "stringUnit": {
             "state": "translated",
-            "value": "Criamos o BudgetMeter com a privacidade como prioridade."
+            "value": "Seus dados são armazenados localmente no seu dispositivo. Usuários Premium podem fazer backup opcionalmente no Supabase, um banco de dados em nuvem seguro."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "BudgetMeter'i öncelikle gizlilik odaklı olarak geliştirdik."
+            "value": "Verilerin cihazında yerel olarak saklanır. Premium kullanıcılar isteğe bağlı olarak güvenli bir bulut veritabanı olan Supabase'e yedekleyebilir."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "我们以隐私为先设计了 BudgetMeter。"
+            "value": "您的数据本地存储在设备上。高级用户可选择备份到安全的云数据库 Supabase。"
           }
         }
       }
@@ -3582,61 +3582,61 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Last Updated: September 2025"
+            "value": "Last Updated: June 2026"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "آخر تحديث: سبتمبر 2025"
+            "value": "آخر تحديث: يونيو 2026"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Zuletzt aktualisiert: September 2025"
+            "value": "Zuletzt aktualisiert: Juni 2026"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Última actualización: Septiembre 2025"
+            "value": "Última actualización: Junio de 2026"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dernière mise à jour : Septembre 2025"
+            "value": "Dernière mise à jour : Juin 2026"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ultimo aggiornamento: Settembre 2025"
+            "value": "Ultimo aggiornamento: Giugno 2026"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "最終更新: 2025年9月"
+            "value": "最終更新: 2026年6月"
           }
         },
         "pt": {
           "stringUnit": {
             "state": "translated",
-            "value": "Última atualização: Setembro de 2025"
+            "value": "Última atualização: Junho de 2026"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Son Güncelleme: Eylül 2025"
+            "value": "Son Güncelleme: Haziran 2026"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "最后更新：2025年9月"
+            "value": "最后更新：2026年6月"
           }
         }
       }
@@ -3842,61 +3842,61 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Financial data (income, expenses, categories) - stored locally on your device\n• App preferences (currency, language) - stored locally\n• iCloud sync data (when enabled) - stored in your personal iCloud account"
+            "value": "• Financial data (income, expenses, categories) - stored locally on your device\n• App preferences (currency, language) - stored locally\n• Premium cloud backup (optional) - stored in your Supabase account when you sign in and back up\n• Legacy iCloud sync may still apply until migration is complete"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "• البيانات المالية (الدخل، المصروفات، الفئات) - مخزنة محلياً على جهازك\n• تفضيلات التطبيق (العملة، اللغة) - مخزنة محلياً\n• بيانات مزامنة iCloud (عند التفعيل) - مخزنة في حساب iCloud الشخصي الخاص بك"
+            "value": "• البيانات المالية (الدخل، المصروفات، الفئات) - مخزنة محلياً على جهازك\n• تفضيلات التطبيق (العملة، اللغة) - مخزنة محلياً\n• النسخ الاحتياطي السحابي المميز (اختياري) - مخزن في حساب Supabase عند تسجيل الدخول والنسخ الاحتياطي\n• قد تظل مزامنة iCloud القديمة سارية حتى اكتمال الترحيل"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Finanzdaten (Einkommen, Ausgaben, Kategorien) - lokal auf Ihrem Gerät gespeichert\n• App-Einstellungen (Währung, Sprache) - lokal gespeichert\n• iCloud-Synchronisierungsdaten (wenn aktiviert) - in Ihrem persönlichen iCloud-Konto gespeichert"
+            "value": "• Finanzdaten (Einkommen, Ausgaben, Kategorien) – lokal auf Ihrem Gerät gespeichert\n• App-Einstellungen (Währung, Sprache) – lokal gespeichert\n• Premium-Cloud-Backup (optional) – in Ihrem Supabase-Konto gespeichert, wenn Sie sich anmelden und sichern\n• Legacy-iCloud-Synchronisierung kann bis zur Migration weiterhin gelten"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Datos financieros (ingresos, gastos, categorías) - almacenados localmente en su dispositivo\n• Preferencias de la aplicación (moneda, idioma) - almacenadas localmente\n• Datos de sincronización de iCloud (cuando está habilitado) - almacenados en su cuenta personal de iCloud"
+            "value": "• Datos financieros (ingresos, gastos, categorías) - almacenados localmente en su dispositivo\n• Preferencias de la aplicación (moneda, idioma) - almacenadas localmente\n• Copia de seguridad en la nube Premium (opcional) - almacenada en su cuenta de Supabase al iniciar sesión y hacer copia de seguridad\n• La sincronización heredada de iCloud puede seguir aplicándose hasta completar la migración"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Données financières (revenus, dépenses, catégories) - stockées localement sur votre appareil\n• Préférences de l'application (devise, langue) - stockées localement\n• Données de synchronisation iCloud (lorsqu'elles sont activées) - stockées dans votre compte iCloud personnel"
+            "value": "• Données financières (revenus, dépenses, catégories) - stockées localement sur votre appareil\n• Préférences de l'application (devise, langue) - stockées localement\n• Sauvegarde cloud Premium (optionnelle) - stockée dans votre compte Supabase lorsque vous vous connectez et sauvegardez\n• La synchronisation iCloud héritée peut encore s'appliquer jusqu'à la fin de la migration"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Dati finanziari (entrate, spese, categorie) - memorizzati localmente sul tuo dispositivo\n• Preferenze dell'app (valuta, lingua) - memorizzate localmente\n• Dati di sincronizzazione iCloud (quando abilitati) - memorizzati nel tuo account iCloud personale"
+            "value": "• Dati finanziari (entrate, spese, categorie) - memorizzati localmente sul tuo dispositivo\n• Preferenze dell'app (valuta, lingua) - memorizzate localmente\n• Backup cloud Premium (opzionale) - memorizzato nel tuo account Supabase quando accedi ed esegui il backup\n• La sincronizzazione iCloud legacy può ancora applicarsi fino al completamento della migrazione"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "• 財務データ（収入、支出、カテゴリ）- デバイスにローカルに保存\n• アプリ設定（通貨、言語）- ローカルに保存\n• iCloud同期データ（有効化時）- 個人のiCloudアカウントに保存"
+            "value": "• 財務データ（収入、支出、カテゴリ）- デバイスにローカル保存\n• アプリ設定（通貨、言語）- ローカル保存\n• プレミアムクラウドバックアップ（任意）- サインインしてバックアップするとSupabaseアカウントに保存\n• 移行が完了するまでレガシーiCloud同期が適用される場合があります"
           }
         },
         "pt": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Dados financeiros (receitas, despesas, categorias) - armazenados localmente no seu dispositivo\n• Preferências do aplicativo (moeda, idioma) - armazenadas localmente\n• Dados de sincronização do iCloud (quando habilitado) - armazenados na sua conta pessoal do iCloud"
+            "value": "• Dados financeiros (receitas, despesas, categorias) - armazenados localmente no seu dispositivo\n• Preferências do aplicativo (moeda, idioma) - armazenadas localmente\n• Backup na nuvem Premium (opcional) - armazenado na sua conta Supabase ao entrar e fazer backup\n• A sincronização legada do iCloud pode ainda se aplicar até a migração ser concluída"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Finansal veriler (gelir, gider, kategoriler) - cihazınızda yerel olarak saklanır\n• Uygulama tercihleri (para birimi, dil) - yerel olarak saklanır\n• iCloud eşitleme verileri (etkinleştirildiğinde) - kişisel iCloud hesabınızda saklanır"
+            "value": "• Finansal veriler (gelir, gider, kategoriler) - cihazınızda yerel olarak saklanır\n• Uygulama tercihleri (para birimi, dil) - yerel olarak saklanır\n• Premium bulut yedekleme (isteğe bağlı) - giriş yapıp yedeklediğinizde Supabase hesabınızda saklanır\n• Geçiş tamamlanana kadar eski iCloud eşitlemesi geçerli olabilir"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "• 财务数据（收入、支出、类别）- 本地存储在您的设备上\n• 应用偏好设置（货币、语言）- 本地存储\n• iCloud同步数据（启用时）- 存储在您的个人iCloud账户中"
+            "value": "• 财务数据（收入、支出、类别）- 本地存储在您的设备上\n• 应用偏好设置（货币、语言）- 本地存储\n• 高级云备份（可选）- 登录并备份后存储在您的 Supabase 账户中\n• 在迁移完成前，旧版 iCloud 同步可能仍然适用"
           }
         }
       }
@@ -3972,61 +3972,61 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "• To provide financial tracking functionality\n• To sync across your devices via iCloud (optional)\n• All processing happens locally on your device"
+            "value": "• To provide financial tracking functionality\n• To back up and restore premium cloud data when you sign in\n• All processing happens locally on your device"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "• لتوفير وظائف تتبع مالية\n• لمزامنة البيانات عبر أجهزتك عبر iCloud (اختياري)\n• تتم جميع المعالجات محلياً على جهازك"
+            "value": "• لتوفير وظائف التتبع المالي\n• لنسخ واستعادة بيانات السحابة المميزة عند تسجيل الدخول\n• تتم جميع المعالجات محلياً على جهازك"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Zur Bereitstellung von Finanzverfolgungsfunktionen\n• Zur Synchronisierung über Ihre Geräte via iCloud (optional)\n• Alle Verarbeitungen erfolgen lokal auf Ihrem Gerät"
+            "value": "• Zur Bereitstellung von Finanzverfolgungsfunktionen\n• Zum Sichern und Wiederherstellen von Premium-Cloud-Daten bei Anmeldung\n• Alle Verarbeitungen erfolgen lokal auf Ihrem Gerät"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Para proporcionar funcionalidad de seguimiento financiero\n• Para sincronizar entre sus dispositivos a través de iCloud (opcional)\n• Todo el procesamiento ocurre localmente en su dispositivo"
+            "value": "• Para proporcionar funcionalidad de seguimiento financiero\n• Para respaldar y restaurar datos en la nube Premium al iniciar sesión\n• Todo el procesamiento ocurre localmente en su dispositivo"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Pour fournir des fonctionnalités de suivi financier\n• Pour synchroniser sur vos appareils via iCloud (optionnel)\n• Tout le traitement se fait localement sur votre appareil"
+            "value": "• Pour fournir des fonctionnalités de suivi financier\n• Pour sauvegarder et restaurer les données cloud Premium lors de la connexion\n• Tout le traitement se fait localement sur votre appareil"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Per fornire funzionalità di monitoraggio finanziario\n• Per sincronizzare tra i tuoi dispositivi tramite iCloud (opzionale)\n• Tutte le elaborazioni avvengono localmente sul tuo dispositivo"
+            "value": "• Per fornire funzionalità di monitoraggio finanziario\n• Per eseguire backup e ripristino dei dati cloud Premium all'accesso\n• Tutte le elaborazioni avvengono localmente sul tuo dispositivo"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "• 財務追跡機能を提供するため\n• iCloud経由でデバイス間を同期するため（オプション）\n• すべての処理はデバイス上でローカルに実行されます"
+            "value": "• 財務追跡機能を提供するため\n• サインイン時にプレミアムクラウドデータをバックアップ・復元するため\n• すべての処理はデバイス上でローカルに実行されます"
           }
         },
         "pt": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Para fornecer funcionalidade de rastreamento financeiro\n• Para sincronizar entre seus dispositivos via iCloud (opcional)\n• Todo o processamento acontece localmente no seu dispositivo"
+            "value": "• Para fornecer funcionalidade de rastreamento financeiro\n• Para fazer backup e restaurar dados na nuvem Premium ao entrar\n• Todo o processamento acontece localmente no seu dispositivo"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Finansal takip işlevselliği sağlamak için\n• iCloud aracılığıyla cihazlarınız arasında senkronize etmek için (isteğe bağlı)\n• Tüm işlemler cihazınızda yerel olarak gerçekleşir"
+            "value": "• Finansal takip işlevselliği sağlamak için\n• Giriş yaptığınızda premium bulut verilerini yedeklemek ve geri yüklemek için\n• Tüm işlemler cihazınızda yerel olarak gerçekleşir"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "• 提供财务跟踪功能\n• 通过iCloud在您的设备间同步（可选）\n• 所有处理都在您的设备上本地进行"
+            "value": "• 提供财务跟踪功能\n• 登录时备份和恢复高级云数据\n• 所有处理都在您的设备上本地进行"
           }
         }
       }
@@ -4102,61 +4102,61 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "We do not share, sell, or transmit your personal data to any third parties."
+            "value": "We do not sell your personal data. Optional premium cloud backup uses Supabase for secure storage. We do not share your data with advertisers or other third parties."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "لا نشارك أو نبيع أو ننقل بياناتك الشخصية إلى أي أطراف ثالثة."
+            "value": "لا نبيع بياناتك الشخصية. يستخدم النسخ الاحتياطي السحابي المميز الاختياري Supabase للتخزين الآمن. لا نشارك بياناتك مع المعلنين أو أطراف ثالثة أخرى."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wir teilen, verkaufen oder übertragen Ihre persönlichen Daten nicht an Dritte."
+            "value": "Wir verkaufen Ihre persönlichen Daten nicht. Optionales Premium-Cloud-Backup nutzt Supabase für sichere Speicherung. Wir teilen Ihre Daten nicht mit Werbetreibenden oder anderen Dritten."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "No compartimos, vendemos ni transmitimos sus datos personales a terceros."
+            "value": "No vendemos sus datos personales. La copia de seguridad en la nube Premium opcional usa Supabase para almacenamiento seguro. No compartimos sus datos con anunciantes u otros terceros."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nous ne partageons, ne vendons ni ne transmettons vos données personnelles à des tiers."
+            "value": "Nous ne vendons pas vos données personnelles. La sauvegarde cloud Premium optionnelle utilise Supabase pour un stockage sécurisé. Nous ne partageons pas vos données avec des annonceurs ou d'autres tiers."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Non condividiamo, vendiamo o trasmettiamo i tuoi dati personali a terze parti."
+            "value": "Non vendiamo i tuoi dati personali. Il backup cloud Premium opzionale utilizza Supabase per l'archiviazione sicura. Non condividiamo i tuoi dati con inserzionisti o altre terze parti."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "個人データを第三者と共有、販売、または送信することはありません。"
+            "value": "個人データを販売することはありません。任意のプレミアムクラウドバックアップはSupabaseで安全に保存されます。広告主やその他の第三者とデータを共有することはありません。"
           }
         },
         "pt": {
           "stringUnit": {
             "state": "translated",
-            "value": "Não compartilhamos, vendemos ou transmitimos seus dados pessoais a terceiros."
+            "value": "Não vendemos seus dados pessoais. O backup na nuvem Premium opcional usa Supabase para armazenamento seguro. Não compartilhamos seus dados com anunciantes ou outros terceiros."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kişisel verilerinizi hiçbir üçüncü taraf ile paylaşmıyor, satmıyor veya iletmiyoruz."
+            "value": "Kişisel verilerinizi satmıyoruz. İsteğe bağlı premium bulut yedekleme güvenli depolama için Supabase kullanır. Verilerinizi reklamverenler veya diğer üçüncü taraflarla paylaşmıyoruz."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "我们不会与任何第三方共享、出售或传输您的个人数据。"
+            "value": "我们不出售您的个人数据。可选的高级云备份使用 Supabase 进行安全存储。我们不会与广告商或其他第三方共享您的数据。"
           }
         }
       }
@@ -4232,61 +4232,61 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Local: Core Data database on your device\n• Cloud: Your private iCloud account (optional)\n• No external servers or third-party databases"
+            "value": "• Local: Core Data database on your device\n• Cloud (Premium): Supabase-backed backup linked to your signed-in account\n• Legacy iCloud data may remain until migration is complete"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "• محلي: قاعدة بيانات Core Data على جهازك\n• السحابة: حساب iCloud الشخصي الخاص بك (اختياري)\n• لا توجد خوادم خارجية أو قواعد بيانات تابعة لأطراف ثالثة"
+            "value": "• محلي: قاعدة بيانات Core Data على جهازك\n• السحابة (مميز): نسخة احتياطية عبر Supabase مرتبطة بحسابك المسجل\n• قد تبقى بيانات iCloud القديمة حتى اكتمال الترحيل"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Lokal: Core Data-Datenbank auf Ihrem Gerät\n• Cloud: Ihr privates iCloud-Konto (optional)\n• Keine externen Server oder Drittanbieter-Datenbanken"
+            "value": "• Lokal: Core-Data-Datenbank auf Ihrem Gerät\n• Cloud (Premium): Supabase-gestütztes Backup, verknüpft mit Ihrem angemeldeten Konto\n• Legacy-iCloud-Daten können bis zur Migration verbleiben"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Local: Base de datos Core Data en su dispositivo\n• Nube: Su cuenta privada de iCloud (opcional)\n• Sin servidores externos ni bases de datos de terceros"
+            "value": "• Local: Base de datos Core Data en su dispositivo\n• Nube (Premium): Copia de seguridad con Supabase vinculada a su cuenta iniciada\n• Los datos heredados de iCloud pueden permanecer hasta completar la migración"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Local : Base de données Core Data sur votre appareil\n• Cloud : Votre compte iCloud privé (optionnel)\n• Aucun serveur externe ni base de données tierce"
+            "value": "• Local : Base de données Core Data sur votre appareil\n• Cloud (Premium) : Sauvegarde via Supabase liée à votre compte connecté\n• Des données iCloud héritées peuvent subsister jusqu'à la fin de la migration"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Locale: Database Core Data sul tuo dispositivo\n• Cloud: Il tuo account iCloud privato (opzionale)\n• Nessun server esterno o database di terze parti"
+            "value": "• Locale: Database Core Data sul tuo dispositivo\n• Cloud (Premium): Backup tramite Supabase collegato al tuo account\n• I dati iCloud legacy possono rimanere fino al completamento della migrazione"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "• ローカル: デバイス上のCore Dataデータベース\n• クラウド: 個人のiCloudアカウント（オプション）\n• 外部サーバーやサードパーティのデータベースはありません"
+            "value": "• ローカル: デバイス上のCore Dataデータベース\n• クラウド（プレミアム）: サインインアカウントにリンクされたSupabaseバックアップ\n• 移行完了までレガシーiCloudデータが残る場合があります"
           }
         },
         "pt": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Local: Banco de dados Core Data no seu dispositivo\n• Nuvem: Sua conta privada do iCloud (opcional)\n• Sem servidores externos ou bancos de dados de terceiros"
+            "value": "• Local: Banco de dados Core Data no seu dispositivo\n• Nuvem (Premium): Backup via Supabase vinculado à sua conta conectada\n• Dados legados do iCloud podem permanecer até a migração ser concluída"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Yerel: Cihazınızdaki Core Data veritabanı\n• Bulut: Kişisel iCloud hesabınız (isteğe bağlı)\n• Harici sunucu veya üçüncü taraf veritabanı yok"
+            "value": "• Yerel: Cihazınızdaki Core Data veritabanı\n• Bulut (Premium): Giriş yaptığınız hesaba bağlı Supabase yedeklemesi\n• Geçiş tamamlanana kadar eski iCloud verileri kalabilir"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "• 本地：您设备上的Core Data数据库\n• 云：您的私人iCloud账户（可选）\n• 无外部服务器或第三方数据库"
+            "value": "• 本地：您设备上的 Core Data 数据库\n• 云（高级）：关联您登录账户的 Supabase 备份\n• 在迁移完成前，旧版 iCloud 数据可能仍然存在"
           }
         }
       }
@@ -4362,61 +4362,61 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Access: View all your data within the app\n• Delete: Reset all data via Settings\n• Control: Disable iCloud sync anytime"
+            "value": "• Access: View all your data within the app\n• Delete local data: Reset all data via Settings\n• Delete cloud account: Delete account in Account & Backup\n• Control: Sign out anytime; cloud backup is optional and premium"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "• الوصول: عرض جميع بياناتك داخل التطبيق\n• الحذف: إعادة تعيين جميع البيانات عبر الإعدادات\n• التحكم: تعطيل مزامنة iCloud في أي وقت"
+            "value": "• الوصول: عرض جميع بياناتك داخل التطبيق\n• حذف البيانات المحلية: إعادة تعيين جميع البيانات عبر الإعدادات\n• حذف الحساب السحابي: حذف الحساب في الحساب والنسخ الاحتياطي\n• التحكم: تسجيل الخروج في أي وقت؛ النسخ الاحتياطي السحابي اختياري ومميز"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Zugriff: Alle Ihre Daten in der App anzeigen\n• Löschen: Alle Daten über Einstellungen zurücksetzen\n• Kontrolle: iCloud-Synchronisierung jederzeit deaktivieren"
+            "value": "• Zugriff: Alle Ihre Daten in der App anzeigen\n• Lokale Daten löschen: Alle Daten über Einstellungen zurücksetzen\n• Cloud-Konto löschen: Konto unter Konto & Backup löschen\n• Kontrolle: Jederzeit abmelden; Cloud-Backup ist optional und Premium"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Acceso: Ver todos sus datos dentro de la aplicación\n• Eliminar: Restablecer todos los datos a través de Configuración\n• Control: Desactivar la sincronización de iCloud en cualquier momento"
+            "value": "• Acceso: Ver todos sus datos dentro de la aplicación\n• Eliminar datos locales: Restablecer todos los datos en Configuración\n• Eliminar cuenta en la nube: Eliminar cuenta en Cuenta y copia de seguridad\n• Control: Cerrar sesión en cualquier momento; la copia en la nube es opcional y Premium"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Accès : Voir toutes vos données dans l'application\n• Supprimer : Réinitialiser toutes les données via Paramètres\n• Contrôle : Désactiver la synchronisation iCloud à tout moment"
+            "value": "• Accès : Voir toutes vos données dans l'application\n• Supprimer les données locales : Réinitialiser via Paramètres\n• Supprimer le compte cloud : Supprimer le compte dans Compte et sauvegarde\n• Contrôle : Se déconnecter à tout moment ; la sauvegarde cloud est optionnelle et Premium"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Accesso: Visualizza tutti i tuoi dati nell'app\n• Elimina: Reimposta tutti i dati tramite Impostazioni\n• Controllo: Disattiva la sincronizzazione iCloud in qualsiasi momento"
+            "value": "• Accesso: Visualizza tutti i tuoi dati nell'app\n• Elimina dati locali: Reimposta tutti i dati tramite Impostazioni\n• Elimina account cloud: Elimina account in Account e backup\n• Controllo: Esci in qualsiasi momento; il backup cloud è opzionale e Premium"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "• アクセス: アプリ内で全データを表示\n• 削除: 設定から全データをリセット\n• 制御: いつでもiCloud同期を無効化"
+            "value": "• アクセス: アプリ内で全データを表示\n• ローカルデータ削除: 設定から全データをリセット\n• クラウドアカウント削除: アカウントとバックアップでアカウントを削除\n• 制御: いつでもサインアウト可能；クラウドバックアップは任意のプレミアム機能"
           }
         },
         "pt": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Acesso: Visualizar todos os seus dados no aplicativo\n• Excluir: Redefinir todos os dados através de Configurações\n• Controle: Desativar a sincronização do iCloud a qualquer momento"
+            "value": "• Acesso: Visualizar todos os seus dados no aplicativo\n• Excluir dados locais: Redefinir todos os dados em Configurações\n• Excluir conta na nuvem: Excluir conta em Conta e backup\n• Controle: Sair a qualquer momento; backup na nuvem é opcional e Premium"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "• Erişim: Uygulama içinde tüm verilerinizi görüntüleyin\n• Silme: Ayarlar üzerinden tüm verileri sıfırlayın\n• Kontrol: iCloud senkronizasyonunu istediğiniz zaman devre dışı bırakın"
+            "value": "• Erişim: Uygulama içinde tüm verilerinizi görüntüleyin\n• Yerel verileri sil: Ayarlar üzerinden tüm verileri sıfırlayın\n• Bulut hesabını sil: Hesap ve Yedekleme'den hesabı silin\n• Kontrol: İstediğiniz zaman çıkış yapın; bulut yedekleme isteğe bağlı ve premium"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "• 访问：在应用内查看您的所有数据\n• 删除：通过设置重置所有数据\n• 控制：随时禁用iCloud同步"
+            "value": "• 访问：在应用内查看您的所有数据\n• 删除本地数据：通过设置重置所有数据\n• 删除云账户：在账户与备份中删除账户\n• 控制：随时退出登录；云备份为可选的高级功能"
           }
         }
       }

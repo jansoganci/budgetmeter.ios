@@ -100,7 +100,8 @@ struct IntervalMetricCard: View {
             }
         }
         .frame(height: CardHeight.medium)
-        .dashboardCard()
+        .padding(LayoutSpacing.cardPadding)
+        .glassSurface()
         .pressEffect(isPressed: $isPressed, haptic: true)
         .onTapGesture {
             if let action = onTap {

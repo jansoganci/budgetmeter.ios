@@ -28,26 +28,31 @@ struct NotificationSettingsView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: Spacing.xl) {
-                    // Permission banner (if denied)
-                    if viewModel.permissionStatus == .denied {
-                        permissionBanner
+            ZStack {
+                AppBackground()
+
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: LayoutSpacing.sectionGap) {
+                        // Permission banner (if denied)
+                        if viewModel.permissionStatus == .denied {
+                            permissionBanner
+                        }
+
+                        // Notification types section
+                        notificationTypesSection
+
+                        // Test notification button
+                        testNotificationSection
+
+                        // Info section
+                        infoSection
                     }
-
-                    // Notification types section
-                    notificationTypesSection
-
-                    // Test notification button
-                    testNotificationSection
-
-                    // Info section
-                    infoSection
+                    .padding(.horizontal, LayoutSpacing.screenPadding)
+                    .padding(.vertical, Spacing.md)
                 }
-                .padding(Spacing.lg)
             }
             .navigationTitle("notifications.nav.title".localized(defaultValue: "Notifications"))
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $viewModel.showPaywall) {
                 PremiumPaywallView(
                     feature: nil,
@@ -108,13 +113,13 @@ struct NotificationSettingsView: View {
     // MARK: - Notification Types Section
 
     private var notificationTypesSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.lg) {
-            Text("notifications.section.types".localized(defaultValue: "NOTIFICATION TYPES"))
-                .font(.caption)
-                .fontWeight(.semibold)
-                .foregroundColor(.secondary)
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            SectionHeader(
+                title: "notifications.section.types".localized(defaultValue: "Notification Types")
+            )
 
-            VStack(spacing: 0) {
+            GlassCard(padding: 0) {
+                VStack(spacing: 0) {
                 // Weekly Summary
                 VStack(spacing: 0) {
                     NotificationToggleRow(
@@ -149,7 +154,8 @@ struct NotificationSettingsView: View {
                 }
 
                 Divider()
-                    .padding(.leading, 44)
+                    .overlay(Color.dividerSubtle)
+                    .padding(.leading, 56)
 
                 // Milestone Alerts
                 NotificationToggleRow(
@@ -167,7 +173,8 @@ struct NotificationSettingsView: View {
                 }
 
                 Divider()
-                    .padding(.leading, 44)
+                    .overlay(Color.dividerSubtle)
+                    .padding(.leading, 56)
 
                 // Spending Alerts
                 NotificationToggleRow(
@@ -185,7 +192,8 @@ struct NotificationSettingsView: View {
                 }
 
                 Divider()
-                    .padding(.leading, 44)
+                    .overlay(Color.dividerSubtle)
+                    .padding(.leading, 56)
 
                 // Daily Encouragement (Premium)
                 VStack(spacing: 0) {
@@ -225,9 +233,7 @@ struct NotificationSettingsView: View {
                     }
                 }
             }
-            .background(Color(.systemBackground))
-            .cornerRadius(CornerRadius.card)
-            .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+            }
         }
     }
 
@@ -250,13 +256,10 @@ struct NotificationSettingsView: View {
             .accessibilityHint("Select the time for weekly summary notifications every Sunday")
 
             Text("notifications.weekly.time_hint".localized(defaultValue: "Notification will be sent every Sunday at this time"))
-                .font(.caption)
-                .foregroundColor(.secondary)
+                .captionStyle()
                 .multilineTextAlignment(.center)
         }
-        .padding(Spacing.lg)
-        .background(Color(.secondarySystemBackground))
-        .cornerRadius(CornerRadius.small)
+        .surfaceInset(padding: Spacing.lg)
         .padding(.horizontal)
         .padding(.bottom, Spacing.sm)
     }
@@ -278,13 +281,10 @@ struct NotificationSettingsView: View {
             .accessibilityHint("Select the time for daily encouragement notifications. Premium feature")
 
             Text("notifications.daily.time_hint".localized(defaultValue: "Notification will be sent every day at this time"))
-                .font(.caption)
-                .foregroundColor(.secondary)
+                .captionStyle()
                 .multilineTextAlignment(.center)
         }
-        .padding(Spacing.lg)
-        .background(Color(.secondarySystemBackground))
-        .cornerRadius(CornerRadius.small)
+        .surfaceInset(padding: Spacing.lg)
         .padding(.horizontal)
         .padding(.bottom, Spacing.sm)
     }
@@ -292,37 +292,28 @@ struct NotificationSettingsView: View {
     // MARK: - Test Notification Section
 
     private var testNotificationSection: some View {
-        VStack(spacing: Spacing.md) {
-            Button {
-                if viewModel.permissionStatus == .authorized {
-                    successFeedback.notificationOccurred(.success)
-                    viewModel.sendTestNotification()
-                    showTestSuccess = true
-                } else {
-                    successFeedback.notificationOccurred(.error)
-                    showTestError = true
-                }
-            } label: {
-                HStack {
-                    Image(systemName: "paperplane.fill")
-                        .font(.subheadline)
+        GlassCard {
+            VStack(spacing: Spacing.md) {
+                PrimaryCTAButton(
+                    title: "notifications.test.button".localized(defaultValue: "Send Test Notification"),
+                    isDisabled: viewModel.permissionStatus != .authorized,
+                    action: {
+                        if viewModel.permissionStatus == .authorized {
+                            successFeedback.notificationOccurred(.success)
+                            viewModel.sendTestNotification()
+                            showTestSuccess = true
+                        } else {
+                            successFeedback.notificationOccurred(.error)
+                            showTestError = true
+                        }
+                    }
+                )
 
-                    Text("notifications.test.button".localized(defaultValue: "Send Test Notification"))
-                        .font(.subheadline)
-                        .fontWeight(.medium)
+                if viewModel.permissionStatus != .authorized {
+                    Text("notifications.test.disabled_hint".localized(defaultValue: "Enable notifications to send test"))
+                        .captionStyle()
+                        .multilineTextAlignment(.center)
                 }
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(viewModel.permissionStatus == .authorized ? Color.brandProgress : Color.gray)
-                .cornerRadius(CornerRadius.button)
-            }
-            .disabled(viewModel.permissionStatus != .authorized)
-
-            if viewModel.permissionStatus != .authorized {
-                Text("notifications.test.disabled_hint".localized(defaultValue: "Enable notifications to send test"))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
             }
         }
         .accessibilityElement(children: .combine)
@@ -333,13 +324,13 @@ struct NotificationSettingsView: View {
     // MARK: - Info Section
 
     private var infoSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.lg) {
-            Text("notifications.section.how_it_works".localized(defaultValue: "HOW IT WORKS"))
-                .font(.caption)
-                .fontWeight(.semibold)
-                .foregroundColor(.secondary)
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            SectionHeader(
+                title: "notifications.section.how_it_works".localized(defaultValue: "How It Works")
+            )
 
-            VStack(alignment: .leading, spacing: Spacing.md) {
+            GlassCard {
+                VStack(alignment: .leading, spacing: Spacing.md) {
                 infoRow(
                     icon: "chart.bar.fill",
                     title: "notifications.weekly.title".localized(defaultValue: "Weekly Summary"),
@@ -364,10 +355,7 @@ struct NotificationSettingsView: View {
                     description: "notifications.info.daily".localized(defaultValue: "Start each day with personalized financial tips and motivation. (Premium)")
                 )
             }
-            .padding(Spacing.lg)
-            .background(Color(.systemBackground))
-            .cornerRadius(CornerRadius.card)
-            .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+            }
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel("How notifications work")
@@ -377,18 +365,16 @@ struct NotificationSettingsView: View {
         HStack(alignment: .top, spacing: Spacing.md) {
             Image(systemName: icon)
                 .font(.title3)
-                .foregroundColor(.brandProgress)
+                .foregroundColor(.accentPrimary)
                 .frame(width: 24)
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
+                    .cardLabelStyle(color: .textPrimary)
 
                 Text(description)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    .captionStyle()
             }
         }
         .accessibilityElement(children: .combine)

@@ -18,21 +18,19 @@ struct NotificationPermissionBanner: View {
     // MARK: - Body
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: Spacing.md) {
             // Icon and title
-            HStack(spacing: 12) {
+            HStack(spacing: Spacing.md) {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .font(.title2)
-                    .foregroundColor(.orange)
+                    .foregroundColor(.financialCaution)
 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: Spacing.xs) {
                     Text("notifications.permission.disabled_title".localized(defaultValue: "Notifications Disabled"))
-                        .font(.headline)
-                        .fontWeight(.semibold)
+                        .sectionTitleStyle()
 
                     Text("notifications.permission.disabled_message".localized(defaultValue: "Enable in Settings to receive financial alerts"))
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .captionStyle()
                 }
 
                 Spacer()
@@ -44,27 +42,24 @@ struct NotificationPermissionBanner: View {
             } label: {
                 HStack {
                     Image(systemName: "gearshape.fill")
-                        .font(.subheadline)
+                        .font(.body)
 
                     Text("notifications.permission.open_settings".localized(defaultValue: "Open Settings"))
-                        .font(.subheadline)
-                        .fontWeight(.medium)
+                        .bodyStyle(color: .white)
                 }
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(Color.blue)
-                .cornerRadius(10)
+                .frame(minHeight: TouchTarget.minimum)
+                .background(Color.accentPrimary)
+                .clipShape(RoundedRectangle(cornerRadius: CornerRadius.button, style: .continuous))
             }
             .accessibilityLabel("Open iOS Settings")
             .accessibilityHint("Opens the Settings app to enable notifications for BudgetMeter")
         }
-        .padding()
-        .background(Color.orange.opacity(0.1))
-        .cornerRadius(12)
+        .surfaceCard(borderColor: Color.financialCaution.opacity(0.35))
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+            RoundedRectangle(cornerRadius: CornerRadius.card, style: .continuous)
+                .stroke(Color.financialCaution.opacity(0.3), lineWidth: 1)
         )
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Notification permission alert")

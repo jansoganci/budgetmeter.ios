@@ -15,30 +15,23 @@ struct budgetmeter_iosApp: App {
     @StateObject private var themeManager = ThemeManager.shared
 
     init() {
+        guard !Self.isRunningUnitTests else { return }
+
         // Load and apply stored theme preference before any views render
         loadAndApplyStoredTheme()
 
-        // Seed initial data on first launch
-        let dataSeedingService = DataSeedingService()
-        dataSeedingService.seedInitialDataIfNeeded()
-
-        // Migrate custom categories to unified FinancialCategory system
-        let migrationService = CustomCategoryMigrationService()
-        migrationService.performMigrationIfNeeded()
-
-        // Initialize background processing
-        BackgroundProcessingService.shared.scheduleBackgroundProcessing()
+        // Phase 2: FinancialCategory v3 fields and legacy savings goal migration
+        let financialDataMigrationService = FinancialDataMigrationService()
+        financialDataMigrationService.performMigrationIfNeeded()
     }
 
     var body: some Scene {
         WindowGroup {
             Group {
-                if biometricManager.shouldRequireAuthentication() {
-                    BiometricAuthView {
-                        // Authentication successful, show main app
-                    }
+                if Self.isRunningUnitTests {
+                    EmptyView()
                 } else {
-                    ContentView()
+                    RootAuthView()
                         .environment(\.managedObjectContext, PersistenceService.shared.viewContext)
                 }
             }
@@ -57,23 +50,34 @@ struct budgetmeter_iosApp: App {
         }
     }
 
+    private static var isRunningUnitTests: Bool {
+        ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+    }
+
     // MARK: - Deep Linking
 
     /// Handles deep link URLs from widgets and other sources
     private func handleDeepLink(_ url: URL) {
         guard url.scheme == "budgetmeter" else { return }
 
-        // Handle different deep link paths
-        switch url.host {
+        let host = url.host ?? ""
+        let path = url.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+
+        switch host {
         case "home":
-            // Navigate to home tab (already selected by default)
-            NotificationCenter.default.post(name: NSNotification.Name("NavigateToHome"), object: nil)
+            if path == "hero" {
+                NotificationCenter.default.post(name: .navigateToHomeHero, object: nil)
+            } else {
+                NotificationCenter.default.post(name: .navigateToHome, object: nil)
+            }
         case "expenses":
-            // Navigate to expenses tab
-            NotificationCenter.default.post(name: NSNotification.Name("NavigateToExpenses"), object: nil)
+            NotificationCenter.default.post(name: .navigateToExpenses, object: nil)
         case "income":
-            // Navigate to income tab
-            NotificationCenter.default.post(name: NSNotification.Name("NavigateToIncome"), object: nil)
+            NotificationCenter.default.post(name: .navigateToIncome, object: nil)
+        case "premium":
+            if path == "widgets" {
+                NotificationCenter.default.post(name: .navigateToPremiumWidgets, object: nil)
+            }
         default:
             break
         }

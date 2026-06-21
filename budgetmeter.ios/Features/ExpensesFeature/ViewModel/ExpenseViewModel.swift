@@ -9,7 +9,6 @@ import Foundation
 import SwiftUI
 import CoreData
 import Combine
-import WidgetKit
 
 /// ViewModel for the Expense screen following MVVM architecture
 @MainActor
@@ -20,55 +19,44 @@ final class ExpenseViewModel: ObservableObject {
     @Published var dailyExpenses: [FinancialCategory] = []
     @Published var monthlyExpenses: [FinancialCategory] = []
     @Published var yearlyExpenses: [FinancialCategory] = []
+    @Published var oneTimeExpenses: [FinancialCategory] = []
     @Published var subscriptions: [Subscription] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published private(set) var currencySymbol: String = CurrencyHelper.symbol(for: CurrencyHelper.defaultCurrencyCode())
-    
-    // MARK: - Summary Computed Properties
+    @Published private(set) var latestSummary: FinancialSummary?
+
+    // MARK: - Summary Properties (FinancialSummaryBuilder)
 
     var totalMonthlyExpenses: Double {
-        let dailyTotal = dailyExpenses.reduce(0) { $0 + $1.amount }
-        let monthlyTotal = monthlyExpenses.reduce(0) { $0 + $1.amount }
-        let yearlyTotal = yearlyExpenses.reduce(0) { $0 + $1.amount }
-        let subscriptionsTotal = subscriptionsTotalMonthly
-
-        // Use CalculationEngine for consistency
-        return CalculationEngine.totalMonthlyExpense(
-            dailyTotal: dailyTotal,
-            monthlyTotal: monthlyTotal,
-            yearlyTotal: yearlyTotal
-        ) + subscriptionsTotal
+        latestSummary?.recurringExpenseMonthly ?? 0
     }
 
-    /// Total monthly cost of all subscriptions
+    /// Section subtotal for subscriptions list (not added to summary card)
     var subscriptionsTotalMonthly: Double {
-        return SubscriptionManager.shared.getTotalMonthlyCost()
+        SubscriptionManager.shared.getTotalMonthlyCost()
     }
 
-    /// Total yearly cost of all subscriptions
     var subscriptionsTotalYearly: Double {
-        return SubscriptionManager.shared.getTotalYearlyCost()
+        SubscriptionManager.shared.getTotalYearlyCost()
     }
 
-    /// Number of active subscriptions
     var subscriptionsCount: Int {
-        return subscriptions.count
+        subscriptions.count
     }
 
     var dailyAverageExpenses: Double {
-        return totalMonthlyExpenses / CalculationEngine.daysPerMonth
+        latestSummary?.recurringExpenseDaily ?? 0
     }
     
     var yearlyProjectionExpenses: Double {
-        return totalMonthlyExpenses * 12
+        totalMonthlyExpenses * 12
     }
 
-    /// Number of expense sources with amounts > 0
     var activeSourcesCount: Int {
-        let allCategories = dailyExpenses + monthlyExpenses + yearlyExpenses
-        let categoryCount = allCategories.filter { $0.amount > 0 }.count
-        return categoryCount + subscriptionsCount
+        let recurring = (dailyExpenses + monthlyExpenses + yearlyExpenses).filter { $0.amount > 0 }.count
+        let oneTime = oneTimeExpenses.filter { $0.amount > 0 }.count
+        return recurring + oneTime + subscriptionsCount
     }
     
     // MARK: - Localized Summary Titles
@@ -92,13 +80,18 @@ final class ExpenseViewModel: ObservableObject {
     // MARK: - Private Properties
     
     private let persistenceService: PersistenceService
+    private let summaryBuilder: FinancialSummaryBuilder
     private var cancellables = Set<AnyCancellable>()
     private var currencyCode: String = CurrencyHelper.defaultCurrencyCode()
 
     // MARK: - Initialization
 
-    init(persistenceService: PersistenceService = .shared) {
+    init(
+        persistenceService: PersistenceService = .shared,
+        summaryBuilder: FinancialSummaryBuilder? = nil
+    ) {
         self.persistenceService = persistenceService
+        self.summaryBuilder = summaryBuilder ?? FinancialSummaryBuilder(context: persistenceService.viewContext)
         setupCurrencyObserver()
         setupLanguageObserver()
         setupSubscriptionObservers()
@@ -113,29 +106,25 @@ final class ExpenseViewModel: ObservableObject {
     
     // MARK: - Public Methods
     
-    /// Updates the amount for a specific expense category
     func updateAmount(for category: FinancialCategory, amount: Double) {
         category.amount = amount
+        FinancialCategoryWriteSupport.touchModified(category)
         persistenceService.save()
 
-        // Reload data to reflect changes immediately
         loadExpenseCategories()
 
-        // Reload widgets to show updated expense data
-        WidgetCenter.shared.reloadAllTimelines()
+        WidgetSnapshotService.refreshFromCurrentData()
     }
 
-    /// Updates the color for a custom category
     func updateColor(for category: FinancialCategory, color: CategoryColor) {
         guard category.isCustom else { return }
         category.customColorHex = color.rawValue
+        FinancialCategoryWriteSupport.touchModified(category)
         persistenceService.save()
 
-        // Reload to reflect changes
         loadExpenseCategories()
     }
     
-    /// Formats amount for display in input field (no live formatting during input)
     func formatInputAmount(_ amount: Double) -> String {
         if amount <= 0 {
             return ""
@@ -143,19 +132,16 @@ final class ExpenseViewModel: ObservableObject {
         
         let formatter = NumberFormatter()
         formatter.numberStyle = .none
-        formatter.locale = Locale(identifier: "en_US") // Standardized formatting (1234.56)
+        formatter.locale = Locale(identifier: "en_US")
         formatter.maximumFractionDigits = 2
         formatter.minimumFractionDigits = 0
         
         return formatter.string(from: NSNumber(value: amount)) ?? "0"
     }
     
-    /// Parses input string to Double amount with validation
     func parseAmount(from input: String) -> Double {
-        // Remove any non-numeric characters except decimal point
         let cleanedInput = input.replacingOccurrences(of: "[^0-9.]", with: "", options: .regularExpression)
 
-        // Handle empty input
         if cleanedInput.isEmpty {
             return 0
         }
@@ -164,22 +150,16 @@ final class ExpenseViewModel: ObservableObject {
             return 0
         }
 
-        // Validate maximum value (prevent overflow and unrealistic amounts)
-        // Max: 1 billion (prevents display issues and calculation overflow)
         let maxAmount: Double = 1_000_000_000
-
-        // Validate minimum value
         let minAmount: Double = 0
 
-        // Clamp to valid range
         return min(max(amount, minAmount), maxAmount)
     }
     
-    /// Formats amount for currency display (shown when not editing)
     func formatCurrencyDisplay(_ amount: Double) -> String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
-        formatter.locale = Locale(identifier: "en_US") // Standardized formatting (1,234.56)
+        formatter.locale = Locale(identifier: "en_US")
         formatter.currencyCode = currencyCode
         formatter.currencySymbol = CurrencyHelper.symbol(for: currencyCode)
         formatter.maximumFractionDigits = 2
@@ -188,46 +168,46 @@ final class ExpenseViewModel: ObservableObject {
         return formatter.string(from: NSNumber(value: amount)) ?? "\(currencySymbol)0"
     }
     
-    /// Gets the localized display name for a category
     func displayName(for category: FinancialCategory) -> String {
+        if let customName = category.customName, !customName.isEmpty {
+            return customName
+        }
         guard let uniqueID = category.uniqueID else { return "Unknown" }
         return DataSeedingService.displayName(for: uniqueID)
     }
     
-    /// Gets the SF Symbol name for a category
     func sfSymbolName(for category: FinancialCategory) -> String {
+        if category.isCustom, let icon = category.customIconName {
+            return icon
+        }
         guard let uniqueID = category.uniqueID else { return "questionmark.circle" }
         return DataSeedingService.sfSymbolName(for: uniqueID)
     }
     
-    /// Refreshes data from Core Data
     func refresh() {
         loadExpenseCategories()
         loadSubscriptions()
     }
 
-    /// Load all subscriptions
     func loadSubscriptions() {
         subscriptions = SubscriptionManager.shared.getAllActiveSubscriptions()
+        refreshSummary()
     }
 
-    /// Delete a subscription
     func deleteSubscription(_ subscription: Subscription) {
         guard let id = subscription.id else { return }
         let success = SubscriptionManager.shared.deleteSubscription(id: id)
         if success {
             loadSubscriptions()
-            WidgetCenter.shared.reloadAllTimelines()
+            WidgetSnapshotService.refreshFromCurrentData()
         }
     }
 
-    /// Format subscription amount
     func formatSubscriptionAmount(_ subscription: Subscription) -> String {
         let amount = subscription.amount
         return CurrencyHelper.format(amount: amount, currencyCode: currencyCode)
     }
 
-    /// Get billing cycle text for subscription
     func subscriptionBillingCycle(_ subscription: Subscription) -> String {
         guard let cycle = subscription.billingCycle else { return "/mo" }
         switch cycle.lowercased() {
@@ -238,7 +218,6 @@ final class ExpenseViewModel: ObservableObject {
         }
     }
 
-    /// Formatted subscriptions subtotal for section header
     var formattedSubscriptionsSubtotal: String {
         let total = subscriptionsTotalMonthly
         let formatter = NumberFormatter()
@@ -250,7 +229,6 @@ final class ExpenseViewModel: ObservableObject {
         return "\(currencySymbol)\(formatted)/mo"
     }
 
-    /// Deletes a custom expense category
     func deleteCategory(_ category: FinancialCategory) {
         guard category.isCustom else { return }
 
@@ -258,11 +236,9 @@ final class ExpenseViewModel: ObservableObject {
         context.delete(category)
         persistenceService.save()
 
-        // Reload to update UI
         loadExpenseCategories()
 
-        // Reload widgets
-        WidgetCenter.shared.reloadAllTimelines()
+        WidgetSnapshotService.refreshFromCurrentData()
     }
 
     // MARK: - Private Methods
@@ -274,18 +250,19 @@ final class ExpenseViewModel: ObservableObject {
         let context = persistenceService.viewContext
         let fetchRequest: NSFetchRequest<FinancialCategory> = FinancialCategory.fetchRequest()
         
-        // Fetch only expense categories
         fetchRequest.predicate = NSPredicate(format: "type == %@", "expense")
         fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \FinancialCategory.uniqueID, ascending: true)]
         
         do {
             let allExpenses = try context.fetch(fetchRequest)
-            
-            // Separate by frequency
-            dailyExpenses = allExpenses.filter { $0.frequency == "daily" }
-            monthlyExpenses = allExpenses.filter { $0.frequency == "monthly" }
-            yearlyExpenses = allExpenses.filter { $0.frequency == "yearly" }
-            
+            let recurringExpenses = allExpenses.filter { FinancialCategoryWriteSupport.isRecurringDisplayCategory($0) }
+
+            dailyExpenses = recurringExpenses.filter { $0.frequency == "daily" }
+            monthlyExpenses = recurringExpenses.filter { $0.frequency == "monthly" }
+            yearlyExpenses = recurringExpenses.filter { $0.frequency == "yearly" }
+            oneTimeExpenses = allExpenses.filter { FinancialCategoryWriteSupport.isOneTimeDisplayCategory($0) }
+
+            refreshSummary()
             isLoading = false
         } catch {
             print("📊 ExpenseViewModel: ❌ Loading failed: \(error)")
@@ -294,14 +271,16 @@ final class ExpenseViewModel: ObservableObject {
             isLoading = false
         }
     }
+
+    private func refreshSummary() {
+        latestSummary = summaryBuilder.build(selectedPeriod: .month)
+    }
 }
 
 // MARK: - Category Grouping Helper
 
 extension ExpenseViewModel {
 
-    /// Groups categories by frequency for easier UI rendering
-    /// Uses red color scheme for expenses as per design rulebook
     var categoryGroups: [(title: String, categories: [FinancialCategory], color: Color)] {
         [
             (
@@ -317,22 +296,17 @@ extension ExpenseViewModel {
             (
                 title: "frequency.yearly".localized(defaultValue: "Yearly"),
                 categories: yearlyExpenses,
-                color: Color(hex: "6B7280") // Secondary color from design rulebook
+                color: Color(hex: "6B7280")
             )
         ]
     }
 
-    /// Checks if any expense categories have been entered
     var hasExpenseData: Bool {
-        let allCategories = dailyExpenses + monthlyExpenses + yearlyExpenses
-        return allCategories.contains { category in
-            return category.amount > 0
-        }
+        let allCategories = dailyExpenses + monthlyExpenses + yearlyExpenses + oneTimeExpenses
+        let hasCategories = allCategories.contains { $0.amount > 0 }
+        return hasCategories || !subscriptions.isEmpty
     }
 
-    // MARK: - Subtotal Methods for Collapsible Sections
-
-    /// Returns the raw subtotal for a given frequency
     func subtotalForFrequency(_ frequency: String) -> Double {
         switch frequency {
         case "daily":
@@ -346,7 +320,21 @@ extension ExpenseViewModel {
         }
     }
 
-    /// Returns formatted subtitle for section header (e.g., "$150/day", "$5,983/mo", "$71,796/yr")
+    func oneTimeSubtotal() -> Double {
+        oneTimeExpenses.reduce(0) { $0 + $1.amount }
+    }
+
+    func formattedOneTimeSubtotal() -> String {
+        let total = oneTimeSubtotal()
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.minimumFractionDigits = 0
+        formatter.maximumFractionDigits = 0
+        formatter.groupingSeparator = ","
+        let formatted = formatter.string(from: NSNumber(value: total)) ?? "0"
+        return "\(currencySymbol)\(formatted)"
+    }
+
     func formattedSubtotal(_ frequency: String) -> String {
         let total = subtotalForFrequency(frequency)
 
@@ -370,7 +358,6 @@ extension ExpenseViewModel {
         }
     }
 
-    /// Returns section title for a given frequency
     func sectionTitle(_ frequency: String) -> String {
         switch frequency {
         case "daily":
@@ -384,7 +371,10 @@ extension ExpenseViewModel {
         }
     }
 
-    /// Returns categories for a given frequency
+    var oneTimeSectionTitle: String {
+        String(localized: "expense.section.one_time", defaultValue: "Surprise Expenses")
+    }
+
     func categoriesForFrequency(_ frequency: String) -> [FinancialCategory] {
         switch frequency {
         case "daily":
@@ -444,8 +434,6 @@ private extension ExpenseViewModel {
     @objc func subscriptionsDidChange() {
         loadSubscriptions()
     }
-    
-
 
     func loadCurrency() {
         let context = persistenceService.viewContext
@@ -474,11 +462,8 @@ private extension ExpenseViewModel {
     }
     
     @objc func languageDidChange(_ notification: Notification) {
-        // Trigger UI refresh to re-evaluate localized strings in summary cards
         DispatchQueue.main.async {
             self.objectWillChange.send()
         }
     }
-    
-
 }

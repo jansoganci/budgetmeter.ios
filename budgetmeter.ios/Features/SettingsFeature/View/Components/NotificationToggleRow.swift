@@ -2,16 +2,13 @@
 //  NotificationToggleRow.swift
 //  BudgetMeter
 //
-//  Phase 1C: Smart Notifications UI - Reusable Component
-//  Created by BudgetMeter Team on 17.09.2025.
+//  Reusable toggle row for notification settings — v2 tokens.
 //
 
 import SwiftUI
 
 /// Reusable toggle row for notification settings
 struct NotificationToggleRow: View {
-
-    // MARK: - Properties
 
     let icon: String
     let title: String
@@ -20,8 +17,6 @@ struct NotificationToggleRow: View {
     let isPremium: Bool
     let isLocked: Bool
     let onTap: () -> Void
-
-    // MARK: - Initialization
 
     init(
         icon: String,
@@ -41,48 +36,44 @@ struct NotificationToggleRow: View {
         self.onTap = onTap
     }
 
-    // MARK: - Body
-
     var body: some View {
-        HStack(spacing: 12) {
-            // Icon
+        HStack(spacing: Spacing.md) {
             Image(systemName: icon)
-                .font(.title3)
-                .foregroundColor(isLocked ? .gray : .blue)
+                .font(.body.weight(.medium))
+                .foregroundColor(isLocked ? .financialNeutral : .accentPrimary)
                 .frame(width: 32, height: 32)
+                .background((isLocked ? Color.financialNeutral : Color.accentPrimary).opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: CornerRadius.small, style: .continuous))
                 .accessibilityHidden(true)
 
-            // Content
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
+            VStack(alignment: .leading, spacing: Spacing.xs) {
+                HStack(spacing: Spacing.sm) {
                     Text(title)
-                        .font(.body)
-                        .fontWeight(.medium)
-                        .foregroundColor(isLocked ? .secondary : .primary)
+                        .bodyStyle(color: isLocked ? .textSecondary : .textPrimary)
 
                     if isPremium {
-                        premiumBadge
+                        PremiumBadge(locked: isLocked)
                     }
                 }
 
                 Text(description)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    .captionStyle()
             }
 
-            Spacer()
+            Spacer(minLength: Spacing.sm)
 
-            // Toggle
             Toggle("", isOn: $isOn)
                 .labelsHidden()
                 .disabled(isLocked)
-                .onChange(of: isOn) { _ in
+                .onChange(of: isOn) { _, _ in
                     if isLocked {
                         onTap()
                     }
                 }
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, Spacing.sm)
+        .padding(.horizontal, Spacing.md)
+        .frame(minHeight: LayoutSpacing.rowHeight)
         .contentShape(Rectangle())
         .onTapGesture {
             if isLocked {
@@ -96,27 +87,7 @@ struct NotificationToggleRow: View {
         .accessibilityAddTraits(isLocked ? [.isButton] : [])
         .accessibilityRemoveTraits(isLocked ? [] : [.isButton])
     }
-
-    // MARK: - Premium Badge
-
-    private var premiumBadge: some View {
-        Text("ui.premium".localized(defaultValue: "PREMIUM"))
-            .font(.system(size: 9, weight: .bold))
-            .foregroundColor(.white)
-            .padding(.horizontal, 6)
-            .padding(.vertical, 2)
-            .background(
-                LinearGradient(
-                    colors: [.blue, .purple],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-            )
-            .cornerRadius(4)
-    }
 }
-
-// MARK: - Preview
 
 #Preview {
     VStack(spacing: 16) {
@@ -134,10 +105,9 @@ struct NotificationToggleRow: View {
             isOn: .constant(false),
             isPremium: true,
             isLocked: true,
-            onTap: {
-                print("Premium required!")
-            }
+            onTap: {}
         )
     }
     .padding()
+    .background(Color.appBackground)
 }

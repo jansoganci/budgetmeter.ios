@@ -2,242 +2,296 @@
 //  TextStyles.swift
 //  BudgetMeter
 //
-//  Design System v2.0 - Typography System
-//  Consistent text styles and modifiers
+//  Design System v2 — Typography tokens and semantic text styles
+//  SF Pro Rounded for financial numbers; SF Pro (system default) for UI text.
 //
 
 import SwiftUI
 
-// MARK: - Typography Scale
+// MARK: - Typography Scale (v2)
 
-/// Typography tokens for consistent text styling with Dynamic Type support
 enum Typography {
+    // v2 semantic scale — reference sizes for @ScaledMetric defaults
+    static let heroFinancialSize: CGFloat = 38          // 36–40pt
+    static let heroFinancialMaxSize: CGFloat = 44     // max large financial
+    static let widgetNumberSize: CGFloat = 30         // 28–32pt
+    static let screenTitleSize: CGFloat = 32          // 28–34pt
+    static let sectionTitleSize: CGFloat = 20         // 18–22pt
+    static let cardTitleSize: CGFloat = 17            // 16–18pt
+    static let bodySize: CGFloat = 16                 // 15–17pt
+    static let captionSize: CGFloat = 13              // 12–13pt
+    static let buttonTextSize: CGFloat = 17           // 16–17pt
 
-    // MARK: - Font Sizes (Base sizes - scale with Dynamic Type)
-
-    /// 48pt - Hero metrics (net flow value, large financial numbers)
-    static let heroMetricSize: CGFloat = 48
-
-    /// 34pt - Large metrics (secondary metrics, savings amounts)
-    static let largeMetricSize: CGFloat = 34
-
-    /// 24pt - Medium metrics (card values, interval amounts)
-    static let mediumMetricSize: CGFloat = 24
-
-    /// 17pt - Small metrics (inline metrics, list values)
-    static let smallMetricSize: CGFloat = 17
-
-    /// 20pt - Section titles (card titles, section headers)
-    static let sectionTitleSize: CGFloat = 20
-
-    /// 15pt - Card labels (labels, descriptions within cards)
-    static let cardLabelSize: CGFloat = 15
-
-    /// 13pt - Captions (timestamps, secondary info, footnotes)
-    static let captionSize: CGFloat = 13
-
-    /// 14pt - Trend indicators (percentage changes)
+    // Supporting UI / compact financial
+    static let metricCompactSize: CGFloat = 17
+    static let statusTitleSize: CGFloat = 14
+    static let badgeSize: CGFloat = 11
     static let trendIndicatorSize: CGFloat = 14
 
-    // MARK: - Font Weights
+    // Compatibility aliases (preserve existing token names)
+    static let paceHeroSize = heroFinancialSize
+    static let heroMetricSize = heroFinancialMaxSize
+    static let largeMetricSize = screenTitleSize
+    static let mediumMetricSize = widgetNumberSize
+    static let smallMetricSize = metricCompactSize
+    static let cardLabelSize = cardTitleSize
 
     static let bold: Font.Weight = .bold
     static let semibold: Font.Weight = .semibold
     static let medium: Font.Weight = .medium
     static let regular: Font.Weight = .regular
-
-    // MARK: - Dynamic Type Text Styles
-
-    /// Maps custom sizes to semantic text styles for Dynamic Type scaling
-    static func scaledFont(size: CGFloat, weight: Font.Weight, relativeTo textStyle: Font.TextStyle) -> Font {
-        return .system(size: size, weight: weight).monospacedDigit()
-    }
 }
 
 // MARK: - Text Style Modifiers
 
 extension View {
 
-    // MARK: - Metric Styles
+    // MARK: - v2 semantic aliases
 
-    /// Hero metric style - 48pt bold, monospaced digits
+    func paceHeroStyle(color: Color = .textPrimary) -> some View {
+        modifier(PaceHeroStyle(color: color))
+    }
+
+    func metricLargeStyle(color: Color = .textPrimary) -> some View {
+        largeMetricStyle(color: color)
+    }
+
+    func metricMediumStyle(color: Color = .textPrimary) -> some View {
+        mediumMetricStyle(color: color)
+    }
+
+    func metricCompactStyle(color: Color = .textPrimary) -> some View {
+        smallMetricStyle(color: color)
+    }
+
+    func widgetNumberStyle(color: Color = .textPrimary) -> some View {
+        mediumMetricStyle(color: color)
+    }
+
+    func statusTitleStyle(color: Color = .textPrimary) -> some View {
+        modifier(StatusTitleStyle(color: color))
+    }
+
+    func bodyStyle(color: Color = .textPrimary) -> some View {
+        modifier(BodyStyle(color: color))
+    }
+
+    func badgeStyle(color: Color = .textSecondary) -> some View {
+        modifier(BadgeStyle(color: color))
+    }
+
+    func buttonTextStyle(color: Color = .textPrimary) -> some View {
+        modifier(ButtonTextStyle(color: color))
+    }
+
+    // MARK: - Legacy compatibility names
+
     func heroMetricStyle(color: Color = .textPrimary) -> some View {
-        self.modifier(HeroMetricStyle(color: color))
+        modifier(HeroMetricStyle(color: color))
     }
 
-    /// Large metric style - 34pt bold
     func largeMetricStyle(color: Color = .textPrimary) -> some View {
-        self.modifier(LargeMetricStyle(color: color))
+        modifier(LargeMetricStyle(color: color))
     }
 
-    /// Medium metric style - 24pt semibold
     func mediumMetricStyle(color: Color = .textPrimary) -> some View {
-        self.modifier(MediumMetricStyle(color: color))
+        modifier(MediumMetricStyle(color: color))
     }
 
-    /// Small metric style - 17pt semibold
     func smallMetricStyle(color: Color = .textPrimary) -> some View {
-        self.modifier(SmallMetricStyle(color: color))
+        modifier(SmallMetricStyle(color: color))
     }
 
-    // MARK: - Label Styles
-
-    /// Section title style - 20pt semibold
     func sectionTitleStyle(color: Color = .textPrimary) -> some View {
-        self.modifier(SectionTitleStyle(color: color))
+        modifier(SectionTitleStyle(color: color))
     }
 
-    /// Card label style - 15pt medium
     func cardLabelStyle(color: Color = .textSecondary) -> some View {
-        self.modifier(CardLabelStyle(color: color))
+        modifier(CardLabelStyle(color: color))
     }
 
-    /// Caption style - 13pt regular
+    func cardTitleStyle(color: Color = .textPrimary) -> some View {
+        cardLabelStyle(color: color)
+    }
+
     func captionStyle(color: Color = .textSecondary) -> some View {
-        self.modifier(CaptionStyle(color: color))
+        modifier(CaptionStyle(color: color))
     }
 
-    /// Trend indicator style - 14pt medium
     func trendStyle(color: Color) -> some View {
-        self.modifier(TrendStyle(color: color))
+        modifier(TrendStyle(color: color))
     }
 }
 
-// MARK: - View Modifier Implementations (Dynamic Type Support)
+// MARK: - Financial Number Modifiers (SF Pro Rounded + monospacedDigit)
 
-private struct HeroMetricStyle: ViewModifier {
+private struct PaceHeroStyle: ViewModifier {
     let color: Color
-    @Environment(\.sizeCategory) var sizeCategory
+    @ScaledMetric(relativeTo: .largeTitle) private var fontSize = Typography.heroFinancialSize
 
     func body(content: Content) -> some View {
         content
-            .font(.system(size: scaledSize(), weight: Typography.bold, design: .default))
+            .font(.system(size: fontSize, weight: .bold, design: .rounded))
             .monospacedDigit()
             .foregroundColor(color)
+            .minimumScaleFactor(0.7)
+            .lineLimit(2)
+            .fixedSize(horizontal: false, vertical: true)
     }
+}
 
-    private func scaledSize() -> CGFloat {
-        let baseSize = Typography.heroMetricSize
-        return baseSize * sizeCategory.scaleFactor
+private struct HeroMetricStyle: ViewModifier {
+    let color: Color
+    @ScaledMetric(relativeTo: .largeTitle) private var fontSize = Typography.heroFinancialMaxSize
+
+    func body(content: Content) -> some View {
+        content
+            .font(.system(size: fontSize, weight: Typography.bold, design: .rounded))
+            .monospacedDigit()
+            .foregroundColor(color)
+            .minimumScaleFactor(0.7)
+            .lineLimit(2)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 
 private struct LargeMetricStyle: ViewModifier {
     let color: Color
-    @Environment(\.sizeCategory) var sizeCategory
+    @ScaledMetric(relativeTo: .title) private var fontSize = Typography.screenTitleSize
 
     func body(content: Content) -> some View {
         content
-            .font(.system(size: scaledSize(), weight: Typography.bold))
+            .font(.system(size: fontSize, weight: Typography.bold, design: .rounded))
             .monospacedDigit()
             .foregroundColor(color)
-    }
-
-    private func scaledSize() -> CGFloat {
-        let baseSize = Typography.largeMetricSize
-        return baseSize * sizeCategory.scaleFactor
+            .minimumScaleFactor(0.75)
+            .lineLimit(2)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 
 private struct MediumMetricStyle: ViewModifier {
     let color: Color
-    @Environment(\.sizeCategory) var sizeCategory
+    @ScaledMetric(relativeTo: .title2) private var fontSize = Typography.widgetNumberSize
 
     func body(content: Content) -> some View {
         content
-            .font(.system(size: scaledSize(), weight: Typography.semibold))
+            .font(.system(size: fontSize, weight: Typography.semibold, design: .rounded))
             .monospacedDigit()
             .foregroundColor(color)
-    }
-
-    private func scaledSize() -> CGFloat {
-        let baseSize = Typography.mediumMetricSize
-        return baseSize * sizeCategory.scaleFactor
+            .minimumScaleFactor(0.75)
+            .lineLimit(2)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 
 private struct SmallMetricStyle: ViewModifier {
     let color: Color
-    @Environment(\.sizeCategory) var sizeCategory
+    @ScaledMetric(relativeTo: .headline) private var fontSize = Typography.metricCompactSize
 
     func body(content: Content) -> some View {
         content
-            .font(.system(size: scaledSize(), weight: Typography.semibold))
+            .font(.system(size: fontSize, weight: Typography.semibold, design: .rounded))
             .monospacedDigit()
             .foregroundColor(color)
+            .minimumScaleFactor(0.75)
+            .lineLimit(2)
+            .fixedSize(horizontal: false, vertical: true)
     }
+}
 
-    private func scaledSize() -> CGFloat {
-        let baseSize = Typography.smallMetricSize
-        return baseSize * sizeCategory.scaleFactor
+// MARK: - UI Text Modifiers (SF Pro / system default)
+
+private struct StatusTitleStyle: ViewModifier {
+    let color: Color
+
+    func body(content: Content) -> some View {
+        content
+            .font(.subheadline.weight(.medium))
+            .foregroundColor(color)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+private struct BodyStyle: ViewModifier {
+    let color: Color
+
+    func body(content: Content) -> some View {
+        content
+            .font(.body)
+            .foregroundColor(color)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+private struct BadgeStyle: ViewModifier {
+    let color: Color
+
+    func body(content: Content) -> some View {
+        content
+            .font(.caption2.weight(.semibold))
+            .foregroundColor(color)
+            .textCase(.uppercase)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+private struct ButtonTextStyle: ViewModifier {
+    let color: Color
+
+    func body(content: Content) -> some View {
+        content
+            .font(.headline)
+            .foregroundColor(color)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 
 private struct SectionTitleStyle: ViewModifier {
     let color: Color
-    @Environment(\.sizeCategory) var sizeCategory
 
     func body(content: Content) -> some View {
         content
-            .font(.system(size: scaledSize(), weight: Typography.semibold))
+            .font(.title3.weight(Typography.semibold))
             .foregroundColor(color)
-    }
-
-    private func scaledSize() -> CGFloat {
-        let baseSize = Typography.sectionTitleSize
-        return baseSize * sizeCategory.scaleFactor
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 
 private struct CardLabelStyle: ViewModifier {
     let color: Color
-    @Environment(\.sizeCategory) var sizeCategory
 
     func body(content: Content) -> some View {
         content
-            .font(.system(size: scaledSize(), weight: Typography.medium))
+            .font(.headline.weight(Typography.medium))
             .foregroundColor(color)
-    }
-
-    private func scaledSize() -> CGFloat {
-        let baseSize = Typography.cardLabelSize
-        return baseSize * sizeCategory.scaleFactor
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 
 private struct CaptionStyle: ViewModifier {
     let color: Color
-    @Environment(\.sizeCategory) var sizeCategory
 
     func body(content: Content) -> some View {
         content
-            .font(.system(size: scaledSize(), weight: Typography.regular))
+            .font(.caption)
             .foregroundColor(color)
-    }
-
-    private func scaledSize() -> CGFloat {
-        let baseSize = Typography.captionSize
-        return baseSize * sizeCategory.scaleFactor
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 
 private struct TrendStyle: ViewModifier {
     let color: Color
-    @Environment(\.sizeCategory) var sizeCategory
 
     func body(content: Content) -> some View {
         content
-            .font(.system(size: scaledSize(), weight: Typography.medium))
+            .font(.subheadline.weight(Typography.medium))
             .foregroundColor(color)
-    }
-
-    private func scaledSize() -> CGFloat {
-        let baseSize = Typography.trendIndicatorSize
-        return baseSize * sizeCategory.scaleFactor
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 
-// MARK: - ContentSizeCategory Extension
+// MARK: - ContentSizeCategory Extension (legacy component support)
 
 extension ContentSizeCategory {
     /// Scale factor relative to default (.large) size
@@ -246,7 +300,7 @@ extension ContentSizeCategory {
         case .extraSmall: return 0.82
         case .small: return 0.88
         case .medium: return 0.94
-        case .large: return 1.0  // Default
+        case .large: return 1.0
         case .extraLarge: return 1.12
         case .extraExtraLarge: return 1.24
         case .extraExtraExtraLarge: return 1.35

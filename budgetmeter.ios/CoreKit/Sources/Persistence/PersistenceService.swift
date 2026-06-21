@@ -28,6 +28,10 @@ final class PersistenceService {
     
     /// The persistent container for the application
     lazy var persistentContainer: NSPersistentCloudKitContainer = {
+        if let injectedContainer {
+            return injectedContainer
+        }
+
         let container = NSPersistentCloudKitContainer(name: "BudgetMeter")
 
         // Configure for CloudKit
@@ -78,7 +82,33 @@ final class PersistenceService {
     }
     
     // MARK: - Private Initializer
-    private init() {}
+    private let injectedContainer: NSPersistentCloudKitContainer?
+
+    private init(injectedContainer: NSPersistentCloudKitContainer? = nil) {
+        self.injectedContainer = injectedContainer
+    }
+
+    /// In-memory Core Data stack for unit tests. Do not use in production.
+    static func makeInMemoryForTesting() -> PersistenceService {
+        let container = NSPersistentCloudKitContainer(name: "BudgetMeter")
+        let description = NSPersistentStoreDescription()
+        description.type = NSInMemoryStoreType
+        description.cloudKitContainerOptions = nil
+        container.persistentStoreDescriptions = [description]
+
+        var loadError: Error?
+        container.loadPersistentStores { _, error in
+            loadError = error
+        }
+
+        if let loadError {
+            fatalError("Failed to load in-memory store: \(loadError)")
+        }
+
+        container.viewContext.automaticallyMergesChangesFromParent = true
+        container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        return PersistenceService(injectedContainer: container)
+    }
     
     // MARK: - Core Data Operations
     

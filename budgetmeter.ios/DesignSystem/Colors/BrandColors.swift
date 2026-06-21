@@ -2,8 +2,8 @@
 //  BrandColors.swift
 //  BudgetMeter
 //
-//  Design System v2.0 - Modern Financial Dashboard
-//  Adaptive color system with full light/dark mode support
+//  Design System v2 — Slate fintech semantic tokens
+//  Light/dark canvas with Coral Default accent and Fresh Green positive status.
 //
 
 import SwiftUI
@@ -24,87 +24,154 @@ extension Color {
     }
 }
 
-// MARK: - Brand Colors (Design System v2.0)
+// MARK: - Semantic Surfaces (v4)
 
 extension Color {
 
-    // MARK: - Primary Colors
-
-    /// Primary positive color - Used for income, net positive flow, success indicators
-    /// Light: #10B981 (Emerald Green) | Dark: #34D399 (Brighter Green)
-    static let brandPositive = Color(
-        light: Color(hex: "10B981"),
-        dark: Color(hex: "34D399")
+    /// Slate fintech app canvas (v2 background.main)
+    static let surfaceObsidian = Color(
+        light: Color(hex: "F8FAFC"),
+        dark: Color(hex: "0F172A")
     )
 
-    /// Primary progress color - Used for progress bars, savings goals, action buttons
-    /// Light: #3B82F6 (Blue) | Dark: #60A5FA (Brighter Blue)
-    /// NOTE: This is the default blue color. For theme-aware color, access ThemeManager.shared.accentColor
-    static let brandProgress = Color(
-        light: Color(hex: "3B82F6"),
-        dark: Color(hex: "60A5FA")
-    )
-
-    /// Returns the theme-aware accent color from ThemeManager
-    /// Use this in custom components that should adapt to the selected theme
-    @MainActor
-    static func themedAccent() -> Color {
-        return ThemeManager.shared.accentColor
-    }
-
-    /// Expense/Negative color - Used for expense values, negative flow, warnings
-    /// Light: #EF4444 (Red) | Dark: #F87171 (Softer Red)
-    static let brandExpense = Color(
-        light: Color(hex: "EF4444"),
-        dark: Color(hex: "F87171")
-    )
-
-    // MARK: - Background Colors
-
-    /// Main app background color (behind cards)
-    /// Light: #F9FAFB (Light Gray) | Dark: #000000 (True Black - OLED optimized)
-    static let appBackground = Color(
-        light: Color(hex: "F9FAFB"),
-        dark: Color(hex: "000000")
-    )
-
-    /// Card background color (all card surfaces)
-    /// Light: #FFFFFF (Pure White) | Dark: #1F2937 (Elevated Dark Gray)
-    static let cardBackground = Color(
+    /// Primary slate card surface
+    static let surfaceCard = Color(
         light: Color(hex: "FFFFFF"),
-        dark: Color(hex: "1F2937")
+        dark: Color(hex: "1E293B")
     )
 
-    // MARK: - Text Colors
-
-    /// Primary text color - Used for headings, values, primary text
-    /// Light: #111827 (Near Black) | Dark: #F9FAFB (Near White)
-    static let textPrimary = Color(
-        light: Color(hex: "111827"),
-        dark: Color(hex: "F9FAFB")
+    /// Elevated card / hover surface
+    static let surfaceRaised = Color(
+        light: Color(hex: "FFFFFF"),
+        dark: Color(hex: "243047")
     )
 
-    /// Secondary text color - Used for labels, descriptions, secondary information
-    /// Light: #6B7280 (Gray) | Dark: #9CA3AF (Light Gray)
-    static let textSecondary = Color(
-        light: Color(hex: "6B7280"),
-        dark: Color(hex: "9CA3AF")
-    )
-
-    // MARK: - Chart Colors
-
-    /// Inactive chart elements - Used for bar chart default state, inactive elements
-    /// Light: #E5E7EB (Light Gray) | Dark: #374151 (Dark Gray)
-    static let chartInactive = Color(
+    /// Inset wells, progress tracks, input backgrounds
+    static let surfaceInset = Color(
         light: Color(hex: "E5E7EB"),
-        dark: Color(hex: "374151")
+        dark: Color(hex: "111827")
     )
 
-    // MARK: - Legacy Support (v1.0 compatibility)
+    /// Sheets, overlays, secondary panels
+    static let surfaceOverlay = Color(
+        light: Color(hex: "FFFFFF"),
+        dark: Color(hex: "162032")
+    )
 
-    /// Legacy brand color (v1.0 blue) - Kept for gradual migration
-    /// Use brandProgress instead for new components
-    @available(*, deprecated, message: "Use brandProgress instead")
+    // MARK: - Compatibility aliases
+
+    static let appBackground = surfaceObsidian
+    static let cardBackground = surfaceCard
+}
+
+// MARK: - Accent & Financial States (v4)
+
+extension Color {
+
+    /// Coral Default — free brand accent (v2 theme.accent.primary)
+    /// Light mode uses a darker coral for WCAG AA text contrast on white surfaces.
+    static let accentPrimary = Color(
+        light: Color(hex: "CC4A4F"),
+        dark: Color(hex: "FF5A5F")
+    )
+
+    /// Restrained indigo secondary accent
+    static let accentSecondary = Color(
+        light: Color(hex: "4F46E5"),
+        dark: Color(hex: "818CF8")
+    )
+
+    /// Fresh Green — moving forward / income / positive flow (v2 status.positive)
+    /// Light mode uses a darker green for WCAG AA text contrast on white surfaces.
+    static let financialPositive = Color(
+        light: Color(hex: "007A36"),
+        dark: Color(hex: "00C853")
+    )
+
+    /// Mint Green — calmer positive state (v2 status.positive.calm)
+    static let financialPositiveCalm = Color(
+        light: Color(hex: "008F7A"),
+        dark: Color(hex: "00BFA5")
+    )
+
+    /// Amber — caution / fair health / attention
+    static let financialCaution = Color(
+        light: Color(hex: "B45309"),
+        dark: Color(hex: "FBBF24")
+    )
+
+    /// Coral Default — slowing down / drain / negative pace (v2 status.negative)
+    static let financialNegative = accentPrimary
+
+    /// Google Red — premium high-energy negative accent (v2 status.negative.alt)
+    static let statusNegativeAlt = Color(hex: "EA4335")
+
+    /// Blue-gray neutral / insufficient steady state
+    static let financialNeutral = Color(
+        light: Color(hex: "64748B"),
+        dark: Color(hex: "94A3B8")
+    )
+
+    // MARK: - Compatibility aliases
+
+    static let brandPositive = financialPositive
+    static let brandProgress = accentPrimary
+    static let brandExpense = financialNegative
+}
+
+// MARK: - Text (v4)
+
+extension Color {
+
+    static let textPrimary = Color(
+        light: Color(hex: "0F172A"),
+        dark: Color(hex: "F8FAFC")
+    )
+
+    static let textSecondary = Color(
+        light: Color(hex: "64748B"),
+        dark: Color(hex: "94A3B8")
+    )
+
+    /// Tertiary text — hints and disabled-adjacent copy (v2 text.tertiary).
+    static let textTertiary = Color(
+        light: Color(hex: "94A3B8"),
+        dark: Color(hex: "64748B")
+    )
+}
+
+// MARK: - Borders, Dividers, Charts (v4)
+
+extension Color {
+
+    static let borderSubtle = Color(
+        light: Color(hex: "E5E7EB"),
+        dark: Color(hex: "334155")
+    )
+
+    static let borderFocus = accentPrimary
+
+    static let dividerSubtle = Color(
+        light: Color(hex: "E5E7EB"),
+        dark: Color(hex: "1E293B")
+    )
+
+    static let chartTrack = Color(
+        light: Color(hex: "E5E7EB"),
+        dark: Color(hex: "334155")
+    )
+
+    static let chartInactive = chartTrack
+
+    static let chartPositive = financialPositive
+    static let chartCaution = financialCaution
+    static let chartNegative = financialNegative
+}
+
+// MARK: - Legacy Support
+
+extension Color {
+    @available(*, deprecated, message: "Use accentPrimary instead")
     static let brandPrimary = Color(hex: "4A90E2")
 }
 
@@ -112,82 +179,61 @@ extension Color {
 
 extension Color {
 
-    /// Returns appropriate color based on financial flow value
-    /// - Parameter value: The financial value (positive/negative/zero)
-    /// - Returns: brandPositive for positive, brandExpense for negative, textSecondary for zero
     static func colorForFlow(_ value: Double) -> Color {
-        if value > 0 {
-            return .brandPositive
-        } else if value < 0 {
-            return .brandExpense
-        } else {
-            return .textSecondary
-        }
+        if value > 0 { return .financialPositive }
+        if value < 0 { return .financialNegative }
+        return .textSecondary
     }
 
-    /// Returns health score color based on score value
-    /// - Parameter score: Health score (0-100)
-    /// - Returns: Green for good (70+), Orange for fair (40-69), Red for poor (<40)
     static func colorForHealthScore(_ score: Int) -> Color {
-        if score >= 70 {
-            return .brandPositive
-        } else if score >= 40 {
-            return .orange
-        } else {
-            return .brandExpense
+        if score >= 70 { return .financialPositive }
+        if score >= 40 { return .financialCaution }
+        return .financialNegative
+    }
+
+    static func color(for paceStatus: PaceStatus) -> Color {
+        switch paceStatus {
+        case .movingForward: return .financialPositive
+        case .slowingDown: return .financialNegative
+        case .neutral: return .accentPrimary
+        case .insufficientData: return .financialNeutral
         }
     }
 }
 
-// MARK: - Gradient Helpers
+// MARK: - Gradient Helpers (restrained — no loud AI gradients)
 
 extension LinearGradient {
 
-    /// Positive flow gradient (green)
     static var positiveFlow: LinearGradient {
         LinearGradient(
-            colors: [
-                Color.brandPositive,
-                Color.brandPositive.opacity(0.8)
-            ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    }
-
-    /// Negative flow gradient (red)
-    static var negativeFlow: LinearGradient {
-        LinearGradient(
-            colors: [
-                Color.brandExpense,
-                Color.brandExpense.opacity(0.8)
-            ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    }
-
-    /// Progress gradient (blue)
-    static var progress: LinearGradient {
-        LinearGradient(
-            colors: [
-                Color.brandProgress,
-                Color.brandProgress.opacity(0.85)
-            ],
+            colors: [Color.financialPositive, Color.financialPositive.opacity(0.85)],
             startPoint: .leading,
             endPoint: .trailing
         )
     }
 
-    /// Neutral flow gradient (gray)
+    static var negativeFlow: LinearGradient {
+        LinearGradient(
+            colors: [Color.financialNegative, Color.financialNegative.opacity(0.85)],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
+    }
+
+    static var progress: LinearGradient {
+        LinearGradient(
+            colors: [Color.accentPrimary, Color.accentPrimary.opacity(0.88)],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
+    }
+
     static var neutral: LinearGradient {
         LinearGradient(
-            colors: [
-                Color.textSecondary,
-                Color.textSecondary.opacity(0.8)
-            ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
+            colors: [Color.financialNeutral, Color.financialNeutral.opacity(0.85)],
+            startPoint: .leading,
+            endPoint: .trailing
         )
     }
 }

@@ -17,10 +17,6 @@ struct EmptyStateRow: View {
     let frequency: String  // "daily", "monthly", "yearly"
     let type: String       // "income" or "expense"
 
-    // MARK: - Environment
-
-    @Environment(\.sizeCategory) var sizeCategory
-
     // MARK: - Computed Properties
 
     private var message: String {
@@ -78,14 +74,14 @@ struct EmptyStateRow: View {
         HStack(spacing: Spacing.md) {
             // Icon
             Image(systemName: iconName)
-                .font(.system(size: 20 * sizeCategory.scaleFactor, weight: .medium))
+                .font(.title3.weight(.medium))
                 .foregroundColor(iconColor)
                 .frame(width: 32, height: 32)
+                .accessibilityHidden(true)
 
             // Message
             Text(message)
-                .font(.system(size: 14 * sizeCategory.scaleFactor, weight: .regular))
-                .foregroundColor(.textSecondary)
+                .captionStyle()
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
 
@@ -94,6 +90,8 @@ struct EmptyStateRow: View {
         .padding(.horizontal, Spacing.md)
         .padding(.vertical, Spacing.md)
         .frame(minHeight: 56)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(message)
     }
 }
 

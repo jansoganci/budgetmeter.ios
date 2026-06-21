@@ -16,39 +16,65 @@ struct AppearancePickerView: View {
 
     var body: some View {
         NavigationView {
-            List {
-                ForEach(SettingsViewModel.AppearanceMode.allCases, id: \.self) { mode in
-                    Button {
-                        onSelect(mode)
-                        dismiss()
-                    } label: {
-                        HStack {
-                            Image(systemName: iconForMode(mode))
-                                .foregroundColor(.brandProgress)
-                                .frame(width: 24)
+            ZStack {
+                AppBackground()
 
-                            Text(mode.displayName)
-                                .font(.body)
-                                .foregroundColor(.primary)
+                ScrollView {
+                    SettingsSection {
+                        ForEach(Array(SettingsViewModel.AppearanceMode.allCases.enumerated()), id: \.element) { index, mode in
+                            Button {
+                                onSelect(mode)
+                                dismiss()
+                            } label: {
+                                HStack(spacing: Spacing.md) {
+                                    Image(systemName: iconForMode(mode))
+                                        .font(.body.weight(.medium))
+                                        .foregroundColor(.accentPrimary)
+                                        .frame(width: 32, height: 32)
+                                        .background(Color.accentPrimary.opacity(0.12))
+                                        .clipShape(RoundedRectangle(cornerRadius: CornerRadius.small, style: .continuous))
+                                        .accessibilityHidden(true)
 
-                            Spacer()
+                                    Text(mode.displayName)
+                                        .bodyStyle()
 
-                            if selectedAppearance == mode {
-                                Image(systemName: "checkmark")
-                                    .foregroundColor(.brandProgress)
-                                    .font(.system(size: 16, weight: .semibold))
+                                    Spacer()
+
+                                    if selectedAppearance == mode {
+                                        Image(systemName: "checkmark")
+                                            .foregroundColor(.accentPrimary)
+                                            .font(.body.weight(.semibold))
+                                            .accessibilityHidden(true)
+                                    }
+                                }
+                                .padding(.horizontal, Spacing.md)
+                                .padding(.vertical, Spacing.sm)
+                                .frame(minHeight: LayoutSpacing.rowHeight)
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel(mode.displayName)
+                            .accessibilityValue(
+                                selectedAppearance == mode
+                                    ? "settings.appearance.selected".localized(defaultValue: "Selected", table: "UI")
+                                    : ""
+                            )
+                            .accessibilityAddTraits(selectedAppearance == mode ? [.isSelected] : [])
+
+                            if index != SettingsViewModel.AppearanceMode.allCases.count - 1 {
+                                SettingsDivider()
                             }
                         }
-                        .contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain)
+                    .padding(.horizontal, LayoutSpacing.screenPadding)
+                    .padding(.vertical, Spacing.md)
                 }
             }
-            .navigationTitle("settings.appearance.title".localized(defaultValue: "Appearance"))
+            .navigationTitle("settings.appearance.title".localized(defaultValue: "Appearance", table: "UI"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("toolbar.done".localized(defaultValue: "Done")) {
+                    Button("toolbar.done".localized(defaultValue: "Done", table: "UI")) {
                         dismiss()
                     }
                 }

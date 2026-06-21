@@ -26,7 +26,7 @@ struct HealthScoreDetailCard: View {
     var body: some View {
         VStack(spacing: 20) {
             // Title
-            Text("Financial Health Score")
+            Text(String(localized: "health.score.title", defaultValue: "Financial Health Score", table: "UI"))
                 .font(.headline)
                 .foregroundColor(.primary)
                 .opacity(showContent ? 1 : 0)
@@ -76,7 +76,7 @@ struct HealthScoreDetailCard: View {
                     .animation(.easeIn(duration: 0.3).delay(0.7), value: showContent)
 
                 // Last updated
-                Text("Updated \(lastUpdated)")
+                Text(String(format: String(localized: "health.updated", defaultValue: "Updated %@", table: "UI"), lastUpdated))
                     .font(.caption2)
                     .foregroundColor(.secondary.opacity(0.7))
                     .opacity(showContent ? 1 : 0)
@@ -96,8 +96,14 @@ struct HealthScoreDetailCard: View {
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Financial health score is \(score) out of 100, rated as \(scoreText)")
-        .accessibilityHint("Your overall financial health based on budget compliance, savings, spending consistency, and income stability")
+        .accessibilityLabel(
+            String(
+                format: String(localized: "health.a11y.detail_score", defaultValue: "Financial health score is %lld out of 100, rated as %@", table: "UI"),
+                score,
+                scoreText
+            )
+        )
+        .accessibilityHint(String(localized: "health.a11y.detail_hint", defaultValue: "Your overall financial health based on budget compliance, savings, spending consistency, and income stability", table: "UI"))
     }
 
     // MARK: - Description Text
@@ -105,17 +111,17 @@ struct HealthScoreDetailCard: View {
     private var descriptionText: String {
         switch score {
         case 90...100:
-            return "Excellent work! Your financial health is outstanding. Keep up the great habits!"
+            return String(localized: "health.detail.description.excellent", defaultValue: "Excellent work! Your financial health is outstanding. Keep up the great habits!", table: "UI")
         case 75...89:
-            return "Great job! Your financial health is strong. A few tweaks can make it even better."
+            return String(localized: "health.detail.description.great", defaultValue: "Great job! Your financial health is strong. A few tweaks can make it even better.", table: "UI")
         case 60...74:
-            return "Good progress! Your financial health is on the right track. Keep improving!"
+            return String(localized: "health.detail.description.good", defaultValue: "Good progress! Your financial health is on the right track. Keep improving!", table: "UI")
         case 40...59:
-            return "Fair start. Your financial health needs attention. Check the tips below for guidance."
+            return String(localized: "health.detail.description.fair", defaultValue: "Fair start. Your financial health needs attention. Check the tips below for guidance.", table: "UI")
         case 20...39:
-            return "Your financial health needs improvement. Follow the recommendations to get back on track."
+            return String(localized: "health.detail.description.needs_improvement", defaultValue: "Your financial health needs improvement. Follow the recommendations to get back on track.", table: "UI")
         default:
-            return "Getting started. Set up your budget to see your financial health improve over time."
+            return String(localized: "health.detail.description.getting_started", defaultValue: "Getting started. Set up your budget to see your financial health improve over time.", table: "UI")
         }
     }
 }

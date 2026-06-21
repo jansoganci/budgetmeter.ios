@@ -1,0 +1,218 @@
+{
+  "en": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: June 2026",
+    "sections": [
+      {
+        "heading": "Overview",
+        "paragraphs": [
+          "BudgetMeter is a personal finance app for iOS developed by <strong>Umurcan Soganci</strong> (\"we\", \"us\", or \"our\"). We are committed to protecting your privacy.",
+          "This Privacy Policy explains what information the app processes, how it is stored, and what choices you have. By using BudgetMeter, you agree to this policy."
+        ]
+      },
+      {
+        "heading": "Data Controller",
+        "paragraphs": [
+          "<strong>Umurcan Soganci</strong><br>Email: <a href=\"mailto:umursoganci@gmail.com\">umursoganci@gmail.com</a>"
+        ]
+      },
+      {
+        "heading": "What Data We Process",
+        "paragraphs": [
+          "BudgetMeter helps you track income, expenses, bills, subscriptions, and savings goals. Depending on how you use the app, we may process:"
+        ],
+        "list": [
+          "<strong>Financial data you enter</strong> — amounts, categories, notes, dates, savings goals, bills, and subscriptions.",
+          "<strong>App settings</strong> — currency, language, theme, and display preferences.",
+          "<strong>Account identifiers</strong> — if you sign in: your email address and/or Apple-provided identifier from Sign in with Apple.",
+          "<strong>Premium purchase status</strong> — whether you have unlocked Premium (processed by Apple; we do not receive your payment card details).",
+          "<strong>Optional cloud backup payload</strong> — if you are signed in, have Premium, and tap <strong>Back Up Now</strong>, an encrypted export of your financial data is stored in our cloud backend (Supabase).",
+          "<strong>Device security</strong> — if you enable Face ID or Touch ID, authentication is handled by iOS; we do not receive your biometric data."
+        ]
+      },
+      {
+        "heading": "What We Do Not Collect",
+        "paragraphs": [
+          "We do not sell your data. We do not use third-party advertising or analytics SDKs. We do not automatically upload your financial data to the cloud when you edit entries in the app."
+        ]
+      },
+      {
+        "heading": "How Data Is Stored",
+        "paragraphs": [
+          "<strong>On your device:</strong> Your financial data is stored locally using Apple's on-device database (Core Data). This is the primary copy of your information.",
+          "<strong>Sign in (Supabase Auth):</strong> When you create an account or sign in with Apple or email/password, an authentication session is created with our cloud provider Supabase. Passwords are hashed by Supabase; we do not store plain-text passwords.",
+          "<strong>Manual cloud backup (Premium):</strong> Financial data is sent to Supabase only when you explicitly choose <strong>Back Up Now</strong> in Settings → Account & Backup. Restore happens only when you tap <strong>Restore from Cloud</strong>. This is not automatic or real-time sync.",
+          "<strong>Apple iCloud (CloudKit):</strong> The app may use Apple's CloudKit technology for optional iCloud-backed storage of local data on your private iCloud account. This is separate from Supabase manual backup. Availability depends on your device iCloud settings and app configuration."
+        ]
+      },
+      {
+        "heading": "Sign-In Methods",
+        "paragraphs": [
+          "BudgetMeter supports <strong>Sign in with Apple</strong> and <strong>email/password</strong> registration.",
+          "If email confirmation is enabled, you must verify your email address before signing in with email and password.",
+          "If you use both Apple Sign In and email/password with the same email address, account linking behavior depends on Supabase Auth configuration. Contact us if you need help merging accounts."
+        ]
+      },
+      {
+        "heading": "Legal Basis & Purpose",
+        "paragraphs": [
+          "We process your data to provide the app, maintain your account, perform manual cloud backup/restore when you request it, process Premium features, and respond to support requests."
+        ]
+      },
+      {
+        "heading": "Data Sharing",
+        "paragraphs": [
+          "We share data only with service providers necessary to operate the app:"
+        ],
+        "list": [
+          "<strong>Apple</strong> — App Store purchases, Sign in with Apple, and optionally iCloud/CloudKit.",
+          "<strong>Supabase</strong> — authentication and storage of user-initiated backup payloads."
+        ]
+      },
+      {
+        "heading": "Your Choices & Rights",
+        "paragraphs": [
+          "You can:"
+        ],
+        "list": [
+          "Use the app without signing in (local data only; cloud backup unavailable).",
+          "Reset local data via <strong>Settings → Data & Privacy → Reset All Data</strong> (removes local app data; does not delete your cloud account).",
+          "Delete your cloud account via <strong>Settings → Account & Backup → Delete Account</strong> (removes Supabase auth user and stored backups; local data remains unless you reset).",
+          "Request information or deletion by emailing <a href=\"mailto:umursoganci@gmail.com\">umursoganci@gmail.com</a>."
+        ]
+      },
+      {
+        "heading": "Children",
+        "paragraphs": [
+          "BudgetMeter is not directed at children under 13. We do not knowingly collect personal information from children."
+        ]
+      },
+      {
+        "heading": "International Transfers",
+        "paragraphs": [
+          "If you use cloud sign-in or backup, your data may be processed on servers operated by Supabase, which may be located outside your country. We take reasonable steps to protect data in transit (HTTPS/TLS)."
+        ]
+      },
+      {
+        "heading": "Changes",
+        "paragraphs": [
+          "We may update this Privacy Policy. The \"Last updated\" date at the top will change when we do. Continued use of the app after changes means you accept the updated policy."
+        ]
+      },
+      {
+        "heading": "Contact",
+        "paragraphs": [
+          "Questions about privacy? Email <a href=\"mailto:umursoganci@gmail.com\">umursoganci@gmail.com</a>."
+        ]
+      }
+    ]
+  },
+  "tr": {
+    "title": "Gizlilik Politikası",
+    "lastUpdated": "Son güncelleme: Haziran 2026",
+    "sections": [
+      {
+        "heading": "Genel Bakış",
+        "paragraphs": [
+          "BudgetMeter, <strong>Umurcan Soganci</strong> (\"biz\") tarafından geliştirilen bir iOS kişisel finans uygulamasıdır. Gizliliğinizi korumaya kararlıyız.",
+          "Bu Gizlilik Politikası, uygulamanın hangi bilgileri işlediğini, nasıl saklandığını ve hangi seçeneklere sahip olduğunuzu açıklar. BudgetMeter'ı kullanarak bu politikayı kabul etmiş olursunuz."
+        ]
+      },
+      {
+        "heading": "Veri Sorumlusu",
+        "paragraphs": [
+          "<strong>Umurcan Soganci</strong><br>E-posta: <a href=\"mailto:umursoganci@gmail.com\">umursoganci@gmail.com</a>"
+        ]
+      },
+      {
+        "heading": "İşlediğimiz Veriler",
+        "paragraphs": [
+          "BudgetMeter gelir, gider, faturalar, abonelikler ve birikim hedeflerini takip etmenize yardımcı olur. Uygulamayı nasıl kullandığınıza bağlı olarak şunları işleyebiliriz:"
+        ],
+        "list": [
+          "<strong>Girdiğiniz finansal veriler</strong> — tutarlar, kategoriler, notlar, tarihler, birikim hedefleri, faturalar ve abonelikler.",
+          "<strong>Uygulama ayarları</strong> — para birimi, dil, tema ve görüntüleme tercihleri.",
+          "<strong>Hesap tanımlayıcıları</strong> — giriş yaparsanız: e-posta adresiniz ve/veya Apple ile Giriş'ten gelen Apple tanımlayıcısı.",
+          "<strong>Premium satın alma durumu</strong> — Premium'u açıp açmadığınız (Apple tarafından işlenir; ödeme kartı bilgilerinizi almayız).",
+          "<strong>İsteğe bağlı bulut yedek yükü</strong> — giriş yaptıysanız, Premium'unuz varsa ve <strong>Şimdi Yedekle</strong>'ye dokunursanız, finansal verilerinizin şifreli bir dışa aktarımı bulut altyapımızda (Supabase) saklanır.",
+          "<strong>Cihaz güvenliği</strong> — Face ID veya Touch ID etkinleştirirseniz kimlik doğrulama iOS tarafından yapılır; biyometrik verilerinizi almayız."
+        ]
+      },
+      {
+        "heading": "Toplamadığımız Veriler",
+        "paragraphs": [
+          "Verilerinizi satmayız. Üçüncü taraf reklam veya analitik SDK'ları kullanmayız. Uygulamada kayıt düzenlediğinizde finansal verilerinizi otomatik olarak buluta yüklemez."
+        ]
+      },
+      {
+        "heading": "Verilerin Saklanması",
+        "paragraphs": [
+          "<strong>Cihazınızda:</strong> Finansal verileriniz Apple'ın cihaz içi veritabanı (Core Data) ile yerel olarak saklanır. Bu, bilgilerinizin birincil kopyasıdır.",
+          "<strong>Giriş (Supabase Auth):</strong> Hesap oluşturduğunuzda veya Apple ya da e-posta/şifre ile giriş yaptığınızda bulut sağlayıcımız Supabase ile bir kimlik doğrulama oturumu oluşturulur. Şifreler Supabase tarafından hash'lenir; düz metin şifre saklamayız.",
+          "<strong>Manuel bulut yedekleme (Premium):</strong> Finansal veriler yalnızca Ayarlar → Hesap ve Yedekleme bölümünde açıkça <strong>Şimdi Yedekle</strong>'yi seçtiğinizde Supabase'e gönderilir. Geri yükleme yalnızca <strong>Buluttan Geri Yükle</strong>'ye dokunduğunuzda gerçekleşir. Bu otomatik veya gerçek zamanlı senkronizasyon değildir.",
+          "<strong>Apple iCloud (CloudKit):</strong> Uygulama, yerel verilerin özel iCloud hesabınızda isteğe bağlı iCloud destekli saklanması için Apple'ın CloudKit teknolojisini kullanabilir. Bu, Supabase manuel yedeklemesinden ayrıdır. Kullanılabilirlik cihazınızdaki iCloud ayarlarına ve uygulama yapılandırmasına bağlıdır."
+        ]
+      },
+      {
+        "heading": "Giriş Yöntemleri",
+        "paragraphs": [
+          "BudgetMeter <strong>Apple ile Giriş</strong> ve <strong>e-posta/şifre</strong> kaydını destekler.",
+          "E-posta onayı etkinse, e-posta ve şifre ile giriş yapmadan önce e-posta adresinizi doğrulamanız gerekir.",
+          "Aynı e-posta adresiyle hem Apple ile Giriş hem de e-posta/şifre kullanırsanız hesap birleştirme davranışı Supabase Auth yapılandırmasına bağlıdır. Hesapları birleştirmek için yardıma ihtiyacınız olursa bizimle iletişime geçin."
+        ]
+      },
+      {
+        "heading": "Hukuki Dayanak ve Amaç",
+        "paragraphs": [
+          "Verilerinizi uygulamayı sunmak, hesabınızı sürdürmek, talep ettiğinizde manuel bulut yedekleme/geri yükleme yapmak, Premium özelliklerini işlemek ve destek taleplerine yanıt vermek için işleriz."
+        ]
+      },
+      {
+        "heading": "Veri Paylaşımı",
+        "paragraphs": [
+          "Verileri yalnızca uygulamayı işletmek için gerekli hizmet sağlayıcılarla paylaşırız:"
+        ],
+        "list": [
+          "<strong>Apple</strong> — App Store satın alımları, Apple ile Giriş ve isteğe bağlı olarak iCloud/CloudKit.",
+          "<strong>Supabase</strong> — kimlik doğrulama ve kullanıcının başlattığı yedek yüklerinin saklanması."
+        ]
+      },
+      {
+        "heading": "Seçenekleriniz ve Haklarınız",
+        "paragraphs": [
+          "Şunları yapabilirsiniz:"
+        ],
+        "list": [
+          "Giriş yapmadan uygulamayı kullanmak (yalnızca yerel veri; bulut yedekleme kullanılamaz).",
+          "<strong>Ayarlar → Veri ve Gizlilik → Tüm Verileri Sıfırla</strong> ile yerel verileri sıfırlamak (yerel uygulama verilerini siler; bulut hesabınızı silmez).",
+          "<strong>Ayarlar → Hesap ve Yedekleme → Hesabı Sil</strong> ile bulut hesabınızı silmek (Supabase kimlik doğrulama kullanıcısını ve saklanan yedekleri kaldırır; sıfırlamadığınız sürece yerel veriler kalır).",
+          "<a href=\"mailto:umursoganci@gmail.com\">umursoganci@gmail.com</a> adresine e-posta göndererek bilgi veya silme talebinde bulunmak."
+        ]
+      },
+      {
+        "heading": "Çocuklar",
+        "paragraphs": [
+          "BudgetMeter 13 yaşın altındaki çocuklara yönelik değildir. Bilerek çocuklardan kişisel bilgi toplamayız."
+        ]
+      },
+      {
+        "heading": "Uluslararası Aktarımlar",
+        "paragraphs": [
+          "Bulut girişi veya yedekleme kullanırsanız verileriniz ülkeniz dışında konumlanmış sunucularda Supabase tarafından işlenebilir. Aktarım sırasında verileri korumak için makul önlemler alırız (HTTPS/TLS)."
+        ]
+      },
+      {
+        "heading": "Değişiklikler",
+        "paragraphs": [
+          "Bu Gizlilik Politikasını güncelleyebiliriz. Güncellediğimizde üstteki \"Son güncelleme\" tarihi değişir. Değişikliklerden sonra uygulamayı kullanmaya devam etmeniz güncellenmiş politikayı kabul ettiğiniz anlamına gelir."
+        ]
+      },
+      {
+        "heading": "İletişim",
+        "paragraphs": [
+          "Gizlilikle ilgili sorularınız mı var? <a href=\"mailto:umursoganci@gmail.com\">umursoganci@gmail.com</a> adresine yazın."
+        ]
+      }
+    ]
+  }
+}

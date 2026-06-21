@@ -1,0 +1,120 @@
+{
+  "en": {
+    "title": "Account Deletion",
+    "lastUpdated": "Last updated: June 2026",
+    "sections": [
+      {
+        "heading": "Overview",
+        "paragraphs": [
+          "This page explains how to delete your <strong>BudgetMeter cloud account</strong> and what happens to your data.",
+          "<strong>Account deletion is different from Reset All Data.</strong> Reset All Data removes information stored on your device only. Delete Account removes your cloud identity and stored backups."
+        ]
+      },
+      {
+        "heading": "Delete Account (In App)",
+        "paragraphs": [
+          "To delete your cloud account:"
+        ],
+        "list": [
+          "Open BudgetMeter.",
+          "Go to <strong>Settings → Account & Backup</strong>.",
+          "Tap <strong>Delete Account</strong> and confirm."
+        ]
+      },
+      {
+        "heading": "What Gets Deleted",
+        "paragraphs": [
+          "When you delete your account, we request deletion of:"
+        ],
+        "list": [
+          "Your Supabase authentication user record.",
+          "Cloud backup data associated with your account (<code>user_backups</code> and related version history)."
+        ]
+      },
+      {
+        "heading": "What Stays on Your Device",
+        "paragraphs": [
+          "Delete Account does <strong>not</strong> automatically erase financial data stored locally on your iPhone or iPad.",
+          "To remove local data and start fresh on the device, use <strong>Settings → Data & Privacy → Reset All Data</strong> after or before deleting your account."
+        ]
+      },
+      {
+        "heading": "Premium Purchases",
+        "paragraphs": [
+          "Deleting your cloud account does not cancel or refund App Store purchases. Premium status is managed by Apple and remains tied to your Apple ID."
+        ]
+      },
+      {
+        "heading": "Request by Email",
+        "paragraphs": [
+          "If you cannot access the app, email <a href=\"mailto:umursoganci@gmail.com\">umursoganci@gmail.com</a> from the address linked to your account with the subject line <strong>Account Deletion Request</strong>. We will verify ownership and process deletion within a reasonable time."
+        ]
+      },
+      {
+        "heading": "Processing Time",
+        "paragraphs": [
+          "Account deletion is processed promptly after confirmation. Residual backups may take additional time to purge from backup systems."
+        ]
+      }
+    ]
+  },
+  "tr": {
+    "title": "Hesap Silme",
+    "lastUpdated": "Son güncelleme: Haziran 2026",
+    "sections": [
+      {
+        "heading": "Genel Bakış",
+        "paragraphs": [
+          "Bu sayfa <strong>BudgetMeter bulut hesabınızı</strong> nasıl sileceğinizi ve verilerinize ne olacağını açıklar.",
+          "<strong>Hesap silme, Tüm Verileri Sıfırla işleminden farklıdır.</strong> Tüm Verileri Sıfırla yalnızca cihazınızda saklanan bilgileri kaldırır. Hesabı Sil bulut kimliğinizi ve saklanan yedekleri kaldırır."
+        ]
+      },
+      {
+        "heading": "Hesabı Sil (Uygulama İçi)",
+        "paragraphs": [
+          "Bulut hesabınızı silmek için:"
+        ],
+        "list": [
+          "BudgetMeter'ı açın.",
+          "<strong>Ayarlar → Hesap ve Yedekleme</strong> bölümüne gidin.",
+          "<strong>Hesabı Sil</strong>'e dokunun ve onaylayın."
+        ]
+      },
+      {
+        "heading": "Silinen Veriler",
+        "paragraphs": [
+          "Hesabınızı sildiğinizde şunların silinmesini talep ederiz:"
+        ],
+        "list": [
+          "Supabase kimlik doğrulama kullanıcı kaydınız.",
+          "Hesabınızla ilişkili bulut yedek verileri (<code>user_backups</code> ve ilgili sürüm geçmişi)."
+        ]
+      },
+      {
+        "heading": "Cihazınızda Kalan Veriler",
+        "paragraphs": [
+          "Hesabı Sil, iPhone veya iPad'inizde yerel olarak saklanan finansal verileri <strong>otomatik olarak silmez</strong>.",
+          "Yerel verileri kaldırmak ve cihazda sıfırdan başlamak için hesabınızı silmeden önce veya sonra <strong>Ayarlar → Veri ve Gizlilik → Tüm Verileri Sıfırla</strong>'yı kullanın."
+        ]
+      },
+      {
+        "heading": "Premium Satın Alımlar",
+        "paragraphs": [
+          "Bulut hesabınızı silmek App Store satın alımlarını iptal etmez veya iade etmez. Premium durumu Apple tarafından yönetilir ve Apple ID'nize bağlı kalır."
+        ]
+      },
+      {
+        "heading": "E-posta ile Talep",
+        "paragraphs": [
+          "Uygulamaya erişemiyorsanız, hesabınıza bağlı adresten <strong>Hesap Silme Talebi</strong> konu satırıyla <a href=\"mailto:umursoganci@gmail.com\">umursoganci@gmail.com</a> adresine yazın. Sahipliği doğrulayıp makul sürede silme işlemini gerçekleştiririz."
+        ]
+      },
+      {
+        "heading": "İşlem Süresi",
+        "paragraphs": [
+          "Hesap silme onaydan sonra derhal işleme alınır. Kalan yedeklerin yedekleme sistemlerinden tamamen temizlenmesi ek süre alabilir."
+        ]
+      }
+    ]
+  }
+}

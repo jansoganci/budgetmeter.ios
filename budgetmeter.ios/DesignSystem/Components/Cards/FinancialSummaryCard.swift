@@ -48,10 +48,6 @@ struct FinancialSummaryCard: View {
     let type: FinancialType
     var sourcesCount: Int = 0  // Number of active sources (optional)
 
-    // MARK: - Environment
-
-    @Environment(\.sizeCategory) var sizeCategory
-
     // MARK: - Computed Properties
 
     private var formattedMonthly: String {
@@ -66,8 +62,8 @@ struct FinancialSummaryCard: View {
         formatCompact(yearlyProjection)
     }
 
-    private var accessibilityLabel: String {
-        var label = "\(type.title): \(formattedMonthly). Daily average: \(formattedDaily). Yearly projection: \(formattedYearly)"
+    private var accessibilitySummary: String {
+        var label = "\(formattedMonthly). Daily average: \(formattedDaily). Yearly projection: \(formattedYearly)"
         if sourcesCount > 0 {
             label += ". \(sourcesCount) active sources."
         }
@@ -85,83 +81,58 @@ struct FinancialSummaryCard: View {
     // MARK: - Body
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            // Top section: Icon + Amount
+        VStack(alignment: .leading, spacing: LayoutSpacing.cardInternalGap) {
+            Text(type.title)
+                .badgeStyle(color: .textSecondary)
+
             HStack(spacing: Spacing.sm) {
                 Image(systemName: type.iconName)
-                    .font(.system(size: 24 * sizeCategory.scaleFactor, weight: .semibold))
+                    .font(.title3.weight(.semibold))
                     .foregroundColor(type.accentColor)
+                    .accessibilityHidden(true)
 
                 Text(formattedMonthly)
-                    .font(.system(size: 28 * sizeCategory.scaleFactor, weight: .bold, design: .rounded))
-                    .foregroundColor(.textPrimary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                    .paceHeroStyle(color: .textPrimary)
             }
 
-            // Subtitle
-            Text(type.title)
-                .font(.system(size: 14 * sizeCategory.scaleFactor, weight: .medium))
-                .foregroundColor(.textSecondary)
-
-            // Divider
-            Divider()
-                .padding(.vertical, Spacing.xs)
-
-            // Bottom section: Daily + Yearly + Metadata
-            HStack(spacing: Spacing.lg) {
-                // Daily
+            HStack(spacing: Spacing.md) {
                 HStack(spacing: Spacing.xs) {
                     Image(systemName: "calendar.day.timeline.left")
-                        .font(.system(size: 12 * sizeCategory.scaleFactor))
+                        .font(.caption2)
                         .foregroundColor(.textSecondary)
+                        .accessibilityHidden(true)
 
                     Text("\(formattedDaily)\(String(localized: "ui.units.per_day", defaultValue: "/day"))")
-                        .font(.system(size: 12 * sizeCategory.scaleFactor, weight: .medium))
-                        .foregroundColor(.textSecondary)
+                        .captionStyle(color: .textSecondary)
                 }
 
                 Text(String(localized: "ui.bullet.point", defaultValue: "•"))
-                    .foregroundColor(.textSecondary.opacity(0.5))
+                    .foregroundColor(.textTertiary)
+                    .captionStyle()
 
-                // Yearly
                 HStack(spacing: Spacing.xs) {
                     Image(systemName: "calendar")
-                        .font(.system(size: 12 * sizeCategory.scaleFactor))
+                        .font(.caption2)
                         .foregroundColor(.textSecondary)
+                        .accessibilityHidden(true)
 
                     Text("\(formattedYearly)\(String(localized: "ui.units.per_year", defaultValue: "/year"))")
-                        .font(.system(size: 12 * sizeCategory.scaleFactor, weight: .medium))
-                        .foregroundColor(.textSecondary)
+                        .captionStyle(color: .textSecondary)
                 }
 
-                Spacer()
+                Spacer(minLength: 0)
 
-                // Metadata (sources count)
                 if let metadata = metadataText {
-                    HStack(spacing: Spacing.xs) {
-                        Image(systemName: "chart.pie")
-                            .font(.system(size: 10 * sizeCategory.scaleFactor))
-                            .foregroundColor(.textSecondary.opacity(0.7))
-
-                        Text(metadata)
-                            .font(.system(size: 11 * sizeCategory.scaleFactor, weight: .medium))
-                            .foregroundColor(.textSecondary.opacity(0.7))
-                    }
+                    Text(metadata)
+                        .captionStyle(color: .textTertiary)
                 }
             }
         }
-        .padding(Spacing.lg)
-        .background(Color.cardBackground)
-        .cornerRadius(CornerRadius.card)
-        .shadow(
-            color: ShadowStyle.card.color,
-            radius: ShadowStyle.card.radius,
-            x: ShadowStyle.card.offset.width,
-            y: ShadowStyle.card.offset.height
-        )
+        .padding(LayoutSpacing.cardPadding)
+        .glassSurface()
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(accessibilityLabel)
+        .accessibilityLabel(type.title)
+        .accessibilityValue(accessibilitySummary)
     }
 
     // MARK: - Helper Methods

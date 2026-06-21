@@ -2,7 +2,7 @@
 //  BiometricSettingsView.swift
 //  BudgetMeter
 //
-//  Created by BudgetMeter Team on 17.09.2025.
+//  Biometric lock settings — v2 glass section layout.
 //
 
 import SwiftUI
@@ -11,116 +11,114 @@ struct BiometricSettingsView: View {
     @StateObject private var biometricManager = BiometricManager.shared
     @State private var showingAlert = false
     @State private var alertMessage = ""
-    
-    // DEBUG: For testing biometric features
-    #if DEBUG
-    @State private var debugMode = true
-    #endif
-    
-    var body: some View {
-        NavigationView {
-            List {
-                Section {
-                    Toggle(isOn: $biometricManager.isBiometricEnabled) {
-                        HStack(spacing: 12) {
-                            Image(systemName: biometricManager.biometricType.iconName)
-                                .font(.title2)
-                                .foregroundColor(.accentColor)
-                                .frame(width: 30)
 
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("security.settings.biometric.title".localized(defaultValue: "Biometric Authentication"))
-                                    .font(.body)
-                                    .foregroundColor(.primary)
-                                Text("security.settings.biometric.subtitle".localized(defaultValue: "Protect your financial data with Face ID or Touch ID"))
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
+    var body: some View {
+        ZStack {
+            AppBackground()
+
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: LayoutSpacing.sectionGap) {
+                    biometricToggleSection
+
+                    if biometricManager.isBiometricEnabled {
+                        statusSection
                     }
-                    .onChange(of: biometricManager.isBiometricEnabled) { newValue in
-                        if newValue {
-                            enableBiometric()
-                        } else {
-                            disableBiometric()
-                        }
-                    }
-                } header: {
-                    Text("security.settings.biometric.header".localized(defaultValue: "Security"))
-                } footer: {
-                    if biometricManager.isAvailable {
-                        Text("security.settings.biometric.footer".localized(defaultValue: "When enabled, you'll need to authenticate with \(biometricManager.biometricType.displayName) to access your financial data."))
-                    } else {
-                        Text("security.settings.biometric.unavailable".localized(defaultValue: "Biometric authentication is not available on this device."))
-                            .foregroundColor(.red)
+
+                    if !biometricManager.isAvailable {
+                        unavailableSection
                     }
                 }
-                
-                if biometricManager.isBiometricEnabled {
-                    Section {
-                        HStack {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.green)
-                                .frame(width: 30)
-                            
-                            VStack(alignment: .leading) {
-                                Text("security.settings.status.enabled".localized(defaultValue: "Biometric Lock Enabled"))
-                                    .font(.headline)
-                                Text("security.settings.status.description".localized(defaultValue: "Your financial data is protected"))
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                        .padding(.vertical, 5)
-                    } header: {
-                        Text("security.settings.status.header".localized(defaultValue: "Status"))
-                    }
-                }
-                
-                if !biometricManager.isAvailable {
-                    Section {
-                        VStack(alignment: .leading, spacing: 10) {
-                            HStack {
-                                Image(systemName: "exclamationmark.triangle.fill")
-                                    .foregroundColor(.orange)
-                                Text("security.settings.unavailable.title".localized(defaultValue: "Not Available"))
-                                    .font(.headline)
-                            }
-                            
-                            Text("security.settings.unavailable.message".localized(defaultValue: "Biometric authentication is not available on this device. This could be because:"))
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                            
-                            VStack(alignment: .leading, spacing: 5) {
-                                Text("• \("security.settings.unavailable.reason1".localized(defaultValue: "Face ID or Touch ID is not set up"))")
-                                Text("• \("security.settings.unavailable.reason2".localized(defaultValue: "Device doesn't support biometric authentication"))")
-                                Text("• \("security.settings.unavailable.reason3".localized(defaultValue: "Biometric authentication is disabled in Settings"))")
-                            }
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        }
-                        .padding(.vertical, 5)
-                    } header: {
-                        Text("security.settings.unavailable.header".localized(defaultValue: "Why is this unavailable?"))
-                    }
-                }
+                .padding(.horizontal, LayoutSpacing.screenPadding)
+                .padding(.vertical, Spacing.md)
             }
-            .navigationTitle("security.settings.nav_title".localized(defaultValue: "Security"))
-            .navigationBarTitleDisplayMode(.large)
-            .alert("security.settings.alert.title".localized(defaultValue: "Biometric Authentication"), isPresented: $showingAlert) {
-                Button("toolbar.ok".localized(defaultValue: "OK")) {
-                    showingAlert = false
+        }
+        .navigationTitle("security.settings.nav_title".localized(defaultValue: "Security"))
+        .navigationBarTitleDisplayMode(.inline)
+        .alert("security.settings.alert.title".localized(defaultValue: "Biometric Authentication"), isPresented: $showingAlert) {
+            Button("toolbar.ok".localized(defaultValue: "OK")) {
+                showingAlert = false
+            }
+        } message: {
+            Text(alertMessage)
+        }
+    }
+
+    private var biometricToggleSection: some View {
+        SettingsSection(
+            title: "security.settings.biometric.header".localized(defaultValue: "Security"),
+            footer: biometricFooterText
+        ) {
+            Toggle(isOn: $biometricManager.isBiometricEnabled) {
+                SettingsRowContent(
+                    iconName: biometricManager.biometricType.iconName,
+                    title: "security.settings.biometric.title".localized(defaultValue: "Biometric Authentication"),
+                    subtitle: "security.settings.biometric.subtitle".localized(defaultValue: "Protect your financial data with Face ID or Touch ID"),
+                    showsChevron: false
+                )
+            }
+            .tint(.accentPrimary)
+            .padding(.trailing, Spacing.md)
+            .onChange(of: biometricManager.isBiometricEnabled) { _, newValue in
+                if newValue {
+                    enableBiometric()
+                } else {
+                    disableBiometric()
                 }
-            } message: {
-                Text(alertMessage)
             }
         }
     }
-    
+
+    private var statusSection: some View {
+        SettingsSection(title: "security.settings.status.header".localized(defaultValue: "Status")) {
+            SettingsRowContent(
+                iconName: "checkmark.circle.fill",
+                title: "security.settings.status.enabled".localized(defaultValue: "Biometric Lock Enabled"),
+                subtitle: "security.settings.status.description".localized(defaultValue: "Your financial data is protected"),
+                showsChevron: false
+            )
+        }
+    }
+
+    private var unavailableSection: some View {
+        SettingsSection(title: "security.settings.unavailable.header".localized(defaultValue: "Why is this unavailable?")) {
+            VStack(alignment: .leading, spacing: Spacing.sm) {
+                SettingsRowContent(
+                    iconName: "exclamationmark.triangle.fill",
+                    title: "security.settings.unavailable.title".localized(defaultValue: "Not Available"),
+                    subtitle: "security.settings.unavailable.message".localized(defaultValue: "Biometric authentication is not available on this device. This could be because:"),
+                    showsChevron: false
+                )
+
+                VStack(alignment: .leading, spacing: Spacing.xs) {
+                    Text("• \("security.settings.unavailable.reason1".localized(defaultValue: "Face ID or Touch ID is not set up"))")
+                    Text("• \("security.settings.unavailable.reason2".localized(defaultValue: "Device doesn't support biometric authentication"))")
+                    Text("• \("security.settings.unavailable.reason3".localized(defaultValue: "Biometric authentication is disabled in Settings"))")
+                }
+                .captionStyle(color: .textSecondary)
+                .padding(.horizontal, Spacing.md)
+                .padding(.bottom, Spacing.sm)
+            }
+        }
+    }
+
+    private var biometricFooterText: String {
+        if biometricManager.isAvailable {
+            return String(
+                format: "security.settings.biometric.footer".localized(
+                    defaultValue: "When enabled, you'll need to authenticate with %@ to access your financial data."
+                ),
+                biometricManager.biometricType.displayName
+            )
+        }
+        return "security.settings.biometric.unavailable".localized(
+            defaultValue: "Biometric authentication is not available on this device."
+        )
+    }
+
     private func enableBiometric() {
         Task {
             let success = await biometricManager.enableBiometric()
-            
+
             await MainActor.run {
                 if !success {
                     biometricManager.isBiometricEnabled = false
@@ -130,12 +128,14 @@ struct BiometricSettingsView: View {
             }
         }
     }
-    
+
     private func disableBiometric() {
         biometricManager.disableBiometric()
     }
 }
 
 #Preview {
-    BiometricSettingsView()
+    NavigationStack {
+        BiometricSettingsView()
+    }
 }

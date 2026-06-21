@@ -20,7 +20,7 @@ struct MiniBarChart: View {
     /// Whether to animate bars on appear
     let animated: Bool
 
-    /// Color for bars (default: chartInactive)
+    /// Color for bars (default: chartTrack)
     let barColor: Color
 
     // MARK: - State
@@ -33,7 +33,7 @@ struct MiniBarChart: View {
     init(
         data: [Double],
         animated: Bool = true,
-        barColor: Color = .chartInactive
+        barColor: Color = .chartTrack
     ) {
         self.data = data
         self.animated = animated

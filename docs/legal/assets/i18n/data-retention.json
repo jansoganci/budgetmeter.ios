@@ -1,0 +1,80 @@
+{
+  "en": {
+    "title": "Data Retention",
+    "lastUpdated": "Last updated: June 2026",
+    "sections": [
+      {
+        "heading": "Local Data (On Device)",
+        "paragraphs": [
+          "Financial data you enter in BudgetMeter is stored on your device until you delete it or use <strong>Reset All Data</strong> in Settings.",
+          "Reset All Data is intended to remove local user data and restore default app state so you can start fresh. It does not delete your cloud account."
+        ]
+      },
+      {
+        "heading": "Cloud Backup (Supabase)",
+        "paragraphs": [
+          "If you sign in, have Premium, and tap <strong>Back Up Now</strong>, a backup snapshot is stored in Supabase.",
+          "Each new backup may replace or version prior backup data associated with your account.",
+          "When you <strong>Delete Account</strong>, we delete your authentication record and associated backup data from our cloud database."
+        ]
+      },
+      {
+        "heading": "Authentication Data",
+        "paragraphs": [
+          "Account credentials and session tokens are retained while your account is active. Deleting your account removes the auth user from Supabase."
+        ]
+      },
+      {
+        "heading": "Support Communications",
+        "paragraphs": [
+          "If you email <a href=\"mailto:umursoganci@gmail.com\">umursoganci@gmail.com</a>, we retain correspondence as long as needed to resolve your request and for reasonable record-keeping."
+        ]
+      },
+      {
+        "heading": "Legal Retention",
+        "paragraphs": [
+          "We may retain minimal information longer if required by law or to resolve disputes, then delete when no longer necessary."
+        ]
+      }
+    ]
+  },
+  "tr": {
+    "title": "Veri Saklama",
+    "lastUpdated": "Son güncelleme: Haziran 2026",
+    "sections": [
+      {
+        "heading": "Yerel Veriler (Cihazda)",
+        "paragraphs": [
+          "BudgetMeter'a girdiğiniz finansal veriler, siz silene veya Ayarlar'da <strong>Tüm Verileri Sıfırla</strong>'yı kullanana kadar cihazınızda saklanır.",
+          "Tüm Verileri Sıfırla, yerel kullanıcı verilerini kaldırmak ve sıfırdan başlayabilmeniz için uygulamayı varsayılan duruma getirmek içindir. Bulut hesabınızı silmez."
+        ]
+      },
+      {
+        "heading": "Bulut Yedekleme (Supabase)",
+        "paragraphs": [
+          "Giriş yaptıysanız, Premium'unuz varsa ve <strong>Şimdi Yedekle</strong>'ye dokunursanız bir yedek anlık görüntüsü Supabase'de saklanır.",
+          "Her yeni yedek, hesabınızla ilişkili önceki yedek verilerinin yerini alabilir veya sürümlendirebilir.",
+          "<strong>Hesabı Sil</strong>'diğinizde kimlik doğrulama kaydınızı ve ilişkili yedek verilerini bulut veritabanımızdan sileriz."
+        ]
+      },
+      {
+        "heading": "Kimlik Doğrulama Verileri",
+        "paragraphs": [
+          "Hesap kimlik bilgileri ve oturum belirteçleri hesabınız aktifken saklanır. Hesabınızı silmek Supabase'deki kimlik doğrulama kullanıcısını kaldırır."
+        ]
+      },
+      {
+        "heading": "Destek Yazışmaları",
+        "paragraphs": [
+          "<a href=\"mailto:umursoganci@gmail.com\">umursoganci@gmail.com</a> adresine e-posta gönderirseniz, talebinizi çözmek ve makul kayıt tutma için gerektiği sürece yazışmaları saklarız."
+        ]
+      },
+      {
+        "heading": "Yasal Saklama",
+        "paragraphs": [
+          "Yasa gereği veya uyuşmazlıkları çözmek için asgari bilgileri daha uzun süre saklayabiliriz; artık gerekli olmadığında sileriz."
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "en": {
+    "title": "Support & Contact",
+    "lastUpdated": "Last updated: June 2026",
+    "sections": [
+      {
+        "heading": "Contact",
+        "paragraphs": [
+          "BudgetMeter is developed by <strong>Umurcan Soganci</strong>.",
+          "For support, feedback, privacy requests, or account help:"
+        ],
+        "list": [
+          "Email: <a href=\"mailto:umursoganci@gmail.com\">umursoganci@gmail.com</a>"
+        ]
+      },
+      {
+        "heading": "Response Time",
+        "paragraphs": [
+          "We aim to respond within a few business days. Complex account or backup issues may take longer."
+        ]
+      },
+      {
+        "heading": "What to Include",
+        "paragraphs": [
+          "When contacting support, please include:"
+        ],
+        "list": [
+          "A clear description of the issue.",
+          "Your iOS version and BudgetMeter app version (Settings → About).",
+          "Whether you use Sign in with Apple or email/password.",
+          "For account deletion by email: use the address linked to your account."
+        ]
+      },
+      {
+        "heading": "Related Documents",
+        "paragraphs": [
+          "See also: <a href=\"../privacy/\">Privacy Policy</a>, <a href=\"../terms/\">Terms of Service</a>, <a href=\"../account-deletion/\">Account Deletion</a>."
+        ]
+      }
+    ]
+  },
+  "tr": {
+    "title": "Destek ve İletişim",
+    "lastUpdated": "Son güncelleme: Haziran 2026",
+    "sections": [
+      {
+        "heading": "İletişim",
+        "paragraphs": [
+          "BudgetMeter <strong>Umurcan Soganci</strong> tarafından geliştirilmiştir.",
+          "Destek, geri bildirim, gizlilik talepleri veya hesap yardımı için:"
+        ],
+        "list": [
+          "E-posta: <a href=\"mailto:umursoganci@gmail.com\">umursoganci@gmail.com</a>"
+        ]
+      },
+      {
+        "heading": "Yanıt Süresi",
+        "paragraphs": [
+          "Birkaç iş günü içinde yanıt vermeyi hedefliyoruz. Karmaşık hesap veya yedekleme sorunları daha uzun sürebilir."
+        ]
+      },
+      {
+        "heading": "Yazarken Belirtin",
+        "paragraphs": [
+          "Destekle iletişime geçerken lütfen şunları ekleyin:"
+        ],
+        "list": [
+          "Sorunun net bir açıklaması.",
+          "iOS sürümünüz ve BudgetMeter uygulama sürümü (Ayarlar → Hakkında).",
+          "Apple ile Giriş mi yoksa e-posta/şifre mi kullandığınız.",
+          "E-posta ile hesap silme için: hesabınıza bağlı adresi kullanın."
+        ]
+      },
+      {
+        "heading": "İlgili Belgeler",
+        "paragraphs": [
+          "Ayrıca bakın: <a href=\"../privacy/\">Gizlilik Politikası</a>, <a href=\"../terms/\">Kullanım Koşulları</a>, <a href=\"../account-deletion/\">Hesap Silme</a>."
+        ]
+      }
+    ]
+  }
+}

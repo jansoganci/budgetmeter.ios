@@ -179,9 +179,10 @@ final class InsightsViewModel: ObservableObject {
         // Observe premium status changes
         premiumManager.$isPremium
             .sink { [weak self] isPremium in
-                self?.isPremium = isPremium
-                if isPremium {
-                    self?.loadData()
+                guard let self else { return }
+                self.isPremium = PremiumManager.hasAccess(to: BudgetMeterCapability.spendingInsights, isPremium: isPremium)
+                if self.isPremium {
+                    self.loadData()
                 }
             }
             .store(in: &cancellables)

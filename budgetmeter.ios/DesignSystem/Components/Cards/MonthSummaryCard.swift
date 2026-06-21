@@ -140,14 +140,12 @@ struct MonthSummaryCard: View {
                     .foregroundColor(type.iconColor)
 
                 Text(type.label)
-                    .font(.system(size: 12 * sizeCategory.scaleFactor, weight: .medium))
-                    .foregroundColor(.textSecondary)
+                    .captionStyle()
             }
 
             // Amount
             Text(displayAmount)
-                .font(.system(size: 18 * sizeCategory.scaleFactor, weight: .bold, design: .rounded))
-                .foregroundColor(amountColor)
+                .metricCompactStyle(color: amountColor)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
 
@@ -161,16 +159,9 @@ struct MonthSummaryCard: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .frame(height: CardHeight.summary)
+        .frame(minHeight: CardHeight.summary)
         .padding(Spacing.md)
-        .background(Color.cardBackground)
-        .cornerRadius(CornerRadius.button)
-        .shadow(
-            color: ShadowStyle.small.color,
-            radius: ShadowStyle.small.radius,
-            x: ShadowStyle.small.offset.width,
-            y: ShadowStyle.small.offset.height
-        )
+        .glassSurface()
         .pressEffect(isPressed: $isPressed, haptic: onTap != nil)
         .onTapGesture {
             if let action = onTap {

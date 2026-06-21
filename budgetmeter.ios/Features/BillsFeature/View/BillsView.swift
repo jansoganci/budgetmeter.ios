@@ -53,6 +53,7 @@ struct BillsView: View {
                         Image(systemName: "plus")
                             .foregroundColor(.brandProgress)
                     }
+                    .accessibilityLabel("bills.add".localized(defaultValue: "Add bill"))
                 }
             }
             .sheet(isPresented: $showingAddBill) {
@@ -84,13 +85,13 @@ struct BillsView: View {
                     .font(.system(size: 32, weight: .bold, design: .rounded))
                     .foregroundColor(.textPrimary)
 
-                Text("due")
+                Text(String(localized: "bills.summary.due", defaultValue: "due", table: "UI"))
                     .font(.body)
                     .foregroundColor(.textSecondary)
             }
 
             if viewModel.totalPaidThisMonth > 0 {
-                Text(viewModel.formatAmount(viewModel.totalPaidThisMonth) + " paid")
+                Text(String(format: String(localized: "bills.summary.paid_amount", defaultValue: "%@ paid", table: "UI"), viewModel.formatAmount(viewModel.totalPaidThisMonth)))
                     .font(.body)
                     .foregroundColor(.brandProgress)
             }
@@ -99,7 +100,7 @@ struct BillsView: View {
                 .padding(.vertical, Spacing.xs)
 
             HStack(spacing: Spacing.md) {
-                Text("\(viewModel.totalBillsThisMonth) total")
+                Text(String(format: String(localized: "bills.summary.total", defaultValue: "%d total", table: "UI"), viewModel.totalBillsThisMonth))
                     .font(.caption)
                     .foregroundColor(.textSecondary)
 
@@ -107,7 +108,7 @@ struct BillsView: View {
                     .font(.caption)
                     .foregroundColor(.textSecondary)
 
-                Text("\(viewModel.paidBillsCount) paid")
+                Text(String(format: String(localized: "bills.summary.paid_count", defaultValue: "%d paid", table: "UI"), viewModel.paidBillsCount))
                     .font(.caption)
                     .foregroundColor(.brandProgress)
 
@@ -115,14 +116,14 @@ struct BillsView: View {
                     .font(.caption)
                     .foregroundColor(.textSecondary)
 
-                Text("\(viewModel.unpaidBillsCount) unpaid")
+                Text(String(format: String(localized: "bills.summary.unpaid_count", defaultValue: "%d unpaid", table: "UI"), viewModel.unpaidBillsCount))
                     .font(.caption)
                     .foregroundColor(.orange)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Spacing.lg)
-        .background(Color.cardBackground)
+        .background(Color.surfaceCard)
         .cornerRadius(CornerRadius.card)
         .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
     }
@@ -213,7 +214,7 @@ struct BillsView: View {
 
                 Picker("Sort", selection: $viewModel.sortOption) {
                     ForEach(BillsViewModel.SortOption.allCases, id: \.self) { option in
-                        Text(option.rawValue).tag(option)
+                        Text(option.displayName).tag(option)
                     }
                 }
                 .pickerStyle(.segmented)
@@ -227,7 +228,7 @@ struct BillsView: View {
 
                 Picker("Filter", selection: $viewModel.filterOption) {
                     ForEach(BillsViewModel.FilterOption.allCases, id: \.self) { option in
-                        Text(option.rawValue).tag(option)
+                        Text(option.displayName).tag(option)
                     }
                 }
                 .pickerStyle(.segmented)
@@ -260,7 +261,7 @@ struct BillsView: View {
                             enableBackground: false,
                             onTap: { billToEdit = bill }
                         )
-                        .background(Color.cardBackground)
+                        .background(Color.surfaceCard)
 
                         if index < viewModel.sortedAndFilteredBills.count - 1 {
                             Divider()
@@ -268,7 +269,7 @@ struct BillsView: View {
                         }
                     }
                 }
-                .background(Color.cardBackground)
+                .background(Color.surfaceCard)
                 .cornerRadius(CornerRadius.card)
                 .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
             }
@@ -296,7 +297,7 @@ struct BillsView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(Spacing.xxl)
-        .background(Color.cardBackground)
+        .background(Color.surfaceCard)
         .cornerRadius(CornerRadius.card)
     }
 }

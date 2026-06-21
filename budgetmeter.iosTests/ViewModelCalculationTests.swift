@@ -28,8 +28,8 @@ final class ViewModelCalculationTests: XCTestCase {
             yearlyTotal: yearlyExpense
         )
 
-        // Calculate using ViewModel formula
-        let viewModelResult = (dailyExpense * 30) + monthlyExpense + (yearlyExpense / 12)
+        // Calculate using the shared normalization contract.
+        let viewModelResult = (dailyExpense * CalculationEngine.daysPerMonth) + monthlyExpense + (yearlyExpense / 12)
 
         XCTAssertEqual(
             engineResult,
@@ -78,8 +78,8 @@ final class ViewModelCalculationTests: XCTestCase {
             yearlyIncomeTotal: yearlyIncome
         )
 
-        // Calculate using ViewModel formula
-        let viewModelResult = (dailyIncome * 30) + monthlyIncome + (yearlyIncome / 12)
+        // Calculate using the shared normalization contract.
+        let viewModelResult = (dailyIncome * CalculationEngine.daysPerMonth) + monthlyIncome + (yearlyIncome / 12)
 
         XCTAssertEqual(
             engineResult,
@@ -200,21 +200,21 @@ final class ViewModelCalculationTests: XCTestCase {
             monthlyIncomeTotal: 8000,
             yearlyIncomeTotal: 0
         )
-        // (100 * 30) + 8000 + 0 = 11,000
+        let expectedMonthlyIncome = (100 * CalculationEngine.daysPerMonth) + 8000
 
         let monthlyExpense = CalculationEngine.totalMonthlyExpense(
             dailyTotal: 50,
             monthlyTotal: 3000,
             yearlyTotal: 1200
         )
-        // (50 * 30) + 3000 + (1200 / 12) = 1500 + 3000 + 100 = 4,600
+        let expectedMonthlyExpense = (50 * CalculationEngine.daysPerMonth) + 3000 + (1200 / 12)
 
         let netFlow = monthlyIncome - monthlyExpense
-        // 11,000 - 4,600 = 6,400
+        let expectedNetFlow = expectedMonthlyIncome - expectedMonthlyExpense
 
-        XCTAssertEqual(monthlyIncome, 11000, accuracy: 0.01)
-        XCTAssertEqual(monthlyExpense, 4600, accuracy: 0.01)
-        XCTAssertEqual(netFlow, 6400, accuracy: 0.01)
+        XCTAssertEqual(monthlyIncome, expectedMonthlyIncome, accuracy: 0.01)
+        XCTAssertEqual(monthlyExpense, expectedMonthlyExpense, accuracy: 0.01)
+        XCTAssertEqual(netFlow, expectedNetFlow, accuracy: 0.01)
 
         // Check financial health
         let health = CalculationEngine.financialHealthScore(
@@ -239,21 +239,21 @@ final class ViewModelCalculationTests: XCTestCase {
             monthlyIncomeTotal: 500,
             yearlyIncomeTotal: 0
         )
-        // (30 * 30) + 500 + 0 = 1,400
+        let expectedMonthlyIncome = (30 * CalculationEngine.daysPerMonth) + 500
 
         let monthlyExpense = CalculationEngine.totalMonthlyExpense(
             dailyTotal: 20,
             monthlyTotal: 400,
             yearlyTotal: 0
         )
-        // (20 * 30) + 400 + 0 = 1,000
+        let expectedMonthlyExpense = (20 * CalculationEngine.daysPerMonth) + 400
 
         let netFlow = monthlyIncome - monthlyExpense
-        // 1,400 - 1,000 = 400
+        let expectedNetFlow = expectedMonthlyIncome - expectedMonthlyExpense
 
-        XCTAssertEqual(monthlyIncome, 1400, accuracy: 0.01)
-        XCTAssertEqual(monthlyExpense, 1000, accuracy: 0.01)
-        XCTAssertEqual(netFlow, 400, accuracy: 0.01)
+        XCTAssertEqual(monthlyIncome, expectedMonthlyIncome, accuracy: 0.01)
+        XCTAssertEqual(monthlyExpense, expectedMonthlyExpense, accuracy: 0.01)
+        XCTAssertEqual(netFlow, expectedNetFlow, accuracy: 0.01)
 
         // Check financial health
         let health = CalculationEngine.financialHealthScore(
@@ -320,24 +320,26 @@ final class ViewModelCalculationTests: XCTestCase {
             yearlyExpenseTotal: 0
         )
         // Monthly net: 1,500
-        // Daily net: 1,500 / 30 = 50
-        // Hourly net: 50 / 24 = 2.083...
+        // Daily net uses the shared average month length.
 
         let targetResult = CalculationEngine.targetTime(
             targetAmount: 3000,
             netHourlyFlow: netHourly
         )
 
-        // Expected: 3,000 / 2.083 = 1,440 hours = 60 days = 2 months
-        XCTAssertEqual(targetResult.hours, 1440, accuracy: 1)
-        XCTAssertEqual(targetResult.days, 60, accuracy: 1)
-        XCTAssertEqual(targetResult.months, 2, accuracy: 0.1)
+        let expectedHours = 3000 / netHourly
+        let expectedDays = expectedHours / CalculationEngine.hoursPerDay
+        let expectedMonths = expectedDays / CalculationEngine.daysPerMonth
+
+        XCTAssertEqual(targetResult.hours, expectedHours, accuracy: 1)
+        XCTAssertEqual(targetResult.days, expectedDays, accuracy: 1)
+        XCTAssertEqual(targetResult.months, expectedMonths, accuracy: 0.1)
     }
 
     // MARK: - Consistency Tests
 
     func testConsistency_DailyMonthlyYearly() {
-        // Test that daily * 30 * 12 ≈ monthly * 12 ≈ yearly
+        // Test that the shared day/month/year constants stay internally consistent.
         let dailyAmount: Double = 10
 
         let fromDaily = CalculationEngine.totalMonthlyIncome(
@@ -345,25 +347,23 @@ final class ViewModelCalculationTests: XCTestCase {
             monthlyIncomeTotal: 0,
             yearlyIncomeTotal: 0
         ) * 12
-        // (10 * 30) * 12 = 3,600
+        let expectedYearly = dailyAmount * CalculationEngine.daysPerYear
 
         let fromMonthly = CalculationEngine.totalMonthlyIncome(
             dailyIncomeTotal: 0,
-            monthlyIncomeTotal: dailyAmount * 30,
+            monthlyIncomeTotal: expectedYearly / 12,
             yearlyIncomeTotal: 0
         ) * 12
-        // 300 * 12 = 3,600
 
         let fromYearly = CalculationEngine.totalMonthlyIncome(
             dailyIncomeTotal: 0,
             monthlyIncomeTotal: 0,
-            yearlyIncomeTotal: dailyAmount * 30 * 12
+            yearlyIncomeTotal: expectedYearly
         ) * 12
-        // (3600 / 12) * 12 = 3,600
 
-        XCTAssertEqual(fromDaily, 3600, accuracy: 0.01)
-        XCTAssertEqual(fromMonthly, 3600, accuracy: 0.01)
-        XCTAssertEqual(fromYearly, 3600, accuracy: 0.01)
+        XCTAssertEqual(fromDaily, expectedYearly, accuracy: 0.01)
+        XCTAssertEqual(fromMonthly, expectedYearly, accuracy: 0.01)
+        XCTAssertEqual(fromYearly, expectedYearly, accuracy: 0.01)
     }
 
     func testConsistency_LiveMeterMatchesSnapshot() {

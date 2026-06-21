@@ -9,7 +9,6 @@ import Foundation
 import SwiftUI
 import CoreData
 import Combine
-import WidgetKit
 
 /// ViewModel for the Home screen following MVVM architecture
 @MainActor
@@ -67,6 +66,15 @@ final class HomeViewModel: ObservableObject {
     @Published var primarySavingsGoalCurrent: Double = 0
     @Published var primarySavingsGoalTarget: Double = 0
 
+    // Phase 3 — Momentum display fields (from FinancialSummary)
+    @Published var netDailyPace: Double = 0
+    @Published var netMinutePace: Double = 0
+    @Published var paceStatus: PaceStatus = .insufficientData
+    @Published var paceStatusCopy: String = ""
+    @Published var biggestDrain: DrainItem? = nil
+    @Published var savingsRemaining: Double = 0
+    @Published var savingsTimeToGoal: CalculationEngine.TargetTimeResult? = nil
+
     // State Management
     @Published var isLoading = false
     @Published var hasAnyData = false
@@ -76,29 +84,30 @@ final class HomeViewModel: ObservableObject {
     // MARK: - Private Properties
 
     private let persistenceService: PersistenceService
+    private let summaryBuilder: FinancialSummaryBuilder
+    private let goalManager: SavingsGoalManager
     private var cancellables = Set<AnyCancellable>()
     private var timer: Timer?
     private var sessionStartTime: Date
     private var sessionBaseline: Double = 0
     private var cumulativeBaseline: Double = 0
     private var cumulativeStartDate: Date = Date()
+    private var latestSummary: FinancialSummary?
     var currencyCode: String = CurrencyHelper.defaultCurrencyCode()
 
     // Prevent timer race conditions
     private var isUpdatingLiveValue: Bool = false
     
-    // Financial data cache
-    private var dailyIncomeTotal: Double = 0
-    private var monthlyIncomeTotal: Double = 0
-    private var yearlyIncomeTotal: Double = 0
-    private var dailyExpenseTotal: Double = 0
-    private var monthlyExpenseTotal: Double = 0
-    private var yearlyExpenseTotal: Double = 0
-
     // MARK: - Initialization
     
-    init(persistenceService: PersistenceService = .shared) {
+    init(
+        persistenceService: PersistenceService = .shared,
+        summaryBuilder: FinancialSummaryBuilder? = nil,
+        goalManager: SavingsGoalManager? = nil
+    ) {
         self.persistenceService = persistenceService
+        self.summaryBuilder = summaryBuilder ?? FinancialSummaryBuilder(context: persistenceService.viewContext)
+        self.goalManager = goalManager ?? SavingsGoalManager(persistence: persistenceService)
         self.sessionStartTime = Date()
         
         setupNotifications()
@@ -184,12 +193,21 @@ final class HomeViewModel: ObservableObject {
         }
     }
     
-    /// Updates savings goal and recalculates time to goal
+    /// Updates savings goal via the primary active SavingsGoal entity.
     func updateSavingsGoal(_ amount: Double) {
-        savingsGoal = max(0, amount) // Ensure non-negative
-        saveSavingsGoalToDatabase(amount)
-        calculateTimeToGoal()
-        updateSavingsGoalDisplay()
+        let clamped = max(0, amount)
+        let goalName = String(localized: "savings.basic_goal.name", defaultValue: "My Savings Goal")
+
+        if clamped > 0 {
+            _ = goalManager.upsertPrimaryBasicGoal(
+                targetAmount: clamped,
+                name: goalName
+            )
+        } else if let primary = goalManager.getPrimaryActiveGoal(), let id = primary.id {
+            _ = goalManager.updateGoal(id: id, targetAmount: 0)
+        }
+
+        refresh()
     }
     
     // MARK: - Private Methods
@@ -222,6 +240,31 @@ final class HomeViewModel: ObservableObject {
             name: .languageDidChange,
             object: nil
         )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(savingsGoalDidChange),
+            name: SavingsGoalManager.goalAddedNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(savingsGoalDidChange),
+            name: SavingsGoalManager.goalUpdatedNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(savingsGoalDidChange),
+            name: SavingsGoalManager.goalDeletedNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(savingsGoalDidChange),
+            name: SavingsGoalManager.goalCompletedNotification,
+            object: nil
+        )
     }
     
     private func startTimer() {
@@ -249,28 +292,12 @@ final class HomeViewModel: ObservableObject {
         let currentTime = Date()
         let sessionElapsed = currentTime.timeIntervalSince(sessionStartTime)
 
-        // Calculate live income and expense
-        let liveIncome = CalculationEngine.calculateLiveIncome(
-            dailyIncomeTotal: dailyIncomeTotal,
-            monthlyIncomeTotal: monthlyIncomeTotal,
-            yearlyIncomeTotal: yearlyIncomeTotal,
-            sessionSeconds: sessionElapsed
-        )
+        guard let summary = latestSummary else { return }
 
-        let liveExpense = CalculationEngine.calculateLiveExpense(
-            dailyTotal: dailyExpenseTotal,
-            monthlyTotal: monthlyExpenseTotal,
-            yearlyTotal: yearlyExpenseTotal,
-            sessionSeconds: sessionElapsed
+        let sessionNet = CalculationEngine.calculateLiveNetFlow(
+            netHourlyFlow: summary.netPacePerHour,
+            elapsedSeconds: sessionElapsed
         )
-
-        // Calculate net live flow
-        let liveNetFlow = CalculationEngine.calculateLiveNetFlow(
-            liveIncome: liveIncome,
-            liveExpense: liveExpense
-        )
-
-        let sessionNet = liveNetFlow
 
         liveValue = sessionBaseline + sessionNet
         isPositive = liveValue >= 0
@@ -281,199 +308,91 @@ final class HomeViewModel: ObservableObject {
     }
     
     private func loadAllData() {
-        Task { @MainActor in
-            isLoading = true
-        }
+        isLoading = true
+        loadAppSettings()
+        loadPrimarySavingsGoal()
 
-        persistenceService.performBackgroundTask { [weak self] context in
-            let fetchRequest: NSFetchRequest<FinancialCategory> = FinancialCategory.fetchRequest()
-            
-            do {
-                let allCategories = try context.fetch(fetchRequest)
-                
-                // Process data into simple value types in the background
-                let incomeCategories = allCategories.filter { $0.type == "income" }
-                let bgDailyIncome = incomeCategories.filter { $0.frequency == "daily" }.reduce(0) { $0 + $1.amount }
-                let bgMonthlyIncome = incomeCategories.filter { $0.frequency == "monthly" }.reduce(0) { $0 + $1.amount }
-                let bgYearlyIncome = incomeCategories.filter { $0.frequency == "yearly" }.reduce(0) { $0 + $1.amount }
-                
-                let expenseCategories = allCategories.filter { $0.type == "expense" }
-                let bgDailyExpense = expenseCategories.filter { $0.frequency == "daily" }.reduce(0) { $0 + $1.amount }
-                let bgMonthlyExpense = expenseCategories.filter { $0.frequency == "monthly" }.reduce(0) { $0 + $1.amount }
-                let bgYearlyExpense = expenseCategories.filter { $0.frequency == "yearly" }.reduce(0) { $0 + $1.amount }
-                
-                let bgHasAnyData = allCategories.contains { $0.amount > 0 }
-                
-                // Switch back to the main thread to update the UI
-                Task { @MainActor in
-                    guard let self = self else { return }
-                    
-                    self.dailyIncomeTotal = bgDailyIncome
-                    self.monthlyIncomeTotal = bgMonthlyIncome
-                    self.yearlyIncomeTotal = bgYearlyIncome
-                    self.dailyExpenseTotal = bgDailyExpense
-                    self.monthlyExpenseTotal = bgMonthlyExpense
-                    self.yearlyExpenseTotal = bgYearlyExpense
-                    self.hasAnyData = bgHasAnyData
-                    
-                    // Now that totals are updated, run calculations and load settings on main thread
-                    self.calculateSnapshotMetrics()
-                    self.loadAppSettings() // This is fast, involves another fetch but should be fine
-                    self.loadSavingsGoal() // Load savings goal and calculate time to goal
-                    
-                    self.isLoading = false
-                }
-            } catch {
-                print("Failed to load data in background: \(error)")
-                Task { @MainActor in
-                    self?.isLoading = false
-                }
-            }
-        }
+        let elapsed = Date().timeIntervalSince(sessionStartTime)
+        let summary = summaryBuilder.build(sessionElapsedSeconds: elapsed)
+        latestSummary = summary
+        applyFinancialSummary(summary)
+
+        isLoading = false
     }
-    
-    private func calculateSnapshotMetrics() {
-        // Hourly net flow
-        hourlyNetFlow = CalculationEngine.netHourlyFlow(
-            dailyIncomeTotal: dailyIncomeTotal,
-            monthlyIncomeTotal: monthlyIncomeTotal,
-            yearlyIncomeTotal: yearlyIncomeTotal,
-            dailyExpenseTotal: dailyExpenseTotal,
-            monthlyExpenseTotal: monthlyExpenseTotal,
-            yearlyExpenseTotal: yearlyExpenseTotal
+
+    private func applyFinancialSummary(_ summary: FinancialSummary) {
+        let resolvedCode = summary.currencyCode
+        if CurrencyHelper.supportedCurrencyCodes.contains(resolvedCode) {
+            currencyCode = resolvedCode
+        }
+
+        netDailyPace = summary.netPacePerDay
+        netMinutePace = summary.netPacePerMinute
+        paceStatus = summary.paceStatus
+        paceStatusCopy = HomeDisplayMapping.paceStatusCopy(
+            status: summary.paceStatus,
+            netDailyPace: summary.netPacePerDay,
+            currencySymbol: currencySymbol
         )
+        biggestDrain = summary.biggestDrain
+        savingsRemaining = summary.savingsRemaining
+        savingsTimeToGoal = summary.savingsTimeToGoal
 
-        // Daily net flow
-        dailyNetFlow = CalculationEngine.netDailyFlow(
-            dailyIncomeTotal: dailyIncomeTotal,
-            monthlyIncomeTotal: monthlyIncomeTotal,
-            yearlyIncomeTotal: yearlyIncomeTotal,
-            dailyExpenseTotal: dailyExpenseTotal,
-            monthlyExpenseTotal: monthlyExpenseTotal,
-            yearlyExpenseTotal: yearlyExpenseTotal
-        )
+        dailyNetFlow = summary.netPacePerDay
+        hourlyNetFlow = summary.netPacePerHour
+        monthlyNetFlow = summary.netPacePerMonth
+        totalMonthlyIncomeDisplay = summary.recurringIncomeMonthly
+        totalMonthlyExpenseDisplay = summary.recurringExpenseMonthly
 
-        // Monthly net flow
-        let totalMonthlyIncome = CalculationEngine.totalMonthlyIncome(
-            dailyIncomeTotal: dailyIncomeTotal,
-            monthlyIncomeTotal: monthlyIncomeTotal,
-            yearlyIncomeTotal: yearlyIncomeTotal
-        )
+        savingsGoal = summary.savingsTargetAmount
+        primarySavingsGoalCurrent = summary.savingsCurrentAmount
+        primarySavingsGoalTarget = summary.savingsTargetAmount
+        updateSavingsGoalDisplay()
+        timeToGoal = HomeDisplayMapping.formatSavingsETA(from: summary)
 
-        let totalMonthlyExpense = CalculationEngine.totalMonthlyExpense(
-            dailyTotal: dailyExpenseTotal,
-            monthlyTotal: monthlyExpenseTotal,
-            yearlyTotal: yearlyExpenseTotal
-        )
+        hasAnyData = HomeDisplayMapping.hasFinancialInput(in: summary)
 
-        monthlyNetFlow = totalMonthlyIncome - totalMonthlyExpense
-
-        // Store for compact layout display
-        totalMonthlyIncomeDisplay = totalMonthlyIncome
-        totalMonthlyExpenseDisplay = totalMonthlyExpense
-
-        // Financial health score
         let healthScore = CalculationEngine.financialHealthScore(
-            totalMonthlyIncome: totalMonthlyIncome,
-            totalMonthlyExpense: totalMonthlyExpense
+            totalMonthlyIncome: summary.recurringIncomeMonthly,
+            totalMonthlyExpense: summary.recurringExpenseMonthly
         )
-
         financialHealthScore = healthScore.score
         financialHealthText = healthScore.text
         financialHealthColor = colorFromString(healthScore.color)
 
-        // Generate chart data for sparklines
-        generateChartData()
+        hourlyChartData = []
+        dailyChartData = []
+        monthlyChartData = []
+        netFlowTrendPercentage = nil
+        incomeTrendPercentage = nil
+        expenseTrendPercentage = nil
 
-        // Calculate trend percentage (compare to previous month - mock for now)
-        calculateTrendPercentage()
-
-        // Calculate daily budget
-        calculateDailyBudget()
-
-        // Recalculate time to goal when financial data changes
-        calculateTimeToGoal()
+        calculateDailyBudget(from: summary)
+        updateLiveValue()
+        publishWidgetSnapshot(from: summary)
     }
 
-    /// Generates mock historical chart data for interval cards
-    /// TODO: Replace with actual historical data from database
-    private func generateChartData() {
-        // Hourly chart data (last 8 hours)
-        // Generate realistic variations around the hourly flow
-        hourlyChartData = (0..<8).map { index in
-            let variance = Double.random(in: 0.7...1.3)
-            return max(0, abs(hourlyNetFlow) * variance)
-        }
-
-        // Daily chart data (last 15 days)
-        dailyChartData = (0..<15).map { index in
-            let variance = Double.random(in: 0.75...1.25)
-            return max(0, abs(dailyNetFlow) * variance)
-        }
-
-        // Monthly chart data (last 12 months)
-        monthlyChartData = (0..<12).map { index in
-            let variance = Double.random(in: 0.8...1.2)
-            let baseValue = abs(monthlyNetFlow)
-            // Add growth trend
-            let growthFactor = 1.0 + (Double(index) * 0.05)
-            return max(0, baseValue * variance * growthFactor)
-        }
-    }
-
-    /// Calculates trend percentage for hero card and month summary
-    /// TODO: Replace with actual comparison to previous period data
-    private func calculateTrendPercentage() {
-        // Mock trend calculation - positive trend if net flow is positive
-        if monthlyNetFlow != 0 {
-            // Generate realistic trend between -20% and +30%
-            let baseTrend = monthlyNetFlow > 0 ? 12.5 : -8.3
-            let variance = Double.random(in: -5...5)
-            netFlowTrendPercentage = baseTrend + variance
-        } else {
-            netFlowTrendPercentage = 0.0
-        }
-
-        // Mock income/expense trends for month summary cards
-        if totalMonthlyIncomeDisplay > 0 {
-            incomeTrendPercentage = Double.random(in: 2...15)
-        }
-        if totalMonthlyExpenseDisplay > 0 {
-            expenseTrendPercentage = Double.random(in: -8...5)
-        }
-    }
-
-    /// Calculates daily budget based on monthly patterns (Approach 3 - Simple Split)
-    private func calculateDailyBudget() {
-        // Calculate monthly income and expenses
-        let totalMonthlyIncome = CalculationEngine.totalMonthlyIncome(
-            dailyIncomeTotal: dailyIncomeTotal,
-            monthlyIncomeTotal: monthlyIncomeTotal,
-            yearlyIncomeTotal: yearlyIncomeTotal
+    private func publishWidgetSnapshot(from summary: FinancialSummary) {
+        WidgetSnapshotWriter.persistAndReload(
+            summary: summary,
+            isPremium: PremiumManager.shared.isPremium,
+            currencySymbol: currencySymbol
         )
+    }
 
-        let totalMonthlyExpense = CalculationEngine.totalMonthlyExpense(
-            dailyTotal: dailyExpenseTotal,
-            monthlyTotal: monthlyExpenseTotal,
-            yearlyTotal: yearlyExpenseTotal
-        )
-
-        // Calculate monthly net (remaining budget)
-        let monthlyNet = totalMonthlyIncome - totalMonthlyExpense
-
-        // Calculate days left in month
+    /// Calculates daily budget from shared summary monthly net pace.
+    private func calculateDailyBudget(from summary: FinancialSummary) {
+        let monthlyNet = summary.netPacePerMonth
         let calendar = Calendar.current
         let today = Date()
         let daysInMonth = calendar.range(of: .day, in: .month, for: today)?.count ?? 30
         let currentDay = calendar.component(.day, from: today)
-        let daysLeft = max(1, daysInMonth - currentDay + 1)  // +1 to include today, minimum 1
+        let daysLeft = max(1, daysInMonth - currentDay + 1)
 
-        // Calculate daily budget
         dailyBudgetAmount = monthlyNet / Double(daysLeft)
         daysLeftInMonth = daysLeft
         totalDaysInMonth = daysInMonth
 
-        // Determine color
         if dailyBudgetAmount > 20 {
             dailyBudgetColor = .green
         } else if dailyBudgetAmount > 0 {
@@ -573,47 +492,6 @@ final class HomeViewModel: ObservableObject {
     
     // MARK: - Savings Goal Private Methods
     
-    /// Calculates time to reach savings goal using CalculationEngine
-    private func calculateTimeToGoal() {
-        guard savingsGoal > 0 else {
-            timeToGoal = ""
-            return
-        }
-        
-        let netHourlyFlowValue = CalculationEngine.netHourlyFlow(
-            dailyIncomeTotal: dailyIncomeTotal,
-            monthlyIncomeTotal: monthlyIncomeTotal,
-            yearlyIncomeTotal: yearlyIncomeTotal,
-            dailyExpenseTotal: dailyExpenseTotal,
-            monthlyExpenseTotal: monthlyExpenseTotal,
-            yearlyExpenseTotal: yearlyExpenseTotal
-        )
-        
-        let targetResult = CalculationEngine.targetTime(
-            targetAmount: savingsGoal,
-            netHourlyFlow: netHourlyFlowValue
-        )
-        
-        if let message = targetResult.message {
-            timeToGoal = message
-        } else {
-            // Format time display based on the most appropriate unit using localization
-            if targetResult.days < 1 {
-                let hoursText = "home.time_to_goal.hours".localized(defaultValue: "hours")
-                timeToGoal = String(format: "%.1f %@", targetResult.hours, hoursText)
-            } else if targetResult.days < 30 {
-                let daysText = "home.time_to_goal.days".localized(defaultValue: "days")
-                timeToGoal = String(format: "%.0f %@", targetResult.days, daysText)
-            } else if targetResult.months < 12 {
-                let monthsText = "home.time_to_goal.months".localized(defaultValue: "months")
-                timeToGoal = String(format: "%.1f %@", targetResult.months, monthsText)
-            } else {
-                let yearsText = "home.time_to_goal.years".localized(defaultValue: "years")
-                timeToGoal = String(format: "%.1f %@", targetResult.years, yearsText)
-            }
-        }
-    }
-    
     /// Updates the formatted savings goal display
     private func updateSavingsGoalDisplay() {
         if savingsGoal > 0 {
@@ -623,70 +501,19 @@ final class HomeViewModel: ObservableObject {
         }
     }
     
-    /// Loads savings goal from AppSettings
-    private func loadSavingsGoal() {
-        let context = persistenceService.viewContext
-        let fetchRequest: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
-
-        do {
-            let settings = try context.fetch(fetchRequest)
-            if let appSettings = settings.first {
-                savingsGoal = appSettings.savingsGoalAmount
-                updateSavingsGoalDisplay()
-                calculateTimeToGoal()
-            }
-        } catch {
-            print("Failed to load savings goal: \(error)")
-        }
-
-        // Also load primary savings goal from SavingsGoalManager
-        loadPrimarySavingsGoal()
-    }
-
-    /// Loads the primary (first active) savings goal from SavingsGoalManager
+    /// Loads primary savings goal metadata for Home display.
     private func loadPrimarySavingsGoal() {
-        let goals = SavingsGoalManager.shared.getActiveGoals()
-        if let primaryGoal = goals.first {
+        if let primaryGoal = goalManager.getPrimaryActiveGoal() {
             primarySavingsGoalName = primaryGoal.name
             primarySavingsGoalEmoji = primaryGoal.emoji
-            primarySavingsGoalCurrent = primaryGoal.currentAmount
-            primarySavingsGoalTarget = primaryGoal.targetAmount
         } else {
             primarySavingsGoalName = nil
             primarySavingsGoalEmoji = nil
-            primarySavingsGoalCurrent = 0
-            primarySavingsGoalTarget = 0
         }
     }
-    
-    /// Saves savings goal to AppSettings database
-    private func saveSavingsGoalToDatabase(_ amount: Double) {
-        persistenceService.performBackgroundTask { [weak self] context in
-            guard let self = self else { return }
-            
-            let fetchRequest: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
-            
-            do {
-                let settings = try context.fetch(fetchRequest)
-                let appSettings: AppSettings
-                
-                if let existingSettings = settings.first {
-                    appSettings = existingSettings
-                } else {
-                    appSettings = AppSettings(context: context)
-                }
-                
-                appSettings.savingsGoalAmount = amount
 
-                // Save is automatically handled by performBackgroundTask
-
-                // Reload widgets to show updated savings goal
-                WidgetCenter.shared.reloadAllTimelines()
-
-            } catch {
-                print("Failed to save savings goal: \(error)")
-            }
-        }
+    @objc private func savingsGoalDidChange() {
+        refresh()
     }
 
     private func applyCurrency(code: String) {
@@ -731,11 +558,10 @@ final class HomeViewModel: ObservableObject {
     }
     
     @objc private func languageDidChange(_ notification: Notification) {
-        // Trigger UI refresh to re-evaluate localized strings
-        DispatchQueue.main.async {
-            self.calculateTimeToGoal() // Recalculate with new language
-            self.objectWillChange.send() // Force UI refresh
+        if let summary = latestSummary {
+            applyFinancialSummary(summary)
         }
+        objectWillChange.send()
     }
     
     private func saveAppSettings() {
@@ -769,8 +595,10 @@ final class HomeViewModel: ObservableObject {
 
                 // The save is automatically handled by performBackgroundTask
 
-                // Reload widgets to show updated data
-                WidgetCenter.shared.reloadAllTimelines()
+                // Refresh widget snapshot after background save
+                Task { @MainActor in
+                    WidgetSnapshotService.refreshFromCurrentData()
+                }
 
                 // After saving, update the UI on the main thread
                 Task { @MainActor in

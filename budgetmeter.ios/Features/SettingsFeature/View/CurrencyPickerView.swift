@@ -17,29 +17,34 @@ struct CurrencyPickerView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                if !featuredCurrencies.isEmpty {
-                    Section(header: Text("settings.currency.section.featured".localized(defaultValue: "Featured"))) {
-                        ForEach(featuredCurrencies) { currency in
-                            currencyRow(for: currency)
-                        }
-                    }
-                }
+            ZStack {
+                AppBackground()
 
-                if !otherCurrencies.isEmpty {
-                    Section(header: Text("settings.currency.section.all".localized(defaultValue: "All Currencies"))) {
-                        ForEach(otherCurrencies) { currency in
-                            currencyRow(for: currency)
+                ScrollView {
+                    VStack(spacing: LayoutSpacing.sectionGap) {
+                        if !featuredCurrencies.isEmpty {
+                            currencySection(
+                                title: "settings.currency.section.featured".localized(defaultValue: "Featured", table: "UI"),
+                                currencies: featuredCurrencies
+                            )
+                        }
+
+                        if !otherCurrencies.isEmpty {
+                            currencySection(
+                                title: "settings.currency.section.all".localized(defaultValue: "All Currencies", table: "UI"),
+                                currencies: otherCurrencies
+                            )
                         }
                     }
+                    .padding(.horizontal, LayoutSpacing.screenPadding)
+                    .padding(.vertical, Spacing.md)
                 }
             }
-            .listStyle(.insetGrouped)
-            .navigationTitle("settings.currency.picker.title".localized(defaultValue: "Currency"))
+            .navigationTitle("settings.currency.picker.title".localized(defaultValue: "Currency", table: "UI"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("toolbar.done".localized(defaultValue: "Done")) {
+                    Button("toolbar.done".localized(defaultValue: "Done", table: "UI")) {
                         dismiss()
                     }
                 }
@@ -47,31 +52,44 @@ struct CurrencyPickerView: View {
         }
     }
 
+    private func currencySection(title: String, currencies: [CurrencyOption]) -> some View {
+        SettingsSection(title: title) {
+            ForEach(Array(currencies.enumerated()), id: \.element.id) { index, currency in
+                currencyRow(for: currency)
+
+                if index != currencies.count - 1 {
+                    SettingsDivider()
+                }
+            }
+        }
+    }
+
     @ViewBuilder
     private func currencyRow(for currency: CurrencyOption) -> some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Spacing.md) {
             Text(currency.symbol)
-                .font(.title3)
+                .metricCompactStyle(color: .accentPrimary)
                 .frame(width: 32, alignment: .leading)
 
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text(currency.localizedName)
-                    .font(.body)
-                    .foregroundColor(.primary)
+                    .bodyStyle()
                 Text(currency.code)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    .captionStyle()
             }
 
             Spacer()
 
             if selectedCurrencyCode == currency.code {
                 Image(systemName: "checkmark")
-                    .foregroundColor(Color(hex: "4A90E2"))
+                    .foregroundColor(.accentPrimary)
                     .font(.system(size: 16, weight: .semibold))
                     .accessibilityHidden(true)
             }
         }
+        .padding(.horizontal, Spacing.md)
+        .padding(.vertical, Spacing.sm)
+        .frame(minHeight: LayoutSpacing.rowHeight)
         .contentShape(Rectangle())
         .onTapGesture {
             onSelect(currency)
@@ -79,11 +97,11 @@ struct CurrencyPickerView: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilityLabel(for: currency))
-        .accessibilityValue(selectedCurrencyCode == currency.code ? "settings.currency.row.accessibility_selected".localized(defaultValue: "Selected") : "")
+        .accessibilityValue(selectedCurrencyCode == currency.code ? "settings.currency.row.accessibility_selected".localized(defaultValue: "Selected", table: "UI") : "")
     }
 
     private func accessibilityLabel(for currency: CurrencyOption) -> String {
-        let format = "settings.currency.accessibility_format".localized(defaultValue: "%@ – %@")
+        let format = "settings.currency.accessibility_format".localized(defaultValue: "%@ – %@", table: "UI")
         return String(format: format, currency.symbol, currency.localizedName)
     }
 }

@@ -2,7 +2,7 @@
 //  PremiumThemesView.swift
 //  BudgetMeter
 //
-//  Created by BudgetMeter Team on 17.09.2025.
+//  Premium theme picker — v2 layout with shared DesignSystem surfaces.
 //
 
 import SwiftUI
@@ -10,92 +10,89 @@ import SwiftUI
 struct PremiumThemesView: View {
     @StateObject private var premiumManager = PremiumManager.shared
     @StateObject private var themeManager = ThemeManager.shared
-    @State private var selectedTheme: AppTheme = .default
+    @State private var selectedTheme: AppTheme = .coral_default
     @State private var showSuccessAlert = false
-    
+    @State private var showingPaywall = false
+
+    private var canApplySelectedTheme: Bool {
+        !selectedTheme.requiresPremium || premiumManager.hasAccess(to: BudgetMeterCapability.premiumThemes)
+    }
+
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(spacing: Spacing.xl) {
-                    // Header
-                    VStack(spacing: Spacing.sm) {
-                        Text("Premium Themes")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
+        ZStack {
+            AppBackground()
 
-                        Text("Choose from beautiful color themes to personalize your BudgetMeter experience.")
-                            .font(.body)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
-                    .padding(.horizontal, Spacing.lg)
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: LayoutSpacing.sectionGap) {
+                    SectionHeader(
+                        title: "theme.premium.title".localized(defaultValue: "Premium Themes", table: "UI"),
+                        subtitle: "theme.premium.subtitle".localized(defaultValue: "Choose from beautiful color themes to personalize your BudgetMeter experience.", table: "UI")
+                    )
 
-                    // Themes Grid
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: Spacing.lg) {
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: Spacing.lg) {
                         ForEach(AppTheme.allThemes, id: \.rawValue) { theme in
                             ThemeCard(
                                 theme: theme,
                                 isSelected: selectedTheme == theme,
                                 isCurrent: themeManager.currentTheme == theme,
+                                requiresPremium: theme.requiresPremium,
                                 onSelect: { selectedTheme = theme }
                             )
                         }
                     }
-                    .padding(.horizontal, Spacing.lg)
 
-                    // Current Theme Info
                     if themeManager.currentTheme == selectedTheme {
                         HStack(spacing: Spacing.sm) {
                             Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.green)
-                            Text("Currently Active")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.financialPositive)
+                            Text("theme.currently_active".localized(defaultValue: "Currently Active", table: "UI"))
+                                .captionStyle(color: .textSecondary)
                         }
-                        .padding(.top, Spacing.sm)
                     }
 
-                    // Apply Button
-                    Button(action: applyTheme) {
-                        HStack {
-                            Image(systemName: "paintbrush.fill")
-                            Text("Apply Theme")
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(Spacing.lg)
-                        .background(selectedTheme.primaryColor)
-                        .foregroundColor(.white)
-                        .cornerRadius(CornerRadius.button)
-                    }
-                    .disabled(themeManager.currentTheme == selectedTheme)
-                    .opacity(themeManager.currentTheme == selectedTheme ? 0.5 : 1.0)
-                    .padding(.horizontal, Spacing.lg)
-                    .padding(.top, Spacing.sm)
+                    PrimaryCTAButton(
+                        title: canApplySelectedTheme
+                            ? "theme.apply".localized(defaultValue: "Apply Theme", table: "UI")
+                            : "theme.unlock_premium".localized(defaultValue: "Unlock Premium Theme", table: "UI"),
+                        isDisabled: themeManager.currentTheme == selectedTheme,
+                        action: applyTheme
+                    )
                 }
-                .padding(.vertical, Spacing.lg)
+                .padding(.horizontal, LayoutSpacing.screenPadding)
+                .padding(.vertical, Spacing.md)
             }
-            .navigationTitle("Themes")
-            .navigationBarTitleDisplayMode(.large)
-            .alert("Theme Applied!", isPresented: $showSuccessAlert) {
-                Button("OK", role: .cancel) { }
-            } message: {
-                Text("\(selectedTheme.displayName) theme has been applied successfully!")
-            }
+        }
+        .navigationTitle("theme.nav.title".localized(defaultValue: "Themes", table: "UI"))
+        .navigationBarTitleDisplayMode(.inline)
+        .alert("theme.applied.title".localized(defaultValue: "Theme Applied!", table: "UI"), isPresented: $showSuccessAlert) {
+            Button("alert.ok".localized(defaultValue: "OK", table: "UI"), role: .cancel) { }
+        } message: {
+            Text(String(format: "theme.applied.message".localized(defaultValue: "%@ theme has been applied successfully!", table: "UI"), selectedTheme.displayName))
+        }
+        .sheet(isPresented: $showingPaywall) {
+            PremiumPaywallView(
+                feature: .premiumThemes,
+                onDismiss: { showingPaywall = false },
+                onPurchase: { showingPaywall = false },
+                onRestore: { showingPaywall = false }
+            )
         }
         .onAppear {
             selectedTheme = themeManager.currentTheme
         }
     }
 
-    // MARK: - Private Methods
-
     private func applyTheme() {
+        guard canApplySelectedTheme else {
+            showingPaywall = true
+            return
+        }
+
         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
             themeManager.applyTheme(selectedTheme)
             showSuccessAlert = true
         }
 
-        // Haptic feedback
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(.success)
     }
@@ -105,12 +102,12 @@ struct ThemeCard: View {
     let theme: AppTheme
     let isSelected: Bool
     let isCurrent: Bool
+    let requiresPremium: Bool
     let onSelect: () -> Void
 
     var body: some View {
         Button(action: onSelect) {
             VStack(spacing: Spacing.md) {
-                // Icon
                 ZStack {
                     Circle()
                         .fill(
@@ -125,32 +122,39 @@ struct ThemeCard: View {
                     Image(systemName: theme.icon)
                         .font(.system(size: 28))
                         .foregroundColor(.white)
+
+                    if requiresPremium {
+                        Image(systemName: "crown.fill")
+                            .font(.caption2)
+                            .foregroundColor(.white)
+                            .padding(4)
+                            .background(Color.black.opacity(0.25))
+                            .clipShape(Circle())
+                            .offset(x: 22, y: -22)
+                    }
                 }
 
-                // Name
                 Text(theme.displayName)
-                    .font(.headline)
-                    .foregroundColor(.primary)
+                    .cardLabelStyle(color: .textPrimary)
 
-                // Current Badge
                 if isCurrent {
                     HStack(spacing: Spacing.xs) {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.caption2)
-                        Text("Active")
+                        Text("theme.active".localized(defaultValue: "Active", table: "UI"))
                             .font(.caption2)
                     }
-                    .foregroundColor(.green)
+                    .foregroundColor(.financialPositive)
                 }
             }
             .frame(height: CardHeight.medium)
             .frame(maxWidth: .infinity)
             .padding(.vertical, Spacing.md)
             .background(
-                RoundedRectangle(cornerRadius: CornerRadius.card)
+                RoundedRectangle(cornerRadius: CornerRadius.card, style: .continuous)
                     .fill(theme.primaryColor.opacity(0.08))
                     .overlay(
-                        RoundedRectangle(cornerRadius: CornerRadius.card)
+                        RoundedRectangle(cornerRadius: CornerRadius.card, style: .continuous)
                             .stroke(
                                 isSelected ? theme.primaryColor : Color.clear,
                                 lineWidth: 3
@@ -171,5 +175,7 @@ struct ThemeCard: View {
 }
 
 #Preview {
-    PremiumThemesView()
+    NavigationStack {
+        PremiumThemesView()
+    }
 }

@@ -1,0 +1,186 @@
+{
+  "en": {
+    "title": "Terms of Service",
+    "lastUpdated": "Last updated: June 2026",
+    "sections": [
+      {
+        "heading": "Agreement",
+        "paragraphs": [
+          "These Terms of Service (\"Terms\") govern your use of the BudgetMeter iOS application (\"App\") provided by <strong>Umurcan Soganci</strong> (\"we\", \"us\", or \"our\").",
+          "By downloading or using the App, you agree to these Terms. If you do not agree, do not use the App."
+        ]
+      },
+      {
+        "heading": "License",
+        "paragraphs": [
+          "We grant you a personal, non-exclusive, non-transferable, revocable license to use the App on Apple devices you own or control, subject to these Terms and the Apple Media Services Terms and Conditions."
+        ]
+      },
+      {
+        "heading": "Premium Purchase",
+        "paragraphs": [
+          "BudgetMeter offers optional <strong>Premium</strong> features as a <strong>one-time, non-consumable in-app purchase</strong> (lifetime unlock) through the Apple App Store.",
+          "Payment is charged to your Apple ID account at confirmation of purchase. Apple processes all payments; we do not receive your payment card details.",
+          "Premium is tied to your Apple ID and may be restored on devices signed into the same Apple ID using Apple's restore purchases flow.",
+          "Refunds are handled by Apple according to Apple's policies. Contact Apple Support for refund requests."
+        ]
+      },
+      {
+        "heading": "Cloud Account & Backup",
+        "paragraphs": [
+          "Signing in creates a cloud account used for authentication and optional Premium cloud backup.",
+          "Backup and restore are <strong>manual</strong> actions you initiate. We do not guarantee uninterrupted availability of cloud services.",
+          "You are responsible for maintaining access to your sign-in method (Apple ID or email/password)."
+        ]
+      },
+      {
+        "heading": "Acceptable Use",
+        "paragraphs": [
+          "You agree not to:"
+        ],
+        "list": [
+          "Use the App for unlawful purposes.",
+          "Attempt to reverse engineer, decompile, or disrupt the App or its services.",
+          "Misuse cloud backup to store malicious content or violate others' rights."
+        ]
+      },
+      {
+        "heading": "Financial Information Disclaimer",
+        "paragraphs": [
+          "BudgetMeter is a personal budgeting tool. It does not provide financial, tax, or investment advice. Calculations are estimates for informational purposes only. You are solely responsible for financial decisions you make."
+        ]
+      },
+      {
+        "heading": "Disclaimer of Warranties",
+        "paragraphs": [
+          "THE APP IS PROVIDED \"AS IS\" AND \"AS AVAILABLE\" WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.",
+          "We do not warrant that the App will be error-free, secure, or available at all times."
+        ]
+      },
+      {
+        "heading": "Limitation of Liability",
+        "paragraphs": [
+          "TO THE MAXIMUM EXTENT PERMITTED BY LAW, UMURCAN SOGANCI SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF DATA, PROFITS, OR REVENUE ARISING FROM YOUR USE OF THE APP.",
+          "Our total liability for any claim relating to the App shall not exceed the amount you paid for Premium in the twelve (12) months before the claim, or USD $10 if you have not purchased Premium."
+        ]
+      },
+      {
+        "heading": "Termination",
+        "paragraphs": [
+          "You may stop using the App at any time. You may delete your cloud account in Settings. We may suspend access if you violate these Terms."
+        ]
+      },
+      {
+        "heading": "Governing Law",
+        "paragraphs": [
+          "These Terms are governed by the laws of <strong>Türkiye</strong>, without regard to conflict-of-law principles.",
+          "Any disputes shall be subject to the exclusive jurisdiction of the courts of <strong>Istanbul, Türkiye</strong>, unless mandatory consumer protection laws in your country require otherwise."
+        ]
+      },
+      {
+        "heading": "Changes",
+        "paragraphs": [
+          "We may update these Terms. The \"Last updated\" date will reflect changes. Continued use after changes constitutes acceptance."
+        ]
+      },
+      {
+        "heading": "Contact",
+        "paragraphs": [
+          "Questions about these Terms? Email <a href=\"mailto:umursoganci@gmail.com\">umursoganci@gmail.com</a>."
+        ]
+      }
+    ]
+  },
+  "tr": {
+    "title": "Kullanım Koşulları",
+    "lastUpdated": "Son güncelleme: Haziran 2026",
+    "sections": [
+      {
+        "heading": "Sözleşme",
+        "paragraphs": [
+          "Bu Kullanım Koşulları (\"Koşullar\"), <strong>Umurcan Soganci</strong> (\"biz\") tarafından sunulan BudgetMeter iOS uygulamasının (\"Uygulama\") kullanımını düzenler.",
+          "Uygulamayı indirerek veya kullanarak bu Koşulları kabul etmiş olursunuz. Kabul etmiyorsanız Uygulamayı kullanmayın."
+        ]
+      },
+      {
+        "heading": "Lisans",
+        "paragraphs": [
+          "Size, bu Koşullar ve Apple Medya Hizmetleri Hüküm ve Koşulları'na tabi olarak, sahip olduğunuz veya kontrol ettiğiniz Apple cihazlarında Uygulamayı kullanmanız için kişisel, münhasır olmayan, devredilemez ve geri alınabilir bir lisans veriyoruz."
+        ]
+      },
+      {
+        "heading": "Premium Satın Alma",
+        "paragraphs": [
+          "BudgetMeter, Apple App Store üzerinden <strong>tek seferlik, tüketilemeyen uygulama içi satın alma</strong> (ömür boyu açılış) olarak isteğe bağlı <strong>Premium</strong> özellikler sunar.",
+          "Ödeme, satın alma onayında Apple ID hesabınıza yansıtılır. Tüm ödemeler Apple tarafından işlenir; ödeme kartı bilgilerinizi almayız.",
+          "Premium Apple ID'nize bağlıdır ve aynı Apple ID ile giriş yapılmış cihazlarda Apple'ın satın alımları geri yükleme akışıyla geri yüklenebilir.",
+          "İadeler Apple'ın politikalarına göre Apple tarafından işlenir. İade talepleri için Apple Destek ile iletişime geçin."
+        ]
+      },
+      {
+        "heading": "Bulut Hesabı ve Yedekleme",
+        "paragraphs": [
+          "Giriş yapmak, kimlik doğrulama ve isteğe bağlı Premium bulut yedeklemesi için kullanılan bir bulut hesabı oluşturur.",
+          "Yedekleme ve geri yükleme sizin başlattığınız <strong>manuel</strong> işlemlerdir. Bulut hizmetlerinin kesintisiz kullanılabilirliğini garanti etmeyiz.",
+          "Giriş yönteminize (Apple ID veya e-posta/şifre) erişimi sürdürmekten siz sorumlusunuz."
+        ]
+      },
+      {
+        "heading": "Kabul Edilebilir Kullanım",
+        "paragraphs": [
+          "Şunları yapmamayı kabul edersiniz:"
+        ],
+        "list": [
+          "Uygulamayı yasadışı amaçlarla kullanmak.",
+          "Uygulamayı veya hizmetlerini tersine mühendislik yapmak, kaynak koda dönüştürmek veya bozmaya çalışmak.",
+          "Kötü amaçlı içerik depolamak veya başkalarının haklarını ihlal etmek için bulut yedeklemeyi kötüye kullanmak."
+        ]
+      },
+      {
+        "heading": "Finansal Bilgi Sorumluluk Reddi",
+        "paragraphs": [
+          "BudgetMeter kişisel bir bütçe aracıdır. Finansal, vergi veya yatırım tavsiyesi vermez. Hesaplamalar yalnızca bilgilendirme amaçlı tahminlerdir. Aldığınız finansal kararlardan yalnızca siz sorumlusunuz."
+        ]
+      },
+      {
+        "heading": "Garanti Reddi",
+        "paragraphs": [
+          "UYGULAMA, TİCARİ ELVERİŞLİLİK, BELİRLİ BİR AMACA UYGUNLUK VE İHLAL ETMEME DAHİL OLMAK ÜZERE AÇIK VEYA ZIMNİ HİÇBİR GARANTİ OLMAKSIZIN \"OLDUĞU GİBİ\" VE \"MEVCUT OLDUĞU ŞEKİLDE\" SUNULUR.",
+          "Uygulamanın hatasız, güvenli veya her zaman kullanılabilir olacağını garanti etmeyiz."
+        ]
+      },
+      {
+        "heading": "Sorumluluk Sınırlaması",
+        "paragraphs": [
+          "YÜRÜRLÜKTEKİ YASALARIN İZİN VERDİĞİ AZAMİ ÖLÇÜDE, UMURCAN SOGANCI; UYGULAMAYI KULLANIMINIZDAN KAYNAKLANAN DOLAYLI, ARIZİ, ÖZEL, SONUÇSAL VEYA CEZAİ ZARARLARDAN VEYA VERİ, KÂR VEYA GELİR KAYBINDAN SORUMLU OLMAZ.",
+          "Uygulamayla ilgili herhangi bir talep için toplam sorumluluğumuz, talepten önceki on iki (12) ayda Premium için ödediğiniz tutarı veya Premium satın almadıysanız 10 ABD dolarını aşmaz."
+        ]
+      },
+      {
+        "heading": "Fesih",
+        "paragraphs": [
+          "Uygulamayı istediğiniz zaman kullanmayı bırakabilirsiniz. Ayarlar'dan bulut hesabınızı silebilirsiniz. Bu Koşulları ihlal ederseniz erişimi askıya alabiliriz."
+        ]
+      },
+      {
+        "heading": "Uygulanacak Hukuk",
+        "paragraphs": [
+          "Bu Koşullar, kanunlar ihtilafı ilkelerine bakılmaksızın <strong>Türkiye</strong> yasalarına tabidir.",
+          "Ülkenizdeki zorunlu tüketici koruma yasaları aksini gerektirmedikçe uyuşmazlıklar <strong>İstanbul, Türkiye</strong> mahkemelerinin münhasır yargı yetkisine tabidir."
+        ]
+      },
+      {
+        "heading": "Değişiklikler",
+        "paragraphs": [
+          "Bu Koşulları güncelleyebiliriz. \"Son güncelleme\" tarihi değişiklikleri yansıtır. Değişikliklerden sonra kullanmaya devam etmeniz kabul anlamına gelir."
+        ]
+      },
+      {
+        "heading": "İletişim",
+        "paragraphs": [
+          "Bu Koşullar hakkında sorularınız mı var? <a href=\"mailto:umursoganci@gmail.com\">umursoganci@gmail.com</a> adresine yazın."
+        ]
+      }
+    ]
+  }
+}

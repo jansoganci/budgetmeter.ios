@@ -1,0 +1,97 @@
+import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+function jsonResponse(body: Record<string, unknown>, status: number): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "application/json",
+    },
+  });
+}
+
+serve(async (request: Request) => {
+  if (request.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+
+  if (request.method !== "POST") {
+    return jsonResponse({ error: "Method not allowed" }, 405);
+  }
+
+  const authorization = request.headers.get("Authorization");
+  if (!authorization?.startsWith("Bearer ")) {
+    return jsonResponse({ error: "Not authenticated" }, 401);
+  }
+
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+  if (!supabaseUrl || !anonKey || !serviceRoleKey) {
+    return jsonResponse({ error: "Server is not configured" }, 500);
+  }
+
+  const userClient = createClient(supabaseUrl, anonKey, {
+    global: {
+      headers: {
+        Authorization: authorization,
+      },
+    },
+    auth: {
+      persistSession: false,
+    },
+  });
+
+  const {
+    data: { user },
+    error: userError,
+  } = await userClient.auth.getUser();
+
+  if (userError || !user) {
+    return jsonResponse({ error: "Not authenticated" }, 401);
+  }
+
+  const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+
+  const { error: backupVersionsDeleteError } = await adminClient
+    .from("user_backup_versions")
+    .delete()
+    .eq("user_id", user.id);
+
+  if (backupVersionsDeleteError) {
+    console.error("Failed to delete user backup versions", backupVersionsDeleteError);
+    return jsonResponse({ error: "Account deletion failed" }, 500);
+  }
+
+  const { error: backupDeleteError } = await adminClient
+    .from("user_backups")
+    .delete()
+    .eq("user_id", user.id);
+
+  if (backupDeleteError) {
+    console.error("Failed to delete user backup", backupDeleteError);
+    return jsonResponse({ error: "Account deletion failed" }, 500);
+  }
+
+  const { error: userDeleteError } = await adminClient.auth.admin.deleteUser(user.id);
+
+  if (userDeleteError) {
+    console.error("Failed to delete auth user", userDeleteError);
+    return jsonResponse({ error: "Account deletion failed" }, 500);
+  }
+
+  return jsonResponse({ deleted: true }, 200);
+});

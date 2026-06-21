@@ -15,26 +15,34 @@ final class SavingsGoalsViewModel: ObservableObject {
     // MARK: - Published Properties
 
     @Published var goals: [SavingsGoal] = []
+    @Published private(set) var latestSummary: FinancialSummary?
 
     // MARK: - Private Properties
 
     private var cancellables = Set<AnyCancellable>()
-    private let goalManager = SavingsGoalManager.shared
+    private let goalManager: SavingsGoalManager
+    private let summaryBuilder: FinancialSummaryBuilder
     private let persistenceService: PersistenceService
     private var currencyCode: String = CurrencyHelper.defaultCurrencyCode()
 
     // MARK: - Initialization
 
-    init(persistenceService: PersistenceService = .shared) {
+    init(
+        persistenceService: PersistenceService = .shared,
+        goalManager: SavingsGoalManager? = nil,
+        summaryBuilder: FinancialSummaryBuilder? = nil
+    ) {
         self.persistenceService = persistenceService
+        self.goalManager = goalManager ?? SavingsGoalManager(persistence: persistenceService)
+        self.summaryBuilder = summaryBuilder ?? FinancialSummaryBuilder(context: persistenceService.viewContext)
         setupObservers()
         loadCurrency()
+        loadGoals()
     }
 
     // MARK: - Setup
 
     private func setupObservers() {
-        // Listen for goal changes
         NotificationCenter.default.publisher(for: SavingsGoalManager.goalAddedNotification)
             .sink { [weak self] _ in
                 self?.loadGoals()
@@ -59,14 +67,12 @@ final class SavingsGoalsViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
-        // Listen for currency changes
         NotificationCenter.default.publisher(for: .currencyDidChange)
             .sink { [weak self] notification in
                 self?.currencyDidChange(notification)
             }
             .store(in: &cancellables)
 
-        // Listen for language changes
         NotificationCenter.default.publisher(for: .languageDidChange)
             .sink { [weak self] notification in
                 self?.languageDidChange(notification)
@@ -76,36 +82,57 @@ final class SavingsGoalsViewModel: ObservableObject {
 
     // MARK: - Computed Properties
 
-    /// Active in-progress goals
+    var primaryGoal: SavingsGoal? {
+        goalManager.getPrimaryActiveGoal()
+    }
+
     var activeGoals: [SavingsGoal] {
         goals.filter { $0.completedDate == nil && !$0.isArchived }
     }
 
-    /// Completed goals
     var completedGoals: [SavingsGoal] {
         goals.filter { $0.completedDate != nil && !$0.isArchived }
     }
 
-    /// Total saved across all goals
     var totalSaved: Double {
         goalManager.getTotalSaved()
     }
 
-    /// Total target across all goals
     var totalTarget: Double {
         goalManager.getTotalTarget()
     }
 
-    /// Overall progress percentage
     var overallProgress: Double {
         guard totalTarget > 0 else { return 0 }
         return (totalSaved / totalTarget) * 100
+    }
+
+    var canAddAnotherGoal: Bool {
+        goals.isEmpty || PremiumManager.shared.hasAccess(to: BudgetMeterCapability.multipleSavingsGoals)
     }
 
     // MARK: - Public Methods
 
     func loadGoals() {
         goals = goalManager.getActiveGoals()
+        refreshSummary()
+    }
+
+    func refreshSummary() {
+        latestSummary = summaryBuilder.build(selectedPeriod: .month)
+    }
+
+    func isPrimaryGoal(_ goal: SavingsGoal) -> Bool {
+        guard let primary = primaryGoal, let goalID = goal.id, let primaryID = primary.id else {
+            return false
+        }
+        return goalID == primaryID
+    }
+
+    func sharedPaceETAText(for goal: SavingsGoal) -> String? {
+        guard isPrimaryGoal(goal), let summary = latestSummary else { return nil }
+        let text = HomeDisplayMapping.formatSavingsETA(from: summary)
+        return text.isEmpty ? nil : text
     }
 
     func deleteGoal(_ goal: SavingsGoal) {
@@ -172,6 +199,7 @@ final class SavingsGoalsViewModel: ObservableObject {
     }
 
     func requiredMonthlyText(_ goal: SavingsGoal) -> String? {
+        guard goal.targetDate != nil else { return nil }
         guard let required = goalManager.calculateRequiredMonthlyContribution(for: goal) else {
             return nil
         }
@@ -184,10 +212,12 @@ final class SavingsGoalsViewModel: ObservableObject {
     }
 
     func paceStatusText(_ goal: SavingsGoal) -> String {
+        guard goal.targetDate != nil else { return "" }
         return goalManager.isPaceStatus(for: goal).displayText
     }
 
     func paceStatusColor(_ goal: SavingsGoal) -> String {
+        guard goal.targetDate != nil else { return "textSecondary" }
         return goalManager.isPaceStatus(for: goal).color
     }
 
@@ -224,7 +254,6 @@ final class SavingsGoalsViewModel: ObservableObject {
     }
 
     @objc func languageDidChange(_ notification: Notification) {
-        // Trigger UI refresh to re-evaluate localized strings
         DispatchQueue.main.async {
             self.objectWillChange.send()
         }

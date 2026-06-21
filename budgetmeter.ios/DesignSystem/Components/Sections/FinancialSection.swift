@@ -23,6 +23,7 @@ struct FinancialSection<Content: View>: View {
     // MARK: - Environment
 
     @Environment(\.sizeCategory) var sizeCategory
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     // MARK: - Body
 
@@ -30,8 +31,12 @@ struct FinancialSection<Content: View>: View {
         VStack(spacing: 0) {
             // Custom Header (replaces DisclosureGroup's default)
             Button(action: {
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                if reduceMotion {
                     isExpanded.toggle()
+                } else {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                        isExpanded.toggle()
+                    }
                 }
                 Haptics.light()
             }) {
@@ -44,18 +49,14 @@ struct FinancialSection<Content: View>: View {
 
                     // Title
                     Text(title)
-                        .font(.system(size: 15 * sizeCategory.scaleFactor, weight: .semibold))
-                        .foregroundColor(.textPrimary)
+                        .sectionTitleStyle(color: .textPrimary)
 
                     Spacer()
 
-                    // Subtitle (amount)
                     Text(subtitle)
-                        .font(.system(size: 15 * sizeCategory.scaleFactor, weight: .semibold, design: .rounded))
-                        .foregroundColor(accentColor)
+                        .metricCompactStyle(color: accentColor)
                 }
-                .padding(.horizontal, Spacing.lg)
-                .padding(.vertical, Spacing.md)
+                .padding(.vertical, Spacing.sm)
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
@@ -68,17 +69,9 @@ struct FinancialSection<Content: View>: View {
                 VStack(spacing: 0) {
                     content()
                 }
-                .background(Color.cardBackground)
-                .cornerRadius(CornerRadius.card)
-                .shadow(
-                    color: ShadowStyle.small.color,
-                    radius: ShadowStyle.small.radius,
-                    x: ShadowStyle.small.offset.width,
-                    y: ShadowStyle.small.offset.height
-                )
-                .padding(.horizontal, Spacing.lg)
+                .glassSurface()
                 .padding(.top, Spacing.xs)
-                .transition(.opacity.combined(with: .move(edge: .top)))
+                .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .top)))
             }
         }
     }

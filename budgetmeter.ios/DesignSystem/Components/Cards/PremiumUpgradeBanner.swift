@@ -2,136 +2,139 @@
 //  PremiumUpgradeBanner.swift
 //  BudgetMeter
 //
-//  Attractive banner for non-premium users to encourage upgrade
+//  Non-intrusive, dismissable premium upgrade banner (v2 glass styling)
 //
 
 import SwiftUI
 
-/// Premium upgrade banner with brand colors and CTA
+/// Premium upgrade banner with v2 glass surface and compact CTA
 struct PremiumUpgradeBanner: View {
 
     // MARK: - Properties
 
     let onUpgradeTapped: () -> Void
 
-    // Feature highlights to show
+    @AppStorage("premiumUpgradeBannerDismissed") private var isDismissed = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     private let featureHighlights = [
-        "premium.banner.feature.subscriptions".localized(defaultValue: "Subscription tracking"),
-        "premium.banner.feature.bills".localized(defaultValue: "Bill reminders"),
-        "premium.banner.feature.savings".localized(defaultValue: "Savings goals")
+        String(localized: "premium.banner.feature.subscriptions", defaultValue: "Subscription tracking", table: "UI"),
+        String(localized: "premium.banner.feature.bills", defaultValue: "Bill reminders", table: "UI"),
+        String(localized: "premium.banner.feature.savings", defaultValue: "Savings goals", table: "UI")
     ]
 
     // MARK: - Body
 
     var body: some View {
-        Button(action: {
-            Haptics.medium()
-            onUpgradeTapped()
-        }) {
-            VStack(alignment: .leading, spacing: Spacing.md) {
-                // Header with crown icon
-                HStack(spacing: Spacing.sm) {
-                    Image(systemName: "crown.fill")
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(.orange)
+        if isDismissed {
+            EmptyView()
+        } else {
+            bannerContent
+        }
+    }
 
-                    Text("premium.banner.title".localized(defaultValue: "Unlock Premium"))
-                        .font(.title3)
-                        .fontWeight(.bold)
-                        .foregroundColor(.primary)
+    private var bannerContent: some View {
+        VStack(alignment: .leading, spacing: Spacing.md) {
+            HStack(alignment: .top, spacing: Spacing.sm) {
+                VStack(alignment: .leading, spacing: Spacing.xs) {
+                    Text(String(localized: "premium.banner.title", defaultValue: "Go Premium", table: "UI"))
+                        .sectionTitleStyle()
 
-                    Spacer()
+                    Text(String(
+                        localized: "premium.banner.subtitle",
+                        defaultValue: "Themes, widgets, and deeper insights — all included.",
+                        table: "UI"
+                    ))
+                    .captionStyle(color: .textSecondary)
                 }
 
-                // Subtitle with feature count
-                Text("premium.banner.subtitle".localized(defaultValue: "Get access to all 9 powerful features:"))
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(.secondary)
+                Spacer(minLength: Spacing.sm)
 
-                // Feature list
-                VStack(alignment: .leading, spacing: Spacing.sm) {
-                    ForEach(featureHighlights, id: \.self) { feature in
-                        HStack(spacing: Spacing.sm) {
-                            Image(systemName: "checkmark.circle.fill")
-                                .font(.subheadline)
-                                .foregroundColor(.brandPositive)
-                            Text(feature)
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                                .foregroundColor(.primary)
+                Button {
+                    if reduceMotion {
+                        isDismissed = true
+                    } else {
+                        withAnimation(AnimationCurve.buttonPress) {
+                            isDismissed = true
                         }
                     }
-
-                    HStack(spacing: Spacing.sm) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.subheadline)
-                            .foregroundColor(.brandPositive)
-                        Text("premium.banner.feature.more".localized(defaultValue: "And 6 more..."))
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.primary)
-                    }
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(.textTertiary)
+                        .frame(width: TouchTarget.minimum, height: TouchTarget.minimum)
                 }
-
-                // One-time purchase highlight
-                Text("premium.banner.onetime".localized(defaultValue: "One-time purchase. No subscription."))
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.brandPositive)
-                    .padding(.top, Spacing.xs)
-
-                // CTA Button with price
-                HStack {
-                    Spacer()
-
-                    VStack(spacing: 2) {
-                        Text("premium.banner.cta".localized(defaultValue: "Upgrade Now"))
-                            .font(.headline)
-                            .fontWeight(.bold)
-
-                        Text("premium.banner.price".localized(defaultValue: "$4.99 — Lifetime Access"))
-                            .font(.caption)
-                            .fontWeight(.medium)
-                    }
-                    .foregroundColor(.white)
-                    .padding(.horizontal, Spacing.xl)
-                    .padding(.vertical, Spacing.md)
-                    .background(Color.brandProgress)
-                    .cornerRadius(CornerRadius.button)
-
-                    Spacer()
-                }
-                .padding(.top, Spacing.sm)
+                .accessibilityLabel(
+                    String(localized: "premium.banner.dismiss", defaultValue: "Dismiss", table: "UI")
+                )
             }
-            .padding(Spacing.lg)
-            .background(Color.cardBackground)
-            .cornerRadius(CornerRadius.card)
-            .overlay(
-                RoundedRectangle(cornerRadius: CornerRadius.card)
-                    .stroke(Color.brandProgress.opacity(0.3), lineWidth: 1)
-            )
-            .shadow(
-                color: Color.black.opacity(0.08),
-                radius: 8,
-                x: 0,
-                y: 4
-            )
+
+            VStack(alignment: .leading, spacing: Spacing.xs) {
+                ForEach(featureHighlights, id: \.self) { feature in
+                    HStack(spacing: Spacing.sm) {
+                        Image(systemName: "checkmark")
+                            .font(.caption.weight(.semibold))
+                            .foregroundColor(.financialPositive)
+                        Text(feature)
+                            .captionStyle(color: .textPrimary)
+                    }
+                }
+
+                Text(String(localized: "premium.banner.feature.more", defaultValue: "And 6 more…", table: "UI"))
+                    .captionStyle(color: .textSecondary)
+            }
+
+            Text(String(localized: "premium.banner.onetime", defaultValue: "One-time purchase · No subscription", table: "UI"))
+                .badgeStyle(color: .textTertiary)
+
+            Button {
+                Haptics.medium()
+                onUpgradeTapped()
+            } label: {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(String(localized: "premium.banner.cta", defaultValue: "Upgrade", table: "UI"))
+                            .buttonTextStyle(color: .white)
+
+                        Text(String(localized: "premium.banner.price", defaultValue: "$4.99 · Lifetime", table: "UI"))
+                            .captionStyle(color: .white.opacity(0.85))
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "arrow.right")
+                        .font(.body.weight(.semibold))
+                        .foregroundColor(.white)
+                }
+                .padding(.horizontal, Spacing.lg)
+                .padding(.vertical, Spacing.md)
+                .background(Color.accentPrimary)
+                .clipShape(RoundedRectangle(cornerRadius: CornerRadius.button, style: .continuous))
+            }
+            .buttonStyle(PremiumBannerButtonStyle())
         }
-        .buttonStyle(PremiumBannerButtonStyle())
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("premium.banner.accessibility".localized(defaultValue: "Unlock Premium features for $4.99 one-time purchase. Tap to upgrade."))
-        .accessibilityAddTraits(.isButton)
+        .padding(Spacing.lg)
+        .glassSurface()
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(
+            String(
+                localized: "premium.banner.accessibility",
+                defaultValue: "Go Premium. Themes, widgets, and deeper insights. One-time purchase. Tap Upgrade to continue.",
+                table: "UI"
+            )
+        )
     }
 }
 
 // MARK: - Button Style
 
 private struct PremiumBannerButtonStyle: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
-            .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
+            .scaleEffect(reduceMotion ? 1.0 : (configuration.isPressed ? 0.98 : 1.0))
+            .animation(reduceMotion ? .none : AnimationCurve.buttonPress, value: configuration.isPressed)
     }
 }
 
@@ -144,7 +147,7 @@ private struct PremiumBannerButtonStyle: ButtonStyle {
         }
     }
     .padding()
-    .background(Color.appBackground)
+    .background(Color.surfaceObsidian)
 }
 
 #Preview("Dark Mode") {
@@ -154,7 +157,7 @@ private struct PremiumBannerButtonStyle: ButtonStyle {
         }
     }
     .padding()
-    .background(Color.appBackground)
+    .background(Color.surfaceObsidian)
     .preferredColorScheme(.dark)
 }
 

@@ -9,7 +9,6 @@ import Foundation
 import SwiftUI
 import CoreData
 import Combine
-import WidgetKit
 
 /// ViewModel for the Income screen following MVVM architecture
 @MainActor
@@ -20,37 +19,31 @@ final class IncomeViewModel: ObservableObject {
     @Published var dailyIncomes: [FinancialCategory] = []
     @Published var monthlyIncomes: [FinancialCategory] = []
     @Published var yearlyIncomes: [FinancialCategory] = []
+    @Published var oneTimeIncomes: [FinancialCategory] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published private(set) var currencySymbol: String = CurrencyHelper.symbol(for: CurrencyHelper.defaultCurrencyCode())
-    
-    // MARK: - Summary Computed Properties
+    @Published private(set) var latestSummary: FinancialSummary?
+
+    // MARK: - Summary Properties (FinancialSummaryBuilder)
 
     var totalMonthlyIncome: Double {
-        let dailyTotal = dailyIncomes.reduce(0) { $0 + $1.amount }
-        let monthlyTotal = monthlyIncomes.reduce(0) { $0 + $1.amount }
-        let yearlyTotal = yearlyIncomes.reduce(0) { $0 + $1.amount }
-
-        // Use CalculationEngine for consistency
-        return CalculationEngine.totalMonthlyIncome(
-            dailyIncomeTotal: dailyTotal,
-            monthlyIncomeTotal: monthlyTotal,
-            yearlyIncomeTotal: yearlyTotal
-        )
+        latestSummary?.recurringIncomeMonthly ?? 0
     }
 
     var dailyAverageIncome: Double {
-        return totalMonthlyIncome / CalculationEngine.daysPerMonth
+        latestSummary?.recurringIncomeDaily ?? 0
     }
     
     var yearlyProjectionIncome: Double {
-        return totalMonthlyIncome * 12
+        totalMonthlyIncome * 12
     }
 
     /// Number of income sources with amounts > 0
     var activeSourcesCount: Int {
-        let allCategories = dailyIncomes + monthlyIncomes + yearlyIncomes
-        return allCategories.filter { $0.amount > 0 }.count
+        let recurring = (dailyIncomes + monthlyIncomes + yearlyIncomes).filter { $0.amount > 0 }.count
+        let oneTime = oneTimeIncomes.filter { $0.amount > 0 }.count
+        return recurring + oneTime
     }
     
     // MARK: - Localized Summary Titles
@@ -74,13 +67,18 @@ final class IncomeViewModel: ObservableObject {
     // MARK: - Private Properties
     
     private let persistenceService: PersistenceService
+    private let summaryBuilder: FinancialSummaryBuilder
     private var cancellables = Set<AnyCancellable>()
     private var currencyCode: String = CurrencyHelper.defaultCurrencyCode()
 
     // MARK: - Initialization
 
-    init(persistenceService: PersistenceService = .shared) {
+    init(
+        persistenceService: PersistenceService = .shared,
+        summaryBuilder: FinancialSummaryBuilder? = nil
+    ) {
         self.persistenceService = persistenceService
+        self.summaryBuilder = summaryBuilder ?? FinancialSummaryBuilder(context: persistenceService.viewContext)
         setupCurrencyObserver()
         setupLanguageObserver()
         loadCurrency()
@@ -96,22 +94,21 @@ final class IncomeViewModel: ObservableObject {
     /// Updates the amount for a specific income category
     func updateAmount(for category: FinancialCategory, amount: Double) {
         category.amount = amount
+        FinancialCategoryWriteSupport.touchModified(category)
         persistenceService.save()
 
-        // Reload data to reflect changes immediately
         loadIncomeCategories()
 
-        // Reload widgets to show updated income data
-        WidgetCenter.shared.reloadAllTimelines()
+        WidgetSnapshotService.refreshFromCurrentData()
     }
 
     /// Updates the color for a custom category
     func updateColor(for category: FinancialCategory, color: CategoryColor) {
         guard category.isCustom else { return }
         category.customColorHex = color.rawValue
+        FinancialCategoryWriteSupport.touchModified(category)
         persistenceService.save()
 
-        // Reload to reflect changes
         loadIncomeCategories()
     }
     
@@ -123,7 +120,7 @@ final class IncomeViewModel: ObservableObject {
         
         let formatter = NumberFormatter()
         formatter.numberStyle = .none
-        formatter.locale = Locale(identifier: "en_US") // Standardized formatting (1234.56)
+        formatter.locale = Locale(identifier: "en_US")
         formatter.maximumFractionDigits = 2
         formatter.minimumFractionDigits = 0
         
@@ -132,10 +129,8 @@ final class IncomeViewModel: ObservableObject {
     
     /// Parses input string to Double amount with validation
     func parseAmount(from input: String) -> Double {
-        // Remove any non-numeric characters except decimal point
         let cleanedInput = input.replacingOccurrences(of: "[^0-9.]", with: "", options: .regularExpression)
 
-        // Handle empty input
         if cleanedInput.isEmpty {
             return 0
         }
@@ -144,14 +139,9 @@ final class IncomeViewModel: ObservableObject {
             return 0
         }
 
-        // Validate maximum value (prevent overflow and unrealistic amounts)
-        // Max: 1 billion (prevents display issues and calculation overflow)
         let maxAmount: Double = 1_000_000_000
-
-        // Validate minimum value
         let minAmount: Double = 0
 
-        // Clamp to valid range
         return min(max(amount, minAmount), maxAmount)
     }
     
@@ -159,7 +149,7 @@ final class IncomeViewModel: ObservableObject {
     func formatCurrencyDisplay(_ amount: Double) -> String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
-        formatter.locale = Locale(identifier: "en_US") // Standardized formatting (1,234.56)
+        formatter.locale = Locale(identifier: "en_US")
         formatter.currencyCode = currencyCode
         formatter.currencySymbol = CurrencyHelper.symbol(for: currencyCode)
         formatter.maximumFractionDigits = 2
@@ -170,12 +160,18 @@ final class IncomeViewModel: ObservableObject {
     
     /// Gets the localized display name for a category
     func displayName(for category: FinancialCategory) -> String {
+        if let customName = category.customName, !customName.isEmpty {
+            return customName
+        }
         guard let uniqueID = category.uniqueID else { return "Unknown" }
         return DataSeedingService.displayName(for: uniqueID)
     }
     
     /// Gets the SF Symbol name for a category
     func sfSymbolName(for category: FinancialCategory) -> String {
+        if category.isCustom, let icon = category.customIconName {
+            return icon
+        }
         guard let uniqueID = category.uniqueID else { return "questionmark.circle" }
         return DataSeedingService.sfSymbolName(for: uniqueID)
     }
@@ -193,11 +189,9 @@ final class IncomeViewModel: ObservableObject {
         context.delete(category)
         persistenceService.save()
 
-        // Reload to update UI
         loadIncomeCategories()
 
-        // Reload widgets
-        WidgetCenter.shared.reloadAllTimelines()
+        WidgetSnapshotService.refreshFromCurrentData()
     }
 
     // MARK: - Private Methods
@@ -209,18 +203,19 @@ final class IncomeViewModel: ObservableObject {
         let context = persistenceService.viewContext
         let fetchRequest: NSFetchRequest<FinancialCategory> = FinancialCategory.fetchRequest()
         
-        // Fetch only income categories
         fetchRequest.predicate = NSPredicate(format: "type == %@", "income")
         fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \FinancialCategory.uniqueID, ascending: true)]
         
         do {
             let allIncomes = try context.fetch(fetchRequest)
-            
-            // Separate by frequency
-            dailyIncomes = allIncomes.filter { $0.frequency == "daily" }
-            monthlyIncomes = allIncomes.filter { $0.frequency == "monthly" }
-            yearlyIncomes = allIncomes.filter { $0.frequency == "yearly" }
-            
+            let recurringIncomes = allIncomes.filter { FinancialCategoryWriteSupport.isRecurringDisplayCategory($0) }
+
+            dailyIncomes = recurringIncomes.filter { $0.frequency == "daily" }
+            monthlyIncomes = recurringIncomes.filter { $0.frequency == "monthly" }
+            yearlyIncomes = recurringIncomes.filter { $0.frequency == "yearly" }
+            oneTimeIncomes = allIncomes.filter { FinancialCategoryWriteSupport.isOneTimeDisplayCategory($0) }
+
+            refreshSummary()
             isLoading = false
         } catch {
             print("📊 IncomeViewModel: ❌ Loading failed: \(error)")
@@ -229,13 +224,16 @@ final class IncomeViewModel: ObservableObject {
             isLoading = false
         }
     }
+
+    private func refreshSummary() {
+        latestSummary = summaryBuilder.build(selectedPeriod: .month)
+    }
 }
 
 // MARK: - Category Grouping Helper
 
 extension IncomeViewModel {
 
-    /// Groups categories by frequency for easier UI rendering
     var categoryGroups: [(title: String, categories: [FinancialCategory], color: Color)] {
         [
             (
@@ -256,17 +254,11 @@ extension IncomeViewModel {
         ]
     }
 
-    /// Checks if any income categories have been entered
     var hasIncomeData: Bool {
-        let allCategories = dailyIncomes + monthlyIncomes + yearlyIncomes
-        return allCategories.contains { category in
-            return category.amount > 0
-        }
+        let allCategories = dailyIncomes + monthlyIncomes + yearlyIncomes + oneTimeIncomes
+        return allCategories.contains { $0.amount > 0 }
     }
 
-    // MARK: - Subtotal Methods for Collapsible Sections
-
-    /// Returns the raw subtotal for a given frequency
     func subtotalForFrequency(_ frequency: String) -> Double {
         switch frequency {
         case "daily":
@@ -280,7 +272,21 @@ extension IncomeViewModel {
         }
     }
 
-    /// Returns formatted subtitle for section header (e.g., "$150/day", "$5,983/mo", "$71,796/yr")
+    func oneTimeSubtotal() -> Double {
+        oneTimeIncomes.reduce(0) { $0 + $1.amount }
+    }
+
+    func formattedOneTimeSubtotal() -> String {
+        let total = oneTimeSubtotal()
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.minimumFractionDigits = 0
+        formatter.maximumFractionDigits = 0
+        formatter.groupingSeparator = ","
+        let formatted = formatter.string(from: NSNumber(value: total)) ?? "0"
+        return "\(currencySymbol)\(formatted)"
+    }
+
     func formattedSubtotal(_ frequency: String) -> String {
         let total = subtotalForFrequency(frequency)
 
@@ -304,7 +310,6 @@ extension IncomeViewModel {
         }
     }
 
-    /// Returns section title for a given frequency
     func sectionTitle(_ frequency: String) -> String {
         switch frequency {
         case "daily":
@@ -318,7 +323,10 @@ extension IncomeViewModel {
         }
     }
 
-    /// Returns categories for a given frequency
+    var oneTimeSectionTitle: String {
+        String(localized: "income.section.one_time", defaultValue: "One-Time Income")
+    }
+
     func categoriesForFrequency(_ frequency: String) -> [FinancialCategory] {
         switch frequency {
         case "daily":
@@ -353,8 +361,6 @@ private extension IncomeViewModel {
             object: nil
         )
     }
-    
-
 
     func loadCurrency() {
         let context = persistenceService.viewContext
@@ -383,11 +389,8 @@ private extension IncomeViewModel {
     }
     
     @objc func languageDidChange(_ notification: Notification) {
-        // Trigger UI refresh to re-evaluate localized strings in summary cards
         DispatchQueue.main.async {
             self.objectWillChange.send()
         }
     }
-    
-
 }

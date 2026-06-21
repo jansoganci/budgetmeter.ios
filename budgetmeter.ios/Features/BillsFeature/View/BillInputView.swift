@@ -119,7 +119,7 @@ struct BillInputView: View {
                             .textFieldStyle(.plain)
                             .font(.body)
                             .padding(Spacing.md)
-                            .background(Color.cardBackground)
+                            .background(Color.surfaceInset)
                             .cornerRadius(CornerRadius.small)
                             .focused($focusedField, equals: .billName)
                     }
@@ -144,7 +144,7 @@ struct BillInputView: View {
                                 .focused($focusedField, equals: .amount)
                         }
                         .padding(Spacing.md)
-                        .background(Color.cardBackground)
+                        .background(Color.surfaceInset)
                         .cornerRadius(CornerRadius.small)
                     }
 
@@ -163,7 +163,7 @@ struct BillInputView: View {
                         .datePickerStyle(.compact)
                         .labelsHidden()
                         .padding(Spacing.md)
-                        .background(Color.cardBackground)
+                        .background(Color.surfaceInset)
                         .cornerRadius(CornerRadius.small)
                     }
 
@@ -200,7 +200,7 @@ struct BillInputView: View {
                         }
                     }
                     .padding(Spacing.md)
-                    .background(Color.cardBackground)
+                    .background(Color.surfaceInset)
                     .cornerRadius(CornerRadius.small)
 
                     // Category
@@ -217,7 +217,7 @@ struct BillInputView: View {
                         }
                         .pickerStyle(.menu)
                         .padding(Spacing.md)
-                        .background(Color.cardBackground)
+                        .background(Color.surfaceInset)
                         .cornerRadius(CornerRadius.small)
                     }
 
@@ -238,7 +238,7 @@ struct BillInputView: View {
                         .toggleStyle(SwitchToggleStyle(tint: .brandProgress))
                     }
                     .padding(Spacing.md)
-                    .background(Color.cardBackground)
+                    .background(Color.surfaceInset)
                     .cornerRadius(CornerRadius.small)
 
                     // Reminder (only if not autopay)
@@ -268,7 +268,7 @@ struct BillInputView: View {
                         TextEditor(text: $notes)
                             .frame(height: 100)
                             .padding(Spacing.sm)
-                            .background(Color.cardBackground)
+                            .background(Color.surfaceInset)
                             .cornerRadius(CornerRadius.small)
                             .focused($focusedField, equals: .notes)
                     }

@@ -28,7 +28,7 @@ struct CategoryInputCard: View {
         VStack(spacing: 12) {
             // Icon
             Image(systemName: DataSeedingService.sfSymbolName(for: category))
-                .font(.system(size: 28, weight: .medium))
+                .font(.title3.weight(.medium))
                 .foregroundColor(accentColor)
                 .frame(height: 32)
             

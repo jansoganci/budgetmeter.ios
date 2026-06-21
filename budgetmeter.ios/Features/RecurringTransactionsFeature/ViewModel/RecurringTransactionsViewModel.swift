@@ -13,11 +13,11 @@ enum RecurringFrequency: String, CaseIterable, Identifiable {
     
     var displayName: String {
         switch self {
-        case .daily: return "recurring.frequency.daily".localized(defaultValue: "Daily")
-        case .weekly: return "recurring.frequency.weekly".localized(defaultValue: "Weekly")
-        case .monthly: return "recurring.frequency.monthly".localized(defaultValue: "Monthly")
-        case .quarterly: return "recurring.frequency.quarterly".localized(defaultValue: "Quarterly")
-        case .yearly: return "recurring.frequency.yearly".localized(defaultValue: "Yearly")
+        case .daily: return String(localized: "recurring.frequency.daily", defaultValue: "Daily", table: "UI")
+        case .weekly: return String(localized: "recurring.frequency.weekly", defaultValue: "Weekly", table: "UI")
+        case .monthly: return String(localized: "recurring.frequency.monthly", defaultValue: "Monthly", table: "UI")
+        case .quarterly: return String(localized: "recurring.frequency.quarterly", defaultValue: "Quarterly", table: "UI")
+        case .yearly: return String(localized: "recurring.frequency.yearly", defaultValue: "Yearly", table: "UI")
         }
     }
     
@@ -96,7 +96,10 @@ final class RecurringTransactionsViewModel: ObservableObject {
         do {
             recurringTransactions = try context.fetch(request)
         } catch {
-            errorMessage = LocalizedError(message: "recurring.error.fetch_failed".localized(defaultValue: "Failed to fetch recurring transactions: \(error.localizedDescription)"))
+            errorMessage = LocalizedError(message: String(
+                format: String(localized: "recurring.error.fetch_failed", defaultValue: "Failed to fetch recurring transactions: %@", table: "UI"),
+                error.localizedDescription
+            ))
             print("Failed to fetch recurring transactions: \(error)")
         }
     }
@@ -179,6 +182,11 @@ final class RecurringTransactionsViewModel: ObservableObject {
     }
     
     func processDueTransactions() async {
+        guard PremiumManager.shared.hasAccess(to: BudgetMeterCapability.recurringAutomation) else {
+            print("RecurringTransactionsViewModel: Recurring automation skipped; premium required")
+            return
+        }
+
         isLoading = true
         defer { isLoading = false }
         
@@ -213,15 +221,24 @@ final class RecurringTransactionsViewModel: ObservableObject {
     
     private func createTransactionFromRecurring(_ recurringTransaction: RecurringTransaction) async {
         let context = persistenceService.viewContext
-        
-        // Create a new FinancialCategory entry
+
         let newCategory = FinancialCategory(context: context)
         newCategory.id = UUID()
         newCategory.uniqueID = UUID().uuidString
         newCategory.type = recurringTransaction.categoryType
         newCategory.amount = recurringTransaction.amount
-        newCategory.frequency = "recurring"
-        
+        newCategory.customName = recurringTransaction.title
+        newCategory.isCustom = true
+
+        FinancialCategoryWriteSupport.applyMetadata(
+            to: newCategory,
+            entryKind: .oneTime,
+            recurringFrequency: "once",
+            occurrenceDate: recurringTransaction.nextDueDate ?? Date(),
+            sourceType: "recurringAutomation",
+            sourceID: recurringTransaction.id?.uuidString
+        )
+
         persistenceService.save()
     }
     

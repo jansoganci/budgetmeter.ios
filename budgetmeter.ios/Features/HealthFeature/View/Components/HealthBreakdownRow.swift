@@ -112,8 +112,18 @@ struct HealthBreakdownRow: View {
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(title): \(score) percent")
-        .accessibilityHint(isExpanded ? "Expanded. Double tap to collapse" : "Double tap to expand and see details")
+        .accessibilityLabel(
+            String(
+                format: String(localized: "health.a11y.breakdown", defaultValue: "%@: %lld percent", table: "UI"),
+                title,
+                score
+            )
+        )
+        .accessibilityHint(
+            isExpanded
+                ? String(localized: "health.a11y.breakdown_collapse", defaultValue: "Expanded. Double tap to collapse", table: "UI")
+                : String(localized: "health.a11y.breakdown_expand", defaultValue: "Double tap to expand and see details", table: "UI")
+        )
         .accessibilityValue(scoreInterpretation)
     }
 
@@ -139,15 +149,15 @@ struct HealthBreakdownRow: View {
     private var scoreInterpretation: String {
         switch score {
         case 90...100:
-            return "Excellent - You're doing great in this area!"
+            return String(localized: "health.breakdown.interpretation.excellent", defaultValue: "Excellent - You're doing great in this area!", table: "UI")
         case 75...89:
-            return "Great - Strong performance with room for minor improvements."
+            return String(localized: "health.breakdown.interpretation.great", defaultValue: "Great - Strong performance with room for minor improvements.", table: "UI")
         case 60...74:
-            return "Good - On the right track, keep it up!"
+            return String(localized: "health.breakdown.interpretation.good", defaultValue: "Good - On the right track, keep it up!", table: "UI")
         case 40...59:
-            return "Fair - This area needs some attention."
+            return String(localized: "health.breakdown.interpretation.fair", defaultValue: "Fair - This area needs some attention.", table: "UI")
         default:
-            return "Needs work - Focus on improving this component."
+            return String(localized: "health.breakdown.interpretation.needs_work", defaultValue: "Needs work - Focus on improving this component.", table: "UI")
         }
     }
 }

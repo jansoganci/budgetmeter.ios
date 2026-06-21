@@ -2,42 +2,35 @@
 //  InsightsView.swift
 //  BudgetMeter
 //
-//  Phase 1B: Insights Dashboard
-//  Created by BudgetMeter Team on 17.09.2025.
+//  Insights screen — v2 UI transformation (calm hierarchy, shared DesignSystem).
 //
 
 import SwiftUI
-import Charts
 
-/// Main view for Phase 1B Insights Dashboard
+/// Main Insights screen — premium-gated analytics and calm money-pace insights.
 struct InsightsView: View {
 
-    // MARK: - Properties
-
     @StateObject private var viewModel = InsightsViewModel()
-    @Environment(\.colorScheme) var colorScheme
-
-    // MARK: - Body
 
     var body: some View {
         NavigationStack {
-            Group {
-                if viewModel.showPaywall && !viewModel.isPremium {
-                    // Show paywall for non-premium users
-                    paywallView
-                } else if viewModel.isLoading {
-                    // Loading state
-                    loadingView
-                } else if !viewModel.hasEnoughData {
-                    // Empty state
-                    emptyStateView
-                } else {
-                    // Main content
-                    contentView
+            ZStack {
+                AppBackground()
+
+                Group {
+                    if viewModel.showPaywall && !viewModel.isPremium {
+                        paywallView
+                    } else if viewModel.isLoading {
+                        loadingView
+                    } else if !viewModel.hasEnoughData {
+                        emptyStateView
+                    } else {
+                        contentView
+                    }
                 }
             }
             .navigationTitle("insights.nav.title".localized(defaultValue: "Insights"))
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $viewModel.showPaywall) {
                 PremiumPaywallView(
                     feature: nil,
@@ -55,302 +48,355 @@ struct InsightsView: View {
         }
     }
 
-    // MARK: - Content View
+    // MARK: - Content
 
     private var contentView: some View {
         ScrollView {
-            VStack(spacing: Spacing.xl) {
-                // Insights Cards Section
-                insightsSection
+            VStack(spacing: LayoutSpacing.sectionGap) {
+                BudgetHeader(
+                    title: "insights.nav.title".localized(defaultValue: "Insights"),
+                    subtitle: "insights.header.subtitle".localized(defaultValue: "See your money pace changes in a simple way.")
+                )
+
+                insightsSummarySection
                     .transition(.opacity.combined(with: .move(edge: .top)))
 
-                // Charts Section
                 if #available(iOS 16.0, *) {
                     chartsSection
                         .transition(.opacity.combined(with: .move(edge: .bottom)))
                 }
             }
-            .padding(Spacing.lg)
+            .padding(.horizontal, LayoutSpacing.screenPadding)
+            .padding(.vertical, Spacing.md)
             .animation(.easeInOut(duration: 0.3), value: viewModel.insights.count)
         }
+        .background(AppBackground(ignoresSafeArea: false))
         .refreshable {
             await viewModel.refresh()
         }
     }
 
-    // MARK: - Insights Section
+    // MARK: - Insights Summary
 
-    private var insightsSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.lg) {
-            Text("insights.section.title".localized(defaultValue: "Your Financial Insights"))
-                .sectionTitleStyle()
-
+    private var insightsSummarySection: some View {
+        VStack(alignment: .leading, spacing: LayoutSpacing.sectionGap) {
             if viewModel.insights.isEmpty {
                 if viewModel.isLoading {
-                    // Loading state with skeleton cards
-                    LazyVGrid(columns: [
-                        GridItem(.flexible()),
-                        GridItem(.flexible())
-                    ], spacing: Spacing.lg) {
-                        ForEach(0..<6, id: \.self) { _ in
-                            SkeletonInsightCard()
-                        }
-                    }
+                    SkeletonPrimaryInsightCard()
                 } else {
-                    Text("insights.empty.message".localized(defaultValue: "No insights available yet. Add your income and expenses to see insights."))
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .padding()
+                    EmptyStateCard(
+                        message: "insights.empty.message".localized(defaultValue: "No insights available yet. Add your income and expenses to see insights.")
+                    )
                 }
             } else {
-                LazyVGrid(columns: [
-                    GridItem(.flexible()),
-                    GridItem(.flexible())
-                ], spacing: Spacing.lg) {
-                    ForEach(Array(viewModel.insights.enumerated()), id: \.element.id) { index, insight in
-                        InsightCardView(insight: insight)
-                            .transition(.asymmetric(
-                                insertion: .scale.combined(with: .opacity),
-                                removal: .opacity
-                            ))
-                            .animation(.spring(response: 0.4, dampingFraction: 0.7).delay(Double(index) * 0.05), value: viewModel.insights.count)
+                if let primary = primaryInsight {
+                    PrimaryInsightHeroCard(insight: primary)
+                }
+
+                if !secondaryInsights.isEmpty {
+                    SectionHeader(
+                        title: "insights.section.title".localized(defaultValue: "Your Financial Insights")
+                    )
+
+                    LazyVGrid(
+                        columns: [GridItem(.flexible()), GridItem(.flexible())],
+                        spacing: LayoutSpacing.cardInternalGap
+                    ) {
+                        ForEach(secondaryInsights) { insight in
+                            SecondaryInsightCard(insight: insight)
+                        }
                     }
+                }
+
+                if !observationInsights.isEmpty {
+                    observationSection
                 }
             }
         }
     }
 
-    // MARK: - Charts Section
+  private var observationSection: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: LayoutSpacing.cardInternalGap) {
+                SectionHeader(
+                    title: "insights.observation.title".localized(defaultValue: "Observations")
+                )
+
+                ForEach(observationInsights) { insight in
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
+                        HStack {
+                            Text(insight.title)
+                                .cardLabelStyle(color: .textPrimary)
+
+                            Spacer()
+
+                            if let trend = insight.trend {
+                                InsightTrendBadge(trend: trend)
+                            }
+                        }
+
+                        if let description = insight.description {
+                            Text(description)
+                                .captionStyle(color: .textSecondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+
+                    if insight.id != observationInsights.last?.id {
+                        Divider()
+                    }
+                }
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("insights.observation.title".localized(defaultValue: "Observations"))
+    }
+
+    // MARK: - Charts (trend → breakdown → comparison)
 
     @available(iOS 16.0, *)
     private var chartsSection: some View {
-        VStack(spacing: Spacing.xl) {
-            // Spending Breakdown Pie Chart
-            if !viewModel.spendingBreakdown.isEmpty {
-                SpendingBreakdownView(data: viewModel.spendingBreakdown)
-            }
-
-            // Month Comparison Bar Chart
-            if let comparison = viewModel.monthComparison {
-                MonthComparisonView(
-                    currentMonth: comparison.current,
-                    previousMonth: comparison.previous
-                )
-            }
-
-            // Balance Trend Line Chart
+        VStack(spacing: LayoutSpacing.sectionGap) {
             if !viewModel.balanceTrend.isEmpty {
                 BalanceTrendView(
                     snapshots: viewModel.balanceTrend,
                     days: 30
                 )
             }
+
+            if !viewModel.spendingBreakdown.isEmpty {
+                SpendingBreakdownView(data: viewModel.spendingBreakdown)
+            }
+
+            if let comparison = viewModel.monthComparison {
+                MonthComparisonView(
+                    currentMonth: comparison.current,
+                    previousMonth: comparison.previous
+                )
+            }
         }
     }
 
-    // MARK: - Paywall View
+    // MARK: - Premium Gate
 
     private var paywallView: some View {
-        VStack(spacing: Spacing.xl) {
+        VStack(spacing: Spacing.lg) {
             Spacer()
 
-            Image(systemName: "chart.bar.doc.horizontal.fill")
-                .font(.system(size: 80))
-                .foregroundColor(.brandProgress)
+            GlassCard {
+                VStack(spacing: LayoutSpacing.cardInternalGap) {
+                    VStack(spacing: Spacing.md) {
+                        Text("insights.premium.title".localized(defaultValue: "Premium Feature"))
+                            .sectionTitleStyle()
+                            .multilineTextAlignment(.center)
 
-            VStack(spacing: Spacing.md) {
-                Text("insights.premium.title".localized(defaultValue: "Premium Feature"))
-                    .font(.title)
-                    .fontWeight(.bold)
+                        Text("insights.premium.subtitle".localized(defaultValue: "Unlock Insights Dashboard with Premium"))
+                            .cardLabelStyle()
+                            .multilineTextAlignment(.center)
 
-                Text("insights.premium.subtitle".localized(defaultValue: "Unlock Insights Dashboard with Premium"))
-                    .font(.headline)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
+                        Text("insights.premium.description".localized(defaultValue: "Get automated financial insights, spending breakdowns, and trend analysis to make smarter money decisions."))
+                            .bodyStyle(color: .textSecondary)
+                            .multilineTextAlignment(.center)
+                    }
 
-                Text("insights.premium.description".localized(defaultValue: "Get automated financial insights, spending breakdowns, and trend analysis to make smarter money decisions."))
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
+                    PrimaryCTAButton(
+                        title: "insights.premium.upgrade_button".localized(defaultValue: "Upgrade to Premium"),
+                        action: { viewModel.upgradeToPremium() }
+                    )
+                }
             }
-
-            Button {
-                viewModel.upgradeToPremium()
-            } label: {
-                Text("insights.premium.upgrade_button".localized(defaultValue: "Upgrade to Premium"))
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.brandProgress)
-                    .cornerRadius(CornerRadius.button)
-            }
-            .padding(.horizontal)
+            .padding(.horizontal, LayoutSpacing.screenPadding)
 
             Spacer()
         }
     }
 
-    // MARK: - Loading View
+    // MARK: - Loading
 
     private var loadingView: some View {
         VStack(spacing: Spacing.lg) {
             ProgressView()
             Text("insights.loading".localized(defaultValue: "Loading insights..."))
-                .font(.subheadline)
-                .foregroundColor(.secondary)
+                .bodyStyle(color: .textSecondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    // MARK: - Empty State View
+    // MARK: - Empty State
 
     private var emptyStateView: some View {
-        VStack(spacing: Spacing.xl) {
+        VStack(spacing: Spacing.lg) {
             Spacer()
 
-            Image(systemName: "chart.bar.xaxis")
-                .font(.system(size: 80))
-                .foregroundColor(.chartInactive)
-
-            VStack(spacing: Spacing.md) {
-                Text("insights.no_data.title".localized(defaultValue: "No Data Yet"))
-                    .font(.title2)
-                    .fontWeight(.bold)
-
-                Text("insights.no_data.message".localized(defaultValue: "Add your income and expenses to see insights"))
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-            }
+            EmptyStateCard(
+                message: "insights.no_data.message".localized(defaultValue: "After you add a few incomes and expenses, your insights will appear here.")
+            )
+            .padding(.horizontal, LayoutSpacing.screenPadding)
 
             Spacer()
         }
-        .padding()
+    }
+
+    // MARK: - Insight Selection (display-only)
+
+    private var primaryInsight: Insight? {
+        if let balanceTrend = viewModel.insights.first(where: { $0.icon == "chart.line.uptrend.xyaxis" }) {
+            return balanceTrend
+        }
+        return viewModel.insights.first
+    }
+
+    private var secondaryInsights: [Insight] {
+        guard let primary = primaryInsight else { return [] }
+        return Array(viewModel.insights.filter { $0.id != primary.id }.prefix(4))
+    }
+
+    private var observationInsights: [Insight] {
+        Array(viewModel.insights.filter { $0.description != nil }.prefix(2))
     }
 }
 
-// MARK: - Insight Card View
+// MARK: - Primary Insight Hero
 
-struct InsightCardView: View {
+private struct PrimaryInsightHeroCard: View {
     let insight: Insight
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            HStack {
-                Image(systemName: insight.icon)
-                    .foregroundColor(insight.color)
-                    .font(.title3)
-                    .accessibilityHidden(true)
+        GlassCard {
+            VStack(alignment: .leading, spacing: LayoutSpacing.cardInternalGap) {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: Spacing.xs) {
+                        Text("insights.summary.title".localized(defaultValue: "Primary insight"))
+                            .badgeStyle(color: .textSecondary)
 
-                Spacer()
+                        Text(insight.title)
+                            .cardLabelStyle(color: .textPrimary)
+                    }
 
-                if let trend = insight.trend {
-                    trendIcon(trend)
+                    Spacer(minLength: Spacing.sm)
+
+                    if let trend = insight.trend {
+                        InsightTrendBadge(trend: trend)
+                    }
+                }
+
+                Text(insight.value)
+                    .metricLargeStyle(color: .textPrimary)
+
+                if let description = insight.description {
+                    Text(description)
+                        .captionStyle(color: .textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
-
-            Text(insight.title)
-                .cardLabelStyle()
-
-            Text(insight.value)
-                .font(.title3)
-                .fontWeight(.bold)
-
-            if let description = insight.description {
-                Text(description)
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                    .lineLimit(2)
-            }
         }
-        .padding()
-        .background(Color.cardBackground)
-        .cornerRadius(CornerRadius.card)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(accessibilityText)
+        .accessibilityLabel(primaryAccessibilityLabel)
     }
 
-    private var accessibilityText: String {
+    private var primaryAccessibilityLabel: String {
         var text = "\(insight.title): \(insight.value)"
         if let description = insight.description {
             text += ". \(description)"
         }
-        if let trend = insight.trend {
-            text += ". Trend: \(trendAccessibilityText(trend))"
-        }
         return text
-    }
-
-    private func trendAccessibilityText(_ trend: Insight.Trend) -> String {
-        switch trend {
-        case .up: return "insights.trend.increasing".localized(defaultValue: "increasing")
-        case .down: return "insights.trend.decreasing".localized(defaultValue: "decreasing")
-        case .neutral: return "insights.trend.stable".localized(defaultValue: "stable")
-        }
-    }
-
-    private func trendIcon(_ trend: Insight.Trend) -> some View {
-        Group {
-            switch trend {
-            case .up:
-                Image(systemName: "arrow.up.right")
-                    .foregroundColor(.brandPositive)
-            case .down:
-                Image(systemName: "arrow.down.right")
-                    .foregroundColor(.brandExpense)
-            case .neutral:
-                Image(systemName: "arrow.right")
-                    .foregroundColor(.orange)
-            }
-        }
-        .font(.caption)
-        .accessibilityHidden(true)
     }
 }
 
-// MARK: - Skeleton Insight Card
+// MARK: - Secondary Insight Card
 
-struct SkeletonInsightCard: View {
+private struct SecondaryInsightCard: View {
+    let insight: Insight
+
+    var body: some View {
+        GlassCard(padding: Spacing.md) {
+            VStack(alignment: .leading, spacing: Spacing.sm) {
+                HStack {
+                    Image(systemName: insight.icon)
+                        .foregroundColor(insight.color)
+                        .font(.body)
+                        .accessibilityHidden(true)
+
+                    Spacer()
+
+                    if let trend = insight.trend {
+                        InsightTrendBadge(trend: trend)
+                    }
+                }
+
+                Text(insight.title)
+                    .captionStyle(color: .textSecondary)
+                    .lineLimit(2)
+
+                Text(insight.value)
+                    .metricCompactStyle(color: .textPrimary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(insight.title): \(insight.value)")
+    }
+}
+
+// MARK: - Trend Badge
+
+private struct InsightTrendBadge: View {
+    let trend: Insight.Trend
+
+    var body: some View {
+        switch trend {
+        case .up:
+            StatusBadge(
+                label: "insights.trend.increasing".localized(defaultValue: "increasing"),
+                style: .positive,
+                iconName: "arrow.up.right"
+            )
+        case .down:
+            StatusBadge(
+                label: "insights.trend.decreasing".localized(defaultValue: "decreasing"),
+                style: .negative,
+                iconName: "arrow.down.right"
+            )
+        case .neutral:
+            StatusBadge(
+                label: "insights.trend.stable".localized(defaultValue: "stable"),
+                style: .neutral,
+                iconName: "arrow.right"
+            )
+        }
+    }
+}
+
+// MARK: - Skeleton
+
+private struct SkeletonPrimaryInsightCard: View {
     @State private var isAnimating = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            HStack {
-                Circle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(width: 24, height: 24)
+        GlassCard {
+            VStack(alignment: .leading, spacing: Spacing.md) {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.chartTrack.opacity(0.35))
+                    .frame(height: 12)
+                    .frame(maxWidth: 100)
 
-                Spacer()
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.chartTrack.opacity(0.35))
+                    .frame(height: 28)
+                    .frame(maxWidth: 180)
+
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.chartTrack.opacity(0.35))
+                    .frame(height: 10)
+                    .frame(maxWidth: .infinity)
             }
-
-            RoundedRectangle(cornerRadius: 4)
-                .fill(Color.gray.opacity(0.3))
-                .frame(height: 12)
-                .frame(maxWidth: 80)
-
-            RoundedRectangle(cornerRadius: 4)
-                .fill(Color.gray.opacity(0.3))
-                .frame(height: 20)
-                .frame(maxWidth: 120)
-
-            RoundedRectangle(cornerRadius: 4)
-                .fill(Color.gray.opacity(0.3))
-                .frame(height: 10)
-                .frame(maxWidth: .infinity)
         }
-        .padding()
-        .background(Color.cardBackground)
-        .cornerRadius(CornerRadius.card)
         .opacity(isAnimating ? 0.5 : 1.0)
         .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: isAnimating)
-        .onAppear {
-            isAnimating = true
-        }
+        .onAppear { isAnimating = true }
     }
 }
-// MARK: - Preview
 
 #Preview {
     InsightsView()

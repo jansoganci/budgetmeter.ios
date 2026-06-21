@@ -9,58 +9,98 @@ import SwiftUI
 
 struct WidgetsSetupView: View {
     @StateObject private var premiumManager = PremiumManager.shared
-    
+
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
                 Image(systemName: "rectangle.3.group")
                     .font(.system(size: 80))
                     .foregroundColor(.accentColor)
-                
-                Text("widgets.setup.title".localized(defaultValue: "Widgets Setup"))
+
+                Text(String(localized: "widgets.setup.title", defaultValue: "Widgets Setup", table: "UI"))
                     .font(.largeTitle)
                     .fontWeight(.bold)
-                
-                Text("widgets.setup.description".localized(defaultValue: "Add BudgetMeter widgets to your Home Screen and Lock Screen to quickly view your financial data."))
-                    .font(.body)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
+
+                Text(String(
+                    localized: "widgets.setup.description.v1",
+                    defaultValue: "Add the BudgetMeter net daily pace widget to your Home Screen to see whether you're moving forward or slowing down.",
+                    table: "UI"
+                ))
+                .font(.body)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+
+                if !premiumManager.hasAccess(to: PremiumFeature.widgets) {
+                    VStack(spacing: 8) {
+                        Image(systemName: "lock.fill")
+                            .foregroundColor(.secondary)
+                        Text(String(
+                            localized: "widget.locked.subtitle",
+                            defaultValue: "Unlock net daily pace on your Home Screen",
+                            table: "UI"
+                        ))
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                    }
                     .padding(.horizontal)
-                
+                }
+
                 VStack(alignment: .leading, spacing: 15) {
-                    Text("widgets.setup.how_to_add".localized(defaultValue: "How to Add Widgets"))
+                    Text(String(localized: "widgets.setup.how_to_add", defaultValue: "How to Add Widgets", table: "UI"))
                         .font(.headline)
                         .fontWeight(.semibold)
                         .padding(.top, 10)
 
                     setupStepRow(
                         number: "1",
-                        title: "Long Press Home Screen",
-                        description: "Press and hold on an empty area of your Home Screen"
+                        title: String(localized: "widgets.setup.step1.title", defaultValue: "Long Press Home Screen", table: "UI"),
+                        description: String(
+                            localized: "widgets.setup.step1.description",
+                            defaultValue: "Press and hold on an empty area of your Home Screen",
+                            table: "UI"
+                        )
                     )
 
                     setupStepRow(
                         number: "2",
-                        title: "Tap the + Button",
-                        description: "Tap the + button in the top-left corner"
+                        title: String(localized: "widgets.setup.step2.title", defaultValue: "Tap the + Button", table: "UI"),
+                        description: String(
+                            localized: "widgets.setup.step2.description",
+                            defaultValue: "Tap the + button in the top-left corner",
+                            table: "UI"
+                        )
                     )
 
                     setupStepRow(
                         number: "3",
-                        title: "Search for BudgetMeter",
-                        description: "Find BudgetMeter in the widget list"
+                        title: String(localized: "widgets.setup.step3.title", defaultValue: "Search for BudgetMeter", table: "UI"),
+                        description: String(
+                            localized: "widgets.setup.step3.description",
+                            defaultValue: "Find BudgetMeter in the widget list",
+                            table: "UI"
+                        )
                     )
 
                     setupStepRow(
                         number: "4",
-                        title: "Choose Widget & Size",
-                        description: "Select your preferred widget and size"
+                        title: String(localized: "widgets.setup.step4.title", defaultValue: "Choose Net Daily Pace", table: "UI"),
+                        description: String(
+                            localized: "widgets.setup.step4.description",
+                            defaultValue: "Select the small net daily pace widget",
+                            table: "UI"
+                        )
                     )
 
                     setupStepRow(
                         number: "5",
-                        title: "Add Widget",
-                        description: "Tap \"Add Widget\" to place it on your Home Screen"
+                        title: String(localized: "widgets.setup.step5.title", defaultValue: "Add Widget", table: "UI"),
+                        description: String(
+                            localized: "widgets.setup.step5.description",
+                            defaultValue: "Tap \"Add Widget\" to place it on your Home Screen",
+                            table: "UI"
+                        )
                     )
                 }
                 .padding(.horizontal)
@@ -68,25 +108,27 @@ struct WidgetsSetupView: View {
                 Spacer()
 
                 VStack(spacing: 12) {
-                    Text("widgets.setup.available".localized(defaultValue: "Available Widgets"))
+                    Text(String(localized: "widgets.setup.available.v1", defaultValue: "Available Widget", table: "UI"))
                         .font(.caption)
                         .foregroundColor(.secondary)
 
-                    HStack(spacing: 12) {
-                        widgetBadge(name: "Balance", color: .blue)
-                        widgetBadge(name: "Spending", color: .green)
-                        widgetBadge(name: "Savings", color: .purple)
-                        widgetBadge(name: "Combined", color: .blue)
-                    }
+                    Text(String(localized: "widget.pace.title", defaultValue: "Net Daily Pace", table: "UI"))
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color.accentColor)
+                        .cornerRadius(8)
                 }
                 .padding(.horizontal)
             }
             .padding()
-            .navigationTitle("Widgets")
+            .navigationTitle(String(localized: "widgets.nav.title", defaultValue: "Widgets", table: "UI"))
             .navigationBarTitleDisplayMode(.large)
         }
     }
-    
+
     private func setupStepRow(number: String, title: String, description: String) -> some View {
         HStack(alignment: .top, spacing: 12) {
             ZStack {
@@ -112,17 +154,6 @@ struct WidgetsSetupView: View {
 
             Spacer()
         }
-    }
-
-    private func widgetBadge(name: String, color: Color) -> some View {
-        Text(name)
-            .font(.caption2)
-            .fontWeight(.medium)
-            .foregroundColor(.white)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
-            .background(color)
-            .cornerRadius(8)
     }
 }
 

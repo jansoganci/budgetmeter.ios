@@ -1,0 +1,22 @@
+{
+  "languageNames": {
+    "en": "English",
+    "tr": "Türkçe",
+    "de": "Deutsch",
+    "fr": "Français",
+    "es": "Español",
+    "it": "Italiano",
+    "pt": "Português",
+    "ja": "日本語",
+    "zh-Hans": "简体中文",
+    "ar": "العربية"
+  },
+  "footer": {
+    "en": {
+      "text": "© 2026 Umurcan Soganci · BudgetMeter · <a href=\"mailto:umursoganci@gmail.com\">umursoganci@gmail.com</a>"
+    },
+    "tr": {
+      "text": "© 2026 Umurcan Soganci · BudgetMeter · <a href=\"mailto:umursoganci@gmail.com\">umursoganci@gmail.com</a>"
+    }
+  }
+}

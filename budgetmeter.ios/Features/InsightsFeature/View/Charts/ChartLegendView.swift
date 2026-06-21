@@ -47,8 +47,7 @@ struct ChartLegendView: View {
 
             // Label
             Text(item.label)
-                .font(.caption)
-                .foregroundColor(.primary)
+                .captionStyle(color: .textPrimary)
                 .lineLimit(1)
 
             Spacer(minLength: 0)
@@ -56,9 +55,7 @@ struct ChartLegendView: View {
             // Optional value
             if let value = item.value {
                 Text(value)
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(.secondary)
+                    .captionStyle()
             }
         }
     }
@@ -92,37 +89,37 @@ struct LegendItem: Identifiable {
     VStack(spacing: 24) {
         // Example 1: Simple legend
         ChartLegendView(items: [
-            LegendItem(label: "Income", color: .green),
-            LegendItem(label: "Expenses", color: .red),
-            LegendItem(label: "Savings", color: .blue),
-            LegendItem(label: "Investments", color: .purple)
+            LegendItem(label: "Income", color: .financialPositive),
+            LegendItem(label: "Expenses", color: .financialNegative),
+            LegendItem(label: "Savings", color: .brandProgress),
+            LegendItem(label: "Investments", color: CategoryColor.purple.color)
         ])
         .padding()
-        .background(Color(.secondarySystemBackground))
+        .background(Color.surfaceInset)
         .cornerRadius(12)
 
         // Example 2: Legend with values
         ChartLegendView(items: [
-            LegendItem(label: "Food", color: .orange, value: "$500"),
-            LegendItem(label: "Transport", color: .blue, value: "$300"),
-            LegendItem(label: "Entertainment", color: .purple, value: "$200"),
-            LegendItem(label: "Utilities", color: .green, value: "$150")
+            LegendItem(label: "Food", color: CategoryColor.orange.color, value: "$500"),
+            LegendItem(label: "Transport", color: CategoryColor.blue.color, value: "$300"),
+            LegendItem(label: "Entertainment", color: CategoryColor.purple.color, value: "$200"),
+            LegendItem(label: "Utilities", color: CategoryColor.green.color, value: "$150")
         ])
         .padding()
-        .background(Color(.secondarySystemBackground))
+        .background(Color.surfaceInset)
         .cornerRadius(12)
 
         // Example 3: Single column with circles
         ChartLegendView(
             items: [
-                LegendItem(label: "Positive", color: .green, value: "15 days", shape: .circle),
-                LegendItem(label: "Negative", color: .red, value: "5 days", shape: .circle),
-                LegendItem(label: "Neutral", color: .orange, value: "10 days", shape: .circle)
+                LegendItem(label: "Positive", color: .financialPositive, value: "15 days", shape: .circle),
+                LegendItem(label: "Negative", color: .financialNegative, value: "5 days", shape: .circle),
+                LegendItem(label: "Neutral", color: .financialCaution, value: "10 days", shape: .circle)
             ],
             columns: 1
         )
         .padding()
-        .background(Color(.secondarySystemBackground))
+        .background(Color.surfaceInset)
         .cornerRadius(12)
     }
     .padding()

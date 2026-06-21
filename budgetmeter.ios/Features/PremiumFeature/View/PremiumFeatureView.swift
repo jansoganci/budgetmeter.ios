@@ -35,7 +35,7 @@ struct PremiumFeatureView<Content: View>: View {
     
     var body: some View {
         Group {
-            if premiumManager.isPremium {
+            if premiumManager.hasAccess(to: premiumFeature) {
                 content
             } else {
                 premiumGatedView
@@ -61,53 +61,45 @@ struct PremiumFeatureView<Content: View>: View {
     // MARK: - Premium Gated View
     
     private var premiumGatedView: some View {
-        VStack(spacing: 16) {
-            // Icon
-            Image(systemName: premiumFeature.iconName)
-                .font(.system(size: 48, weight: .medium))
-                .foregroundColor(Color(hex: "4A90E2"))
-            
-            // Title
-            Text("premium.gated.title".localized(defaultValue: "Premium Feature"))
-                .font(.title2)
-                .fontWeight(.bold)
+        ZStack {
+            Color.surfaceObsidian.ignoresSafeArea()
+
+            VStack(spacing: Spacing.lg) {
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 44, weight: .medium))
+                    .foregroundColor(.textSecondary)
+
+                Text(String(localized: "premium.gated.title", defaultValue: "Premium Feature", table: "UI"))
+                    .sectionTitleStyle()
+                    .multilineTextAlignment(.center)
+
+                Text(String(
+                    localized: "premium.gated.description",
+                    defaultValue: "Unlock themes, widgets, and deeper insights with Premium.",
+                    table: "UI"
+                ))
+                .bodyStyle(color: .textSecondary)
                 .multilineTextAlignment(.center)
-            
-            // Description
-            Text("premium.gated.description".localized(defaultValue: "This feature is available with BudgetMeter Premium"))
-                .font(.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-            
-            // Feature Name
-            Text(premiumFeature.displayName)
-                .font(.headline)
-                .fontWeight(.semibold)
-                .foregroundColor(Color(hex: "4A90E2"))
-            
-            // Upgrade Button
-            Button(action: {
-                showingPaywall = true
-            }) {
-                HStack {
-                    Image(systemName: "crown.fill")
-                        .font(.system(size: 16, weight: .medium))
-                    
-                    Text("premium.gated.upgrade".localized(defaultValue: "Upgrade to Premium"))
-                        .font(.headline)
-                        .fontWeight(.semibold)
+
+                Text(premiumFeature.displayName)
+                    .cardLabelStyle(color: .textPrimary)
+
+                Button(action: {
+                    showingPaywall = true
+                }) {
+                    Text(String(localized: "premium.gated.upgrade", defaultValue: "Upgrade to Premium", table: "UI"))
+                        .buttonTextStyle(color: .white)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(minHeight: TouchTarget.minimum)
+                        .background(Color.accentPrimary)
+                        .clipShape(RoundedRectangle(cornerRadius: CornerRadius.button, style: .continuous))
                 }
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 50)
-                .background(Color(hex: "4A90E2"))
-                .cornerRadius(12)
             }
-            .padding(.horizontal, 20)
+            .padding(Spacing.lg)
+            .glassSurface()
+            .padding(LayoutSpacing.screenPadding)
         }
-        .padding(.vertical, 40)
-        .frame(maxWidth: .infinity)
-        .background(Color(uiColor: .systemBackground))
     }
 }
 
@@ -154,20 +146,20 @@ struct PremiumFeatureButton: View {
                     .font(.body)
                     .fontWeight(.medium)
                 
-                if !premiumManager.isPremium {
+                if !premiumManager.hasAccess(to: premiumFeature) {
                     Spacer()
                     
                     Image(systemName: "crown.fill")
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(Color(hex: "4A90E2"))
+                        .foregroundColor(.brandProgress)
                 }
             }
-            .foregroundColor(.primary)
+            .foregroundColor(.textPrimary)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.vertical, 12)
             .padding(.horizontal, 16)
-            .background(Color(uiColor: .secondarySystemBackground))
-            .cornerRadius(12)
+            .background(Color.surfaceInset)
+            .clipShape(RoundedRectangle(cornerRadius: CornerRadius.button, style: .continuous))
         }
         .buttonStyle(.plain)
         .sheet(isPresented: $showingPaywall) {
@@ -190,7 +182,7 @@ struct PremiumFeatureButton: View {
     // MARK: - Actions
     
     private func handleTap() {
-        if premiumManager.isPremium {
+        if premiumManager.hasAccess(to: premiumFeature) {
             action()
         } else {
             showingPaywall = true
@@ -233,7 +225,7 @@ struct PremiumFeatureRow: View {
     
     var body: some View {
         Button(action: {
-            if premiumManager.isPremium {
+            if premiumManager.hasAccess(to: premiumFeature) {
                 // Feature is available
             } else {
                 showingPaywall = true
@@ -243,34 +235,31 @@ struct PremiumFeatureRow: View {
                 // Icon
                 Image(systemName: iconName)
                     .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(Color(hex: "4A90E2"))
+                    .foregroundColor(.brandProgress)
                     .frame(width: 32, height: 32)
-                    .background(Color(hex: "4A90E2").opacity(0.1))
-                    .cornerRadius(8)
+                    .background(Color.brandProgress.opacity(0.12))
+                    .clipShape(RoundedRectangle(cornerRadius: CornerRadius.small, style: .continuous))
                 
                 // Content
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
+                        .cardLabelStyle(color: .textPrimary)
                     
                     Text(subtitle)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .captionStyle()
                 }
                 
                 Spacer()
                 
                 // Premium Indicator
-                if !premiumManager.isPremium {
+                if !premiumManager.hasAccess(to: premiumFeature) {
                     Image(systemName: "crown.fill")
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(Color(hex: "4A90E2"))
+                        .foregroundColor(.brandProgress)
                 } else {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.green)
+                        .foregroundColor(.financialPositive)
                 }
             }
             .padding(.vertical, 8)

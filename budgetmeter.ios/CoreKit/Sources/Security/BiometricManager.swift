@@ -66,14 +66,21 @@ final class BiometricManager: ObservableObject {
     
     /// Enables biometric authentication
     func enableBiometric() async -> Bool {
+        guard PremiumManager.shared.hasAccess(to: BudgetMeterCapability.biometricLock) else {
+            await MainActor.run {
+                errorMessage = "security.error.premium_required".localized(defaultValue: "Biometric lock requires BudgetMeter Premium.")
+            }
+            return false
+        }
+
         guard isAvailable else {
             await MainActor.run {
-                errorMessage = "Biometric authentication is not available on this device"
+                errorMessage = "biometric.error.not_available_device".localized(defaultValue: "Biometric authentication is not available on this device")
             }
             return false
         }
         
-        let success = await authenticateUser(reason: "Enable biometric authentication to secure your financial data")
+        let success = await authenticateUser(reason: "biometric.enable.reason".localized(defaultValue: "Enable biometric authentication to secure your financial data"))
         
         if success {
             await MainActor.run {
@@ -94,10 +101,10 @@ final class BiometricManager: ObservableObject {
     }
     
     /// Authenticates the user using biometrics
-    func authenticateUser(reason: String = "Authenticate to access your financial data") async -> Bool {
+    func authenticateUser(reason: String = "biometric.auth.reason".localized(defaultValue: "Authenticate to access your financial data")) async -> Bool {
         guard isAvailable && isBiometricEnabled else {
             await MainActor.run {
-                errorMessage = "Biometric authentication is not enabled"
+                errorMessage = "biometric.error.not_enabled".localized(defaultValue: "Biometric authentication is not enabled")
             }
             return false
         }
@@ -111,7 +118,7 @@ final class BiometricManager: ObservableObject {
             await MainActor.run {
                 isAuthenticated = success
                 if !success {
-                    errorMessage = "Authentication failed"
+                    errorMessage = "biometric.error.auth_failed".localized(defaultValue: "Authentication failed")
                 }
             }
             
@@ -185,13 +192,13 @@ enum BiometricType {
     var displayName: String {
         switch self {
         case .none:
-            return "None"
+            return "biometric.type.none".localized(defaultValue: "None")
         case .faceID:
-            return "Face ID"
+            return "biometric.type.face_id".localized(defaultValue: "Face ID")
         case .touchID:
-            return "Touch ID"
+            return "biometric.type.touch_id".localized(defaultValue: "Touch ID")
         case .opticID:
-            return "Optic ID"
+            return "biometric.type.optic_id".localized(defaultValue: "Optic ID")
         }
     }
     
@@ -226,21 +233,21 @@ extension BiometricError {
     var errorDescription: String? {
         switch self {
         case .notAvailable:
-            return "Biometric authentication is not available on this device"
+            return "biometric.error.not_available_device".localized(defaultValue: "Biometric authentication is not available on this device")
         case .notEnrolled:
-            return "No biometric data is enrolled. Please set up Face ID or Touch ID in Settings"
+            return "biometric.error.not_enrolled".localized(defaultValue: "No biometric data is enrolled. Please set up Face ID or Touch ID in Settings")
         case .lockedOut:
-            return "Biometric authentication is locked out. Please use your passcode"
+            return "biometric.error.locked_out".localized(defaultValue: "Biometric authentication is locked out. Please use your passcode")
         case .authenticationFailed:
-            return "Authentication failed. Please try again"
+            return "biometric.error.auth_failed_retry".localized(defaultValue: "Authentication failed. Please try again")
         case .userCancel:
-            return "Authentication was cancelled by the user"
+            return "biometric.error.user_cancel".localized(defaultValue: "Authentication was cancelled by the user")
         case .systemCancel:
-            return "Authentication was cancelled by the system"
+            return "biometric.error.system_cancel".localized(defaultValue: "Authentication was cancelled by the system")
         case .passcodeNotSet:
-            return "Passcode is not set. Please set up a passcode in Settings"
+            return "biometric.error.passcode_not_set".localized(defaultValue: "Passcode is not set. Please set up a passcode in Settings")
         case .biometryNotAvailable:
-            return "Biometric authentication is not available"
+            return "biometric.error.not_available".localized(defaultValue: "Biometric authentication is not available")
         }
     }
 }

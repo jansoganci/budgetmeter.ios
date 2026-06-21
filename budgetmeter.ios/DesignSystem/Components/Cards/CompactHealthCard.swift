@@ -73,18 +73,13 @@ struct CompactHealthCard: View {
             // Left side: Title and status
             VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text(String(localized: "home.health.title", defaultValue: "Health"))
-                    .font(.system(size: 13 * sizeCategory.scaleFactor, weight: .medium))
-                    .foregroundColor(.textSecondary)
+                    .captionStyle()
 
-                // Score number
                 Text("\(score)")
-                    .font(.system(size: 28 * sizeCategory.scaleFactor, weight: .bold, design: .rounded))
-                    .foregroundColor(.textPrimary)
+                    .paceHeroStyle(color: .textPrimary)
 
-                // Status label
                 Text(statusLabel)
-                    .font(.system(size: 12 * sizeCategory.scaleFactor, weight: .semibold))
-                    .foregroundColor(scoreColor)
+                    .badgeStyle(color: scoreColor)
             }
 
             Spacer()
@@ -93,7 +88,7 @@ struct CompactHealthCard: View {
             ZStack {
                 // Background circle
                 Circle()
-                    .stroke(Color.chartInactive, lineWidth: ChartDimensions.compactCircleStroke)
+                    .stroke(Color.chartTrack, lineWidth: ChartDimensions.compactCircleStroke)
 
                 // Progress circle
                 Circle()
@@ -113,21 +108,13 @@ struct CompactHealthCard: View {
 
                 // Percentage in circle
                 Text("\(score)%")
-                    .font(.system(size: 11 * sizeCategory.scaleFactor, weight: .bold))
-                    .foregroundColor(.textSecondary)
+                    .badgeStyle(color: .textSecondary)
             }
             .frame(width: ChartDimensions.compactCircleDiameter, height: ChartDimensions.compactCircleDiameter)
         }
-        .frame(height: CardHeight.metric)
+        .frame(minHeight: CardHeight.metric)
         .padding(Spacing.md)
-        .background(Color.cardBackground)
-        .cornerRadius(CornerRadius.card)
-        .shadow(
-            color: ShadowStyle.card.color,
-            radius: ShadowStyle.card.radius,
-            x: ShadowStyle.card.offset.width,
-            y: ShadowStyle.card.offset.height
-        )
+        .glassSurface()
         .pressEffect(isPressed: $isPressed, haptic: onTap != nil)
         .onTapGesture {
             if let action = onTap {

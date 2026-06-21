@@ -40,9 +40,9 @@ struct TrendIndicator: View {
         }
 
         if isPositive {
-            return .brandPositive
+            return .financialPositive
         } else if isNegative {
-            return .brandExpense
+            return .financialNegative
         } else {
             return .textSecondary
         }
@@ -79,10 +79,10 @@ struct TrendIndicator: View {
     var body: some View {
         HStack(spacing: Spacing.xs) {
             Image(systemName: iconName)
-                .font(.system(size: Typography.trendIndicatorSize - 2, weight: Typography.medium))
+                .font(.caption2.weight(Typography.medium))
 
             Text(formattedPercentage)
-                .font(.system(size: Typography.trendIndicatorSize, weight: Typography.medium))
+                .trendStyle(color: color)
         }
         .foregroundColor(color)
         .accessibilityElement(children: .ignore)

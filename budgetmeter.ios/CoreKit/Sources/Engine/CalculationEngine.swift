@@ -32,16 +32,53 @@ struct CalculationEngine {
     /// Seconds per year
     static let secondsPerYear: Double = daysPerYear * hoursPerDay * 60 * 60
 
+    // MARK: - Generic Recurring Normalization
+
+    enum RecurringInterval: Equatable {
+        case daily
+        case weekly
+        case monthly
+        case quarterly
+        case yearly
+        case custom(days: Double)
+    }
+
+    static func dailyAmount(amount: Double, interval: RecurringInterval) -> Double {
+        switch interval {
+        case .daily:
+            return amount
+        case .weekly:
+            return amount / 7
+        case .monthly:
+            return amount / daysPerMonth
+        case .quarterly:
+            return amount / (daysPerMonth * 3)
+        case .yearly:
+            return amount / daysPerYear
+        case .custom(let days):
+            guard days > 0 else { return amount / daysPerMonth }
+            return amount / days
+        }
+    }
+
+    static func monthlyAmount(amount: Double, interval: RecurringInterval) -> Double {
+        dailyAmount(amount: amount, interval: interval) * daysPerMonth
+    }
+
+    static func periodAmount(amount: Double, interval: RecurringInterval, days: Double) -> Double {
+        dailyAmount(amount: amount, interval: interval) * days
+    }
+
     // MARK: - Financial Health Score
     
-    struct FinancialHealthScore {
+    struct FinancialHealthScore: Equatable {
         let score: Int
         let text: String
         let color: String
         let description: String
     }
     
-    struct TargetTimeResult {
+    struct TargetTimeResult: Equatable {
         let hours: Double
         let days: Double
         let weeks: Double
@@ -430,6 +467,15 @@ struct CalculationEngine {
         return liveIncome - liveExpense
     }
 
+    /// Calculate live net flow from a normalized hourly pace.
+    static func calculateLiveNetFlow(
+        netHourlyFlow: Double,
+        elapsedSeconds: Double
+    ) -> Double {
+        let liveNet = netHourlyFlow * (elapsedSeconds / 3_600)
+        return (liveNet * 100).rounded() / 100
+    }
+
     // MARK: - Health Score (0-100 Scale)
 
     /// Calculate comprehensive financial health score (0-100)
@@ -500,17 +546,17 @@ struct CalculationEngine {
     static func healthScoreText(for score: Int) -> String {
         switch score {
         case 90...100:
-            return "Excellent"
+            return "health.rating.excellent".localized(defaultValue: "Excellent")
         case 75...89:
-            return "Great"
+            return "health.rating.great".localized(defaultValue: "Great")
         case 60...74:
-            return "Good"
+            return "health.rating.good".localized(defaultValue: "Good")
         case 40...59:
-            return "Fair"
+            return "health.rating.fair".localized(defaultValue: "Fair")
         case 20...39:
-            return "Needs Improvement"
+            return "health.rating.needs_improvement".localized(defaultValue: "Needs Improvement")
         default:
-            return "Getting Started"
+            return "health.rating.getting_started".localized(defaultValue: "Getting Started")
         }
     }
 

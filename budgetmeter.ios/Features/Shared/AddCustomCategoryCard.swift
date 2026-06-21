@@ -26,35 +26,31 @@ struct AddCustomCategoryCard: View {
         Button(action: handleTap) {
             VStack(spacing: 12) {
                 // Icon
-                Image(systemName: premiumManager.isPremium ? "plus" : "crown.fill")
+                Image(systemName: premiumManager.hasAccess(to: BudgetMeterCapability.customCategories) ? "plus" : "crown.fill")
                     .font(.system(size: 28, weight: .medium))
-                    .foregroundColor(premiumManager.isPremium ? accentColor : Color(hex: "4A90E2"))
+                    .foregroundColor(premiumManager.hasAccess(to: BudgetMeterCapability.customCategories) ? accentColor : Color(hex: "4A90E2"))
                     .frame(height: 32)
                 
                 // Label
-                Text(premiumManager.isPremium ? "Add Card" : "Premium")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(.primary)
+                Text(premiumManager.hasAccess(to: BudgetMeterCapability.customCategories) ? "Add Card" : "Premium")
+                    .captionStyle(color: .textPrimary)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
                     .frame(minHeight: 32)
                 
                 // Subtitle for free users
-                if !premiumManager.isPremium {
+                if !premiumManager.hasAccess(to: BudgetMeterCapability.customCategories) {
                     Text("ui.unlock".localized(defaultValue: "Unlock"))
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .badgeStyle()
                         .multilineTextAlignment(.center)
                 }
             }
-            .padding(12)
-            .background(Color(uiColor: .secondarySystemBackground))
-            .cornerRadius(12)
+            .padding(Spacing.md)
+            .glassSurface()
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
+                RoundedRectangle(cornerRadius: CornerRadius.card, style: .continuous)
                     .stroke(
-                        premiumManager.isPremium 
+                        premiumManager.hasAccess(to: BudgetMeterCapability.customCategories)
                             ? Color.clear
                             : Color(hex: "4A90E2").opacity(0.3),
                         lineWidth: 2
@@ -81,7 +77,7 @@ struct AddCustomCategoryCard: View {
     // MARK: - Actions
     
     private func handleTap() {
-        if premiumManager.isPremium {
+        if premiumManager.hasAccess(to: BudgetMeterCapability.customCategories) {
             onAddCategory()
         } else {
             showingPaywall = true
@@ -120,4 +116,3 @@ struct AddCustomCategoryCard: View {
     }
     .padding()
 }
-

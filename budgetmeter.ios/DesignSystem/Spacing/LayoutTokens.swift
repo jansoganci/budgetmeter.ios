@@ -2,186 +2,167 @@
 //  LayoutTokens.swift
 //  BudgetMeter
 //
-//  Design System v2.0 - Spacing and Layout Constants
-//  Consistent spacing scale for the Modern Financial Dashboard
+//  Design System v2 — Spacing, surfaces, radius, and elevation tokens
 //
 
 import SwiftUI
 
-// MARK: - Spacing System
+// MARK: - Spacing Scale
 
-/// Spacing tokens for consistent layout throughout the app
 enum Spacing {
-    /// 4pt - Icon-to-text spacing, tight groupings
     static let xs: CGFloat = 4
-
-    /// 8pt - Related elements within a card
     static let sm: CGFloat = 8
-
-    /// 12pt - Vertical spacing between card content sections
     static let md: CGFloat = 12
-
-    /// 16pt - Horizontal screen padding (mobile)
     static let lg: CGFloat = 16
-
-    /// 24pt - Card gap spacing, section separation, desktop padding
+    static let section: CGFloat = 20
     static let xl: CGFloat = 24
-
-    /// 32pt - Major section breaks
     static let xxl: CGFloat = 32
 }
 
-// MARK: - Corner Radius
+// MARK: - Semantic Spacing (v2)
 
-/// Corner radius tokens for consistent rounded corners
+enum LayoutSpacing {
+    static let screenPadding = Spacing.lg
+    static let dashboardScreenPadding: CGFloat = 20
+    static let sectionGap = Spacing.section
+    static let cardPadding = Spacing.lg
+    static let cardInternalGap = Spacing.md
+    static let modalPadding = Spacing.xl
+    static let widgetPadding = Spacing.lg
+    static let rowHeight: CGFloat = 48
+    static let buttonHeight: CGFloat = 52
+    static let rowGap = Spacing.sm
+    static let controlGap = Spacing.sm
+}
+
+// MARK: - Corner Radius (v2)
+
 enum CornerRadius {
-    /// 16pt - Cards (primary)
-    static let card: CGFloat = 16
-
-    /// 12pt - Buttons, secondary elements
-    static let button: CGFloat = 12
-
-    /// 8pt - Small elements (badges, chips, progress bars)
+    static let card: CGFloat = 20
+    static let button: CGFloat = 14
+    static let modal: CGFloat = 24
+    static let widget: CGFloat = 22
+    static let badge: CGFloat = 8
     static let small: CGFloat = 8
-
-    /// 4pt - Tiny elements
     static let tiny: CGFloat = 4
-
-    /// 2pt - Chart bars (top only)
     static let chartBar: CGFloat = 2
+}
+
+// MARK: - Compatibility Aliases (Phase 5)
+
+enum LayoutTokens {
+    static let screenHorizontalPadding: CGFloat = LayoutSpacing.screenPadding
+    static let cardRadius: CGFloat = CornerRadius.card
+    static let buttonRadius: CGFloat = CornerRadius.button
+    static let modalRadius: CGFloat = CornerRadius.modal
+    static let widgetRadius: CGFloat = CornerRadius.widget
 }
 
 // MARK: - Touch Targets
 
-/// Minimum touch target sizes (HIG compliance)
 enum TouchTarget {
-    /// 44pt - HIG minimum touch target
-    static let minimum: CGFloat = 44
-
-    /// 50pt - Recommended for primary actions
-    static let recommended: CGFloat = 50
-
-    /// 80pt - Large action buttons
+    static let minimum = LayoutSpacing.rowHeight
+    static let recommended = LayoutSpacing.buttonHeight
     static let large: CGFloat = 80
 }
 
 // MARK: - Card Heights
 
-/// Standard card heights for consistency
 enum CardHeight {
-    /// 180pt - Hero card (legacy)
     static let hero: CGFloat = 180
-
-    /// 160pt - Health score, savings goal (legacy)
     static let large: CGFloat = 160
-
-    /// 140pt - Interval metric cards (legacy)
     static let medium: CGFloat = 140
-
-    /// 100pt - Insight cards
     static let small: CGFloat = 100
-
-    /// 70pt - Snapshot cards
     static let compact: CGFloat = 70
-
-    // MARK: - Compact Dashboard Heights (v2.1)
-
-    /// 100pt - Primary card (Daily Budget)
     static let primary: CGFloat = 100
-
-    /// 70pt - Summary cards (Income/Expense/Net)
     static let summary: CGFloat = 70
-
-    /// 90pt - Metric cards (Health + Savings)
     static let metric: CGFloat = 90
-
-    /// 70pt - Interval cards (Hourly/Daily/Monthly)
     static let interval: CGFloat = 70
 }
 
 // MARK: - Chart Dimensions
 
-/// Chart-specific dimensions
 enum ChartDimensions {
-    /// 60pt - Mini bar chart height
     static let miniChartHeight: CGFloat = 60
-
-    /// 4pt - Bar width
     static let barWidth: CGFloat = 4
-
-    /// 2pt - Bar spacing
     static let barSpacing: CGFloat = 2
-
-    /// 100pt - Circular progress diameter (legacy)
     static let circularProgressDiameter: CGFloat = 100
-
-    /// 10pt - Circular progress stroke width (legacy)
     static let circularProgressStroke: CGFloat = 10
-
-    /// 12pt - Horizontal progress bar height
     static let horizontalProgressHeight: CGFloat = 12
-
-    /// 6pt - Milestone marker diameter
     static let milestoneMarkerSize: CGFloat = 6
-
-    // MARK: - Compact Dimensions (v2.1)
-
-    /// 50pt - Compact circular progress diameter
     static let compactCircleDiameter: CGFloat = 50
-
-    /// 5pt - Compact circular progress stroke
     static let compactCircleStroke: CGFloat = 5
-
-    /// 8pt - Compact progress bar height
     static let compactProgressHeight: CGFloat = 8
+}
+
+// MARK: - Glass Surface (v2)
+
+enum GlassSurfaceStyle {
+    static let cornerRadius = CornerRadius.card
+    static let borderLineWidth: CGFloat = 0.5
+
+    /// Dark mode border — rgba(248, 250, 252, 0.12)
+    static let borderDark = Color(red: 248 / 255, green: 250 / 255, blue: 252 / 255, opacity: 0.12)
+
+    /// Light mode border — rgba(15, 23, 42, 0.08)
+    static let borderLight = Color(red: 15 / 255, green: 23 / 255, blue: 42 / 255, opacity: 0.08)
+
+    /// Opaque fallback — white (light) / slate-800 #1E293B (dark)
+    static let opaqueFallback = Color.surfaceCard
 }
 
 // MARK: - Shadow Styles
 
-/// Shadow configurations for cards and elevated elements
 enum ShadowStyle {
     case card
     case hero
     case small
 
-    var color: Color {
-        .black.opacity(opacity)
-    }
+    var color: Color { .black.opacity(opacity) }
 
     var opacity: Double {
         switch self {
-        case .card: return 0.08
-        case .hero: return 0.15
-        case .small: return 0.06
+        case .card: return 0.10
+        case .hero: return 0.14
+        case .small: return 0.08
         }
     }
 
     var radius: CGFloat {
         switch self {
-        case .card: return 8
-        case .hero: return 12
-        case .small: return 6
+        case .card: return 6
+        case .hero: return 10
+        case .small: return 4
         }
     }
 
     var offset: CGSize {
         switch self {
         case .card: return CGSize(width: 0, height: 2)
-        case .hero: return CGSize(width: 0, height: 4)
-        case .small: return CGSize(width: 0, height: 2)
+        case .hero: return CGSize(width: 0, height: 3)
+        case .small: return CGSize(width: 0, height: 1)
         }
     }
 }
 
-// MARK: - View Modifiers
+// MARK: - Surface & Card Modifiers (v2)
 
 extension View {
-    /// Applies standard dashboard card styling
-    func dashboardCard(padding: CGFloat = 20) -> some View {
+
+    /// Standard raised card on app background
+    func surfaceCard(
+        padding: CGFloat = LayoutSpacing.cardPadding,
+        borderColor: Color = .borderSubtle,
+        raised: Bool = false
+    ) -> some View {
         self
             .padding(padding)
-            .background(Color.cardBackground)
-            .cornerRadius(CornerRadius.card)
+            .background(raised ? Color.surfaceRaised : Color.surfaceCard)
+            .clipShape(RoundedRectangle(cornerRadius: CornerRadius.card, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: CornerRadius.card, style: .continuous)
+                    .stroke(borderColor, lineWidth: 1)
+            )
             .shadow(
                 color: ShadowStyle.card.color,
                 radius: ShadowStyle.card.radius,
@@ -190,11 +171,34 @@ extension View {
             )
     }
 
-    /// Applies hero card styling (larger shadow)
-    func heroCard(padding: CGFloat = 20) -> some View {
+    /// Inset well for nested rows / progress tracks
+    func surfaceInset(padding: CGFloat = Spacing.sm) -> some View {
         self
             .padding(padding)
-            .cornerRadius(CornerRadius.card)
+            .background(Color.surfaceInset)
+            .clipShape(RoundedRectangle(cornerRadius: CornerRadius.badge, style: .continuous))
+    }
+
+    /// Sheet / overlay panel styling
+    func surfaceOverlay(padding: CGFloat = LayoutSpacing.modalPadding) -> some View {
+        self
+            .padding(padding)
+            .background(Color.surfaceOverlay)
+            .clipShape(RoundedRectangle(cornerRadius: CornerRadius.modal, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: CornerRadius.modal, style: .continuous)
+                    .stroke(Color.borderSubtle, lineWidth: 1)
+            )
+    }
+
+    func dashboardCard(padding: CGFloat = LayoutSpacing.cardPadding) -> some View {
+        surfaceCard(padding: padding)
+    }
+
+    func heroCard(padding: CGFloat = LayoutSpacing.cardPadding) -> some View {
+        self
+            .padding(padding)
+            .clipShape(RoundedRectangle(cornerRadius: CornerRadius.card, style: .continuous))
             .shadow(
                 color: ShadowStyle.hero.color,
                 radius: ShadowStyle.hero.radius,
@@ -203,12 +207,15 @@ extension View {
             )
     }
 
-    /// Applies small card styling (subtle shadow)
-    func smallCard(padding: CGFloat = 12) -> some View {
+    func smallCard(padding: CGFloat = Spacing.md) -> some View {
         self
             .padding(padding)
-            .background(Color.cardBackground)
-            .cornerRadius(CornerRadius.button)
+            .background(Color.surfaceCard)
+            .clipShape(RoundedRectangle(cornerRadius: CornerRadius.button, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: CornerRadius.button, style: .continuous)
+                    .stroke(Color.borderSubtle, lineWidth: 1)
+            )
             .shadow(
                 color: ShadowStyle.small.color,
                 radius: ShadowStyle.small.radius,

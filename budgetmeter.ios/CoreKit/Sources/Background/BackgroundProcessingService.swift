@@ -66,6 +66,14 @@ final class BackgroundProcessingService {
     
     @MainActor
     private func processRecurringTransactions() async {
+        let canProcess = await MainActor.run {
+            PremiumManager.shared.hasAccess(to: BudgetMeterCapability.recurringAutomation)
+        }
+        guard canProcess else {
+            print("BackgroundProcessingService: Recurring automation skipped; premium required")
+            return
+        }
+
         let context = persistenceService.viewContext
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
