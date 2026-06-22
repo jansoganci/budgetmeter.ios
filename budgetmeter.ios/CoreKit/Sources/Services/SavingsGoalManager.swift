@@ -16,6 +16,7 @@ final class SavingsGoalManager {
 
     // MARK: - Properties
     private let persistence: PersistenceService
+    private let syncService: SavingsGoalSyncScheduling
     private var context: NSManagedObjectContext {
         persistence.viewContext
     }
@@ -27,11 +28,20 @@ final class SavingsGoalManager {
     static let goalCompletedNotification = Notification.Name("SavingsGoalCompleted")
 
     // MARK: - Init
-    init(persistence: PersistenceService = .shared) {
+    init(
+        persistence: PersistenceService = .shared,
+        syncService: SavingsGoalSyncScheduling = SupabaseSavingsGoalSyncService.shared
+    ) {
         self.persistence = persistence
+        self.syncService = syncService
     }
 
     // MARK: - CRUD Operations
+
+    /// Whether the user may create another savings goal (first goal always allowed on free tier).
+    func canCreateAdditionalGoal() -> Bool {
+        canCreateAdditionalGoal(in: context)
+    }
 
     /// Create a new savings goal
     @discardableResult
@@ -46,8 +56,8 @@ final class SavingsGoalManager {
         notes: String? = nil,
         enforceFreeGoalLimit: Bool = true
     ) -> SavingsGoal? {
-        if enforceFreeGoalLimit && !canCreateGoalUnderFreeBoundary(in: context) {
-            print("❌ SavingsGoalManager: Free goal limit reached")
+        if enforceFreeGoalLimit && !canCreateAdditionalGoal(in: context) {
+            print("❌ SavingsGoalManager: Savings goal limit reached")
             return nil
         }
 
@@ -65,6 +75,7 @@ final class SavingsGoalManager {
         goal.priority = 0
         goal.createdAt = Date()
         goal.lastModified = Date()
+        markPendingSync(for: goal)
 
         guard persistence.save() else {
             print("❌ SavingsGoalManager: Failed to create goal")
@@ -73,6 +84,7 @@ final class SavingsGoalManager {
 
         // Post notification
         NotificationCenter.default.post(name: Self.goalAddedNotification, object: goal)
+        syncService.scheduleSync()
 
         print("✅ SavingsGoalManager: Created goal '\(name)'")
         return goal
@@ -104,6 +116,7 @@ final class SavingsGoalManager {
         if let notes = notes { goal.notes = notes }
 
         goal.lastModified = Date()
+        markPendingSync(for: goal)
 
         guard persistence.save() else {
             print("❌ SavingsGoalManager: Failed to update goal")
@@ -111,6 +124,7 @@ final class SavingsGoalManager {
         }
 
         NotificationCenter.default.post(name: Self.goalUpdatedNotification, object: goal)
+        syncService.scheduleSync()
 
         print("✅ SavingsGoalManager: Updated goal '\(goal.name ?? "")'")
         return true
@@ -123,7 +137,9 @@ final class SavingsGoalManager {
             return false
         }
 
-        context.delete(goal)
+        goal.deletedAt = Date()
+        goal.lastModified = Date()
+        markPendingSync(for: goal)
 
         guard persistence.save() else {
             print("❌ SavingsGoalManager: Failed to delete goal")
@@ -131,6 +147,7 @@ final class SavingsGoalManager {
         }
 
         NotificationCenter.default.post(name: Self.goalDeletedNotification, object: id)
+        syncService.scheduleSync()
 
         print("✅ SavingsGoalManager: Deleted goal")
         return true
@@ -143,6 +160,8 @@ final class SavingsGoalManager {
 
         goal.currentAmount += amount
         goal.lastModified = Date()
+        goal.deletedAt = nil
+        markPendingSync(for: goal)
 
         // Check if goal is now complete
         let wasCompleted = goal.completedDate != nil
@@ -153,6 +172,7 @@ final class SavingsGoalManager {
         guard persistence.save() else { return false }
 
         NotificationCenter.default.post(name: Self.goalUpdatedNotification, object: goal)
+        syncService.scheduleSync()
         return true
     }
 
@@ -164,6 +184,8 @@ final class SavingsGoalManager {
 
         goal.currentAmount -= amount
         goal.lastModified = Date()
+        goal.deletedAt = nil
+        markPendingSync(for: goal)
 
         // If it was completed and now it's not, unmark completion
         if goal.completedDate != nil && goal.currentAmount < goal.targetAmount {
@@ -173,6 +195,7 @@ final class SavingsGoalManager {
         guard persistence.save() else { return false }
 
         NotificationCenter.default.post(name: Self.goalUpdatedNotification, object: goal)
+        syncService.scheduleSync()
         return true
     }
 
@@ -186,6 +209,7 @@ final class SavingsGoalManager {
         guard persistence.save() else { return false }
 
         NotificationCenter.default.post(name: Self.goalCompletedNotification, object: goal)
+        syncService.scheduleSync()
         return true
     }
 
@@ -196,10 +220,12 @@ final class SavingsGoalManager {
         goal.isArchived = true
         goal.archivedDate = Date()
         goal.lastModified = Date()
+        markPendingSync(for: goal)
 
         guard persistence.save() else { return false }
 
         NotificationCenter.default.post(name: Self.goalUpdatedNotification, object: goal)
+        syncService.scheduleSync()
         return true
     }
 
@@ -210,10 +236,12 @@ final class SavingsGoalManager {
         goal.isArchived = false
         goal.archivedDate = nil
         goal.lastModified = Date()
+        markPendingSync(for: goal)
 
         guard persistence.save() else { return false }
 
         NotificationCenter.default.post(name: Self.goalUpdatedNotification, object: goal)
+        syncService.scheduleSync()
         return true
     }
 
@@ -222,7 +250,7 @@ final class SavingsGoalManager {
     /// Get all active (non-archived) goals
     func getActiveGoals() -> [SavingsGoal] {
         let request: NSFetchRequest<SavingsGoal> = SavingsGoal.fetchRequest()
-        request.predicate = NSPredicate(format: "isArchived == NO")
+        request.predicate = NSPredicate(format: "isArchived == NO AND deletedAt == nil")
 
         do {
             return Self.sortedGoals(try context.fetch(request))
@@ -240,7 +268,7 @@ final class SavingsGoalManager {
     /// Fetch the deterministic primary active savings goal from a supplied context.
     static func primaryActiveGoal(in context: NSManagedObjectContext) -> SavingsGoal? {
         let request: NSFetchRequest<SavingsGoal> = SavingsGoal.fetchRequest()
-        request.predicate = NSPredicate(format: "isArchived == NO")
+        request.predicate = NSPredicate(format: "isArchived == NO AND deletedAt == nil")
 
         do {
             let nonArchivedGoals = try context.fetch(request)
@@ -273,7 +301,7 @@ final class SavingsGoalManager {
     /// Get completed goals
     func getCompletedGoals() -> [SavingsGoal] {
         let request: NSFetchRequest<SavingsGoal> = SavingsGoal.fetchRequest()
-        request.predicate = NSPredicate(format: "completedDate != nil AND isArchived == NO")
+        request.predicate = NSPredicate(format: "completedDate != nil AND isArchived == NO AND deletedAt == nil")
         request.sortDescriptors = [NSSortDescriptor(key: "completedDate", ascending: false)]
 
         do {
@@ -287,7 +315,7 @@ final class SavingsGoalManager {
     /// Get in-progress goals (active but not completed)
     func getInProgressGoals() -> [SavingsGoal] {
         let request: NSFetchRequest<SavingsGoal> = SavingsGoal.fetchRequest()
-        request.predicate = NSPredicate(format: "completedDate == nil AND isArchived == NO")
+        request.predicate = NSPredicate(format: "completedDate == nil AND isArchived == NO AND deletedAt == nil")
         request.sortDescriptors = [NSSortDescriptor(key: "targetDate", ascending: true)]
 
         do {
@@ -301,7 +329,7 @@ final class SavingsGoalManager {
     /// Get archived goals
     func getArchivedGoals() -> [SavingsGoal] {
         let request: NSFetchRequest<SavingsGoal> = SavingsGoal.fetchRequest()
-        request.predicate = NSPredicate(format: "isArchived == YES")
+        request.predicate = NSPredicate(format: "isArchived == YES AND deletedAt == nil")
         request.sortDescriptors = [NSSortDescriptor(key: "archivedDate", ascending: false)]
 
         do {
@@ -315,7 +343,7 @@ final class SavingsGoalManager {
     /// Get goal by ID
     func fetchGoal(by id: UUID) -> SavingsGoal? {
         let request: NSFetchRequest<SavingsGoal> = SavingsGoal.fetchRequest()
-        request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        request.predicate = NSPredicate(format: "id == %@ AND deletedAt == nil", id as CVarArg)
         request.fetchLimit = 1
 
         do {
@@ -404,8 +432,10 @@ final class SavingsGoalManager {
         if let existing = getPrimaryActiveGoal() {
             existing.targetAmount = clampedTarget
             existing.lastModified = Date()
+            markPendingSync(for: existing)
             guard persistence.save() else { return nil }
             NotificationCenter.default.post(name: Self.goalUpdatedNotification, object: existing)
+            syncService.scheduleSync()
             return existing
         }
 
@@ -419,9 +449,11 @@ final class SavingsGoalManager {
         goal.emoji = "🎯"
         goal.createdAt = Date()
         goal.lastModified = Date()
+        markPendingSync(for: goal)
 
         guard persistence.save() else { return nil }
         NotificationCenter.default.post(name: Self.goalAddedNotification, object: goal)
+        syncService.scheduleSync()
         return goal
     }
 
@@ -431,17 +463,46 @@ final class SavingsGoalManager {
         guard goal.completedDate == nil else { return }
         goal.completedDate = Date()
         goal.lastModified = Date()
+        markPendingSync(for: goal)
     }
 
-    private func canCreateGoalUnderFreeBoundary(in context: NSManagedObjectContext) -> Bool {
-        if isPremiumUser(in: context) {
+    private func canCreateAdditionalGoal(in context: NSManagedObjectContext) -> Bool {
+        if hasMultipleSavingsGoalsAccess(in: context) {
             return true
         }
 
         let request: NSFetchRequest<SavingsGoal> = SavingsGoal.fetchRequest()
-        request.predicate = NSPredicate(format: "isArchived == NO")
+        request.predicate = NSPredicate(format: "isArchived == NO AND deletedAt == nil")
         let count = (try? context.count(for: request)) ?? 0
         return count == 0
+    }
+
+    private func markPendingSync(for goal: SavingsGoal) {
+        goal.syncStatus = SavingsGoalSyncStatus.pending.rawValue
+        goal.lastSyncError = nil
+        if goal.id == nil {
+            goal.id = UUID()
+        }
+    }
+
+    private func hasMultipleSavingsGoalsAccess(in context: NSManagedObjectContext) -> Bool {
+        if isPremiumUser(in: context) {
+            return true
+        }
+
+        #if DEBUG
+        if UserDefaults.standard.bool(forKey: PremiumManager.debugPremiumOverrideKey) {
+            return true
+        }
+        #endif
+
+        if Thread.isMainThread {
+            return MainActor.assumeIsolated {
+                PremiumManager.shared.hasAccess(to: BudgetMeterCapability.multipleSavingsGoals)
+            }
+        }
+
+        return false
     }
 
     private func isPremiumUser(in context: NSManagedObjectContext) -> Bool {
@@ -496,13 +557,13 @@ enum SavingsGoalPaceStatus {
     var displayText: String {
         switch self {
         case .ahead:
-            return String(localized: "savings.pace.ahead", defaultValue: "Ahead of pace!", table: "UI")
+            return "savings.pace.ahead".localized(defaultValue: "Saving faster than planned", table: "UI")
         case .onPace:
-            return String(localized: "savings.pace.on_pace", defaultValue: "On pace", table: "UI")
+            return "savings.pace.on_pace".localized(defaultValue: "On track for your date", table: "UI")
         case .behind:
-            return String(localized: "savings.pace.behind", defaultValue: "Behind pace", table: "UI")
+            return "savings.pace.behind".localized(defaultValue: "Behind your plan", table: "UI")
         case .completed:
-            return String(localized: "savings.goal_reached", defaultValue: "Goal reached!", table: "UI")
+            return "savings.goal_reached".localized(defaultValue: "Goal reached!", table: "UI")
         case .unknown:
             return ""
         }

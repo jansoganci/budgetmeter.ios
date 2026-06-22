@@ -12,6 +12,7 @@ import CoreData
 struct HomeView: View {
 
     @StateObject private var viewModel = HomeViewModel()
+    @StateObject private var premiumManager = PremiumManager.shared
     @Environment(\.sizeCategory) var sizeCategory
 
     private enum HomeScrollTarget {
@@ -77,21 +78,34 @@ struct HomeView: View {
                 .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $viewModel.showingSavingsGoalSheet) {
-            QuickSavingsGoalInputView(
-                currentGoal: viewModel.savingsGoal,
-                currencySymbol: viewModel.currencySymbol,
-                onSave: { amount in
-                    viewModel.updateSavingsGoal(amount)
-                }
-            )
-            .presentationDetents([.medium, .large])
-            .presentationDragIndicator(.visible)
+            if shouldOpenFullAddGoalFlow {
+                SavingsGoalInputView(goal: nil, onSave: {})
+                    .onDisappear {
+                        viewModel.refresh()
+                    }
+                    .presentationDragIndicator(.visible)
+            } else {
+                QuickSavingsGoalInputView(
+                    currentGoal: viewModel.savingsGoal,
+                    currencySymbol: viewModel.currencySymbol,
+                    onSave: { amount in
+                        viewModel.updateSavingsGoal(amount)
+                    }
+                )
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+            }
         }
         .sheet(isPresented: $viewModel.showingDailyBudgetInfo) {
             DailyBudgetInfoView()
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
         }
+    }
+
+    private var shouldOpenFullAddGoalFlow: Bool {
+        premiumManager.hasAccess(to: .multipleSavingsGoals)
+            && SavingsGoalManager.shared.canCreateAdditionalGoal()
     }
 
     // MARK: - Money Pace Hero
@@ -169,24 +183,24 @@ struct HomeView: View {
     // MARK: - Health + Savings Row
 
     private var healthAndSavingsRow: some View {
-        HStack(spacing: Spacing.md) {
+        HStack(alignment: .top, spacing: Spacing.md) {
             CompactHealthCard(
                 score: viewModel.financialHealthScore,
                 onTap: {
                     // TODO: Navigate to health details
                 }
             )
+            .frame(maxWidth: .infinity)
 
-            CompactSavingsCard(
-                goalName: viewModel.primarySavingsGoalName,
-                emoji: viewModel.primarySavingsGoalEmoji,
-                currentAmount: viewModel.primarySavingsGoalCurrent,
-                targetAmount: viewModel.primarySavingsGoalTarget > 0 ? viewModel.primarySavingsGoalTarget : viewModel.savingsGoal,
+            CompactSavingsCarouselCard(
+                goals: viewModel.homeSavingsGoals,
                 currencySymbol: viewModel.currencySymbol,
+                fallbackTargetAmount: viewModel.savingsGoal,
                 onTap: {
                     viewModel.showSavingsGoalEntry()
                 }
             )
+            .frame(maxWidth: .infinity)
         }
     }
 

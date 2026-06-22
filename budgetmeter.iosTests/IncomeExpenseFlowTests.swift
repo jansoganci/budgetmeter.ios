@@ -225,6 +225,21 @@ final class IncomeExpenseFlowTests: XCTestCase {
         XCTAssertEqual(viewModel.oneTimeIncomes.count, 1)
     }
 
+    func test_weeklyRecurringRoutesToWeeklySectionOnly() {
+        insertRecurringCategory(type: "income", frequency: "weekly", amount: 250)
+        insertRecurringCategory(type: "income", frequency: "monthly", amount: 1_000)
+        CoreDataMigrationTestSupport.saveContext(persistence)
+
+        let viewModel = IncomeViewModel(
+            persistenceService: persistence,
+            summaryBuilder: builder
+        )
+
+        XCTAssertEqual(viewModel.weeklyIncomes.count, 1)
+        XCTAssertEqual(viewModel.monthlyIncomes.count, 1)
+        XCTAssertEqual(viewModel.dailyIncomes.count, 0)
+    }
+
     // MARK: - Helpers
 
     @discardableResult

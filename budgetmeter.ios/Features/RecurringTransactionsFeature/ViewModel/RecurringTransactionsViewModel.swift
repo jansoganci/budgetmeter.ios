@@ -57,10 +57,15 @@ final class RecurringTransactionsViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     
     private let persistenceService: PersistenceService
+    private let syncService: FinancialEntitySyncScheduling
     private var cancellables = Set<AnyCancellable>()
     
-    init(persistenceService: PersistenceService = .shared) {
+    init(
+        persistenceService: PersistenceService = .shared,
+        syncService: FinancialEntitySyncScheduling = SupabaseRecurringTransactionSyncService.shared
+    ) {
         self.persistenceService = persistenceService
+        self.syncService = syncService
         setupSubscriptions()
         setupLanguageObserver()
         fetchRecurringTransactions()
@@ -91,6 +96,7 @@ final class RecurringTransactionsViewModel: ObservableObject {
     func fetchRecurringTransactions() {
         let context = persistenceService.viewContext
         let request: NSFetchRequest<RecurringTransaction> = RecurringTransaction.fetchRequest()
+        request.predicate = NSPredicate(format: "deletedAt == nil")
         request.sortDescriptors = [NSSortDescriptor(keyPath: \RecurringTransaction.nextDueDate, ascending: true)]
         
         do {
@@ -129,10 +135,13 @@ final class RecurringTransactionsViewModel: ObservableObject {
         newTransaction.isActive = true
         newTransaction.notes = notes?.trimmingCharacters(in: .whitespacesAndNewlines)
         newTransaction.createdAt = Date()
+        newTransaction.lastModified = Date()
         newTransaction.lastProcessedDate = nil
+        newTransaction.markFinancialSyncPending()
         
         persistenceService.save()
         fetchRecurringTransactions()
+        syncService.scheduleSync()
     }
     
     func updateRecurringTransaction(
@@ -157,23 +166,28 @@ final class RecurringTransactionsViewModel: ObservableObject {
         transaction.endDate = endDate
         transaction.nextDueDate = calculateNextDueDate(from: startDate, frequency: frequency)
         transaction.notes = notes?.trimmingCharacters(in: .whitespacesAndNewlines)
+        transaction.lastModified = Date()
+        transaction.markFinancialSyncPending()
         
         persistenceService.save()
         fetchRecurringTransactions()
+        syncService.scheduleSync()
     }
     
     func deleteRecurringTransaction(_ transaction: RecurringTransaction) {
-        let context = persistenceService.viewContext
-        context.delete(transaction)
+        transaction.tombstoneForFinancialSync()
         persistenceService.save()
         fetchRecurringTransactions()
+        syncService.scheduleSync()
     }
     
     func toggleTransactionActive(_ transaction: RecurringTransaction) {
-        let context = persistenceService.viewContext
         transaction.isActive.toggle()
+        transaction.lastModified = Date()
+        transaction.markFinancialSyncPending()
         persistenceService.save()
         fetchRecurringTransactions()
+        syncService.scheduleSync()
     }
     
     func editTransaction(_ transaction: RecurringTransaction) {
@@ -239,6 +253,7 @@ final class RecurringTransactionsViewModel: ObservableObject {
             sourceID: recurringTransaction.id?.uuidString
         )
 
+        SupabaseOneTimeTransactionSyncService.shared.registerLocalOneTimeRow(newCategory)
         persistenceService.save()
     }
     

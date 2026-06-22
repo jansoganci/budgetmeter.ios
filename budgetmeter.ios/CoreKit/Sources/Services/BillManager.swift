@@ -17,6 +17,7 @@ final class BillManager {
 
     // MARK: - Properties
     private let persistence = PersistenceService.shared
+    private let syncService: FinancialEntitySyncScheduling
     private var context: NSManagedObjectContext {
         persistence.viewContext
     }
@@ -28,7 +29,17 @@ final class BillManager {
     static let billPaidNotification = Notification.Name("BillPaid")
 
     // MARK: - Private Init
-    private init() {}
+    private init(syncService: FinancialEntitySyncScheduling = SupabaseBillSyncService.shared) {
+        self.syncService = syncService
+    }
+
+    private func scheduleBillSync() {
+        syncService.scheduleSync()
+    }
+
+    private func markBillPending(_ bill: Bill) {
+        bill.markFinancialSyncPending()
+    }
 
     // MARK: - CRUD Operations
 
@@ -65,6 +76,7 @@ final class BillManager {
         bill.colorHex = colorHex
         bill.createdAt = Date()
         bill.lastModified = Date()
+        markBillPending(bill)
 
         guard persistence.save() else {
             print("❌ BillManager: Failed to create bill")
@@ -78,6 +90,7 @@ final class BillManager {
 
         // Post notification
         NotificationCenter.default.post(name: Self.billAddedNotification, object: bill)
+        scheduleBillSync()
 
         print("✅ BillManager: Created bill '\(name)'")
         return bill
@@ -117,6 +130,7 @@ final class BillManager {
         if let colorHex = colorHex { bill.colorHex = colorHex }
 
         bill.lastModified = Date()
+        markBillPending(bill)
 
         guard persistence.save() else {
             print("❌ BillManager: Failed to update bill")
@@ -130,6 +144,7 @@ final class BillManager {
         }
 
         NotificationCenter.default.post(name: Self.billUpdatedNotification, object: bill)
+        scheduleBillSync()
 
         print("✅ BillManager: Updated bill '\(bill.name ?? "")'")
         return true
@@ -144,8 +159,7 @@ final class BillManager {
 
         // Cancel notifications
         cancelReminderNotification(for: bill)
-
-        context.delete(bill)
+        bill.tombstoneForFinancialSync()
 
         guard persistence.save() else {
             print("❌ BillManager: Failed to delete bill")
@@ -153,6 +167,7 @@ final class BillManager {
         }
 
         NotificationCenter.default.post(name: Self.billDeletedNotification, object: id)
+        scheduleBillSync()
 
         print("✅ BillManager: Deleted bill")
         return true
@@ -165,6 +180,8 @@ final class BillManager {
         bill.isPaid = true
         bill.paidDate = paidDate
         bill.paidAmount = paidAmount ?? bill.amount
+        bill.lastModified = Date()
+        markBillPending(bill)
 
         // If recurring, create next bill instance
         if bill.isRecurring, let frequency = bill.frequency {
@@ -181,6 +198,7 @@ final class BillManager {
         cancelReminderNotification(for: bill)
 
         NotificationCenter.default.post(name: Self.billPaidNotification, object: bill)
+        scheduleBillSync()
         return true
     }
 
@@ -191,6 +209,8 @@ final class BillManager {
         bill.isPaid = false
         bill.paidDate = nil
         bill.paidAmount = 0
+        bill.lastModified = Date()
+        markBillPending(bill)
 
         guard persistence.save() else { return false }
 
@@ -200,6 +220,7 @@ final class BillManager {
         }
 
         NotificationCenter.default.post(name: Self.billUpdatedNotification, object: bill)
+        scheduleBillSync()
         return true
     }
 
@@ -208,6 +229,7 @@ final class BillManager {
     /// Get all bills (paid and unpaid)
     func getAllBills() -> [Bill] {
         let request: NSFetchRequest<Bill> = Bill.fetchRequest()
+        request.predicate = NSPredicate(format: "deletedAt == nil")
         request.sortDescriptors = [NSSortDescriptor(key: "dueDate", ascending: true)]
 
         do {
@@ -221,7 +243,7 @@ final class BillManager {
     /// Get unpaid bills only
     func getUnpaidBills() -> [Bill] {
         let request: NSFetchRequest<Bill> = Bill.fetchRequest()
-        request.predicate = NSPredicate(format: "isPaid == NO")
+        request.predicate = NSPredicate(format: "isPaid == NO AND deletedAt == nil")
         request.sortDescriptors = [NSSortDescriptor(key: "dueDate", ascending: true)]
 
         do {
@@ -235,7 +257,7 @@ final class BillManager {
     /// Get paid bills only
     func getPaidBills() -> [Bill] {
         let request: NSFetchRequest<Bill> = Bill.fetchRequest()
-        request.predicate = NSPredicate(format: "isPaid == YES")
+        request.predicate = NSPredicate(format: "isPaid == YES AND deletedAt == nil")
         request.sortDescriptors = [NSSortDescriptor(key: "paidDate", ascending: false)]
 
         do {
@@ -250,7 +272,7 @@ final class BillManager {
     func getOverdueBills() -> [Bill] {
         let now = Date()
         let request: NSFetchRequest<Bill> = Bill.fetchRequest()
-        request.predicate = NSPredicate(format: "isPaid == NO AND dueDate < %@", now as CVarArg)
+        request.predicate = NSPredicate(format: "isPaid == NO AND dueDate < %@ AND deletedAt == nil", now as CVarArg)
         request.sortDescriptors = [NSSortDescriptor(key: "dueDate", ascending: true)]
 
         do {
@@ -268,7 +290,7 @@ final class BillManager {
 
         let request: NSFetchRequest<Bill> = Bill.fetchRequest()
         request.predicate = NSPredicate(
-            format: "isPaid == NO AND dueDate >= %@ AND dueDate <= %@",
+            format: "isPaid == NO AND dueDate >= %@ AND dueDate <= %@ AND deletedAt == nil",
             now as CVarArg,
             endDate as CVarArg
         )
@@ -285,7 +307,7 @@ final class BillManager {
     /// Get bill by ID
     func fetchBill(by id: UUID) -> Bill? {
         let request: NSFetchRequest<Bill> = Bill.fetchRequest()
-        request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        request.predicate = NSPredicate(format: "id == %@ AND deletedAt == nil", id as CVarArg)
         request.fetchLimit = 1
 
         do {
@@ -308,7 +330,7 @@ final class BillManager {
 
         let request: NSFetchRequest<Bill> = Bill.fetchRequest()
         request.predicate = NSPredicate(
-            format: "dueDate >= %@ AND dueDate <= %@",
+            format: "dueDate >= %@ AND dueDate <= %@ AND deletedAt == nil",
             startOfMonth as CVarArg,
             endOfMonth as CVarArg
         )

@@ -2,7 +2,7 @@
 //  AccountBackupSettingsView.swift
 //  BudgetMeter
 //
-//  Account, sign-in, and premium cloud backup controls.
+//  Account, sign-in, account sync, and premium manual backup controls.
 //
 
 import SwiftUI
@@ -27,22 +27,33 @@ struct AccountBackupSettingsView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: LayoutSpacing.sectionGap) {
                     accountSection
+                    syncSection
                     backupSection
                     if authService.isAuthenticated {
                         dangerSection
+                    }
+
+                    if let statusMessage {
+                        StatusBanner(message: statusMessage, iconName: "checkmark.circle.fill", color: .financialPositive)
+                            .accessibilityLabel(statusMessage)
+                    }
+
+                    if let error = authService.errorMessage ?? backupService.syncState.lastErrorMessage {
+                        StatusBanner(message: error, iconName: "xmark.octagon.fill", color: .financialNegative)
+                            .accessibilityLabel(error)
                     }
                 }
                 .padding(.horizontal, LayoutSpacing.screenPadding)
                 .padding(.vertical, Spacing.md)
             }
         }
-        .navigationTitle("account.title".localized(defaultValue: "Account & Backup", table: "UI"))
+        .navigationTitle("account.title".localized(defaultValue: "Account", table: "UI"))
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await refreshCloudState()
         }
         .alert(
-            "backup.restore.confirm.title".localized(defaultValue: "Restore Cloud Backup", table: "UI"),
+            "backup.restore.confirm.title".localized(defaultValue: "Restore Manual Backup", table: "UI"),
             isPresented: $showingRestoreConfirm
         ) {
             Button("common.cancel".localized(defaultValue: "Cancel", table: "UI"), role: .cancel) { }
@@ -50,7 +61,7 @@ struct AccountBackupSettingsView: View {
                 Task { await restoreConfirmed() }
             }
         } message: {
-            Text("backup.restore.confirm.message".localized(defaultValue: "This replaces local data on this device with your cloud backup.", table: "UI"))
+            Text("backup.restore.confirm.message".localized(defaultValue: "This replaces local data on this device with your manual backup.", table: "UI"))
         }
         .alert(
             "account.delete.title".localized(defaultValue: "Delete Account", table: "UI"),
@@ -61,7 +72,7 @@ struct AccountBackupSettingsView: View {
                 Task { await deleteAccount() }
             }
         } message: {
-            Text("account.delete.message".localized(defaultValue: "This deletes your cloud account and backup. Local data on this device stays unless you reset it separately.", table: "UI"))
+            Text("account.delete.message".localized(defaultValue: "This permanently deletes your account and synced data on our servers. Data on this device stays unless you reset it separately in Settings.", table: "UI"))
         }
         .sheet(isPresented: $showingPremiumPaywall) {
             PremiumPaywallView(
@@ -76,7 +87,7 @@ struct AccountBackupSettingsView: View {
     private var accountSection: some View {
         SettingsSection(
             title: "account.section.title".localized(defaultValue: "Account", table: "UI"),
-            footer: "account.footer".localized(defaultValue: "Sign in is free. Cloud backup requires Premium.", table: "UI")
+            footer: "account.footer".localized(defaultValue: "Sign in is free and syncs your data to your account. Manual backup & restore is a Premium feature.", table: "UI")
         ) {
             if authService.isAuthenticated {
                 SettingsRowContent(
@@ -99,8 +110,32 @@ struct AccountBackupSettingsView: View {
             } else {
                 SettingsRowContent(
                     iconName: "person.crop.circle",
-                    title: "backup.sign_in_required".localized(defaultValue: "Sign in to back up or restore.", table: "UI"),
-                    subtitle: "account.footer".localized(defaultValue: "Sign in is free. Cloud backup requires Premium.", table: "UI"),
+                    title: "account.sign_in_prompt".localized(defaultValue: "Sign in to sync your account data.", table: "UI"),
+                    subtitle: "account.footer".localized(defaultValue: "Sign in is free and syncs your data to your account. Manual backup & restore is a Premium feature.", table: "UI"),
+                    showsChevron: false
+                )
+            }
+        }
+    }
+
+    private var syncSection: some View {
+        SettingsSection(
+            title: "sync.section.title".localized(defaultValue: "Account Sync", table: "UI"),
+            footer: authService.isAuthenticated
+                ? "sync.footer.signed_in".localized(defaultValue: "When you sign in, your BudgetMeter data syncs securely to your account. Sync runs after sign-in and when you make changes. It may take a moment to appear on another device.", table: "UI")
+                : "sync.footer.signed_out".localized(defaultValue: "Sign in to save your settings and financial data to your account and use it on another device.", table: "UI")
+        ) {
+            if authService.isAuthenticated {
+                SettingsRowContent(
+                    iconName: "arrow.triangle.2.circlepath",
+                    title: "sync.status.active".localized(defaultValue: "Sync enabled for your account", table: "UI"),
+                    subtitle: "sync.status.detail".localized(defaultValue: "Updates when you sign in or save changes", table: "UI"),
+                    showsChevron: false
+                )
+            } else {
+                SettingsRowContent(
+                    iconName: "arrow.triangle.2.circlepath",
+                    title: "account.sign_in_prompt".localized(defaultValue: "Sign in to sync your account data.", table: "UI"),
                     showsChevron: false
                 )
             }
@@ -109,26 +144,26 @@ struct AccountBackupSettingsView: View {
 
     private var backupSection: some View {
         SettingsSection(
-            title: "backup.section.title".localized(defaultValue: "Cloud Backup", table: "UI"),
-            footer: "backup.footer".localized(defaultValue: "Backup is manual in v1. Local data is snapshotted before backup or restore.", table: "UI")
+            title: "backup.section.title".localized(defaultValue: "Manual Backup & Restore", table: "UI"),
+            footer: "backup.footer".localized(defaultValue: "Optional full-device snapshot for advanced recovery. This is separate from everyday account sync. Local data is snapshotted before backup or restore.", table: "UI")
         ) {
             if !premiumManager.hasAccess(to: .backupSync) {
                 SettingsActionRow(
                     iconName: "crown.fill",
-                    title: "backup.premium_required".localized(defaultValue: "Upgrade for Cloud Backup", table: "UI")
+                    title: "backup.premium_required".localized(defaultValue: "Upgrade for Manual Backup & Restore", table: "UI")
                 ) {
                     showingPremiumPaywall = true
                 }
             } else if !authService.isAuthenticated {
                 SettingsRowContent(
                     iconName: "icloud.slash",
-                    title: "backup.sign_in_required".localized(defaultValue: "Sign in to back up or restore.", table: "UI"),
+                    title: "backup.sign_in_required".localized(defaultValue: "Sign in to use manual backup & restore.", table: "UI"),
                     showsChevron: false
                 )
             } else {
                 if let scenario = firstSignInScenario, scenario == .overlap {
                     StatusBanner(
-                        message: "backup.overlap.message".localized(defaultValue: "This device and your cloud backup both contain data. Choose backup or restore carefully.", table: "UI"),
+                        message: "backup.overlap.message".localized(defaultValue: "This device and your manual backup both contain data. Choose backup or restore carefully.", table: "UI"),
                         iconName: "exclamationmark.triangle.fill",
                         color: .financialCaution
                     )
@@ -146,7 +181,7 @@ struct AccountBackupSettingsView: View {
                 } else {
                     SettingsRowContent(
                         iconName: "clock",
-                        title: "backup.never".localized(defaultValue: "No cloud backup yet", table: "UI"),
+                        title: "backup.never".localized(defaultValue: "No manual backup yet", table: "UI"),
                         showsChevron: false
                     )
                 }
@@ -156,7 +191,7 @@ struct AccountBackupSettingsView: View {
 
                     SettingsRowContent(
                         iconName: "icloud.fill",
-                        title: String(format: "backup.cloud_summary".localized(defaultValue: "Cloud backup: %lld records, %@", table: "UI"), cloudSummary.recordCount, formattedDate(cloudSummary.updatedAt)),
+                        title: String(format: "backup.cloud_summary".localized(defaultValue: "Manual backup: %lld records, %@", table: "UI"), cloudSummary.recordCount, formattedDate(cloudSummary.updatedAt)),
                         showsChevron: false
                     )
                 }
@@ -176,24 +211,12 @@ struct AccountBackupSettingsView: View {
 
                 SettingsActionRow(
                     iconName: "icloud.and.arrow.down",
-                    title: "backup.restore".localized(defaultValue: "Restore from Cloud", table: "UI"),
+                    title: "backup.restore".localized(defaultValue: "Restore Manual Backup", table: "UI"),
                     showsChevron: false
                 ) {
                     showingRestoreConfirm = true
                 }
                 .disabled(authService.isLoading || backupService.syncState.status == .restoring || cloudSummary == nil)
-            }
-
-            if let statusMessage {
-                StatusBanner(message: statusMessage, iconName: "checkmark.circle.fill", color: .financialPositive)
-                    .padding(Spacing.md)
-                    .accessibilityLabel(statusMessage)
-            }
-
-            if let error = authService.errorMessage ?? backupService.syncState.lastErrorMessage {
-                StatusBanner(message: error, iconName: "xmark.octagon.fill", color: .financialNegative)
-                    .padding(Spacing.md)
-                    .accessibilityLabel(error)
             }
         }
     }

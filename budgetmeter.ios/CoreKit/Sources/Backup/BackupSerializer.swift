@@ -119,7 +119,19 @@ struct BackupSerializer {
 
     private func fetchCategories(from context: NSManagedObjectContext) throws -> [BackupFinancialCategory] {
         let request: NSFetchRequest<FinancialCategory> = FinancialCategory.fetchRequest()
-        return try context.fetch(request).map { category in
+        return try context.fetch(request)
+            .filter { category in
+                if FinancialCategoryWriteSupport.isOneTimeDisplayCategory(category) {
+                    return !OneTimeTransactionSyncMetadataStore.shared.isTombstoned(category, in: context)
+                }
+                if category.isCustom,
+                   FinancialCategoryWriteSupport.isRecurringDisplayCategory(category),
+                   FinancialCategorySyncMetadataStore.shared.isTombstonedCustomCategory(category, in: context) {
+                    return false
+                }
+                return true
+            }
+            .map { category in
             BackupFinancialCategory(
                 clientRecordID: clientRecordID(for: category.id, fallback: category.uniqueID),
                 updatedAt: category.lastModified ?? category.createdAt ?? Date(),
@@ -144,6 +156,7 @@ struct BackupSerializer {
 
     private func fetchRecurring(from context: NSManagedObjectContext) throws -> [BackupRecurringTransaction] {
         let request: NSFetchRequest<RecurringTransaction> = RecurringTransaction.fetchRequest()
+        request.predicate = NSPredicate(format: "deletedAt == nil")
         return try context.fetch(request).map { item in
             BackupRecurringTransaction(
                 clientRecordID: clientRecordID(for: item.id),
@@ -167,6 +180,7 @@ struct BackupSerializer {
 
     private func fetchSavingsGoals(from context: NSManagedObjectContext) throws -> [BackupSavingsGoal] {
         let request: NSFetchRequest<SavingsGoal> = SavingsGoal.fetchRequest()
+        request.predicate = NSPredicate(format: "deletedAt == nil")
         return try context.fetch(request).map { goal in
             BackupSavingsGoal(
                 clientRecordID: clientRecordID(for: goal.id),
@@ -193,6 +207,7 @@ struct BackupSerializer {
 
     private func fetchSubscriptions(from context: NSManagedObjectContext) throws -> [BackupSubscription] {
         let request: NSFetchRequest<Subscription> = Subscription.fetchRequest()
+        request.predicate = NSPredicate(format: "deletedAt == nil")
         return try context.fetch(request).map { item in
             BackupSubscription(
                 clientRecordID: clientRecordID(for: item.id),
@@ -217,6 +232,7 @@ struct BackupSerializer {
 
     private func fetchBills(from context: NSManagedObjectContext) throws -> [BackupBill] {
         let request: NSFetchRequest<Bill> = Bill.fetchRequest()
+        request.predicate = NSPredicate(format: "deletedAt == nil")
         return try context.fetch(request).map { bill in
             BackupBill(
                 clientRecordID: clientRecordID(for: bill.id),
@@ -245,6 +261,7 @@ struct BackupSerializer {
 
     private func fetchBillPayments(from context: NSManagedObjectContext) throws -> [BackupBillPayment] {
         let request: NSFetchRequest<BillPayment> = BillPayment.fetchRequest()
+        request.predicate = NSPredicate(format: "deletedAt == nil")
         return try context.fetch(request).map { payment in
             BackupBillPayment(
                 clientRecordID: clientRecordID(for: payment.id),

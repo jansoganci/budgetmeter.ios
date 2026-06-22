@@ -18,6 +18,7 @@ struct PremiumFeatureView<Content: View>: View {
     
     @StateObject private var premiumManager = PremiumManager.shared
     @State private var showingPaywall = false
+    @Environment(\.themeAccent) private var themeAccent
     
     // MARK: - Initialization
     
@@ -92,7 +93,7 @@ struct PremiumFeatureView<Content: View>: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .frame(minHeight: TouchTarget.minimum)
-                        .background(Color.accentPrimary)
+                        .background(themeAccent)
                         .clipShape(RoundedRectangle(cornerRadius: CornerRadius.button, style: .continuous))
                 }
             }
@@ -117,6 +118,7 @@ struct PremiumFeatureButton: View {
     
     @StateObject private var premiumManager = PremiumManager.shared
     @State private var showingPaywall = false
+    @Environment(\.themeAccent) private var themeAccent
     
     // MARK: - Initialization
     
@@ -151,7 +153,7 @@ struct PremiumFeatureButton: View {
                     
                     Image(systemName: "crown.fill")
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.brandProgress)
+                        .foregroundColor(themeAccent)
                 }
             }
             .foregroundColor(.textPrimary)
@@ -204,6 +206,7 @@ struct PremiumFeatureRow: View {
     
     @StateObject private var premiumManager = PremiumManager.shared
     @State private var showingPaywall = false
+    @Environment(\.themeAccent) private var themeAccent
     
     // MARK: - Initialization
     
@@ -235,9 +238,9 @@ struct PremiumFeatureRow: View {
                 // Icon
                 Image(systemName: iconName)
                     .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(.brandProgress)
+                    .foregroundColor(themeAccent)
                     .frame(width: 32, height: 32)
-                    .background(Color.brandProgress.opacity(0.12))
+                    .background(themeAccent.opacity(0.12))
                     .clipShape(RoundedRectangle(cornerRadius: CornerRadius.small, style: .continuous))
                 
                 // Content
@@ -255,7 +258,7 @@ struct PremiumFeatureRow: View {
                 if !premiumManager.hasAccess(to: premiumFeature) {
                     Image(systemName: "crown.fill")
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.brandProgress)
+                        .foregroundColor(themeAccent)
                 } else {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 16, weight: .medium))

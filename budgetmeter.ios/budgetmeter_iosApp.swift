@@ -8,14 +8,18 @@
 import SwiftUI
 import UIKit
 import BackgroundTasks
+import UserNotifications
 
 @main
 struct budgetmeter_iosApp: App {
     @StateObject private var biometricManager = BiometricManager.shared
     @StateObject private var themeManager = ThemeManager.shared
+    private static let notificationPresentationDelegate = NotificationPresentationDelegate()
 
     init() {
         guard !Self.isRunningUnitTests else { return }
+
+        UNUserNotificationCenter.current().delegate = Self.notificationPresentationDelegate
 
         // Load and apply stored theme preference before any views render
         loadAndApplyStoredTheme()
@@ -36,6 +40,7 @@ struct budgetmeter_iosApp: App {
                 }
             }
             .environmentObject(biometricManager)
+            .environment(\.themeAccent, themeManager.accentColor)
             .accentColor(themeManager.accentColor)
             .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { _ in
                 BackgroundProcessingService.shared.applicationDidEnterBackground()
@@ -132,6 +137,16 @@ struct budgetmeter_iosApp: App {
         case .system:
             window.overrideUserInterfaceStyle = .unspecified
         }
+    }
+}
+
+private final class NotificationPresentationDelegate: NSObject, UNUserNotificationCenterDelegate {
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([.banner, .list, .sound])
     }
 }
 

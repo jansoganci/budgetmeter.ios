@@ -44,7 +44,7 @@ final class ThemeManager: ObservableObject {
 
     /// Apply a new theme
     /// - Parameter theme: The theme to apply
-    func applyTheme(_ theme: AppTheme) {
+    func applyTheme(_ theme: AppTheme, shouldSyncToAccount: Bool = true) {
         guard !theme.requiresPremium || PremiumManager.shared.hasAccess(to: BudgetMeterCapability.premiumThemes) else {
             print("🎨 ThemeManager: ⭐ Premium required for theme: \(theme.rawValue)")
             return
@@ -54,6 +54,12 @@ final class ThemeManager: ObservableObject {
         saveTheme(theme)
         applyAppIcon(for: theme)
         notifyThemeChange()
+
+        if shouldSyncToAccount {
+            Task {
+                await SupabaseAccountDataService.shared.pushSelectedTheme(theme.rawValue)
+            }
+        }
     }
 
     /// Get the accent color for the current theme

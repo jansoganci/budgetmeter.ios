@@ -15,13 +15,17 @@ struct IncomeView: View {
     @StateObject private var localizationManager = LocalizationManager.shared
 
     @State private var isDailyExpanded = true
+    @State private var isWeeklyExpanded = false
     @State private var isMonthlyExpanded = false
     @State private var isYearlyExpanded = false
     @State private var isOneTimeExpanded = false
 
     @State private var categoryToEdit: FinancialCategory?
     @State private var showingCreateModal = false
-    @State private var selectedFrequency = ""
+    @State private var createModalIntent: FinancialCategoryEntryKind = .recurring
+    @State private var createModalFrequency = "monthly"
+    @State private var pendingCategoryForAmountEntry: FinancialCategory?
+    @State private var showErrorAlert = false
 
     var body: some View {
         NavigationView {
@@ -71,11 +75,13 @@ struct IncomeView: View {
                 } : nil
             )
         }
-        .sheet(isPresented: $showingCreateModal) {
+        .sheet(isPresented: $showingCreateModal, onDismiss: openPendingAmountEntryIfNeeded) {
             CreateCategoryModal(
-                frequency: selectedFrequency,
+                entryIntent: createModalIntent,
+                defaultRecurringFrequency: createModalFrequency,
                 type: "income",
-                onSave: { _ in
+                onSave: { category in
+                    pendingCategoryForAmountEntry = category
                     viewModel.refresh()
                     showingCreateModal = false
                 },
@@ -88,12 +94,16 @@ struct IncomeView: View {
         .onAppear {
             viewModel.refresh()
         }
+        .onChange(of: viewModel.errorMessage) { _, message in
+            showErrorAlert = message != nil
+        }
         .alert(
             String(localized: "alert.error.title", defaultValue: "Error"),
-            isPresented: .constant(viewModel.errorMessage != nil)
+            isPresented: $showErrorAlert
         ) {
             Button(String(localized: "alert.ok", defaultValue: "OK")) {
                 viewModel.errorMessage = nil
+                showErrorAlert = false
             }
         } message: {
             if let errorMessage = viewModel.errorMessage {
@@ -128,7 +138,7 @@ struct IncomeView: View {
 
             PrimaryCTAButton(
                 title: "income.add.primary".localized(defaultValue: "Add income"),
-                action: { presentCreateModal(frequency: "monthly") }
+                action: { presentCreateModal(entryIntent: .recurring, defaultRecurringFrequency: "monthly") }
             )
         }
     }
@@ -136,7 +146,7 @@ struct IncomeView: View {
     private var secondaryAddButton: some View {
         SecondaryCTAButton(
             title: "income.add.primary".localized(defaultValue: "Add income"),
-            action: { presentCreateModal(frequency: "monthly") }
+            action: { presentCreateModal(entryIntent: .recurring, defaultRecurringFrequency: "monthly") }
         )
     }
 
@@ -145,6 +155,7 @@ struct IncomeView: View {
     private var sectionsStack: some View {
         VStack(spacing: Spacing.md) {
             incomeSection(frequency: "daily", isExpanded: $isDailyExpanded)
+            incomeSection(frequency: "weekly", isExpanded: $isWeeklyExpanded)
             incomeSection(frequency: "monthly", isExpanded: $isMonthlyExpanded)
             incomeSection(frequency: "yearly", isExpanded: $isYearlyExpanded)
             oneTimeSection
@@ -163,7 +174,8 @@ struct IncomeView: View {
         ) {
             categoryList(
                 categories: categories,
-                frequency: frequency,
+                entryIntent: .recurring,
+                defaultRecurringFrequency: frequency,
                 type: "income",
                 accentColor: .brandPositive
             )
@@ -179,7 +191,8 @@ struct IncomeView: View {
         ) {
             categoryList(
                 categories: viewModel.oneTimeIncomes,
-                frequency: "monthly",
+                entryIntent: .oneTime,
+                defaultRecurringFrequency: "monthly",
                 type: "income",
                 accentColor: .brandPositive
             )
@@ -189,10 +202,13 @@ struct IncomeView: View {
     @ViewBuilder
     private func categoryList(
         categories: [FinancialCategory],
-        frequency: String,
+        entryIntent: FinancialCategoryEntryKind,
+        defaultRecurringFrequency: String,
         type: String,
         accentColor: Color
     ) -> some View {
+        let addRowFrequency = entryIntent == .oneTime ? "once" : defaultRecurringFrequency
+
         VStack(spacing: 0) {
             ForEach(categories, id: \.objectID) { category in
                 FinanceListRow(
@@ -216,10 +232,13 @@ struct IncomeView: View {
             }
 
             AddFinancialItemRow(
-                frequency: frequency,
+                frequency: addRowFrequency,
                 type: type,
                 onTap: {
-                    presentCreateModal(frequency: frequency)
+                    presentCreateModal(
+                        entryIntent: entryIntent,
+                        defaultRecurringFrequency: defaultRecurringFrequency
+                    )
                 }
             )
         }
@@ -241,9 +260,19 @@ struct IncomeView: View {
 
     // MARK: - Actions
 
-    private func presentCreateModal(frequency: String) {
-        selectedFrequency = frequency
+    private func presentCreateModal(
+        entryIntent: FinancialCategoryEntryKind,
+        defaultRecurringFrequency: String = "monthly"
+    ) {
+        createModalIntent = entryIntent
+        createModalFrequency = defaultRecurringFrequency
         showingCreateModal = true
+    }
+
+    private func openPendingAmountEntryIfNeeded() {
+        guard let category = pendingCategoryForAmountEntry else { return }
+        pendingCategoryForAmountEntry = nil
+        categoryToEdit = category
     }
 }
 

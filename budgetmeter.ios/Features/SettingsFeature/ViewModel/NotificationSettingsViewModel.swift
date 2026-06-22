@@ -55,6 +55,9 @@ final class NotificationSettingsViewModel: ObservableObject {
     /// Show error alert
     @Published var showErrorAlert = false
 
+    /// Show notification settings guidance
+    @Published var showNotificationSettingsAlert = false
+
     /// Success message
     @Published var successMessage: String?
 
@@ -66,18 +69,28 @@ final class NotificationSettingsViewModel: ObservableObject {
     private let persistenceService: PersistenceService
     private let notificationService: NotificationService
     private let premiumManager: PremiumManager
+    private let supabaseAccountDataService: SupabaseAccountDataSyncing
+    private let userDefaults: UserDefaults
     private var cancellables = Set<AnyCancellable>()
+
+    private enum LocalKeys {
+        static let dailyEncouragementTime = "DailyEncouragementTime"
+    }
 
     // MARK: - Initialization
 
     init(
         persistenceService: PersistenceService = .shared,
         notificationService: NotificationService = .shared,
-        premiumManager: PremiumManager = .shared
+        premiumManager: PremiumManager = .shared,
+        supabaseAccountDataService: SupabaseAccountDataSyncing = SupabaseAccountDataService.shared,
+        userDefaults: UserDefaults = .standard
     ) {
         self.persistenceService = persistenceService
         self.notificationService = notificationService
         self.premiumManager = premiumManager
+        self.supabaseAccountDataService = supabaseAccountDataService
+        self.userDefaults = userDefaults
 
         setupObservers()
         loadSettings()
@@ -99,7 +112,7 @@ final class NotificationSettingsViewModel: ObservableObject {
                 milestonesEnabled = appSettings.milestonesEnabled
                 spendingEnabled = appSettings.spendingAlertsEnabled
                 dailyEnabled = appSettings.dailyEncouragementEnabled
-                dailyTime = createDefaultDailyTime() // dailyEncouragementTime doesn't exist in model
+                dailyTime = loadPersistedDailyTime()
 
                 print("📱 NotificationSettings: Loaded settings - Weekly: \(weeklyEnabled), Milestones: \(milestonesEnabled), Spending: \(spendingEnabled), Daily: \(dailyEnabled)")
             } else {
@@ -118,7 +131,7 @@ final class NotificationSettingsViewModel: ObservableObject {
                 milestonesEnabled = true
                 spendingEnabled = true
                 dailyEnabled = false
-                dailyTime = createDefaultDailyTime()
+                dailyTime = loadPersistedDailyTime()
 
                 print("📱 NotificationSettings: Created default settings")
             }
@@ -148,8 +161,20 @@ final class NotificationSettingsViewModel: ObservableObject {
             appSettings.milestonesEnabled = milestonesEnabled
             appSettings.spendingAlertsEnabled = spendingEnabled
             appSettings.dailyEncouragementEnabled = dailyEnabled
+            persistDailyTime(dailyTime)
 
             persistenceService.save()
+
+            Task {
+                await supabaseAccountDataService.pushNotificationPreferences(
+                    dailyEncouragementEnabled: dailyEnabled,
+                    weeklySummaryEnabled: weeklyEnabled,
+                    milestonesEnabled: milestonesEnabled,
+                    spendingAlertsEnabled: spendingEnabled,
+                    dailyTime: dailyTime,
+                    weeklySummaryTime: weeklyTime
+                )
+            }
 
             print("📱 NotificationSettings: ✅ Saved settings")
         } catch {
@@ -214,23 +239,55 @@ final class NotificationSettingsViewModel: ObservableObject {
             return
         }
 
-        guard permissionStatus == .authorized || !enabled else {
-            showError("Please enable notifications in Settings first")
+        guard enabled else {
             dailyEnabled = false
+            saveSettings()
+            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["daily-encouragement"])
+            print("📱 NotificationSettings: ❌ Cancelled daily encouragement")
             return
         }
 
-        dailyEnabled = enabled
-        saveSettings()
-
-        if enabled {
-            notificationService.scheduleDailyEncouragement()
-            print("📱 NotificationSettings: ✅ Scheduled daily encouragement")
-        } else {
-            // Cancel daily notifications
-            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["daily-encouragement"])
-            print("📱 NotificationSettings: ❌ Cancelled daily encouragement")
+        switch permissionStatus {
+        case .authorized, .provisional, .ephemeral:
+            enableDailyEncouragement()
+        case .notDetermined:
+            dailyEnabled = false
+            Task {
+                await requestDailyNotificationPermissionAndEnable()
+            }
+        case .denied:
+            dailyEnabled = false
+            showNotificationSettingsAlert = true
+        @unknown default:
+            dailyEnabled = false
+            showNotificationSettingsAlert = true
         }
+    }
+
+    /// Request notification permission before enabling daily encouragement.
+    func requestDailyNotificationPermissionAndEnable() async {
+        let granted = await requestPermissions()
+
+        if granted {
+            enableDailyEncouragement()
+        } else {
+            dailyEnabled = false
+            saveSettings()
+            showNotificationSettingsAlert = true
+        }
+    }
+
+    /// Enable and schedule daily encouragement after permission is usable.
+    func enableDailyEncouragement() {
+        dailyEnabled = true
+        saveSettings()
+        notificationService.scheduleDailyEncouragement()
+        print("📱 NotificationSettings: ✅ Scheduled daily encouragement")
+    }
+
+    /// Whether current permission status can deliver user-visible notifications.
+    var hasUsableNotificationPermission: Bool {
+        permissionStatus == .authorized || permissionStatus == .provisional || permissionStatus == .ephemeral
     }
 
     /// Update daily notification time
@@ -245,7 +302,7 @@ final class NotificationSettingsViewModel: ObservableObject {
     }
 
     /// Request notification permissions from iOS
-    func requestPermissions() async {
+    func requestPermissions() async -> Bool {
         do {
             let granted = await withCheckedContinuation { continuation in
                 notificationService.requestPermissions { granted in
@@ -259,9 +316,12 @@ final class NotificationSettingsViewModel: ObservableObject {
             } else {
                 print("📱 NotificationSettings: ❌ Permissions denied")
             }
+
+            return granted
         } catch {
             print("📱 NotificationSettings: ❌ Permission request failed: \(error)")
             errorMessage = "notifications.error.permission_failed".localized(defaultValue: "Failed to request notification permissions")
+            return false
         }
     }
 
@@ -365,6 +425,19 @@ final class NotificationSettingsViewModel: ObservableObject {
         components.hour = 9
         components.minute = 0
         return calendar.date(from: components) ?? Date()
+    }
+
+    private func loadPersistedDailyTime() -> Date {
+        if let storedTime = userDefaults.object(forKey: LocalKeys.dailyEncouragementTime) as? Date {
+            return storedTime
+        }
+        let defaultTime = createDefaultDailyTime()
+        userDefaults.set(defaultTime, forKey: LocalKeys.dailyEncouragementTime)
+        return defaultTime
+    }
+
+    private func persistDailyTime(_ time: Date) {
+        userDefaults.set(time, forKey: LocalKeys.dailyEncouragementTime)
     }
 
     /// Show error message to user

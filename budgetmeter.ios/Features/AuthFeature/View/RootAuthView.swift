@@ -6,12 +6,12 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct RootAuthView: View {
     @StateObject private var authService = AuthService.shared
     @EnvironmentObject private var biometricManager: BiometricManager
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
-    @State private var biometricUnlocked = false
 
     var body: some View {
         Group {
@@ -21,10 +21,8 @@ struct RootAuthView: View {
             case .signedOut:
                 WelcomeView()
             case .signedIn:
-                if biometricManager.shouldRequireAuthentication() && !biometricUnlocked {
-                    BiometricAuthView {
-                        biometricUnlocked = true
-                    }
+                if biometricManager.shouldRequireAuthentication() {
+                    BiometricAuthView()
                 } else if !hasCompletedOnboarding {
                     OnboardingView()
                 } else {
@@ -34,13 +32,18 @@ struct RootAuthView: View {
         }
         .onChange(of: authService.phase) { oldPhase, newPhase in
             if newPhase == .signedIn && oldPhase != .signedIn {
+                biometricManager.refreshBiometricSettingsFromStore()
                 DataSeedingService().seedInitialDataIfNeeded()
                 CustomCategoryMigrationService().performMigrationIfNeeded()
                 BackgroundProcessingService.shared.scheduleBackgroundProcessing()
             }
             if newPhase != .signedIn {
-                biometricUnlocked = false
+                biometricManager.resetAuthentication()
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+            guard authService.phase == .signedIn, biometricManager.isBiometricEnabled else { return }
+            biometricManager.resetAuthentication()
         }
     }
 }

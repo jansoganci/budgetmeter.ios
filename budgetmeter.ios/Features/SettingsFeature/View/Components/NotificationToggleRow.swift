@@ -18,6 +18,8 @@ struct NotificationToggleRow: View {
     let isLocked: Bool
     let onTap: () -> Void
 
+    @Environment(\.themeAccent) private var themeAccent
+
     init(
         icon: String,
         title: String,
@@ -40,9 +42,9 @@ struct NotificationToggleRow: View {
         HStack(spacing: Spacing.md) {
             Image(systemName: icon)
                 .font(.body.weight(.medium))
-                .foregroundColor(isLocked ? .financialNeutral : .accentPrimary)
+                .foregroundColor(iconAccentColor)
                 .frame(width: 32, height: 32)
-                .background((isLocked ? Color.financialNeutral : Color.accentPrimary).opacity(0.12))
+                .background(iconAccentColor.opacity(0.12))
                 .clipShape(RoundedRectangle(cornerRadius: CornerRadius.small, style: .continuous))
                 .accessibilityHidden(true)
 
@@ -86,6 +88,10 @@ struct NotificationToggleRow: View {
         .accessibilityHint(isLocked ? "Premium feature. Double tap to view upgrade options" : "Double tap to \(isOn ? "disable" : "enable") \(title.lowercased())")
         .accessibilityAddTraits(isLocked ? [.isButton] : [])
         .accessibilityRemoveTraits(isLocked ? [] : [.isButton])
+    }
+
+    private var iconAccentColor: Color {
+        isLocked ? .financialNeutral : themeAccent
     }
 }
 

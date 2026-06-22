@@ -16,6 +16,7 @@ struct QuickSavingsGoalInputView: View {
 
     @State private var inputText: String = ""
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.themeAccent) private var themeAccent
     @FocusState private var isInputFocused: Bool
 
     var body: some View {
@@ -35,7 +36,7 @@ struct QuickSavingsGoalInputView: View {
                                 label: nil,
                                 currencySymbol: currencySymbol,
                                 text: $inputText,
-                                accentColor: .accentPrimary,
+                                accentColor: themeAccent,
                                 focused: $isInputFocused
                             )
                             .accessibilityLabel("home.savings_goal_input.accessibility".localized(defaultValue: "Savings goal amount input"))
@@ -80,7 +81,7 @@ struct QuickSavingsGoalInputView: View {
                     Button("toolbar.done".localized(defaultValue: "Done")) {
                         isInputFocused = false
                     }
-                    .foregroundColor(.accentPrimary)
+                    .foregroundColor(themeAccent)
                     .fontWeight(.semibold)
                 }
             }

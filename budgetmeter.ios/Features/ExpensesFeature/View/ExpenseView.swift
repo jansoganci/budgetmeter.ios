@@ -16,6 +16,7 @@ struct ExpenseView: View {
     @StateObject private var premiumManager = PremiumManager.shared
 
     @State private var isDailyExpanded = true
+    @State private var isWeeklyExpanded = false
     @State private var isMonthlyExpanded = false
     @State private var isSubscriptionsExpanded = false
     @State private var isYearlyExpanded = false
@@ -23,7 +24,10 @@ struct ExpenseView: View {
 
     @State private var categoryToEdit: FinancialCategory?
     @State private var showingCreateModal = false
-    @State private var selectedFrequency = ""
+    @State private var createModalIntent: FinancialCategoryEntryKind = .recurring
+    @State private var createModalFrequency = "monthly"
+    @State private var pendingCategoryForAmountEntry: FinancialCategory?
+    @State private var showErrorAlert = false
 
     @State private var showingAddSubscription = false
     @State private var showingSubscriptionPaywall = false
@@ -77,11 +81,13 @@ struct ExpenseView: View {
                 } : nil
             )
         }
-        .sheet(isPresented: $showingCreateModal) {
+        .sheet(isPresented: $showingCreateModal, onDismiss: openPendingAmountEntryIfNeeded) {
             CreateCategoryModal(
-                frequency: selectedFrequency,
+                entryIntent: createModalIntent,
+                defaultRecurringFrequency: createModalFrequency,
                 type: "expense",
-                onSave: { _ in
+                onSave: { category in
+                    pendingCategoryForAmountEntry = category
                     viewModel.refresh()
                     showingCreateModal = false
                 },
@@ -111,12 +117,16 @@ struct ExpenseView: View {
         .onAppear {
             viewModel.refresh()
         }
+        .onChange(of: viewModel.errorMessage) { _, message in
+            showErrorAlert = message != nil
+        }
         .alert(
             String(localized: "alert.error.title", defaultValue: "Error"),
-            isPresented: .constant(viewModel.errorMessage != nil)
+            isPresented: $showErrorAlert
         ) {
             Button(String(localized: "alert.ok", defaultValue: "OK")) {
                 viewModel.errorMessage = nil
+                showErrorAlert = false
             }
         } message: {
             if let errorMessage = viewModel.errorMessage {
@@ -151,7 +161,7 @@ struct ExpenseView: View {
 
             PrimaryCTAButton(
                 title: "expense.add.primary".localized(defaultValue: "Add expense"),
-                action: { presentCreateModal(frequency: "monthly") }
+                action: { presentCreateModal(entryIntent: .recurring, defaultRecurringFrequency: "monthly") }
             )
         }
     }
@@ -159,7 +169,7 @@ struct ExpenseView: View {
     private var secondaryAddButton: some View {
         SecondaryCTAButton(
             title: "expense.add.primary".localized(defaultValue: "Add expense"),
-            action: { presentCreateModal(frequency: "monthly") }
+            action: { presentCreateModal(entryIntent: .recurring, defaultRecurringFrequency: "monthly") }
         )
     }
 
@@ -168,6 +178,7 @@ struct ExpenseView: View {
     private var sectionsStack: some View {
         VStack(spacing: Spacing.md) {
             expenseSection(frequency: "daily", isExpanded: $isDailyExpanded)
+            expenseSection(frequency: "weekly", isExpanded: $isWeeklyExpanded)
             expenseSection(frequency: "monthly", isExpanded: $isMonthlyExpanded)
 
             if premiumManager.hasAccess(to: BudgetMeterCapability.subscriptionTracking) {
@@ -193,7 +204,8 @@ struct ExpenseView: View {
         ) {
             categoryList(
                 categories: categories,
-                frequency: frequency,
+                entryIntent: .recurring,
+                defaultRecurringFrequency: frequency,
                 type: "expense",
                 accentColor: .brandExpense
             )
@@ -287,7 +299,8 @@ struct ExpenseView: View {
         ) {
             categoryList(
                 categories: viewModel.oneTimeExpenses,
-                frequency: "monthly",
+                entryIntent: .oneTime,
+                defaultRecurringFrequency: "monthly",
                 type: "expense",
                 accentColor: .brandExpense
             )
@@ -297,10 +310,13 @@ struct ExpenseView: View {
     @ViewBuilder
     private func categoryList(
         categories: [FinancialCategory],
-        frequency: String,
+        entryIntent: FinancialCategoryEntryKind,
+        defaultRecurringFrequency: String,
         type: String,
         accentColor: Color
     ) -> some View {
+        let addRowFrequency = entryIntent == .oneTime ? "once" : defaultRecurringFrequency
+
         VStack(spacing: 0) {
             ForEach(categories, id: \.objectID) { category in
                 FinanceListRow(
@@ -324,10 +340,13 @@ struct ExpenseView: View {
             }
 
             AddFinancialItemRow(
-                frequency: frequency,
+                frequency: addRowFrequency,
                 type: type,
                 onTap: {
-                    presentCreateModal(frequency: frequency)
+                    presentCreateModal(
+                        entryIntent: entryIntent,
+                        defaultRecurringFrequency: defaultRecurringFrequency
+                    )
                 }
             )
         }
@@ -349,9 +368,19 @@ struct ExpenseView: View {
 
     // MARK: - Actions
 
-    private func presentCreateModal(frequency: String) {
-        selectedFrequency = frequency
+    private func presentCreateModal(
+        entryIntent: FinancialCategoryEntryKind,
+        defaultRecurringFrequency: String = "monthly"
+    ) {
+        createModalIntent = entryIntent
+        createModalFrequency = defaultRecurringFrequency
         showingCreateModal = true
+    }
+
+    private func openPendingAmountEntryIfNeeded() {
+        guard let category = pendingCategoryForAmountEntry else { return }
+        pendingCategoryForAmountEntry = nil
+        categoryToEdit = category
     }
 }
 

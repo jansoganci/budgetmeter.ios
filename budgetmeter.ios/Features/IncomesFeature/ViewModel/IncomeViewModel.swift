@@ -17,6 +17,7 @@ final class IncomeViewModel: ObservableObject {
     // MARK: - Published Properties
     
     @Published var dailyIncomes: [FinancialCategory] = []
+    @Published var weeklyIncomes: [FinancialCategory] = []
     @Published var monthlyIncomes: [FinancialCategory] = []
     @Published var yearlyIncomes: [FinancialCategory] = []
     @Published var oneTimeIncomes: [FinancialCategory] = []
@@ -41,7 +42,7 @@ final class IncomeViewModel: ObservableObject {
 
     /// Number of income sources with amounts > 0
     var activeSourcesCount: Int {
-        let recurring = (dailyIncomes + monthlyIncomes + yearlyIncomes).filter { $0.amount > 0 }.count
+        let recurring = (dailyIncomes + weeklyIncomes + monthlyIncomes + yearlyIncomes).filter { $0.amount > 0 }.count
         let oneTime = oneTimeIncomes.filter { $0.amount > 0 }.count
         return recurring + oneTime
     }
@@ -68,19 +69,34 @@ final class IncomeViewModel: ObservableObject {
     
     private let persistenceService: PersistenceService
     private let summaryBuilder: FinancialSummaryBuilder
+    private let oneTimeSyncService: OneTimeTransactionSyncScheduling
+    private let categorySyncService: FinancialCategorySyncScheduling
     private var cancellables = Set<AnyCancellable>()
     private var currencyCode: String = CurrencyHelper.defaultCurrencyCode()
+    private var hasLoadedCategories = false
+
+    private static let saveFailedMessage = String(
+        localized: "income.error.save",
+        defaultValue: "Couldn't save your change. Please try again.",
+        table: "UI"
+    )
 
     // MARK: - Initialization
 
     init(
         persistenceService: PersistenceService = .shared,
-        summaryBuilder: FinancialSummaryBuilder? = nil
+        summaryBuilder: FinancialSummaryBuilder? = nil,
+        oneTimeSyncService: OneTimeTransactionSyncScheduling = SupabaseOneTimeTransactionSyncService.shared,
+        categorySyncService: FinancialCategorySyncScheduling = SupabaseFinancialCategorySyncService.shared
     ) {
         self.persistenceService = persistenceService
         self.summaryBuilder = summaryBuilder ?? FinancialSummaryBuilder(context: persistenceService.viewContext)
+        self.oneTimeSyncService = oneTimeSyncService
+        self.categorySyncService = categorySyncService
         setupCurrencyObserver()
         setupLanguageObserver()
+        setupOneTimeSyncObserver()
+        setupCategorySyncObserver()
         loadCurrency()
         loadIncomeCategories()
     }
@@ -95,10 +111,14 @@ final class IncomeViewModel: ObservableObject {
     func updateAmount(for category: FinancialCategory, amount: Double) {
         category.amount = amount
         FinancialCategoryWriteSupport.touchModified(category)
-        persistenceService.save()
+        guard persistenceService.save() else {
+            errorMessage = Self.saveFailedMessage
+            return
+        }
 
-        loadIncomeCategories()
+        loadIncomeCategories(showLoadingIndicator: false)
 
+        syncOneTimeChange(for: category)
         WidgetSnapshotService.refreshFromCurrentData()
     }
 
@@ -107,9 +127,13 @@ final class IncomeViewModel: ObservableObject {
         guard category.isCustom else { return }
         category.customColorHex = color.rawValue
         FinancialCategoryWriteSupport.touchModified(category)
-        persistenceService.save()
+        guard persistenceService.save() else {
+            errorMessage = Self.saveFailedMessage
+            return
+        }
 
-        loadIncomeCategories()
+        loadIncomeCategories(showLoadingIndicator: false)
+        syncCategoryChange(for: category)
     }
     
     /// Formats amount for display in input field (no live formatting during input)
@@ -178,26 +202,31 @@ final class IncomeViewModel: ObservableObject {
     
     /// Refreshes data from Core Data
     func refresh() {
-        loadIncomeCategories()
+        loadIncomeCategories(showLoadingIndicator: false)
     }
 
     /// Deletes a custom income category
     func deleteCategory(_ category: FinancialCategory) {
         guard category.isCustom else { return }
 
-        let context = persistenceService.viewContext
-        context.delete(category)
-        persistenceService.save()
+        if FinancialCategoryWriteSupport.isOneTimeDisplayCategory(category) {
+            oneTimeSyncService.tombstoneLocalOneTimeRow(category)
+            loadIncomeCategories(showLoadingIndicator: false)
+            WidgetSnapshotService.refreshFromCurrentData()
+            return
+        }
 
-        loadIncomeCategories()
-
+        categorySyncService.tombstoneLocalCustomCategory(category)
+        loadIncomeCategories(showLoadingIndicator: false)
         WidgetSnapshotService.refreshFromCurrentData()
     }
 
     // MARK: - Private Methods
     
-    private func loadIncomeCategories() {
-        isLoading = true
+    private func loadIncomeCategories(showLoadingIndicator: Bool = true) {
+        if showLoadingIndicator || !hasLoadedCategories {
+            isLoading = true
+        }
         errorMessage = nil
         
         let context = persistenceService.viewContext
@@ -208,14 +237,20 @@ final class IncomeViewModel: ObservableObject {
         
         do {
             let allIncomes = try context.fetch(fetchRequest)
-            let recurringIncomes = allIncomes.filter { FinancialCategoryWriteSupport.isRecurringDisplayCategory($0) }
+            let recurringIncomes = allIncomes
+                .filter { FinancialCategoryWriteSupport.isRecurringDisplayCategory($0) }
+                .filter { !FinancialCategorySyncMetadataStore.shared.isTombstonedCustomCategory($0, in: context) }
 
             dailyIncomes = recurringIncomes.filter { $0.frequency == "daily" }
+            weeklyIncomes = recurringIncomes.filter { $0.frequency == "weekly" }
             monthlyIncomes = recurringIncomes.filter { $0.frequency == "monthly" }
             yearlyIncomes = recurringIncomes.filter { $0.frequency == "yearly" }
-            oneTimeIncomes = allIncomes.filter { FinancialCategoryWriteSupport.isOneTimeDisplayCategory($0) }
+            oneTimeIncomes = allIncomes
+                .filter { FinancialCategoryWriteSupport.isOneTimeDisplayCategory($0) }
+                .filter { !OneTimeTransactionSyncMetadataStore.shared.isTombstoned($0, in: context) }
 
             refreshSummary()
+            hasLoadedCategories = true
             isLoading = false
         } catch {
             print("📊 IncomeViewModel: ❌ Loading failed: \(error)")
@@ -255,7 +290,7 @@ extension IncomeViewModel {
     }
 
     var hasIncomeData: Bool {
-        let allCategories = dailyIncomes + monthlyIncomes + yearlyIncomes + oneTimeIncomes
+        let allCategories = dailyIncomes + weeklyIncomes + monthlyIncomes + yearlyIncomes + oneTimeIncomes
         return allCategories.contains { $0.amount > 0 }
     }
 
@@ -263,6 +298,8 @@ extension IncomeViewModel {
         switch frequency {
         case "daily":
             return dailyIncomes.reduce(0) { $0 + $1.amount }
+        case "weekly":
+            return weeklyIncomes.reduce(0) { $0 + $1.amount }
         case "monthly":
             return monthlyIncomes.reduce(0) { $0 + $1.amount }
         case "yearly":
@@ -301,6 +338,8 @@ extension IncomeViewModel {
         switch frequency {
         case "daily":
             return "\(currencySymbol)\(formatted)/day"
+        case "weekly":
+            return "\(currencySymbol)\(formatted)/wk"
         case "monthly":
             return "\(currencySymbol)\(formatted)/mo"
         case "yearly":
@@ -314,6 +353,8 @@ extension IncomeViewModel {
         switch frequency {
         case "daily":
             return String(localized: "income.section.daily", defaultValue: "Daily Income")
+        case "weekly":
+            return String(localized: "income.section.weekly", defaultValue: "Weekly Income")
         case "monthly":
             return String(localized: "income.section.monthly", defaultValue: "Monthly Income")
         case "yearly":
@@ -331,6 +372,8 @@ extension IncomeViewModel {
         switch frequency {
         case "daily":
             return dailyIncomes
+        case "weekly":
+            return weeklyIncomes
         case "monthly":
             return monthlyIncomes
         case "yearly":
@@ -344,6 +387,51 @@ extension IncomeViewModel {
 // MARK: - Currency Handling
 
 private extension IncomeViewModel {
+    func setupOneTimeSyncObserver() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(oneTimeTransactionsDidSync(_:)),
+            name: .oneTimeTransactionsDidSync,
+            object: nil
+        )
+    }
+
+    @objc func oneTimeTransactionsDidSync(_ notification: Notification) {
+        loadIncomeCategories(showLoadingIndicator: false)
+    }
+
+    func setupCategorySyncObserver() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(financialCategoriesDidSync(_:)),
+            name: .financialCategoriesDidSync,
+            object: nil
+        )
+    }
+
+    @objc func financialCategoriesDidSync(_ notification: Notification) {
+        loadIncomeCategories(showLoadingIndicator: false)
+    }
+
+    func syncCategoryChange(for category: FinancialCategory) {
+        if FinancialCategoryWriteSupport.isOneTimeDisplayCategory(category) {
+            oneTimeSyncService.registerLocalOneTimeRow(category)
+            return
+        }
+        if FinancialCategorySyncMapper.isCustomRecurringSyncEligible(category) {
+            categorySyncService.registerLocalCustomCategory(category)
+            return
+        }
+        if FinancialCategorySyncMapper.isSeededOverrideSyncEligible(category) {
+            categorySyncService.registerLocalSeededOverride(category)
+        }
+    }
+
+    func syncOneTimeChange(for category: FinancialCategory) {
+        guard FinancialCategoryWriteSupport.isOneTimeDisplayCategory(category) else { return }
+        oneTimeSyncService.registerLocalOneTimeRow(category)
+    }
+
     func setupCurrencyObserver() {
         NotificationCenter.default.addObserver(
             self,

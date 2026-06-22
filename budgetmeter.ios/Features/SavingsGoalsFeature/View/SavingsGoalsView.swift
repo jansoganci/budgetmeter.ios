@@ -22,76 +22,75 @@ struct SavingsGoalsView: View {
     // MARK: - Body
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                Color.appBackground.ignoresSafeArea()
+        ZStack {
+            Color.appBackground.ignoresSafeArea()
 
-                ScrollView {
-                    VStack(spacing: Spacing.xl) {
-                        // Active Goals Section
-                        if !viewModel.activeGoals.isEmpty {
-                            activeGoalsSection
-                        }
-
-                        // Completed Goals Section
-                        if !viewModel.completedGoals.isEmpty {
-                            completedGoalsSection
-                        }
-
-                        // Empty State
-                        if viewModel.activeGoals.isEmpty && viewModel.completedGoals.isEmpty {
-                            emptyState
-                        }
+            ScrollView {
+                VStack(spacing: Spacing.xl) {
+                    // Active Goals Section
+                    if !viewModel.activeGoals.isEmpty {
+                        activeGoalsSection
                     }
-                    .padding(Spacing.lg)
-                }
-            }
-            .navigationTitle(String(localized: "savings.list.title", defaultValue: "Savings Goals", table: "UI"))
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        if viewModel.canAddAnotherGoal {
-                            showingAddGoal = true
-                        } else {
-                            showingPaywall = true
-                        }
-                    } label: {
-                        Image(systemName: "plus")
-                            .foregroundColor(.brandProgress)
+
+                    // Completed Goals Section
+                    if !viewModel.completedGoals.isEmpty {
+                        completedGoalsSection
                     }
-                    .accessibilityLabel(String(localized: "savings.add_goal", defaultValue: "Add savings goal", table: "UI"))
-                    .accessibilityHint(
-                        viewModel.canAddAnotherGoal
-                            ? String(localized: "savings.add_goal.hint", defaultValue: "Double tap to create a new savings goal", table: "UI")
-                            : String(localized: "savings.add_goal.premium_hint", defaultValue: "Premium required for additional goals. Double tap to upgrade.", table: "UI")
-                    )
+
+                    // Empty State
+                    if viewModel.activeGoals.isEmpty && viewModel.completedGoals.isEmpty {
+                        emptyState
+                    }
                 }
+                .padding(Spacing.lg)
             }
-            .sheet(isPresented: $showingAddGoal) {
-                SavingsGoalInputView(goal: nil, onSave: {})
-            }
-            .sheet(isPresented: $showingPaywall) {
-                PremiumPaywallView(
-                    onDismiss: { showingPaywall = false },
-                    onPurchase: { showingPaywall = false },
-                    onRestore: { showingPaywall = false }
+        }
+        .navigationTitle("savings.list.title".localized(defaultValue: "Savings Goals", table: "UI"))
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    if viewModel.canAddAnotherGoal {
+                        showingAddGoal = true
+                    } else {
+                        showingPaywall = true
+                    }
+                } label: {
+                    Image(systemName: "plus")
+                        .foregroundColor(.brandProgress)
+                }
+                .accessibilityLabel("savings.add_goal".localized(defaultValue: "Add savings goal", table: "UI"))
+                .accessibilityHint(
+                    viewModel.canAddAnotherGoal
+                        ? "savings.add_goal.hint".localized(defaultValue: "Double tap to create a new savings goal", table: "UI")
+                        : "savings.add_goal.premium_hint".localized(defaultValue: "Premium required for additional goals. Double tap to upgrade.", table: "UI")
                 )
+                .accessibilityValue(premiumManager.isPremium ? "premium" : "free")
             }
-            .sheet(item: $goalToEdit) { goal in
-                // Empty callback - notification observer handles UI update
-                SavingsGoalInputView(goal: goal, onSave: {})
-            }
-            .sheet(item: $goalToView) { goal in
-                SavingsGoalDetailView(
-                    goal: goal,
-                    sharedPaceETAText: viewModel.sharedPaceETAText(for: goal),
-                    onUpdate: {}
-                )
-            }
-            .onAppear {
-                viewModel.loadGoals()
-            }
+        }
+        .sheet(isPresented: $showingAddGoal, onDismiss: { viewModel.loadGoals() }) {
+            SavingsGoalInputView(goal: nil, onSave: {})
+        }
+        .sheet(isPresented: $showingPaywall) {
+            PremiumPaywallView(
+                onDismiss: { showingPaywall = false },
+                onPurchase: { showingPaywall = false },
+                onRestore: { showingPaywall = false }
+            )
+        }
+        .sheet(item: $goalToEdit) { goal in
+            // Empty callback - notification observer handles UI update
+            SavingsGoalInputView(goal: goal, onSave: {})
+        }
+        .sheet(item: $goalToView) { goal in
+            SavingsGoalDetailView(
+                goal: goal,
+                sharedPaceETAText: viewModel.sharedPaceETAText(for: goal),
+                onUpdate: {}
+            )
+        }
+        .onAppear {
+            viewModel.loadGoals()
         }
     }
 
@@ -99,7 +98,7 @@ struct SavingsGoalsView: View {
 
     private var activeGoalsSection: some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
-            Text(String(localized: "savings.list.active", defaultValue: "Active Goals", table: "UI"))
+            Text("savings.list.active".localized(defaultValue: "Active Goals", table: "UI"))
                 .sectionTitleStyle()
 
             ForEach(viewModel.activeGoals, id: \.id) { goal in
@@ -111,13 +110,13 @@ struct SavingsGoalsView: View {
                         Button {
                             goalToEdit = goal
                         } label: {
-                            Label(String(localized: "common.edit", defaultValue: "Edit", table: "UI"), systemImage: "pencil")
+                            Label("common.edit".localized(defaultValue: "Edit", table: "UI"), systemImage: "pencil")
                         }
 
                         Button(role: .destructive) {
                             viewModel.deleteGoal(goal)
                         } label: {
-                            Label(String(localized: "common.delete", defaultValue: "Delete", table: "UI"), systemImage: "trash")
+                            Label("common.delete".localized(defaultValue: "Delete", table: "UI"), systemImage: "trash")
                         }
                     }
             }
@@ -129,7 +128,7 @@ struct SavingsGoalsView: View {
     private var completedGoalsSection: some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
             HStack {
-                Text(String(localized: "savings.list.completed", defaultValue: "Completed", table: "UI"))
+                Text("savings.list.completed".localized(defaultValue: "Completed", table: "UI"))
                     .sectionTitleStyle()
 
                 Text("(\(viewModel.completedGoals.count))")
@@ -145,13 +144,13 @@ struct SavingsGoalsView: View {
                         Button {
                             viewModel.archiveGoal(goal)
                         } label: {
-                            Label(String(localized: "common.archive", defaultValue: "Archive", table: "UI"), systemImage: "archivebox")
+                            Label("common.archive".localized(defaultValue: "Archive", table: "UI"), systemImage: "archivebox")
                         }
 
                         Button(role: .destructive) {
                             viewModel.deleteGoal(goal)
                         } label: {
-                            Label(String(localized: "common.delete", defaultValue: "Delete", table: "UI"), systemImage: "trash")
+                            Label("common.delete".localized(defaultValue: "Delete", table: "UI"), systemImage: "trash")
                         }
                     }
             }
@@ -167,10 +166,10 @@ struct SavingsGoalsView: View {
                 .foregroundColor(.brandProgress.opacity(0.3))
 
             VStack(spacing: Spacing.sm) {
-                Text(String(localized: "savings.empty.title", defaultValue: "No Savings Goals Yet", table: "UI"))
+                Text("savings.empty.title".localized(defaultValue: "No Savings Goals Yet", table: "UI"))
                     .sectionTitleStyle()
 
-                Text(String(localized: "savings.empty.subtitle", defaultValue: "Tap + to create your first savings goal", table: "UI"))
+                Text("savings.empty.subtitle".localized(defaultValue: "Tap + to create your first savings goal", table: "UI"))
                     .captionStyle()
                     .multilineTextAlignment(.center)
             }
@@ -181,9 +180,9 @@ struct SavingsGoalsView: View {
         .accessibilityElement(children: .combine)
         .accessibilityLabel(
             String(
-                format: String(localized: "savings.empty.accessibility", defaultValue: "%@. %@", table: "UI"),
-                String(localized: "savings.empty.title", defaultValue: "No Savings Goals Yet", table: "UI"),
-                String(localized: "savings.empty.subtitle", defaultValue: "Tap + to create your first savings goal", table: "UI")
+                format: "savings.empty.accessibility".localized(defaultValue: "%@. %@", table: "UI"),
+                "savings.empty.title".localized(defaultValue: "No Savings Goals Yet", table: "UI"),
+                "savings.empty.subtitle".localized(defaultValue: "Tap + to create your first savings goal", table: "UI")
             )
         )
     }
@@ -208,7 +207,7 @@ struct GoalCard: View {
                         .foregroundColor(.brandProgress)
                 }
 
-                Text(goal.name ?? String(localized: "savings.unknown", defaultValue: "Unknown", table: "UI"))
+                Text(goal.name ?? "savings.unknown".localized(defaultValue: "Unknown", table: "UI"))
                     .cardLabelStyle(color: .textPrimary)
 
                 Spacer()
@@ -243,7 +242,7 @@ struct GoalCard: View {
                 Text(viewModel.formatAmount(goal.currentAmount))
                     .metricCompactStyle(color: .textPrimary)
 
-                Text(String(format: String(localized: "savings.of_amount", defaultValue: "of %@", table: "UI"), viewModel.formatAmount(goal.targetAmount)))
+                Text(String(format: "savings.of_amount".localized(defaultValue: "of %@", table: "UI"), viewModel.formatAmount(goal.targetAmount)))
                     .captionStyle()
             }
 
@@ -254,18 +253,14 @@ struct GoalCard: View {
 
                 VStack(alignment: .leading, spacing: Spacing.xs) {
                     HStack {
-                        Text(String(format: String(localized: "savings.target_label", defaultValue: "Target: %@", table: "UI"), viewModel.formatShortDate(targetDate)))
-                            .font(.caption)
-                            .foregroundColor(.textSecondary)
-
-                        Text(String(localized: "ui.bullet.point", defaultValue: "•", table: "UI"))
-                            .font(.caption)
-                            .foregroundColor(.textSecondary)
-
-                        Text(viewModel.timeRemainingText(goal))
+                        Text(String(format: "savings.target_label".localized(defaultValue: "Target date: %@", table: "UI"), viewModel.formatShortDate(targetDate)))
                             .font(.caption)
                             .foregroundColor(.textSecondary)
                     }
+
+                    Text(viewModel.timeRemainingText(goal))
+                        .font(.caption)
+                        .foregroundColor(.textSecondary)
 
                     // Pace status
                     if let paceText = viewModel.requiredMonthlyText(goal) {
@@ -275,7 +270,7 @@ struct GoalCard: View {
                                 .foregroundColor(.textSecondary)
 
                             if !viewModel.paceStatusText(goal).isEmpty {
-                                Text(String(localized: "ui.bullet.point", defaultValue: "•", table: "UI"))
+                                Text("ui.bullet.point".localized(defaultValue: "•", table: "UI"))
                                     .font(.caption)
                                     .foregroundColor(.textSecondary)
 
@@ -298,7 +293,7 @@ struct GoalCard: View {
                             .foregroundColor(.textSecondary)
                             .accessibilityLabel(
                                 String(
-                                    format: String(localized: "savings.eta.accessibility", defaultValue: "Estimated time to goal: %@", table: "UI"),
+                                    format: "savings.eta.accessibility".localized(defaultValue: "Estimated time to goal: %@", table: "UI"),
                                     etaText
                                 )
                             )
@@ -319,17 +314,17 @@ struct GoalCard: View {
         .glassSurface()
         .accessibilityElement(children: .combine)
         .accessibilityLabel(goalAccessibilityLabel)
-        .accessibilityHint(String(localized: "savings.goal.hint", defaultValue: "Double tap to view goal details", table: "UI"))
+        .accessibilityHint("savings.goal.hint".localized(defaultValue: "Double tap to view goal details", table: "UI"))
         .accessibilityAddTraits(.isButton)
     }
 
     private var goalAccessibilityLabel: String {
-        let name = goal.name ?? String(localized: "savings.unknown", defaultValue: "Unknown", table: "UI")
+        let name = goal.name ?? "savings.unknown".localized(defaultValue: "Unknown", table: "UI")
         let progress = viewModel.formatProgress(goal)
         let current = viewModel.formatAmount(goal.currentAmount)
         let target = viewModel.formatAmount(goal.targetAmount)
         return String(
-            format: String(localized: "savings.goal.accessibility", defaultValue: "%@, %@ complete, %@ of %@", table: "UI"),
+            format: "savings.goal.accessibility".localized(defaultValue: "%@, %@ complete, %@ of %@", table: "UI"),
             name,
             progress,
             current,
@@ -365,21 +360,21 @@ struct CompletedGoalCard: View {
                     HStack(spacing: Spacing.xs) {
                         Text(emoji)
                             .font(.body)
-                        Text(goal.name ?? String(localized: "savings.unknown", defaultValue: "Unknown", table: "UI"))
+                        Text(goal.name ?? "savings.unknown".localized(defaultValue: "Unknown", table: "UI"))
                             .bodyStyle()
                     }
                 } else {
-                    Text(goal.name ?? String(localized: "savings.unknown", defaultValue: "Unknown", table: "UI"))
+                    Text(goal.name ?? "savings.unknown".localized(defaultValue: "Unknown", table: "UI"))
                         .bodyStyle()
                 }
 
                 if let completedDate = goal.completedDate {
-                    Text(String(format: String(localized: "savings.completed_label", defaultValue: "Completed %@", table: "UI"), viewModel.formatShortDate(completedDate)))
+                    Text(String(format: "savings.completed_label".localized(defaultValue: "Completed %@", table: "UI"), viewModel.formatShortDate(completedDate)))
                         .font(.caption)
                         .foregroundColor(.textSecondary)
                 }
 
-                Text(String(format: String(localized: "savings.amount_saved", defaultValue: "%@ saved", table: "UI"), viewModel.formatAmount(goal.targetAmount)))
+                Text(String(format: "savings.amount_saved".localized(defaultValue: "%@ saved", table: "UI"), viewModel.formatAmount(goal.targetAmount)))
                     .font(.caption)
                     .foregroundColor(.brandProgress)
             }
@@ -394,30 +389,30 @@ struct CompletedGoalCard: View {
         .glassSurface()
         .accessibilityElement(children: .combine)
         .accessibilityLabel(completedGoalAccessibilityLabel)
-        .accessibilityHint(String(localized: "savings.goal.hint", defaultValue: "Double tap to view goal details", table: "UI"))
+        .accessibilityHint("savings.goal.hint".localized(defaultValue: "Double tap to view goal details", table: "UI"))
         .accessibilityAddTraits(.isButton)
     }
 
     private var completedGoalAccessibilityLabel: String {
-        let name = goal.name ?? String(localized: "savings.unknown", defaultValue: "Unknown", table: "UI")
+        let name = goal.name ?? "savings.unknown".localized(defaultValue: "Unknown", table: "UI")
         let saved = String(
-            format: String(localized: "savings.amount_saved", defaultValue: "%@ saved", table: "UI"),
+            format: "savings.amount_saved".localized(defaultValue: "%@ saved", table: "UI"),
             viewModel.formatAmount(goal.targetAmount)
         )
         if let completedDate = goal.completedDate {
             let dateText = String(
-                format: String(localized: "savings.completed_label", defaultValue: "Completed %@", table: "UI"),
+                format: "savings.completed_label".localized(defaultValue: "Completed %@", table: "UI"),
                 viewModel.formatShortDate(completedDate)
             )
             return String(
-                format: String(localized: "savings.completed.accessibility", defaultValue: "Completed goal %@, %@, %@", table: "UI"),
+                format: "savings.completed.accessibility".localized(defaultValue: "Completed goal %@, %@, %@", table: "UI"),
                 name,
                 saved,
                 dateText
             )
         }
         return String(
-            format: String(localized: "savings.completed.accessibility_short", defaultValue: "Completed goal %@, %@", table: "UI"),
+            format: "savings.completed.accessibility_short".localized(defaultValue: "Completed goal %@, %@", table: "UI"),
             name,
             saved
         )

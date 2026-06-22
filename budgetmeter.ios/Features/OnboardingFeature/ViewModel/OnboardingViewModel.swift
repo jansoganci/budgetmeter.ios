@@ -11,15 +11,22 @@ import SwiftUI
 final class OnboardingViewModel: ObservableObject {
     @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding = false
     @Published var currentPage = 0
+    private let supabaseAccountDataService = SupabaseAccountDataService.shared
 
     static let totalPages = 3
 
     func skip() {
         hasCompletedOnboarding = true
+        Task {
+            await supabaseAccountDataService.pushOnboardingCompleted(true)
+        }
     }
 
     func complete() {
         hasCompletedOnboarding = true
+        Task {
+            await supabaseAccountDataService.pushOnboardingCompleted(true)
+        }
     }
 
     func advancePage() {

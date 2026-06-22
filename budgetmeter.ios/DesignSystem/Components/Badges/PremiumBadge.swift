@@ -16,6 +16,7 @@ enum PremiumBadgeVariant {
 struct PremiumBadge: View {
 
     let variant: PremiumBadgeVariant
+    @Environment(\.themeAccent) private var themeAccent
 
     init(locked: Bool) {
         self.variant = locked ? .locked : .active
@@ -51,12 +52,20 @@ struct PremiumBadge: View {
                 .font(.caption.weight(.semibold))
                 .lineLimit(1)
         }
-        .foregroundColor(variant == .locked ? .financialCaution : .accentPrimary)
+        .foregroundColor(foregroundColor)
         .padding(.horizontal, Spacing.sm)
         .padding(.vertical, Spacing.xs)
-        .background(Color.accentPrimary.opacity(0.1))
+        .background(backgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: CornerRadius.badge, style: .continuous))
         .accessibilityLabel(label)
+    }
+
+    private var foregroundColor: Color {
+        variant == .locked ? .financialCaution : themeAccent
+    }
+
+    private var backgroundColor: Color {
+        foregroundColor.opacity(0.1)
     }
 }
 

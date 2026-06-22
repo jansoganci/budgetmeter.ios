@@ -43,12 +43,15 @@ final class WidgetSnapshotStoreTests: XCTestCase {
         var snapshot = makeSnapshot(isPremium: true, displayState: .unlocked)
         let mismatched = WidgetSnapshot(
             schemaVersion: 999,
+            appLanguageCode: snapshot.appLanguageCode,
             netDailyPace: snapshot.netDailyPace,
             paceStatus: snapshot.paceStatus,
             displayValue: snapshot.displayValue,
             displayStatusCopy: snapshot.displayStatusCopy,
             currencyCode: snapshot.currencyCode,
             currencySymbol: snapshot.currencySymbol,
+            savingsTargetAmount: snapshot.savingsTargetAmount,
+            savingsCurrentAmount: snapshot.savingsCurrentAmount,
             isPremium: snapshot.isPremium,
             generatedAt: snapshot.generatedAt,
             staleAfter: snapshot.staleAfter,
@@ -75,12 +78,15 @@ final class WidgetSnapshotStoreTests: XCTestCase {
         let generatedAt = Date(timeIntervalSince1970: 1_000)
         let snapshot = WidgetSnapshot(
             schemaVersion: WidgetConstants.schemaVersion,
+            appLanguageCode: "en",
             netDailyPace: 10,
             paceStatus: "movingForward",
             displayValue: "+$10/day",
             displayStatusCopy: "Moving forward +$10/day",
             currencyCode: "USD",
             currencySymbol: "$",
+            savingsTargetAmount: 100,
+            savingsCurrentAmount: 70,
             isPremium: true,
             generatedAt: generatedAt,
             staleAfter: generatedAt.addingTimeInterval(-60),
@@ -102,12 +108,15 @@ final class WidgetSnapshotStoreTests: XCTestCase {
         let generatedAt = Date()
         return WidgetSnapshot(
             schemaVersion: WidgetConstants.schemaVersion,
+            appLanguageCode: "en",
             netDailyPace: 12,
             paceStatus: "movingForward",
             displayValue: "+$12/day",
             displayStatusCopy: "Moving forward +$12/day",
             currencyCode: "USD",
             currencySymbol: "$",
+            savingsTargetAmount: 100,
+            savingsCurrentAmount: 64,
             isPremium: isPremium,
             generatedAt: generatedAt,
             staleAfter: generatedAt.addingTimeInterval(WidgetConstants.staleInterval),

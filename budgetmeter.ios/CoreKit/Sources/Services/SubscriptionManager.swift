@@ -17,6 +17,7 @@ final class SubscriptionManager {
 
     // MARK: - Properties
     private let persistence = PersistenceService.shared
+    private let syncService: FinancialEntitySyncScheduling
     private var context: NSManagedObjectContext {
         persistence.viewContext
     }
@@ -27,7 +28,9 @@ final class SubscriptionManager {
     static let subscriptionDeletedNotification = Notification.Name("SubscriptionDeleted")
 
     // MARK: - Private Init
-    private init() {}
+    private init(syncService: FinancialEntitySyncScheduling = SupabaseSubscriptionSyncService.shared) {
+        self.syncService = syncService
+    }
 
     // MARK: - CRUD Operations
 
@@ -57,6 +60,7 @@ final class SubscriptionManager {
         subscription.reminderDaysBefore = Int16(reminderDaysBefore)
         subscription.createdAt = Date()
         subscription.lastModified = Date()
+        subscription.markFinancialSyncPending()
 
         guard persistence.save() else {
             print("❌ SubscriptionManager: Failed to create subscription")
@@ -68,6 +72,7 @@ final class SubscriptionManager {
 
         // Post notification
         NotificationCenter.default.post(name: Self.subscriptionAddedNotification, object: subscription)
+        syncService.scheduleSync()
 
         print("✅ SubscriptionManager: Created subscription '\(name)'")
         return subscription
@@ -104,6 +109,7 @@ final class SubscriptionManager {
         if let reminderDaysBefore = reminderDaysBefore { subscription.reminderDaysBefore = Int16(reminderDaysBefore) }
 
         subscription.lastModified = Date()
+        subscription.markFinancialSyncPending()
 
         guard persistence.save() else {
             print("❌ SubscriptionManager: Failed to update subscription")
@@ -115,6 +121,7 @@ final class SubscriptionManager {
         scheduleRenewalNotification(for: subscription)
 
         NotificationCenter.default.post(name: Self.subscriptionUpdatedNotification, object: subscription)
+        syncService.scheduleSync()
 
         print("✅ SubscriptionManager: Updated subscription '\(subscription.name ?? "")'")
         return true
@@ -129,8 +136,7 @@ final class SubscriptionManager {
 
         // Cancel notifications
         cancelRenewalNotification(for: subscription)
-
-        context.delete(subscription)
+        subscription.tombstoneForFinancialSync()
 
         guard persistence.save() else {
             print("❌ SubscriptionManager: Failed to delete subscription")
@@ -138,6 +144,7 @@ final class SubscriptionManager {
         }
 
         NotificationCenter.default.post(name: Self.subscriptionDeletedNotification, object: id)
+        syncService.scheduleSync()
 
         print("✅ SubscriptionManager: Deleted subscription")
         return true
@@ -149,6 +156,7 @@ final class SubscriptionManager {
 
         subscription.isPaused = true
         subscription.lastModified = Date()
+        subscription.markFinancialSyncPending()
 
         // Cancel notifications while paused
         cancelRenewalNotification(for: subscription)
@@ -156,6 +164,7 @@ final class SubscriptionManager {
         guard persistence.save() else { return false }
 
         NotificationCenter.default.post(name: Self.subscriptionUpdatedNotification, object: subscription)
+        syncService.scheduleSync()
         return true
     }
 
@@ -165,6 +174,7 @@ final class SubscriptionManager {
 
         subscription.isPaused = false
         subscription.lastModified = Date()
+        subscription.markFinancialSyncPending()
 
         // Re-schedule notifications
         scheduleRenewalNotification(for: subscription)
@@ -172,6 +182,7 @@ final class SubscriptionManager {
         guard persistence.save() else { return false }
 
         NotificationCenter.default.post(name: Self.subscriptionUpdatedNotification, object: subscription)
+        syncService.scheduleSync()
         return true
     }
 
@@ -181,7 +192,7 @@ final class SubscriptionManager {
     /// Get all active subscriptions
     func getAllActiveSubscriptions() -> [Subscription] {
         let request: NSFetchRequest<Subscription> = Subscription.fetchRequest()
-        request.predicate = NSPredicate(format: "isActive == YES AND isPaused == NO")
+        request.predicate = NSPredicate(format: "isActive == YES AND isPaused == NO AND deletedAt == nil")
         request.sortDescriptors = [NSSortDescriptor(key: "nextRenewalDate", ascending: true)]
 
         do {
@@ -195,7 +206,7 @@ final class SubscriptionManager {
     /// Get subscription by ID
     func fetchSubscription(by id: UUID) -> Subscription? {
         let request: NSFetchRequest<Subscription> = Subscription.fetchRequest()
-        request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        request.predicate = NSPredicate(format: "id == %@ AND deletedAt == nil", id as CVarArg)
         request.fetchLimit = 1
 
         do {
@@ -212,7 +223,7 @@ final class SubscriptionManager {
 
         let request: NSFetchRequest<Subscription> = Subscription.fetchRequest()
         request.predicate = NSPredicate(
-            format: "isActive == YES AND isPaused == NO AND nextRenewalDate >= %@ AND nextRenewalDate <= %@",
+            format: "isActive == YES AND isPaused == NO AND deletedAt == nil AND nextRenewalDate >= %@ AND nextRenewalDate <= %@",
             Date() as CVarArg,
             endDate as CVarArg
         )

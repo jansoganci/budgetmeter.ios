@@ -115,7 +115,8 @@ struct CustomCategoryTestView: View {
         }
         .sheet(isPresented: $showingIncomeModal) {
             CreateCategoryModal(
-                frequency: "monthly",
+                entryIntent: .recurring,
+                defaultRecurringFrequency: "monthly",
                 type: "income",
                 onSave: { category in
                     print("✅ Created income category: \(category.customName ?? "Unknown")")
@@ -128,7 +129,8 @@ struct CustomCategoryTestView: View {
         }
         .sheet(isPresented: $showingExpenseModal) {
             CreateCategoryModal(
-                frequency: "monthly",
+                entryIntent: .recurring,
+                defaultRecurringFrequency: "monthly",
                 type: "expense",
                 onSave: { category in
                     print("✅ Created expense category: \(category.customName ?? "Unknown")")

@@ -30,6 +30,12 @@ struct AddFinancialItemRow: View {
     // MARK: - Computed Properties
 
     private var buttonText: String {
+        if frequency == "once" {
+            return type == "income"
+                ? String(localized: "financial.add.one_time_income", defaultValue: "Add one-time income", table: "UI")
+                : String(localized: "financial.add.one_time_expense", defaultValue: "Add one-time expense", table: "UI")
+        }
+
         let frequencyText = frequency.capitalized
         let typeText = type == "income"
             ? String(localized: "financial.add.income", defaultValue: "income")

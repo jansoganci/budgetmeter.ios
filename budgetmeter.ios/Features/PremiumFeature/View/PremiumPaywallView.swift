@@ -18,6 +18,7 @@ struct PremiumPaywallView: View {
     @StateObject private var premiumManager = PremiumManager.shared
     @State private var showingRestoreAlert = false
     @State private var showingPurchaseAlert = false
+    @Environment(\.themeAccent) private var themeAccent
 
     init(
         feature: PremiumFeature? = nil,
@@ -130,7 +131,7 @@ struct PremiumPaywallView: View {
         GlassCard {
             VStack(spacing: Spacing.sm) {
                 Text(displayPrice)
-                    .heroMetricStyle(color: .accentPrimary)
+                    .heroMetricStyle(color: themeAccent)
 
                 Text(String(localized: "premium.price.subtitle", defaultValue: "One-time purchase • Lifetime access", table: "UI"))
                     .captionStyle(color: .textSecondary)
@@ -166,9 +167,9 @@ struct PremiumPaywallView: View {
         HStack(alignment: .top, spacing: Spacing.md) {
             Image(systemName: feature.iconName)
                 .font(.body.weight(.medium))
-                .foregroundColor(.accentPrimary)
+                .foregroundColor(themeAccent)
                 .frame(width: 32, height: 32)
-                .background(Color.accentPrimary.opacity(0.12))
+                .background(themeAccent.opacity(0.12))
                 .clipShape(RoundedRectangle(cornerRadius: CornerRadius.small, style: .continuous))
                 .accessibilityHidden(true)
 

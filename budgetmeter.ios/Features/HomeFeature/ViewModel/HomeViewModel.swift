@@ -10,6 +10,9 @@ import SwiftUI
 import CoreData
 import Combine
 
+/// Lightweight savings goal snapshot for Home carousel cards.
+typealias HomeSavingsGoalSummary = CompactSavingsGoalItem
+
 /// ViewModel for the Home screen following MVVM architecture
 @MainActor
 final class HomeViewModel: ObservableObject {
@@ -65,6 +68,7 @@ final class HomeViewModel: ObservableObject {
     @Published var primarySavingsGoalEmoji: String? = nil
     @Published var primarySavingsGoalCurrent: Double = 0
     @Published var primarySavingsGoalTarget: Double = 0
+    @Published var homeSavingsGoals: [HomeSavingsGoalSummary] = []
 
     // Phase 3 — Momentum display fields (from FinancialSummary)
     @Published var netDailyPace: Double = 0
@@ -316,6 +320,7 @@ final class HomeViewModel: ObservableObject {
         let summary = summaryBuilder.build(sessionElapsedSeconds: elapsed)
         latestSummary = summary
         applyFinancialSummary(summary)
+        loadHomeSavingsGoals()
 
         isLoading = false
     }
@@ -510,6 +515,36 @@ final class HomeViewModel: ObservableObject {
             primarySavingsGoalName = nil
             primarySavingsGoalEmoji = nil
         }
+    }
+
+    /// Builds in-progress savings goal cards for the Home carousel.
+    private func loadHomeSavingsGoals() {
+        let inProgressGoals = goalManager.getInProgressGoals()
+        if !inProgressGoals.isEmpty {
+            homeSavingsGoals = inProgressGoals.compactMap { goal in
+                guard let id = goal.id else { return nil }
+                return CompactSavingsGoalItem(
+                    id: id,
+                    name: goal.name,
+                    emoji: goal.emoji,
+                    currentAmount: goal.currentAmount,
+                    targetAmount: goal.targetAmount
+                )
+            }
+            return
+        }
+
+        let fallbackTarget = max(savingsGoal, primarySavingsGoalTarget)
+        let fallbackID = goalManager.getPrimaryActiveGoal()?.id ?? UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
+        homeSavingsGoals = [
+            CompactSavingsGoalItem(
+                id: fallbackID,
+                name: primarySavingsGoalName,
+                emoji: primarySavingsGoalEmoji,
+                currentAmount: primarySavingsGoalCurrent,
+                targetAmount: fallbackTarget
+            )
+        ]
     }
 
     @objc private func savingsGoalDidChange() {

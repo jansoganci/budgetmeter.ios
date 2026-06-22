@@ -14,6 +14,7 @@ struct CurrencyPickerView: View {
     let onSelect: (CurrencyOption) -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.themeAccent) private var themeAccent
 
     var body: some View {
         NavigationStack {
@@ -68,7 +69,7 @@ struct CurrencyPickerView: View {
     private func currencyRow(for currency: CurrencyOption) -> some View {
         HStack(spacing: Spacing.md) {
             Text(currency.symbol)
-                .metricCompactStyle(color: .accentPrimary)
+                .metricCompactStyle(color: themeAccent)
                 .frame(width: 32, alignment: .leading)
 
             VStack(alignment: .leading, spacing: Spacing.xs) {
@@ -82,7 +83,7 @@ struct CurrencyPickerView: View {
 
             if selectedCurrencyCode == currency.code {
                 Image(systemName: "checkmark")
-                    .foregroundColor(.accentPrimary)
+                    .foregroundColor(themeAccent)
                     .font(.system(size: 16, weight: .semibold))
                     .accessibilityHidden(true)
             }

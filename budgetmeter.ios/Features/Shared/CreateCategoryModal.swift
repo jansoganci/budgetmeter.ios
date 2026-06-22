@@ -10,7 +10,8 @@ import SwiftUI
 /// Modal for creating custom categories inline from Income/Expense views
 struct CreateCategoryModal: View {
 
-    let frequency: String
+    let entryIntent: FinancialCategoryEntryKind
+    let defaultRecurringFrequency: String
     let type: String
     let onSave: (FinancialCategory) -> Void
     let onCancel: () -> Void
@@ -18,7 +19,7 @@ struct CreateCategoryModal: View {
     @State private var categoryName = ""
     @State private var selectedIcon = "tag.fill"
     @State private var selectedColor: CategoryColor = .gray
-    @State private var selectedEntryKind: FinancialCategoryEntryKind = .recurring
+    @State private var selectedRecurringFrequency: String
     @State private var occurrenceDate = Date()
     @State private var showingValidationError = false
     @State private var validationErrorMessage = ""
@@ -28,8 +29,43 @@ struct CreateCategoryModal: View {
     @StateObject private var validationService = CategoryValidationService()
     @StateObject private var premiumManager = PremiumManager.shared
 
+    init(
+        entryIntent: FinancialCategoryEntryKind,
+        defaultRecurringFrequency: String = "monthly",
+        type: String,
+        onSave: @escaping (FinancialCategory) -> Void,
+        onCancel: @escaping () -> Void
+    ) {
+        self.entryIntent = entryIntent
+        self.defaultRecurringFrequency = defaultRecurringFrequency
+        self.type = type
+        self.onSave = onSave
+        self.onCancel = onCancel
+        _selectedRecurringFrequency = State(initialValue: defaultRecurringFrequency)
+    }
+
     private var accentColor: Color {
         type == "income" ? .financialPositive : .brandExpense
+    }
+
+    private var navigationTitle: String {
+        switch entryIntent {
+        case .oneTime:
+            return type == "income"
+                ? String(localized: "category.modal.title.one_time_income", defaultValue: "Add One-Time Income", table: "UI")
+                : String(localized: "category.modal.title.one_time_expense", defaultValue: "Add One-Time Expense", table: "UI")
+        case .recurring:
+            return String(format: "category.modal.title.add".localized(defaultValue: "Add %@ Category"), type.capitalized)
+        }
+    }
+
+    private var previewFrequencyLabel: String {
+        switch entryIntent {
+        case .oneTime:
+            return String(localized: "financial.entry.one_time", defaultValue: "One-Time", table: "UI")
+        case .recurring:
+            return selectedRecurringFrequency.capitalized
+        }
     }
 
     var body: some View {
@@ -39,7 +75,14 @@ struct CreateCategoryModal: View {
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: LayoutSpacing.sectionGap) {
-                        entryTypeSection
+                        if entryIntent == .oneTime {
+                            oneTimeHelperSection
+                        }
+
+                        if entryIntent == .recurring {
+                            frequencySection
+                        }
+
                         detailsSection
                         iconSection
                         colorSection
@@ -55,7 +98,7 @@ struct CreateCategoryModal: View {
                     .padding(.vertical, Spacing.md)
                 }
             }
-            .navigationTitle(String(format: "category.modal.title.add".localized(defaultValue: "Add %@ Category"), type.capitalized))
+            .navigationTitle(navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -73,33 +116,51 @@ struct CreateCategoryModal: View {
         .presentationDragIndicator(.visible)
     }
 
-    private var entryTypeSection: some View {
+    private var oneTimeHelperSection: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            SectionHeader(title: "financial.entry.type_header".localized(defaultValue: "Entry Type"))
+            SectionHeader(title: String(localized: "financial.entry.type_header", defaultValue: "Entry Type", table: "UI"))
 
             GlassCard {
-                VStack(spacing: LayoutSpacing.cardInternalGap) {
-                    Picker(
-                        String(localized: "financial.entry.kind", defaultValue: "Entry Type"),
-                        selection: $selectedEntryKind
-                    ) {
-                        Text(entryKindRecurringLabel)
-                            .tag(FinancialCategoryEntryKind.recurring)
-                        Text(entryKindOneTimeLabel)
-                            .tag(FinancialCategoryEntryKind.oneTime)
-                    }
-                    .pickerStyle(.segmented)
-                    .tint(accentColor)
+                VStack(alignment: .leading, spacing: LayoutSpacing.cardInternalGap) {
+                    Text(entryKindOneTimeLabel)
+                        .statusTitleStyle()
 
-                    if selectedEntryKind == .oneTime {
-                        DatePicker(
-                            String(localized: "financial.entry.occurrence_date", defaultValue: "Date"),
-                            selection: $occurrenceDate,
-                            displayedComponents: .date
+                    Text(
+                        String(
+                            localized: "financial.entry.one_time_helper",
+                            defaultValue: "One-time items are counted in the current month.",
+                            table: "UI"
                         )
-                        .datePickerStyle(.compact)
-                    }
+                    )
+                    .captionStyle(color: .textSecondary)
+
+                    DatePicker(
+                        String(localized: "financial.entry.occurrence_date", defaultValue: "Date"),
+                        selection: $occurrenceDate,
+                        displayedComponents: .date
+                    )
+                    .datePickerStyle(.compact)
                 }
+            }
+        }
+    }
+
+    private var frequencySection: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            SectionHeader(title: String(localized: "category.modal.frequency_header", defaultValue: "Frequency", table: "UI"))
+
+            GlassCard {
+                Picker(
+                    String(localized: "category.modal.frequency_picker", defaultValue: "Frequency", table: "UI"),
+                    selection: $selectedRecurringFrequency
+                ) {
+                    Text(String(localized: "frequency.daily", defaultValue: "Daily", table: "UI")).tag("daily")
+                    Text(String(localized: "frequency.weekly", defaultValue: "Weekly", table: "UI")).tag("weekly")
+                    Text(String(localized: "frequency.monthly", defaultValue: "Monthly", table: "UI")).tag("monthly")
+                    Text(String(localized: "frequency.yearly", defaultValue: "Yearly", table: "UI")).tag("yearly")
+                }
+                .pickerStyle(.segmented)
+                .tint(accentColor)
             }
         }
     }
@@ -110,9 +171,6 @@ struct CreateCategoryModal: View {
 
             GlassCard {
                 VStack(alignment: .leading, spacing: LayoutSpacing.cardInternalGap) {
-                    Label("\(frequency.capitalized) \(type.capitalized)", systemImage: "info.circle")
-                        .captionStyle(color: .textSecondary)
-
                     VStack(alignment: .leading, spacing: Spacing.xs) {
                         Text("category.modal.name_placeholder".localized(defaultValue: "Category Name"))
                             .statusTitleStyle(color: .textSecondary)
@@ -126,16 +184,7 @@ struct CreateCategoryModal: View {
                         .padding(Spacing.md)
                         .background(Color.surfaceInset)
                         .clipShape(RoundedRectangle(cornerRadius: CornerRadius.card, style: .continuous))
-                        .onSubmit {
-                            if validationService.validateCustomCategory(
-                                name: categoryName,
-                                type: type,
-                                frequency: frequency,
-                                context: viewContext
-                            ).isValid {
-                                saveCategory()
-                            }
-                        }
+                        .onSubmit { saveCategory() }
                         .onChange(of: categoryName) { _, _ in
                             inlineNameError = nil
                         }
@@ -185,15 +234,9 @@ struct CreateCategoryModal: View {
                 name: categoryName.isEmpty ? "category.modal.name_placeholder".localized(defaultValue: "Category Name") : categoryName,
                 iconName: selectedIcon,
                 color: selectedColor.color,
-                frequency: frequency
+                frequency: previewFrequencyLabel
             )
         }
-    }
-
-    private var entryKindRecurringLabel: String {
-        type == "income"
-            ? String(localized: "financial.entry.recurring_income", defaultValue: "Recurring Income")
-            : String(localized: "financial.entry.regular_expense", defaultValue: "Regular Expense")
     }
 
     private var entryKindOneTimeLabel: String {
@@ -203,10 +246,13 @@ struct CreateCategoryModal: View {
     }
 
     private func saveCategory() {
+        let recurringFrequency = entryIntent == .recurring ? selectedRecurringFrequency : defaultRecurringFrequency
+
         let validationResult = validationService.validateCustomCategory(
             name: categoryName,
             type: type,
-            frequency: frequency,
+            entryKind: entryIntent,
+            recurringFrequency: entryIntent == .recurring ? recurringFrequency : nil,
             context: viewContext
         )
 
@@ -222,7 +268,8 @@ struct CreateCategoryModal: View {
         let result = validationService.createCustomCategory(
             name: categoryName,
             type: type,
-            frequency: frequency,
+            entryKind: entryIntent,
+            recurringFrequency: recurringFrequency,
             iconName: selectedIcon,
             colorHex: colorToSave,
             context: viewContext
@@ -232,17 +279,24 @@ struct CreateCategoryModal: View {
         case .success(let category):
             FinancialCategoryWriteSupport.applyMetadata(
                 to: category,
-                entryKind: selectedEntryKind,
-                recurringFrequency: frequency,
+                entryKind: entryIntent,
+                recurringFrequency: recurringFrequency,
                 occurrenceDate: occurrenceDate
             )
 
-            do {
-                try viewContext.save()
+            if PersistenceService.shared.save() {
+                if entryIntent == .oneTime {
+                    SupabaseOneTimeTransactionSyncService.shared.registerLocalOneTimeRow(category)
+                } else {
+                    SupabaseFinancialCategorySyncService.shared.registerLocalCustomCategory(category)
+                }
                 onSave(category)
-            } catch {
-                print("❌ Failed to save custom category: \(error)")
-                validationErrorMessage = "category.modal.save_error".localized(defaultValue: "Failed to save category. Please try again.")
+            } else {
+                validationErrorMessage = String(
+                    localized: "category.modal.save_error",
+                    defaultValue: "Couldn't save your change. Please try again.",
+                    table: "UI"
+                )
                 inlineNameError = validationErrorMessage
                 showingValidationError = true
             }
@@ -372,7 +426,7 @@ struct CategoryPreviewCard: View {
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
 
-            Text(frequency.capitalized)
+            Text(frequency)
                 .badgeStyle(color: .textSecondary)
         }
         .frame(maxWidth: .infinity)
@@ -383,81 +437,10 @@ struct CategoryPreviewCard: View {
 
 #Preview {
     CreateCategoryModal(
-        frequency: "monthly",
+        entryIntent: .recurring,
+        defaultRecurringFrequency: "monthly",
         type: "expense",
         onSave: { _ in },
         onCancel: { }
     )
-}
-
-// MARK: - Phase 5 Write / Display Support
-
-enum FinancialCategoryEntryKind: String {
-    case recurring = "recurring"
-    case oneTime = "oneTime"
-}
-
-enum FinancialCategoryWriteSupport {
-
-    static let recurringFrequencies: Set<String> = ["daily", "weekly", "monthly", "yearly"]
-
-    static func applyMetadata(
-        to category: FinancialCategory,
-        entryKind: FinancialCategoryEntryKind,
-        recurringFrequency: String,
-        occurrenceDate: Date = Date(),
-        sourceType: String? = nil,
-        sourceID: String? = nil
-    ) {
-        category.entryKind = entryKind.rawValue
-        category.isActive = true
-        category.lastModified = Date()
-
-        if let sourceType {
-            category.sourceType = sourceType
-        }
-        if let sourceID {
-            category.sourceID = sourceID
-        }
-
-        switch entryKind {
-        case .recurring:
-            category.frequency = recurringFrequency
-        case .oneTime:
-            category.frequency = "once"
-            category.occurrenceDate = occurrenceDate
-        }
-    }
-
-    static func touchModified(_ category: FinancialCategory) {
-        category.lastModified = Date()
-        category.isActive = true
-
-        let kind = normalized(category.entryKind)
-        if kind.isEmpty {
-            category.entryKind = FinancialCategoryEntryKind.recurring.rawValue
-        }
-    }
-
-    static func isRecurringDisplayCategory(_ category: FinancialCategory) -> Bool {
-        if normalized(category.entryKind) == FinancialCategoryEntryKind.oneTime.rawValue {
-            return false
-        }
-        let frequency = normalized(category.frequency)
-        if frequency == "recurring" || frequency == "once" {
-            return false
-        }
-        return recurringFrequencies.contains(frequency)
-    }
-
-    static func isOneTimeDisplayCategory(_ category: FinancialCategory) -> Bool {
-        if normalized(category.entryKind) == FinancialCategoryEntryKind.oneTime.rawValue {
-            return true
-        }
-        return normalized(category.frequency) == "once"
-    }
-
-    private static func normalized(_ value: String?) -> String {
-        value?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-    }
 }

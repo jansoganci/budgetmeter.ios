@@ -120,6 +120,7 @@ final class BasicSavingsIntegrationTests: XCTestCase {
     }
 
     func test_savingsGoalsViewModel_canAddAnotherGoal_respectsFreeBoundary() {
+        _ = insertSettings()
         _ = goalManager.createGoal(name: "Only Goal", targetAmount: 500)
         let viewModel = SavingsGoalsViewModel(
             persistenceService: persistence,
@@ -127,8 +128,108 @@ final class BasicSavingsIntegrationTests: XCTestCase {
             summaryBuilder: builder
         )
 
-        XCTAssertEqual(viewModel.canAddAnotherGoal, PremiumManager.shared.isPremium)
+        XCTAssertFalse(viewModel.canAddAnotherGoal)
     }
+
+    func test_savingsGoalsViewModel_canAddAnotherGoal_trueForPremiumWithExistingGoal() {
+        let settings = insertSettings()
+        settings.isPremiumUser = true
+        CoreDataMigrationTestSupport.saveContext(persistence)
+
+        _ = goalManager.createGoal(name: "Only Goal", targetAmount: 500)
+        let viewModel = SavingsGoalsViewModel(
+            persistenceService: persistence,
+            goalManager: goalManager,
+            summaryBuilder: builder
+        )
+
+        XCTAssertTrue(viewModel.canAddAnotherGoal)
+    }
+
+    func test_freeUserWithNoGoals_canCreateFirstGoal() {
+        _ = insertSettings()
+        XCTAssertTrue(goalManager.canCreateAdditionalGoal())
+
+        let first = goalManager.createGoal(name: "First", targetAmount: 500)
+
+        XCTAssertNotNil(first)
+        XCTAssertEqual(goalManager.getActiveGoals().count, 1)
+    }
+
+    func test_premiumUser_secondGoalDoesNotOverwriteFirst() {
+        let settings = insertSettings()
+        settings.isPremiumUser = true
+        CoreDataMigrationTestSupport.saveContext(persistence)
+
+        let first = goalManager.createGoal(name: "First", targetAmount: 500)
+        let second = goalManager.createGoal(name: "Second", targetAmount: 900)
+
+        XCTAssertNotNil(first)
+        XCTAssertNotNil(second)
+        XCTAssertNotEqual(first?.id, second?.id)
+        XCTAssertEqual(goalManager.getActiveGoals().count, 2)
+        XCTAssertEqual(Set(goalManager.getActiveGoals().compactMap(\.name)), Set(["First", "Second"]))
+    }
+
+    func test_savingsGoalsViewModel_listsMultipleActiveGoals() {
+        let settings = insertSettings()
+        settings.isPremiumUser = true
+        CoreDataMigrationTestSupport.saveContext(persistence)
+
+        _ = goalManager.createGoal(name: "Vacation", targetAmount: 2_000)
+        _ = goalManager.createGoal(name: "Emergency", targetAmount: 1_000)
+        CoreDataMigrationTestSupport.saveContext(persistence)
+
+        let viewModel = SavingsGoalsViewModel(
+            persistenceService: persistence,
+            goalManager: goalManager,
+            summaryBuilder: builder
+        )
+
+        XCTAssertEqual(viewModel.activeGoals.count, 2)
+        XCTAssertEqual(Set(viewModel.activeGoals.compactMap(\.name)), Set(["Vacation", "Emergency"]))
+    }
+
+    func test_homeSavingsGoals_listsMultipleInProgressGoals() {
+        let settings = insertSettings()
+        settings.isPremiumUser = true
+        CoreDataMigrationTestSupport.saveContext(persistence)
+
+        _ = goalManager.createGoal(name: "Vacation", targetAmount: 2_000, currentAmount: 500)
+        _ = goalManager.createGoal(name: "Emergency", targetAmount: 1_000, currentAmount: 200)
+        CoreDataMigrationTestSupport.saveContext(persistence)
+
+        let homeViewModel = HomeViewModel(
+            persistenceService: persistence,
+            summaryBuilder: builder,
+            goalManager: goalManager
+        )
+        homeViewModel.refresh()
+
+        XCTAssertEqual(homeViewModel.homeSavingsGoals.count, 2)
+        XCTAssertEqual(Set(homeViewModel.homeSavingsGoals.compactMap(\.name)), Set(["Vacation", "Emergency"]))
+    }
+
+    #if DEBUG
+    func test_debugPremiumOverride_allowsSecondGoalCreation() {
+        let defaultsKey = PremiumManager.debugPremiumOverrideKey
+        let previousOverride = UserDefaults.standard.bool(forKey: defaultsKey)
+        defer {
+            UserDefaults.standard.set(previousOverride, forKey: defaultsKey)
+        }
+
+        UserDefaults.standard.set(true, forKey: defaultsKey)
+        _ = insertSettings()
+
+        let first = goalManager.createGoal(name: "First", targetAmount: 500)
+        let second = goalManager.createGoal(name: "Second", targetAmount: 900)
+
+        XCTAssertNotNil(first)
+        XCTAssertNotNil(second)
+        XCTAssertEqual(goalManager.getActiveGoals().count, 2)
+        XCTAssertTrue(goalManager.canCreateAdditionalGoal())
+    }
+    #endif
 
     func test_createGoal_blocksSecondNonArchivedGoalForFreeUsers() {
         _ = insertSettings()

@@ -19,6 +19,7 @@ struct NotificationSettingsView: View {
     @State private var showDailyTimePicker = false
     @State private var showTestSuccess = false
     @State private var showTestError = false
+    @Environment(\.themeAccent) private var themeAccent
 
     // Haptic feedback generator
     private let hapticFeedback = UIImpactFeedbackGenerator(style: .medium)
@@ -90,10 +91,24 @@ struct NotificationSettingsView: View {
             } message: {
                 Text(viewModel.errorMessage ?? "An unexpected error occurred")
             }
+            .alert(
+                "notifications.permission.disabled_title".localized(defaultValue: "Notifications Disabled"),
+                isPresented: $viewModel.showNotificationSettingsAlert
+            ) {
+                Button("notifications.permission.open_settings".localized(defaultValue: "Open Settings")) {
+                    viewModel.openSystemSettings()
+                }
+                Button("alert.cancel".localized(defaultValue: "Cancel"), role: .cancel) { }
+            } message: {
+                Text("notifications.permission.daily_denied_message".localized(defaultValue: "Notifications are off for BudgetMeter. Enable them in iOS Settings to use daily reminders."))
+            }
             .onAppear {
                 viewModel.checkPermissionStatus()
                 hapticFeedback.prepare()
                 successFeedback.prepare()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+                viewModel.checkPermissionStatus()
             }
         }
     }
@@ -365,7 +380,7 @@ struct NotificationSettingsView: View {
         HStack(alignment: .top, spacing: Spacing.md) {
             Image(systemName: icon)
                 .font(.title3)
-                .foregroundColor(.accentPrimary)
+                .foregroundColor(themeAccent)
                 .frame(width: 24)
                 .accessibilityHidden(true)
 
@@ -389,8 +404,7 @@ struct NotificationSettingsView: View {
     }
 
     private var dailyDescription: String {
-        let timeString = DateFormattingHelper.shared.formatTime(viewModel.dailyTime)
-        return "Every day at \(timeString)"
+        "notifications.daily.description".localized(defaultValue: "A gentle daily reminder to check your money pace.")
     }
 }
 

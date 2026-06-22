@@ -119,6 +119,20 @@ extension Color {
     static let brandExpense = financialNegative
 }
 
+// MARK: - Runtime Theme Accent
+
+private struct ThemeAccentKey: EnvironmentKey {
+    static let defaultValue: Color = .accentPrimary
+}
+
+extension EnvironmentValues {
+    /// Runtime accent selected by Premium Themes. Use only for accent-layer UI.
+    var themeAccent: Color {
+        get { self[ThemeAccentKey.self] }
+        set { self[ThemeAccentKey.self] = newValue }
+    }
+}
+
 // MARK: - Text (v4)
 
 extension Color {

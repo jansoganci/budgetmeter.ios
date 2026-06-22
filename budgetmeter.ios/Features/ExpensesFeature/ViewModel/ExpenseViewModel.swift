@@ -17,6 +17,7 @@ final class ExpenseViewModel: ObservableObject {
     // MARK: - Published Properties
 
     @Published var dailyExpenses: [FinancialCategory] = []
+    @Published var weeklyExpenses: [FinancialCategory] = []
     @Published var monthlyExpenses: [FinancialCategory] = []
     @Published var yearlyExpenses: [FinancialCategory] = []
     @Published var oneTimeExpenses: [FinancialCategory] = []
@@ -54,7 +55,7 @@ final class ExpenseViewModel: ObservableObject {
     }
 
     var activeSourcesCount: Int {
-        let recurring = (dailyExpenses + monthlyExpenses + yearlyExpenses).filter { $0.amount > 0 }.count
+        let recurring = (dailyExpenses + weeklyExpenses + monthlyExpenses + yearlyExpenses).filter { $0.amount > 0 }.count
         let oneTime = oneTimeExpenses.filter { $0.amount > 0 }.count
         return recurring + oneTime + subscriptionsCount
     }
@@ -81,20 +82,35 @@ final class ExpenseViewModel: ObservableObject {
     
     private let persistenceService: PersistenceService
     private let summaryBuilder: FinancialSummaryBuilder
+    private let oneTimeSyncService: OneTimeTransactionSyncScheduling
+    private let categorySyncService: FinancialCategorySyncScheduling
     private var cancellables = Set<AnyCancellable>()
     private var currencyCode: String = CurrencyHelper.defaultCurrencyCode()
+    private var hasLoadedCategories = false
+
+    private static let saveFailedMessage = String(
+        localized: "expenses.error.save",
+        defaultValue: "Couldn't save your change. Please try again.",
+        table: "UI"
+    )
 
     // MARK: - Initialization
 
     init(
         persistenceService: PersistenceService = .shared,
-        summaryBuilder: FinancialSummaryBuilder? = nil
+        summaryBuilder: FinancialSummaryBuilder? = nil,
+        oneTimeSyncService: OneTimeTransactionSyncScheduling = SupabaseOneTimeTransactionSyncService.shared,
+        categorySyncService: FinancialCategorySyncScheduling = SupabaseFinancialCategorySyncService.shared
     ) {
         self.persistenceService = persistenceService
         self.summaryBuilder = summaryBuilder ?? FinancialSummaryBuilder(context: persistenceService.viewContext)
+        self.oneTimeSyncService = oneTimeSyncService
+        self.categorySyncService = categorySyncService
         setupCurrencyObserver()
         setupLanguageObserver()
         setupSubscriptionObservers()
+        setupOneTimeSyncObserver()
+        setupCategorySyncObserver()
         loadCurrency()
         loadExpenseCategories()
         loadSubscriptions()
@@ -109,10 +125,14 @@ final class ExpenseViewModel: ObservableObject {
     func updateAmount(for category: FinancialCategory, amount: Double) {
         category.amount = amount
         FinancialCategoryWriteSupport.touchModified(category)
-        persistenceService.save()
+        guard persistenceService.save() else {
+            errorMessage = Self.saveFailedMessage
+            return
+        }
 
-        loadExpenseCategories()
+        loadExpenseCategories(showLoadingIndicator: false)
 
+        syncOneTimeChange(for: category)
         WidgetSnapshotService.refreshFromCurrentData()
     }
 
@@ -120,9 +140,13 @@ final class ExpenseViewModel: ObservableObject {
         guard category.isCustom else { return }
         category.customColorHex = color.rawValue
         FinancialCategoryWriteSupport.touchModified(category)
-        persistenceService.save()
+        guard persistenceService.save() else {
+            errorMessage = Self.saveFailedMessage
+            return
+        }
 
-        loadExpenseCategories()
+        loadExpenseCategories(showLoadingIndicator: false)
+        syncCategoryChange(for: category)
     }
     
     func formatInputAmount(_ amount: Double) -> String {
@@ -185,7 +209,7 @@ final class ExpenseViewModel: ObservableObject {
     }
     
     func refresh() {
-        loadExpenseCategories()
+        loadExpenseCategories(showLoadingIndicator: false)
         loadSubscriptions()
     }
 
@@ -232,19 +256,24 @@ final class ExpenseViewModel: ObservableObject {
     func deleteCategory(_ category: FinancialCategory) {
         guard category.isCustom else { return }
 
-        let context = persistenceService.viewContext
-        context.delete(category)
-        persistenceService.save()
+        if FinancialCategoryWriteSupport.isOneTimeDisplayCategory(category) {
+            oneTimeSyncService.tombstoneLocalOneTimeRow(category)
+            loadExpenseCategories(showLoadingIndicator: false)
+            WidgetSnapshotService.refreshFromCurrentData()
+            return
+        }
 
-        loadExpenseCategories()
-
+        categorySyncService.tombstoneLocalCustomCategory(category)
+        loadExpenseCategories(showLoadingIndicator: false)
         WidgetSnapshotService.refreshFromCurrentData()
     }
 
     // MARK: - Private Methods
     
-    private func loadExpenseCategories() {
-        isLoading = true
+    private func loadExpenseCategories(showLoadingIndicator: Bool = true) {
+        if showLoadingIndicator || !hasLoadedCategories {
+            isLoading = true
+        }
         errorMessage = nil
         
         let context = persistenceService.viewContext
@@ -255,14 +284,20 @@ final class ExpenseViewModel: ObservableObject {
         
         do {
             let allExpenses = try context.fetch(fetchRequest)
-            let recurringExpenses = allExpenses.filter { FinancialCategoryWriteSupport.isRecurringDisplayCategory($0) }
+            let recurringExpenses = allExpenses
+                .filter { FinancialCategoryWriteSupport.isRecurringDisplayCategory($0) }
+                .filter { !FinancialCategorySyncMetadataStore.shared.isTombstonedCustomCategory($0, in: context) }
 
             dailyExpenses = recurringExpenses.filter { $0.frequency == "daily" }
+            weeklyExpenses = recurringExpenses.filter { $0.frequency == "weekly" }
             monthlyExpenses = recurringExpenses.filter { $0.frequency == "monthly" }
             yearlyExpenses = recurringExpenses.filter { $0.frequency == "yearly" }
-            oneTimeExpenses = allExpenses.filter { FinancialCategoryWriteSupport.isOneTimeDisplayCategory($0) }
+            oneTimeExpenses = allExpenses
+                .filter { FinancialCategoryWriteSupport.isOneTimeDisplayCategory($0) }
+                .filter { !OneTimeTransactionSyncMetadataStore.shared.isTombstoned($0, in: context) }
 
             refreshSummary()
+            hasLoadedCategories = true
             isLoading = false
         } catch {
             print("📊 ExpenseViewModel: ❌ Loading failed: \(error)")
@@ -302,7 +337,7 @@ extension ExpenseViewModel {
     }
 
     var hasExpenseData: Bool {
-        let allCategories = dailyExpenses + monthlyExpenses + yearlyExpenses + oneTimeExpenses
+        let allCategories = dailyExpenses + weeklyExpenses + monthlyExpenses + yearlyExpenses + oneTimeExpenses
         let hasCategories = allCategories.contains { $0.amount > 0 }
         return hasCategories || !subscriptions.isEmpty
     }
@@ -311,6 +346,8 @@ extension ExpenseViewModel {
         switch frequency {
         case "daily":
             return dailyExpenses.reduce(0) { $0 + $1.amount }
+        case "weekly":
+            return weeklyExpenses.reduce(0) { $0 + $1.amount }
         case "monthly":
             return monthlyExpenses.reduce(0) { $0 + $1.amount }
         case "yearly":
@@ -349,6 +386,8 @@ extension ExpenseViewModel {
         switch frequency {
         case "daily":
             return "\(currencySymbol)\(formatted)/day"
+        case "weekly":
+            return "\(currencySymbol)\(formatted)/wk"
         case "monthly":
             return "\(currencySymbol)\(formatted)/mo"
         case "yearly":
@@ -362,6 +401,8 @@ extension ExpenseViewModel {
         switch frequency {
         case "daily":
             return String(localized: "expense.section.daily", defaultValue: "Daily Expenses")
+        case "weekly":
+            return String(localized: "expense.section.weekly", defaultValue: "Weekly Expenses")
         case "monthly":
             return String(localized: "expense.section.monthly", defaultValue: "Monthly Expenses")
         case "yearly":
@@ -379,6 +420,8 @@ extension ExpenseViewModel {
         switch frequency {
         case "daily":
             return dailyExpenses
+        case "weekly":
+            return weeklyExpenses
         case "monthly":
             return monthlyExpenses
         case "yearly":
@@ -392,6 +435,51 @@ extension ExpenseViewModel {
 // MARK: - Currency Handling
 
 private extension ExpenseViewModel {
+    func setupOneTimeSyncObserver() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(oneTimeTransactionsDidSync(_:)),
+            name: .oneTimeTransactionsDidSync,
+            object: nil
+        )
+    }
+
+    @objc func oneTimeTransactionsDidSync(_ notification: Notification) {
+        loadExpenseCategories(showLoadingIndicator: false)
+    }
+
+    func setupCategorySyncObserver() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(financialCategoriesDidSync(_:)),
+            name: .financialCategoriesDidSync,
+            object: nil
+        )
+    }
+
+    @objc func financialCategoriesDidSync(_ notification: Notification) {
+        loadExpenseCategories(showLoadingIndicator: false)
+    }
+
+    func syncCategoryChange(for category: FinancialCategory) {
+        if FinancialCategoryWriteSupport.isOneTimeDisplayCategory(category) {
+            oneTimeSyncService.registerLocalOneTimeRow(category)
+            return
+        }
+        if FinancialCategorySyncMapper.isCustomRecurringSyncEligible(category) {
+            categorySyncService.registerLocalCustomCategory(category)
+            return
+        }
+        if FinancialCategorySyncMapper.isSeededOverrideSyncEligible(category) {
+            categorySyncService.registerLocalSeededOverride(category)
+        }
+    }
+
+    func syncOneTimeChange(for category: FinancialCategory) {
+        guard FinancialCategoryWriteSupport.isOneTimeDisplayCategory(category) else { return }
+        oneTimeSyncService.registerLocalOneTimeRow(category)
+    }
+
     func setupCurrencyObserver() {
         NotificationCenter.default.addObserver(
             self,

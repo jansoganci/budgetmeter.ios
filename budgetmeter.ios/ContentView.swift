@@ -60,6 +60,7 @@ struct ContentView: View {
                 .tag(AppTab.settings)
         }
         .environment(\.locale, localizationManager.currentLocale)
+        .environment(\.themeAccent, themeManager.accentColor)
         .accentColor(themeManager.accentColor)
         .onReceive(NotificationCenter.default.publisher(for: .navigateToHome)) { _ in
             selectedTab = .home

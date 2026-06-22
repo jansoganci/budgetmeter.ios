@@ -9,30 +9,26 @@ import SwiftUI
 import LocalAuthentication
 
 struct BiometricAuthView: View {
-    @StateObject private var biometricManager = BiometricManager.shared
+    @EnvironmentObject private var biometricManager: BiometricManager
     @State private var isAuthenticating = false
     @State private var showError = false
-    
-    let onAuthenticationSuccess: () -> Void
+    @State private var hasAttemptedAutoAuth = false
     
     var body: some View {
         VStack(spacing: 30) {
             Spacer()
             
-            // Biometric Icon
             Image(systemName: biometricManager.biometricType.iconName)
                 .font(.system(size: 80))
                 .foregroundColor(.accentColor)
                 .padding(.bottom, 20)
             
-            // Title
             Text("security.auth.title".localized(defaultValue: "Secure Access"))
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .multilineTextAlignment(.center)
             
-            // Subtitle
-            Text(String(format: "security.auth.subtitle".localized(defaultValue: "Use %@ to access your financial data"), biometricManager.biometricType.displayName))
+            Text(statusSubtitle)
                 .font(.headline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -40,7 +36,6 @@ struct BiometricAuthView: View {
             
             Spacer()
             
-            // Authenticate Button
             Button {
                 authenticateUser()
             } label: {
@@ -53,7 +48,7 @@ struct BiometricAuthView: View {
                         Image(systemName: biometricManager.biometricType.iconName)
                     }
                     
-                    Text("security.auth.button".localized(defaultValue: "Authenticate"))
+                    Text(retryButtonTitle)
                         .fontWeight(.semibold)
                 }
                 .frame(maxWidth: .infinity)
@@ -65,23 +60,28 @@ struct BiometricAuthView: View {
             .disabled(isAuthenticating)
             .padding(.horizontal)
             
-            // Fallback Options
             VStack(spacing: 15) {
                 Text("security.auth.fallback".localized(defaultValue: "Having trouble?"))
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                 
                 Button("security.auth.passcode".localized(defaultValue: "Use Passcode")) {
-                    // Fallback to passcode authentication
                     authenticateWithPasscode()
                 }
                 .font(.subheadline)
                 .foregroundColor(.accentColor)
+                .disabled(isAuthenticating)
             }
             .padding(.bottom, 30)
         }
         .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemBackground))
+        .task {
+            guard !hasAttemptedAutoAuth else { return }
+            hasAttemptedAutoAuth = true
+            authenticateUser()
+        }
         .alert("security.auth.error.title".localized(defaultValue: "Authentication Error"), isPresented: $showError) {
             Button("toolbar.ok".localized(defaultValue: "OK")) {
                 showError = false
@@ -91,7 +91,25 @@ struct BiometricAuthView: View {
         }
     }
     
+    private var statusSubtitle: String {
+        if biometricManager.lastAuthenticationWasCancelled {
+            return "biometric.error.user_cancel".localized(defaultValue: "Authentication was cancelled by the user")
+        }
+        return String(
+            format: "security.auth.subtitle".localized(defaultValue: "Use %@ to access your financial data"),
+            biometricManager.biometricType.displayName
+        )
+    }
+    
+    private var retryButtonTitle: String {
+        if biometricManager.lastAuthenticationWasCancelled {
+            return "security.auth.retry".localized(defaultValue: "Try Again")
+        }
+        return "security.auth.button".localized(defaultValue: "Authenticate")
+    }
+    
     private func authenticateUser() {
+        guard !isAuthenticating else { return }
         isAuthenticating = true
         
         Task {
@@ -101,8 +119,10 @@ struct BiometricAuthView: View {
                 isAuthenticating = false
                 
                 if success {
-                    onAuthenticationSuccess()
-                } else {
+                    return
+                }
+                
+                if !biometricManager.lastAuthenticationWasCancelled {
                     showError = true
                 }
             }
@@ -110,17 +130,20 @@ struct BiometricAuthView: View {
     }
     
     private func authenticateWithPasscode() {
+        guard !isAuthenticating else { return }
         isAuthenticating = true
         
         Task {
-            let success = await biometricManager.authenticateUser(reason: "Use your passcode to access your financial data")
+            let success = await biometricManager.authenticateWithPasscode()
             
             await MainActor.run {
                 isAuthenticating = false
                 
                 if success {
-                    onAuthenticationSuccess()
-                } else {
+                    return
+                }
+                
+                if !biometricManager.lastAuthenticationWasCancelled {
                     showError = true
                 }
             }
@@ -129,7 +152,6 @@ struct BiometricAuthView: View {
 }
 
 #Preview {
-    BiometricAuthView {
-        print("Authentication successful")
-    }
+    BiometricAuthView()
+        .environmentObject(BiometricManager.shared)
 }

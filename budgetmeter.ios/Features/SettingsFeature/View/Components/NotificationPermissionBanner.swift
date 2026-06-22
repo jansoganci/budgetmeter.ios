@@ -14,6 +14,7 @@ struct NotificationPermissionBanner: View {
     // MARK: - Properties
 
     let onOpenSettings: () -> Void
+    @Environment(\.themeAccent) private var themeAccent
 
     // MARK: - Body
 
@@ -50,7 +51,7 @@ struct NotificationPermissionBanner: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .frame(minHeight: TouchTarget.minimum)
-                .background(Color.accentPrimary)
+                .background(themeAccent)
                 .clipShape(RoundedRectangle(cornerRadius: CornerRadius.button, style: .continuous))
             }
             .accessibilityLabel("Open iOS Settings")

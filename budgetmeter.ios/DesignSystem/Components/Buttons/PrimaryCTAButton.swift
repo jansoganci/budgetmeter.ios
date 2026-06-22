@@ -15,6 +15,8 @@ struct PrimaryCTAButton: View {
     var isDisabled: Bool = false
     let action: () -> Void
 
+    @Environment(\.themeAccent) private var themeAccent
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: Spacing.sm) {
@@ -29,7 +31,7 @@ struct PrimaryCTAButton: View {
             }
             .frame(maxWidth: .infinity)
             .frame(minHeight: LayoutSpacing.buttonHeight)
-            .background(isDisabled ? Color.financialNeutral : Color.accentPrimary)
+            .background(isDisabled ? Color.financialNeutral : themeAccent)
             .clipShape(RoundedRectangle(cornerRadius: CornerRadius.button, style: .continuous))
         }
         .disabled(isDisabled || isLoading)

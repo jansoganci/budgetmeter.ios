@@ -13,6 +13,7 @@ struct LanguagePickerView: View {
     let onSelect: (SettingsViewModel.LanguageMode) -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.themeAccent) private var themeAccent
     
     // Alphabetically sorted languages by display name
     private var sortedLanguages: [SettingsViewModel.LanguageMode] {
@@ -55,9 +56,9 @@ struct LanguagePickerView: View {
         HStack(spacing: Spacing.md) {
             Image(systemName: "globe")
                 .font(.system(size: 19, weight: .medium))
-                .foregroundColor(.accentPrimary)
+                .foregroundColor(themeAccent)
                 .frame(width: 32, height: 32)
-                .background(Color.accentPrimary.opacity(0.12))
+                .background(themeAccent.opacity(0.12))
                 .clipShape(RoundedRectangle(cornerRadius: CornerRadius.small, style: .continuous))
                 .accessibilityHidden(true)
 
@@ -72,7 +73,7 @@ struct LanguagePickerView: View {
 
             if selectedLanguage == language {
                 Image(systemName: "checkmark")
-                    .foregroundColor(.accentPrimary)
+                    .foregroundColor(themeAccent)
                     .font(.system(size: 16, weight: .semibold))
                     .accessibilityHidden(true)
             }

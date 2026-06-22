@@ -78,6 +78,13 @@ final class SavingsGoalsViewModel: ObservableObject {
                 self?.languageDidChange(notification)
             }
             .store(in: &cancellables)
+
+        PremiumManager.shared.$isPremium
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: - Computed Properties
@@ -108,7 +115,7 @@ final class SavingsGoalsViewModel: ObservableObject {
     }
 
     var canAddAnotherGoal: Bool {
-        goals.isEmpty || PremiumManager.shared.hasAccess(to: BudgetMeterCapability.multipleSavingsGoals)
+        goalManager.canCreateAdditionalGoal()
     }
 
     // MARK: - Public Methods

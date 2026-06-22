@@ -147,6 +147,10 @@ final class FinancialSummaryBuilder {
     ) {
         for category in fetchAll(FinancialCategory.fetchRequest()) {
             guard category.isActive else { continue }
+            if FinancialCategoryWriteSupport.isOneTimeDisplayCategory(category),
+               OneTimeTransactionSyncMetadataStore.shared.isTombstoned(category, in: context) {
+                continue
+            }
             guard category.amount > 0 else { continue }
             guard let type = category.type else { continue }
 
@@ -239,6 +243,7 @@ final class FinancialSummaryBuilder {
         expense: inout [String: RecurringMoneyLine]
     ) {
         for transaction in fetchAll(RecurringTransaction.fetchRequest()) {
+            guard transaction.deletedAt == nil else { continue }
             guard transaction.isActive else { continue }
             guard transaction.amount > 0 else { continue }
             guard let type = transaction.categoryType else { continue }

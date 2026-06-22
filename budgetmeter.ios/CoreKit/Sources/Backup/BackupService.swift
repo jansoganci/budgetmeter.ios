@@ -2,7 +2,7 @@
 //  BackupService.swift
 //  BudgetMeter
 //
-//  Premium-gated manual cloud backup and restore via Supabase.
+//  Premium-gated manual backup and restore via Supabase.
 //
 
 import CoreData
@@ -22,19 +22,19 @@ enum BackupServiceError: Error, Foundation.LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notConfigured:
-            return String(localized: "backup.error.not_configured", defaultValue: "Cloud backup is not configured.", table: "UI")
+            return String(localized: "backup.error.not_configured", defaultValue: "Manual backup is not configured.", table: "UI")
         case .notAuthenticated:
-            return String(localized: "backup.error.not_authenticated", defaultValue: "Sign in to use cloud backup.", table: "UI")
+            return String(localized: "backup.error.not_authenticated", defaultValue: "Sign in to use manual backup & restore.", table: "UI")
         case .premiumRequired:
-            return String(localized: "backup.error.premium_required", defaultValue: "Cloud backup requires BudgetMeter Premium.", table: "UI")
+            return String(localized: "backup.error.premium_required", defaultValue: "Manual backup & restore requires BudgetMeter Premium.", table: "UI")
         case .offline:
-            return String(localized: "backup.error.offline", defaultValue: "Cloud backup is unavailable offline.", table: "UI")
+            return String(localized: "backup.error.offline", defaultValue: "Manual backup is unavailable offline.", table: "UI")
         case .backupFailed:
             return String(localized: "backup.error.failed", defaultValue: "Backup failed. Your local data is safe.", table: "UI")
         case .restoreFailed:
             return String(localized: "backup.error.restore_failed", defaultValue: "Restore failed. Your previous data was preserved.", table: "UI")
         case .noCloudBackup:
-            return String(localized: "backup.error.no_cloud_backup", defaultValue: "No cloud backup found for this account.", table: "UI")
+            return String(localized: "backup.error.no_cloud_backup", defaultValue: "No manual backup found for this account.", table: "UI")
         case .localDataRequiresConfirmation:
             return String(localized: "backup.error.confirm_restore", defaultValue: "Restore will replace local data on this device.", table: "UI")
         }

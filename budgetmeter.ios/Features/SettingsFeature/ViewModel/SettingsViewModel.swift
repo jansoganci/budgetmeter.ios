@@ -30,6 +30,7 @@ final class SettingsViewModel: ObservableObject {
     
     private let userDefaults: UserDefaults
     private let persistenceService: PersistenceService
+    private let supabaseAccountDataService: SupabaseAccountDataSyncing
     
     // MARK: - Settings Keys
     
@@ -109,10 +110,12 @@ final class SettingsViewModel: ObservableObject {
     
     init(
         userDefaults: UserDefaults = .standard,
-        persistenceService: PersistenceService = .shared
+        persistenceService: PersistenceService = .shared,
+        supabaseAccountDataService: SupabaseAccountDataSyncing = SupabaseAccountDataService.shared
     ) {
         self.userDefaults = userDefaults
         self.persistenceService = persistenceService
+        self.supabaseAccountDataService = supabaseAccountDataService
         loadSettings()
         loadCurrencyPreference()
     }
@@ -124,6 +127,10 @@ final class SettingsViewModel: ObservableObject {
         selectedAppearance = mode
         userDefaults.set(mode.rawValue, forKey: SettingsKeys.appearanceMode)
         applyAppearance()
+
+        Task {
+            await supabaseAccountDataService.pushAppearanceMode(mode.rawValue)
+        }
     }
     
     /// Updates language preference and applies it immediately
@@ -133,6 +140,10 @@ final class SettingsViewModel: ObservableObject {
         
         // Apply language change immediately using LocalizationManager
         LocalizationManager.shared.currentLanguage = language.rawValue
+
+        Task {
+            await supabaseAccountDataService.pushLanguageCode(language.rawValue)
+        }
     }
     
     /// Shows privacy policy
@@ -246,6 +257,10 @@ final class SettingsViewModel: ObservableObject {
                 object: nil,
                 userInfo: ["code": resolvedCode]
             )
+
+            Task {
+                await supabaseAccountDataService.pushPreferredCurrencyCode(resolvedCode)
+            }
         } catch {
             print("Failed to persist currency: \(error)")
         }

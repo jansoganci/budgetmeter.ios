@@ -13,6 +13,7 @@ struct AppearancePickerView: View {
     let onSelect: (SettingsViewModel.AppearanceMode) -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.themeAccent) private var themeAccent
 
     var body: some View {
         NavigationView {
@@ -29,9 +30,9 @@ struct AppearancePickerView: View {
                                 HStack(spacing: Spacing.md) {
                                     Image(systemName: iconForMode(mode))
                                         .font(.body.weight(.medium))
-                                        .foregroundColor(.accentPrimary)
+                                        .foregroundColor(themeAccent)
                                         .frame(width: 32, height: 32)
-                                        .background(Color.accentPrimary.opacity(0.12))
+                                        .background(themeAccent.opacity(0.12))
                                         .clipShape(RoundedRectangle(cornerRadius: CornerRadius.small, style: .continuous))
                                         .accessibilityHidden(true)
 
@@ -42,7 +43,7 @@ struct AppearancePickerView: View {
 
                                     if selectedAppearance == mode {
                                         Image(systemName: "checkmark")
-                                            .foregroundColor(.accentPrimary)
+                                            .foregroundColor(themeAccent)
                                             .font(.body.weight(.semibold))
                                             .accessibilityHidden(true)
                                     }

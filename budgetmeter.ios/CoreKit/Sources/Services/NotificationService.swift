@@ -350,7 +350,7 @@ final class NotificationService {
     /// Schedule daily encouragement (premium feature)
     func scheduleDailyEncouragement() {
         checkPermissionStatus { [weak self] status in
-            guard status == .authorized else { return }
+            guard status == .authorized || status == .provisional || status == .ephemeral else { return }
             guard let self = self else { return }
 
             let context = self.persistenceService.viewContext

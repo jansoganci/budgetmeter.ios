@@ -19,6 +19,7 @@ enum WidgetSnapshotWriter {
     ) -> WidgetSnapshot {
         let hasInput = HomeDisplayMapping.hasFinancialInput(in: summary)
         let resolvedCurrencyCode = currencyCode ?? summary.currencyCode
+        let appLanguageCode = LocalizationManager.shared.currentLanguage
         let displayValue = HomeDisplayMapping.signedDailyAmount(
             summary.netPacePerDay,
             currencySymbol: currencySymbol
@@ -53,12 +54,15 @@ enum WidgetSnapshotWriter {
         if isLockedTeaser {
             return WidgetSnapshot(
                 schemaVersion: WidgetConstants.schemaVersion,
+                appLanguageCode: appLanguageCode,
                 netDailyPace: 0,
                 paceStatus: "insufficientData",
                 displayValue: "",
                 displayStatusCopy: "",
                 currencyCode: "",
                 currencySymbol: "",
+                savingsTargetAmount: summary.savingsTargetAmount,
+                savingsCurrentAmount: summary.savingsCurrentAmount,
                 isPremium: false,
                 generatedAt: generatedAt,
                 staleAfter: generatedAt.addingTimeInterval(WidgetConstants.staleInterval),
@@ -75,12 +79,15 @@ enum WidgetSnapshotWriter {
 
         return WidgetSnapshot(
             schemaVersion: WidgetConstants.schemaVersion,
+            appLanguageCode: appLanguageCode,
             netDailyPace: summary.netPacePerDay,
             paceStatus: paceStatusRawValue(summary.paceStatus),
             displayValue: displayValue,
             displayStatusCopy: displayStatusCopy,
             currencyCode: resolvedCurrencyCode,
             currencySymbol: currencySymbol,
+            savingsTargetAmount: summary.savingsTargetAmount,
+            savingsCurrentAmount: summary.savingsCurrentAmount,
             isPremium: isPremium,
             generatedAt: generatedAt,
             staleAfter: generatedAt.addingTimeInterval(WidgetConstants.staleInterval),

@@ -17,12 +17,15 @@ enum WidgetDisplayState: String, Codable, Equatable {
 
 struct WidgetSnapshot: Codable, Equatable {
     let schemaVersion: Int
+    let appLanguageCode: String
     let netDailyPace: Double
     let paceStatus: String
     let displayValue: String
     let displayStatusCopy: String
     let currencyCode: String
     let currencySymbol: String
+    let savingsTargetAmount: Double
+    let savingsCurrentAmount: Double
     let isPremium: Bool
     let generatedAt: Date
     let staleAfter: Date

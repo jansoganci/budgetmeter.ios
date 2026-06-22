@@ -16,6 +16,7 @@ struct PremiumUpgradeBanner: View {
 
     @AppStorage("premiumUpgradeBannerDismissed") private var isDismissed = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.themeAccent) private var themeAccent
 
     private let featureHighlights = [
         String(localized: "premium.banner.feature.subscriptions", defaultValue: "Subscription tracking", table: "UI"),
@@ -108,7 +109,7 @@ struct PremiumUpgradeBanner: View {
                 }
                 .padding(.horizontal, Spacing.lg)
                 .padding(.vertical, Spacing.md)
-                .background(Color.accentPrimary)
+                .background(themeAccent)
                 .clipShape(RoundedRectangle(cornerRadius: CornerRadius.button, style: .continuous))
             }
             .buttonStyle(PremiumBannerButtonStyle())

@@ -278,6 +278,17 @@ final class AuthService: ObservableObject {
         authProvider = provider
         phase = .signedIn
         sessionStore.save(userID: user.id.uuidString, email: user.email)
+
+        Task {
+            await SupabaseAccountDataService.shared.bootstrapSignedInAccount(
+                profileEmail: user.email,
+                provider: provider == .apple ? "apple" : "email"
+            )
+            await SupabaseSavingsGoalSyncService.shared.bootstrapSignedInAccount()
+            await SupabasePhase2FinancialSyncBootstrap.shared.bootstrapSignedInAccount()
+            await SupabaseOneTimeTransactionSyncService.shared.bootstrapSignedInAccount()
+            await SupabaseFinancialCategorySyncService.shared.bootstrapSignedInAccount()
+        }
     }
 
     private func clearSessionState() {

@@ -13,6 +13,7 @@ struct SettingsView: View {
     @StateObject private var viewModel = SettingsViewModel()
     @StateObject private var premiumManager = PremiumManager.shared
     @StateObject private var authService = AuthService.shared
+    @Environment(\.themeAccent) private var themeAccent
     @State private var showingPremiumPaywall = false
     #if DEBUG
     @AppStorage(PremiumManager.debugPremiumOverrideKey) private var debugPremiumEnabled = false
@@ -264,7 +265,7 @@ struct SettingsView: View {
             NavigationLink(destination: AccountBackupSettingsView()) {
                 SettingsRowContent(
                     iconName: "person.crop.circle",
-                    title: "settings.account.title".localized(defaultValue: "Account & Backup", table: "UI"),
+                    title: "settings.account.title".localized(defaultValue: "Account", table: "UI"),
                     subtitle: accountStatusText,
                     trailingBadge: premiumManager.isPremium ? .premiumActive : nil,
                     showsChevron: true
@@ -274,7 +275,7 @@ struct SettingsView: View {
             .accessibilityLabel(
                 String(
                     format: "settings.notifications.accessibility".localized(defaultValue: "%@, %@", table: "UI"),
-                    "settings.account.title".localized(defaultValue: "Account & Backup", table: "UI"),
+                    "settings.account.title".localized(defaultValue: "Account", table: "UI"),
                     accountStatusText
                 )
             )
@@ -283,6 +284,9 @@ struct SettingsView: View {
     }
 
     private var accountStatusText: String {
+        guard authService.isAuthenticated else {
+            return "settings.account.subtitle".localized(defaultValue: "Sign in to sync your data", table: "UI")
+        }
         if let email = authService.currentEmail, !email.isEmpty {
             return email
         }
@@ -377,23 +381,23 @@ struct SettingsView: View {
                         )
                         legalSectionBlock(
                             title: "settings.privacy.policy.data_collect.title".localized(defaultValue: "DATA WE COLLECT", table: "UI"),
-                            body: "settings.privacy.policy.data_collect.content".localized(defaultValue: "• Financial data (income, expenses, categories) - stored locally on your device\n• App preferences (currency, language) - stored locally\n• Premium cloud backup (optional) - stored in your Supabase account when you sign in and back up\n• Legacy iCloud sync may still apply until migration is complete", table: "UI")
+                            body: "settings.privacy.policy.data_collect.content".localized(defaultValue: "• Financial data (income, expenses, categories) — stored locally on your device\n• App preferences (currency, language) — stored locally\n• Account sync data (when signed in) — settings, goals, bills, transactions, and categories stored in your Supabase account\n• Optional Premium manual backup snapshots — separate from everyday sync", table: "UI")
                         )
                         legalSectionBlock(
                             title: "settings.privacy.policy.data_use.title".localized(defaultValue: "HOW WE USE DATA", table: "UI"),
-                            body: "settings.privacy.policy.data_use.content".localized(defaultValue: "• To provide financial tracking functionality\n• To back up and restore premium cloud data when you sign in\n• All processing happens locally on your device", table: "UI")
+                            body: "settings.privacy.policy.data_use.content".localized(defaultValue: "• To provide financial tracking functionality\n• To sync your account data when you sign in\n• To back up and restore optional Premium manual snapshots when you choose", table: "UI")
                         )
                         legalSectionBlock(
                             title: "settings.privacy.policy.data_sharing.title".localized(defaultValue: "DATA SHARING", table: "UI"),
-                            body: "settings.privacy.policy.data_sharing.content".localized(defaultValue: "We do not sell your personal data. Optional premium cloud backup uses Supabase for secure storage. We do not share your data with advertisers or other third parties.", table: "UI")
+                            body: "settings.privacy.policy.data_sharing.content".localized(defaultValue: "We do not sell your personal data. Account sync and optional manual backup use Supabase over HTTPS. We do not share your data with advertisers or other third parties.", table: "UI")
                         )
                         legalSectionBlock(
                             title: "settings.privacy.policy.data_storage.title".localized(defaultValue: "DATA STORAGE", table: "UI"),
-                            body: "settings.privacy.policy.data_storage.content".localized(defaultValue: "• Local: Core Data database on your device\n• Cloud (Premium): Supabase-backed backup linked to your signed-in account\n• Legacy iCloud data may remain until migration is complete", table: "UI")
+                            body: "settings.privacy.policy.data_storage.content".localized(defaultValue: "• Local: Core Data database on your device\n• Account sync: Supabase (when signed in)\n• Manual backup (Premium, optional): full snapshot in user_backups", table: "UI")
                         )
                         legalSectionBlock(
                             title: "settings.privacy.policy.your_rights.title".localized(defaultValue: "YOUR RIGHTS", table: "UI"),
-                            body: "settings.privacy.policy.your_rights.content".localized(defaultValue: "• Access: View all your data within the app\n• Delete local data: Reset all data via Settings\n• Delete cloud account: Delete account in Account & Backup\n• Control: Sign out anytime; cloud backup is optional and premium", table: "UI")
+                            body: "settings.privacy.policy.your_rights.content".localized(defaultValue: "• Access: View all your data within the app\n• Delete local data: Reset all data via Settings\n• Delete account: Delete account in Account — removes synced server data\n• Control: Sign out anytime; manual backup is optional and Premium", table: "UI")
                         )
                         legalSectionBlock(
                             title: "settings.privacy.policy.contact.title".localized(defaultValue: "CONTACT", table: "UI"),
@@ -492,7 +496,7 @@ struct SettingsView: View {
                     showsChevron: false
                 )
             }
-            .tint(.accentPrimary)
+            .tint(themeAccent)
             .padding(.trailing, Spacing.md)
                 .onChange(of: debugPremiumEnabled) { _, newValue in
                     premiumManager.setDebugPremiumStatus(newValue)
@@ -640,6 +644,8 @@ struct SettingsRowContent: View {
     let role: ButtonRole?
     let showsChevron: Bool
 
+    @Environment(\.themeAccent) private var themeAccent
+
     init(
         iconName: String,
         title: String,
@@ -659,7 +665,7 @@ struct SettingsRowContent: View {
     }
 
     private var accentColor: Color {
-        role == .destructive ? .financialNegative : .accentPrimary
+        role == .destructive ? .financialNegative : themeAccent
     }
 
     private var titleColor: Color {
