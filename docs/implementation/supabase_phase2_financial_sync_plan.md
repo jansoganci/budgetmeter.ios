@@ -1153,3 +1153,27 @@ That keeps Phase 2 moving while preserving isolation from the active Phase 1 Swi
 | `financial_snapshots` | — | — | Deferred |
 
 Core Data model **v6** adds sync metadata on Subscription, Bill, BillPayment, and RecurringTransaction. Sign-in bootstrap runs `SupabasePhase2FinancialSyncBootstrap` after savings goals. BackupService and CloudKit retained.
+
+---
+
+## 21. Row-Level Currency Code (Migration 0010)
+
+Account-level `user_settings.preferred_currency_code` remains the **default for new records only**.
+
+Each money-bearing synced table now stores its own `currency_code`:
+
+- `savings_goals`
+- `subscriptions`
+- `bills`
+- `bill_payments`
+- `recurring_transactions`
+- `one_time_transactions`
+
+Rules:
+
+- New local/remote money records stamp `currencyCode` from the current preferred currency at creation time.
+- Changing preferred currency later does **not** rewrite existing row-level codes.
+- Display and sync payloads prefer row-level `currencyCode`; account preferred currency is a fallback for legacy rows missing the field.
+- **No currency conversion or exchange rates** are implemented — amounts stay in the currency they were saved with.
+- Supabase migration: `supabase/migrations/0010_add_currency_code_to_money_tables.sql`
+- Core Data model **v8** adds optional `currencyCode` on local money entities (lightweight migration + app launch backfill via `FinancialDataMigrationService` v2).

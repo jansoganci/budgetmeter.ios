@@ -15,7 +15,7 @@ final class FinancialDataMigrationService {
     // MARK: - Version Tracking
 
     static let migrationVersionKey = "financialDataMigrationVersion"
-    static let currentMigrationVersion = 1
+    static let currentMigrationVersion = 2
 
     // MARK: - Domain Constants
 
@@ -61,6 +61,7 @@ final class FinancialDataMigrationService {
         didChange = migrateFinancialCategoryDefaults(in: context) || didChange
         didChange = migrateLegacyRecurringFrequencyRows(in: context) || didChange
         didChange = migrateLegacySavingsGoalIfNeeded(in: context) || didChange
+        didChange = migrateMoneyRecordCurrencyCodes(in: context) || didChange
 
         if didChange {
             if persistenceService.save() {
@@ -251,6 +252,46 @@ final class FinancialDataMigrationService {
             print("❌ FinancialDataMigrationService: Failed to fetch savings goals: \(error)")
             return true
         }
+    }
+
+    // MARK: - Row-Level Currency Backfill
+
+    @discardableResult
+    private func migrateMoneyRecordCurrencyCodes(in context: NSManagedObjectContext) -> Bool {
+        guard recordedMigrationVersion < 2 else { return false }
+
+        let preferredCode = fetchAppSettings(in: context)?.preferredCurrencyCode
+            ?? CurrencyHelper.defaultCurrencyCode()
+        var changedCount = 0
+
+        let entityNames = [
+            "SavingsGoal",
+            "Subscription",
+            "Bill",
+            "BillPayment",
+            "RecurringTransaction",
+            "FinancialCategory"
+        ]
+
+        for entityName in entityNames {
+            let request = NSFetchRequest<NSManagedObject>(entityName: entityName)
+            guard let rows = try? context.fetch(request) else { continue }
+
+            for row in rows {
+                let before = (row.value(forKey: "currencyCode") as? String) ?? ""
+                RecordCurrencySupport.backfillCurrencyCodeIfNeeded(on: row, preferredCode: preferredCode)
+                let after = (row.value(forKey: "currencyCode") as? String) ?? ""
+                if before != after, !after.isEmpty {
+                    changedCount += 1
+                }
+            }
+        }
+
+        if changedCount > 0 {
+            print("🔄 FinancialDataMigrationService: Backfilled currencyCode on \(changedCount) money records")
+        }
+
+        return changedCount > 0
     }
 
     // MARK: - Version Marker

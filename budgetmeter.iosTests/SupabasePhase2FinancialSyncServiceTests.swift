@@ -104,6 +104,7 @@ final class SupabasePhase2FinancialSyncServiceTests: XCTestCase {
                 isActive: true,
                 notes: nil,
                 lastProcessedDate: nil,
+                currencyCode: "USD",
                 createdAt: Date(),
                 updatedAt: Date(),
                 deletedAt: nil
@@ -203,6 +204,7 @@ private final class MockSupabaseSubscriptionRemoteStore: SupabaseSubscriptionRem
             nextRenewalDate: payload.nextRenewalDate, categoryLabel: payload.categoryLabel,
             notes: payload.notes, reminderDaysBefore: payload.reminderDaysBefore,
             isActive: payload.isActive, isPaused: payload.isPaused,
+            currencyCode: payload.currencyCode,
             createdAt: payload.createdAt, updatedAt: Date(), deletedAt: payload.deletedAt
         )
     }
@@ -224,6 +226,7 @@ private final class MockSupabaseBillRemoteStore: SupabaseBillRemoteStoreProtocol
             categoryLabel: payload.categoryLabel, iconName: payload.iconName, colorHex: payload.colorHex,
             notes: payload.notes, reminderDaysBefore: payload.reminderDaysBefore, isPaid: payload.isPaid,
             paidDate: payload.paidDate, paidAmount: payload.paidAmount, isAutoPay: payload.isAutoPay,
+            currencyCode: payload.currencyCode,
             createdAt: payload.createdAt, updatedAt: Date(), deletedAt: payload.deletedAt
         )
     }

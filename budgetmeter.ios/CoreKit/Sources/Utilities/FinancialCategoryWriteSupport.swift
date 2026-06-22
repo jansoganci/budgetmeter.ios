@@ -42,6 +42,7 @@ enum FinancialCategoryWriteSupport {
         case .oneTime:
             category.frequency = "once"
             category.occurrenceDate = occurrenceDate
+            RecordCurrencySupport.stampCurrencyCodeIfNeeded(on: category)
         }
     }
 

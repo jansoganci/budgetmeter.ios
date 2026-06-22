@@ -159,8 +159,15 @@ final class SavingsGoalsViewModel: ObservableObject {
 
     // MARK: - Formatting
 
-    func formatAmount(_ amount: Double) -> String {
-        CurrencyHelper.format(amount: amount, currencyCode: currencyCode)
+    func formatAmount(_ amount: Double, currencyCode: String? = nil) -> String {
+        CurrencyHelper.format(
+            amount: amount,
+            currencyCode: RecordCurrencySupport.resolvedDisplayCode(storedCode: currencyCode ?? self.currencyCode)
+        )
+    }
+
+    func formatAmount(for goal: SavingsGoal, _ amount: Double) -> String {
+        formatAmount(amount, currencyCode: goal.currencyCode)
     }
 
     func formatProgress(_ goal: SavingsGoal) -> String {

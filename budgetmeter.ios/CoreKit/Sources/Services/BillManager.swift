@@ -76,6 +76,7 @@ final class BillManager {
         bill.colorHex = colorHex
         bill.createdAt = Date()
         bill.lastModified = Date()
+        RecordCurrencySupport.stampCurrencyCodeIfNeeded(on: bill)
         markBillPending(bill)
 
         guard persistence.save() else {

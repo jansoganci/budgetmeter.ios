@@ -84,6 +84,7 @@ final class ExpenseViewModel: ObservableObject {
     private let summaryBuilder: FinancialSummaryBuilder
     private let oneTimeSyncService: OneTimeTransactionSyncScheduling
     private let categorySyncService: FinancialCategorySyncScheduling
+    private let paceSyncService: RecurringCategoryPaceSyncScheduling
     private var cancellables = Set<AnyCancellable>()
     private var currencyCode: String = CurrencyHelper.defaultCurrencyCode()
     private var hasLoadedCategories = false
@@ -100,17 +101,20 @@ final class ExpenseViewModel: ObservableObject {
         persistenceService: PersistenceService = .shared,
         summaryBuilder: FinancialSummaryBuilder? = nil,
         oneTimeSyncService: OneTimeTransactionSyncScheduling = SupabaseOneTimeTransactionSyncService.shared,
-        categorySyncService: FinancialCategorySyncScheduling = SupabaseFinancialCategorySyncService.shared
+        categorySyncService: FinancialCategorySyncScheduling = SupabaseFinancialCategorySyncService.shared,
+        paceSyncService: RecurringCategoryPaceSyncScheduling = SupabaseRecurringCategoryPaceSyncService.shared
     ) {
         self.persistenceService = persistenceService
         self.summaryBuilder = summaryBuilder ?? FinancialSummaryBuilder(context: persistenceService.viewContext)
         self.oneTimeSyncService = oneTimeSyncService
         self.categorySyncService = categorySyncService
+        self.paceSyncService = paceSyncService
         setupCurrencyObserver()
         setupLanguageObserver()
         setupSubscriptionObservers()
         setupOneTimeSyncObserver()
         setupCategorySyncObserver()
+        setupPaceSyncObserver()
         loadCurrency()
         loadExpenseCategories()
         loadSubscriptions()
@@ -124,6 +128,7 @@ final class ExpenseViewModel: ObservableObject {
     
     func updateAmount(for category: FinancialCategory, amount: Double) {
         category.amount = amount
+        RecordCurrencySupport.stampCurrencyCodeIfNeeded(on: category)
         FinancialCategoryWriteSupport.touchModified(category)
         guard persistenceService.save() else {
             errorMessage = Self.saveFailedMessage
@@ -132,6 +137,7 @@ final class ExpenseViewModel: ObservableObject {
 
         loadExpenseCategories(showLoadingIndicator: false)
 
+        syncRecurringPaceChange(for: category)
         syncOneTimeChange(for: category)
         WidgetSnapshotService.refreshFromCurrentData()
     }
@@ -264,6 +270,7 @@ final class ExpenseViewModel: ObservableObject {
         }
 
         categorySyncService.tombstoneLocalCustomCategory(category)
+        paceSyncService.tombstoneLocalRecurringPaceRow(category)
         loadExpenseCategories(showLoadingIndicator: false)
         WidgetSnapshotService.refreshFromCurrentData()
     }
@@ -287,6 +294,7 @@ final class ExpenseViewModel: ObservableObject {
             let recurringExpenses = allExpenses
                 .filter { FinancialCategoryWriteSupport.isRecurringDisplayCategory($0) }
                 .filter { !FinancialCategorySyncMetadataStore.shared.isTombstonedCustomCategory($0, in: context) }
+                .filter { !RecurringCategoryPaceSyncMetadataStore.shared.isTombstoned($0, in: context) }
 
             dailyExpenses = recurringExpenses.filter { $0.frequency == "daily" }
             weeklyExpenses = recurringExpenses.filter { $0.frequency == "weekly" }
@@ -478,6 +486,25 @@ private extension ExpenseViewModel {
     func syncOneTimeChange(for category: FinancialCategory) {
         guard FinancialCategoryWriteSupport.isOneTimeDisplayCategory(category) else { return }
         oneTimeSyncService.registerLocalOneTimeRow(category)
+    }
+
+    func syncRecurringPaceChange(for category: FinancialCategory) {
+        guard FinancialCategoryWriteSupport.isRecurringDisplayCategory(category) else { return }
+        guard category.sourceType != "recurringAutomation" else { return }
+        paceSyncService.registerLocalRecurringPaceRow(category)
+    }
+
+    func setupPaceSyncObserver() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(recurringCategoryPaceDidSync(_:)),
+            name: .recurringCategoryPaceDidSync,
+            object: nil
+        )
+    }
+
+    @objc func recurringCategoryPaceDidSync(_ notification: Notification) {
+        loadExpenseCategories(showLoadingIndicator: false)
     }
 
     func setupCurrencyObserver() {

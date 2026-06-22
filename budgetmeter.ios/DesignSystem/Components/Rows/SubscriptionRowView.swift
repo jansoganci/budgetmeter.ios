@@ -70,7 +70,10 @@ struct SubscriptionRowView: View {
 
     private var formattedAmount: String {
         let amount = subscription.amount
-        return CurrencyHelper.format(amount: amount, currencyCode: CurrencyHelper.currentCurrencyCode())
+        return CurrencyHelper.format(
+            amount: amount,
+            currencyCode: RecordCurrencySupport.resolvedDisplayCode(storedCode: subscription.currencyCode)
+        )
     }
 
     private var billingCycleText: String {

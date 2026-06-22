@@ -110,6 +110,98 @@ enum FinancialEntitySyncSupport {
     }
 }
 
+/// Row-level currency stamping and display resolution for money-bearing records.
+enum RecordCurrencySupport {
+    static func preferredCurrencyCode(in context: NSManagedObjectContext) -> String {
+        let request: NSFetchRequest<AppSettings> = AppSettings.fetchRequest()
+        if let settings = try? context.fetch(request).first,
+           let storedCode = settings.preferredCurrencyCode,
+           CurrencyHelper.supportedCurrencyCodes.contains(storedCode) {
+            return storedCode
+        }
+        return CurrencyHelper.defaultCurrencyCode()
+    }
+
+    static func stampCurrencyCodeIfNeeded(on goal: SavingsGoal) {
+        guard normalized(goal.currencyCode).isEmpty else { return }
+        let context = goal.managedObjectContext ?? PersistenceService.shared.viewContext
+        goal.currencyCode = preferredCurrencyCode(in: context)
+    }
+
+    static func stampCurrencyCodeIfNeeded(on subscription: Subscription) {
+        guard normalized(subscription.currencyCode).isEmpty else { return }
+        let context = subscription.managedObjectContext ?? PersistenceService.shared.viewContext
+        subscription.currencyCode = preferredCurrencyCode(in: context)
+    }
+
+    static func stampCurrencyCodeIfNeeded(on bill: Bill) {
+        guard normalized(bill.currencyCode).isEmpty else { return }
+        let context = bill.managedObjectContext ?? PersistenceService.shared.viewContext
+        bill.currencyCode = preferredCurrencyCode(in: context)
+    }
+
+    static func stampCurrencyCodeIfNeeded(on payment: BillPayment) {
+        guard normalized(payment.currencyCode).isEmpty else { return }
+        let context = payment.managedObjectContext ?? PersistenceService.shared.viewContext
+        payment.currencyCode = preferredCurrencyCode(in: context)
+    }
+
+    static func stampCurrencyCodeIfNeeded(on transaction: RecurringTransaction) {
+        guard normalized(transaction.currencyCode).isEmpty else { return }
+        let context = transaction.managedObjectContext ?? PersistenceService.shared.viewContext
+        transaction.currencyCode = preferredCurrencyCode(in: context)
+    }
+
+    static func stampCurrencyCodeIfNeeded(on category: FinancialCategory) {
+        guard normalized(category.currencyCode).isEmpty else { return }
+        let context = category.managedObjectContext ?? PersistenceService.shared.viewContext
+        category.currencyCode = preferredCurrencyCode(in: context)
+    }
+
+    static func resolvedDisplayCode(storedCode: String?, in context: NSManagedObjectContext? = nil) -> String {
+        let code = normalized(storedCode)
+        if !code.isEmpty, CurrencyHelper.supportedCurrencyCodes.contains(code) {
+            return code
+        }
+        if let context {
+            return preferredCurrencyCode(in: context)
+        }
+        return CurrencyHelper.currentCurrencyCode()
+    }
+
+    static func payloadCurrencyCode(storedCode: String?, in context: NSManagedObjectContext? = nil) -> String {
+        resolvedDisplayCode(storedCode: storedCode, in: context)
+    }
+
+    static func backfillCurrencyCodeIfNeeded(on entity: NSManagedObject, preferredCode: String) {
+        let fallback = normalized(preferredCode).isEmpty
+            ? CurrencyHelper.defaultCurrencyCode()
+            : preferredCode
+
+        switch entity {
+        case let goal as SavingsGoal where normalized(goal.currencyCode).isEmpty:
+            goal.currencyCode = fallback
+        case let subscription as Subscription where normalized(subscription.currencyCode).isEmpty:
+            subscription.currencyCode = fallback
+        case let bill as Bill where normalized(bill.currencyCode).isEmpty:
+            bill.currencyCode = fallback
+        case let payment as BillPayment where normalized(payment.currencyCode).isEmpty:
+            payment.currencyCode = fallback
+        case let transaction as RecurringTransaction where normalized(transaction.currencyCode).isEmpty:
+            transaction.currencyCode = fallback
+        case let category as FinancialCategory where normalized(category.currencyCode).isEmpty:
+            guard FinancialCategoryWriteSupport.isOneTimeDisplayCategory(category) else { return }
+            category.currencyCode = fallback
+        default:
+            break
+        }
+    }
+
+    private static func normalized(_ value: String?) -> String {
+        value?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+    }
+}
+
 extension Subscription {
     func ensureFinancialSyncClientRecordID() -> String {
         if let id {

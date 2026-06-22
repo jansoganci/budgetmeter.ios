@@ -137,6 +137,7 @@ final class RecurringTransactionsViewModel: ObservableObject {
         newTransaction.createdAt = Date()
         newTransaction.lastModified = Date()
         newTransaction.lastProcessedDate = nil
+        RecordCurrencySupport.stampCurrencyCodeIfNeeded(on: newTransaction)
         newTransaction.markFinancialSyncPending()
         
         persistenceService.save()

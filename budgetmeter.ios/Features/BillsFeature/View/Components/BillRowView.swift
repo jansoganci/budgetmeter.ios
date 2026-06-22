@@ -128,7 +128,7 @@ struct BillRowView: View {
             Spacer()
 
             VStack(alignment: .trailing, spacing: 4) {
-                Text(viewModel.formatAmount(bill.amount))
+                Text(viewModel.formatAmount(for: bill, bill.amount))
                     .font(.body)
                     .fontWeight(.semibold)
                     .foregroundColor(.textPrimary)

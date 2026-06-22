@@ -22,6 +22,7 @@ struct SupabaseBillPaymentRow: Decodable, Equatable {
     let notes: String?
     let wasLate: Bool
     let daysLate: Int?
+    let currencyCode: String
     let createdAt: Date?
     let updatedAt: Date?
     let deletedAt: Date?
@@ -39,6 +40,7 @@ struct SupabaseBillPaymentRow: Decodable, Equatable {
         case notes
         case wasLate = "was_late"
         case daysLate = "days_late"
+        case currencyCode = "currency_code"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
         case deletedAt = "deleted_at"
@@ -57,6 +59,7 @@ struct SupabaseBillPaymentRow: Decodable, Equatable {
         notes: String?,
         wasLate: Bool,
         daysLate: Int?,
+        currencyCode: String,
         createdAt: Date?,
         updatedAt: Date?,
         deletedAt: Date?
@@ -73,6 +76,7 @@ struct SupabaseBillPaymentRow: Decodable, Equatable {
         self.notes = notes
         self.wasLate = wasLate
         self.daysLate = daysLate
+        self.currencyCode = currencyCode
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.deletedAt = deletedAt
@@ -92,6 +96,7 @@ struct SupabaseBillPaymentRow: Decodable, Equatable {
         notes = try container.decodeIfPresent(String.self, forKey: .notes)
         wasLate = try container.decode(Bool.self, forKey: .wasLate)
         daysLate = try container.decodeIfPresent(Int.self, forKey: .daysLate)
+        currencyCode = try container.decode(String.self, forKey: .currencyCode)
         createdAt = try container.decodeTimestampIfPresent(forKey: .createdAt)
         updatedAt = try container.decodeTimestampIfPresent(forKey: .updatedAt)
         deletedAt = try container.decodeTimestampIfPresent(forKey: .deletedAt)
@@ -110,6 +115,7 @@ struct SupabaseBillPaymentUpsertPayload: Encodable {
     let notes: String?
     let wasLate: Bool
     let daysLate: Int?
+    let currencyCode: String
     let createdAt: Date?
     let deletedAt: Date?
 
@@ -125,6 +131,7 @@ struct SupabaseBillPaymentUpsertPayload: Encodable {
         case notes
         case wasLate = "was_late"
         case daysLate = "days_late"
+        case currencyCode = "currency_code"
         case createdAt = "created_at"
         case deletedAt = "deleted_at"
     }
@@ -142,6 +149,7 @@ struct SupabaseBillPaymentUpsertPayload: Encodable {
         try container.encodeIfPresent(notes, forKey: .notes)
         try container.encode(wasLate, forKey: .wasLate)
         try container.encodeIfPresent(daysLate, forKey: .daysLate)
+        try container.encode(currencyCode, forKey: .currencyCode)
         try container.encodeTimestampIfPresent(createdAt, forKey: .createdAt)
         try container.encodeTimestampIfPresent(deletedAt, forKey: .deletedAt)
     }
@@ -453,6 +461,7 @@ final class SupabaseBillPaymentSyncService: FinancialEntitySyncScheduling {
             notes: payment.notes,
             wasLate: payment.wasLate,
             daysLate: payment.daysLate > 0 ? Int(payment.daysLate) : nil,
+            currencyCode: RecordCurrencySupport.payloadCurrencyCode(storedCode: payment.currencyCode),
             createdAt: payment.createdAt,
             deletedAt: payment.deletedAt
         )
@@ -486,6 +495,7 @@ final class SupabaseBillPaymentSyncService: FinancialEntitySyncScheduling {
         payment.notes = remoteRow.notes
         payment.wasLate = remoteRow.wasLate
         payment.daysLate = Int16(clamping: remoteRow.daysLate ?? 0)
+        payment.currencyCode = remoteRow.currencyCode
         payment.createdAt = remoteRow.createdAt ?? payment.createdAt ?? Date()
         payment.lastModified = FinancialEntitySyncSupport.maxDate(
             payment.lastModified,

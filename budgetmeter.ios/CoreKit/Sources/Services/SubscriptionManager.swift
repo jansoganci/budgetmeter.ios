@@ -60,6 +60,7 @@ final class SubscriptionManager {
         subscription.reminderDaysBefore = Int16(reminderDaysBefore)
         subscription.createdAt = Date()
         subscription.lastModified = Date()
+        RecordCurrencySupport.stampCurrencyCodeIfNeeded(on: subscription)
         subscription.markFinancialSyncPending()
 
         guard persistence.save() else {

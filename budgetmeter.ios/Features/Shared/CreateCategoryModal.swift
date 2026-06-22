@@ -289,6 +289,7 @@ struct CreateCategoryModal: View {
                     SupabaseOneTimeTransactionSyncService.shared.registerLocalOneTimeRow(category)
                 } else {
                     SupabaseFinancialCategorySyncService.shared.registerLocalCustomCategory(category)
+                    SupabaseRecurringCategoryPaceSyncService.shared.registerLocalRecurringPaceRow(category)
                 }
                 onSave(category)
             } else {

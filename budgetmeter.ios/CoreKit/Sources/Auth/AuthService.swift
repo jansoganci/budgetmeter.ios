@@ -288,6 +288,7 @@ final class AuthService: ObservableObject {
             await SupabasePhase2FinancialSyncBootstrap.shared.bootstrapSignedInAccount()
             await SupabaseOneTimeTransactionSyncService.shared.bootstrapSignedInAccount()
             await SupabaseFinancialCategorySyncService.shared.bootstrapSignedInAccount()
+            await SupabaseRecurringCategoryPaceSyncService.shared.bootstrapSignedInAccount()
         }
     }
 

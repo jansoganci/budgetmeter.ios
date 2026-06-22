@@ -41,6 +41,7 @@ struct SupabaseSavingsGoalRow: Decodable, Equatable {
     let notes: String?
     let categoryLabel: String?
     let monthlyContribution: Decimal?
+    let currencyCode: String
     let createdAt: Date?
     let updatedAt: Date?
     let deletedAt: Date?
@@ -62,6 +63,7 @@ struct SupabaseSavingsGoalRow: Decodable, Equatable {
         case notes
         case categoryLabel = "category_label"
         case monthlyContribution = "monthly_contribution"
+        case currencyCode = "currency_code"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
         case deletedAt = "deleted_at"
@@ -84,6 +86,7 @@ struct SupabaseSavingsGoalRow: Decodable, Equatable {
         notes: String?,
         categoryLabel: String?,
         monthlyContribution: Decimal?,
+        currencyCode: String,
         createdAt: Date?,
         updatedAt: Date?,
         deletedAt: Date?
@@ -104,6 +107,7 @@ struct SupabaseSavingsGoalRow: Decodable, Equatable {
         self.notes = notes
         self.categoryLabel = categoryLabel
         self.monthlyContribution = monthlyContribution
+        self.currencyCode = currencyCode
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.deletedAt = deletedAt
@@ -127,6 +131,7 @@ struct SupabaseSavingsGoalRow: Decodable, Equatable {
         notes = try container.decodeIfPresent(String.self, forKey: .notes)
         categoryLabel = try container.decodeIfPresent(String.self, forKey: .categoryLabel)
         monthlyContribution = try container.decodeIfPresent(Decimal.self, forKey: .monthlyContribution)
+        currencyCode = try container.decode(String.self, forKey: .currencyCode)
         createdAt = try container.decodeTimestampIfPresent(forKey: .createdAt)
         updatedAt = try container.decodeTimestampIfPresent(forKey: .updatedAt)
         deletedAt = try container.decodeTimestampIfPresent(forKey: .deletedAt)
@@ -149,6 +154,7 @@ struct SupabaseSavingsGoalUpsertPayload: Encodable {
     let notes: String?
     let categoryLabel: String?
     let monthlyContribution: Decimal?
+    let currencyCode: String
     let createdAt: Date?
     let deletedAt: Date?
 
@@ -168,6 +174,7 @@ struct SupabaseSavingsGoalUpsertPayload: Encodable {
         case notes
         case categoryLabel = "category_label"
         case monthlyContribution = "monthly_contribution"
+        case currencyCode = "currency_code"
         case createdAt = "created_at"
         case deletedAt = "deleted_at"
     }
@@ -189,6 +196,7 @@ struct SupabaseSavingsGoalUpsertPayload: Encodable {
         try container.encodeIfPresent(notes, forKey: .notes)
         try container.encodeIfPresent(categoryLabel, forKey: .categoryLabel)
         try container.encodeIfPresent(monthlyContribution, forKey: .monthlyContribution)
+        try container.encode(currencyCode, forKey: .currencyCode)
         try container.encodeTimestampIfPresent(createdAt, forKey: .createdAt)
         try container.encodeTimestampIfPresent(deletedAt, forKey: .deletedAt)
     }
@@ -443,6 +451,7 @@ final class SupabaseSavingsGoalSyncService: SavingsGoalSyncScheduling {
             notes: goal.notes,
             categoryLabel: goal.category,
             monthlyContribution: goal.monthlyContribution > 0 ? Self.decimal(from: goal.monthlyContribution) : nil,
+            currencyCode: RecordCurrencySupport.payloadCurrencyCode(storedCode: goal.currencyCode),
             createdAt: goal.createdAt,
             deletedAt: goal.deletedAt
         )
@@ -475,6 +484,7 @@ final class SupabaseSavingsGoalSyncService: SavingsGoalSyncScheduling {
         goal.notes = remoteRow.notes
         goal.category = remoteRow.categoryLabel
         goal.monthlyContribution = Self.double(from: remoteRow.monthlyContribution ?? 0)
+        goal.currencyCode = remoteRow.currencyCode
         goal.createdAt = remoteRow.createdAt ?? goal.createdAt ?? Date()
         goal.lastModified = maxDate(goal.lastModified, remoteRow.updatedAt ?? remoteRow.createdAt)
         goal.deletedAt = remoteRow.deletedAt

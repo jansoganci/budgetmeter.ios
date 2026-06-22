@@ -87,17 +87,17 @@ struct SavingsGoalDetailView: View {
                         // Amounts
                         VStack(spacing: Spacing.xs) {
                             HStack(alignment: .firstTextBaseline, spacing: 4) {
-                                Text(formatAmount(goal.currentAmount))
+                                Text(formatAmount(goal.currentAmount, for: goal))
                                     .font(.system(size: 32, weight: .bold, design: .rounded))
                                     .foregroundColor(.textPrimary)
 
-                                Text(String(format: String(localized: "savings.of_amount", defaultValue: "of %@", table: "UI"), formatAmount(goal.targetAmount)))
+                                Text(String(format: String(localized: "savings.of_amount", defaultValue: "of %@", table: "UI"), formatAmount(goal.targetAmount, for: goal)))
                                     .font(.title3)
                                     .foregroundColor(.textSecondary)
                             }
 
                             if remaining > 0 {
-                                Text(String(format: String(localized: "savings.to_go", defaultValue: "%@ to go", table: "UI"), formatAmount(remaining)))
+                                Text(String(format: String(localized: "savings.to_go", defaultValue: "%@ to go", table: "UI"), formatAmount(remaining, for: goal)))
                                     .font(.subheadline)
                                     .foregroundColor(.textSecondary)
                             } else {
@@ -114,8 +114,8 @@ struct SavingsGoalDetailView: View {
                         String(
                             format: String(localized: "savings.detail.progress.accessibility", defaultValue: "Goal progress %@. %@ saved out of %@.", table: "UI"),
                             progressPercentage,
-                            formatAmount(goal.currentAmount),
-                            formatAmount(goal.targetAmount)
+                            formatAmount(goal.currentAmount, for: goal),
+                            formatAmount(goal.targetAmount, for: goal)
                         )
                     )
 
@@ -181,7 +181,7 @@ struct SavingsGoalDetailView: View {
                                             .font(.caption)
                                             .foregroundColor(.textSecondary)
 
-                                        Text(formatAmount(required))
+                                        Text(formatAmount(required, for: goal))
                                             .font(.body)
                                             .fontWeight(.medium)
                                             .foregroundColor(.textPrimary)
@@ -344,7 +344,7 @@ struct SavingsGoalDetailView: View {
                 VStack(spacing: LayoutSpacing.sectionGap) {
                     SectionHeader(
                         title: String(localized: "savings.withdraw_from_goal", defaultValue: "Withdraw from Goal", table: "UI"),
-                        subtitle: String(format: String(localized: "savings.available_amount", defaultValue: "Available: %@", table: "UI"), formatAmount(goal.currentAmount))
+                        subtitle: String(format: String(localized: "savings.available_amount", defaultValue: "Available: %@", table: "UI"), formatAmount(goal.currentAmount, for: goal))
                     )
 
                     FinancialAmountField(
@@ -409,8 +409,11 @@ struct SavingsGoalDetailView: View {
         return Double(cleaned)
     }
 
-    private func formatAmount(_ amount: Double) -> String {
-        CurrencyHelper.format(amount: amount, currencyCode: CurrencyHelper.currentCurrencyCode())
+    private func formatAmount(_ amount: Double, for goal: SavingsGoal) -> String {
+        CurrencyHelper.format(
+            amount: amount,
+            currencyCode: RecordCurrencySupport.resolvedDisplayCode(storedCode: goal.currencyCode)
+        )
     }
 
     private func formatDate(_ date: Date) -> String {

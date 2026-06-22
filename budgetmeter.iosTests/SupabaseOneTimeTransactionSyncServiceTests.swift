@@ -287,6 +287,7 @@ final class SupabaseOneTimeTransactionSyncServiceTests: XCTestCase {
             sourceType: nil,
             sourceClientRecordID: nil,
             notes: nil,
+            currencyCode: "USD",
             createdAt: updatedAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt
@@ -331,6 +332,7 @@ private final class MockSupabaseOneTimeTransactionRemoteStore: SupabaseOneTimeTr
             sourceType: payload.sourceType,
             sourceClientRecordID: payload.sourceClientRecordID,
             notes: payload.notes,
+            currencyCode: payload.currencyCode,
             createdAt: payload.createdAt,
             updatedAt: Date(),
             deletedAt: payload.deletedAt

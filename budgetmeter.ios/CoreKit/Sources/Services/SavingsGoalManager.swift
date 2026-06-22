@@ -75,6 +75,7 @@ final class SavingsGoalManager {
         goal.priority = 0
         goal.createdAt = Date()
         goal.lastModified = Date()
+        RecordCurrencySupport.stampCurrencyCodeIfNeeded(on: goal)
         markPendingSync(for: goal)
 
         guard persistence.save() else {

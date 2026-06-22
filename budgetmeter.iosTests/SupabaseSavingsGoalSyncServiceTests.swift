@@ -293,6 +293,7 @@ final class SupabaseSavingsGoalSyncServiceTests: XCTestCase {
             notes: "notes",
             categoryLabel: "Other",
             monthlyContribution: 100,
+            currencyCode: "USD",
             createdAt: Date(timeIntervalSince1970: 1),
             updatedAt: updatedAt,
             deletedAt: deletedAt
@@ -350,6 +351,7 @@ private final class MockSupabaseSavingsGoalRemoteStore: SupabaseSavingsGoalRemot
             notes: payload.notes,
             categoryLabel: payload.categoryLabel,
             monthlyContribution: payload.monthlyContribution,
+            currencyCode: payload.currencyCode,
             createdAt: payload.createdAt ?? Date(),
             updatedAt: Date(),
             deletedAt: payload.deletedAt

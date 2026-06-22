@@ -64,7 +64,7 @@ final class FinancialDataMigrationServiceTests: XCTestCase {
 
         XCTAssertEqual(category.entryKind, "recurring")
         XCTAssertNotNil(category.lastModified)
-        XCTAssertEqual(migrationService.recordedMigrationVersion, 1)
+        XCTAssertEqual(migrationService.recordedMigrationVersion, 2)
     }
 
     // MARK: - isActive

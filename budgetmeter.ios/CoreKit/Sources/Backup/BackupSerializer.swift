@@ -149,7 +149,10 @@ struct BackupSerializer {
                 sourceType: category.sourceType,
                 sourceID: category.sourceID,
                 isActive: category.isActive,
-                createdAt: category.createdAt
+                createdAt: category.createdAt,
+                currencyCode: FinancialCategoryWriteSupport.isOneTimeDisplayCategory(category)
+                    ? category.currencyCode
+                    : nil
             )
         }
     }
@@ -173,7 +176,8 @@ struct BackupSerializer {
                 isActive: item.isActive,
                 notes: item.notes,
                 createdAt: item.createdAt,
-                lastProcessedDate: item.lastProcessedDate
+                lastProcessedDate: item.lastProcessedDate,
+                currencyCode: item.currencyCode
             )
         }
     }
@@ -200,7 +204,8 @@ struct BackupSerializer {
                 category: goal.category,
                 monthlyContribution: goal.monthlyContribution,
                 createdAt: goal.createdAt,
-                lastModified: goal.lastModified
+                lastModified: goal.lastModified,
+                currencyCode: goal.currencyCode
             )
         }
     }
@@ -225,7 +230,8 @@ struct BackupSerializer {
                 isActive: item.isActive,
                 isPaused: item.isPaused,
                 createdAt: item.createdAt,
-                lastModified: item.lastModified
+                lastModified: item.lastModified,
+                currencyCode: item.currencyCode
             )
         }
     }
@@ -254,7 +260,8 @@ struct BackupSerializer {
                 paidAmount: bill.paidAmount,
                 isAutoPay: bill.isAutoPay,
                 createdAt: bill.createdAt,
-                lastModified: bill.lastModified
+                lastModified: bill.lastModified,
+                currencyCode: bill.currencyCode
             )
         }
     }
@@ -275,7 +282,8 @@ struct BackupSerializer {
                 notes: payment.notes,
                 wasLate: payment.wasLate,
                 daysLate: payment.daysLate,
-                createdAt: payment.createdAt
+                createdAt: payment.createdAt,
+                currencyCode: payment.currencyCode
             )
         }
     }

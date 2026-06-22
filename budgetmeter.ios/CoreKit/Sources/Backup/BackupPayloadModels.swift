@@ -91,6 +91,7 @@ struct BackupFinancialCategory: Codable, Equatable {
     let sourceID: String?
     let isActive: Bool
     let createdAt: Date?
+    let currencyCode: String?
 }
 
 struct BackupRecurringTransaction: Codable, Equatable {
@@ -109,6 +110,7 @@ struct BackupRecurringTransaction: Codable, Equatable {
     let notes: String?
     let createdAt: Date?
     let lastProcessedDate: Date?
+    let currencyCode: String?
 }
 
 struct BackupSavingsGoal: Codable, Equatable {
@@ -130,6 +132,7 @@ struct BackupSavingsGoal: Codable, Equatable {
     let monthlyContribution: Double
     let createdAt: Date?
     let lastModified: Date?
+    let currencyCode: String?
 }
 
 struct BackupSubscription: Codable, Equatable {
@@ -149,6 +152,7 @@ struct BackupSubscription: Codable, Equatable {
     let isPaused: Bool
     let createdAt: Date?
     let lastModified: Date?
+    let currencyCode: String?
 }
 
 struct BackupBill: Codable, Equatable {
@@ -172,6 +176,7 @@ struct BackupBill: Codable, Equatable {
     let isAutoPay: Bool
     let createdAt: Date?
     let lastModified: Date?
+    let currencyCode: String?
 }
 
 struct BackupBillPayment: Codable, Equatable {
@@ -187,6 +192,7 @@ struct BackupBillPayment: Codable, Equatable {
     let wasLate: Bool
     let daysLate: Int16
     let createdAt: Date?
+    let currencyCode: String?
 }
 
 struct BackupFinancialSnapshot: Codable, Equatable {

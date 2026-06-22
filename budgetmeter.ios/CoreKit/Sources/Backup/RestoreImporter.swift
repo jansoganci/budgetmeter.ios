@@ -117,6 +117,7 @@ struct RestoreImporter {
         category.isActive = backup.isActive
         category.createdAt = backup.createdAt
         category.lastModified = backup.updatedAt
+        category.currencyCode = backup.currencyCode
     }
 
     private func importRecurring(_ backup: BackupRecurringTransaction, into context: NSManagedObjectContext) throws {
@@ -134,6 +135,7 @@ struct RestoreImporter {
         item.notes = backup.notes
         item.createdAt = backup.createdAt
         item.lastProcessedDate = backup.lastProcessedDate
+        item.currencyCode = backup.currencyCode
     }
 
     private func importSavingsGoal(_ backup: BackupSavingsGoal, into context: NSManagedObjectContext) throws {
@@ -154,6 +156,7 @@ struct RestoreImporter {
         goal.monthlyContribution = backup.monthlyContribution
         goal.createdAt = backup.createdAt
         goal.lastModified = backup.lastModified ?? backup.updatedAt
+        goal.currencyCode = backup.currencyCode
     }
 
     private func importSubscription(_ backup: BackupSubscription, into context: NSManagedObjectContext) throws {
@@ -172,6 +175,7 @@ struct RestoreImporter {
         item.isPaused = backup.isPaused
         item.createdAt = backup.createdAt
         item.lastModified = backup.lastModified ?? backup.updatedAt
+        item.currencyCode = backup.currencyCode
     }
 
     private func importBill(_ backup: BackupBill, into context: NSManagedObjectContext) throws {
@@ -194,6 +198,7 @@ struct RestoreImporter {
         bill.isAutoPay = backup.isAutoPay
         bill.createdAt = backup.createdAt
         bill.lastModified = backup.lastModified ?? backup.updatedAt
+        bill.currencyCode = backup.currencyCode
     }
 
     private func importBillPayment(_ backup: BackupBillPayment, into context: NSManagedObjectContext) throws {
@@ -208,6 +213,7 @@ struct RestoreImporter {
         payment.wasLate = backup.wasLate
         payment.daysLate = backup.daysLate
         payment.createdAt = backup.createdAt
+        payment.currencyCode = backup.currencyCode
     }
 
     private func importSnapshot(_ backup: BackupFinancialSnapshot, into context: NSManagedObjectContext) throws {

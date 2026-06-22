@@ -24,6 +24,7 @@ struct SupabaseSubscriptionRow: Decodable, Equatable {
     let reminderDaysBefore: Int?
     let isActive: Bool
     let isPaused: Bool
+    let currencyCode: String
     let createdAt: Date?
     let updatedAt: Date?
     let deletedAt: Date?
@@ -43,6 +44,7 @@ struct SupabaseSubscriptionRow: Decodable, Equatable {
         case reminderDaysBefore = "reminder_days_before"
         case isActive = "is_active"
         case isPaused = "is_paused"
+        case currencyCode = "currency_code"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
         case deletedAt = "deleted_at"
@@ -63,6 +65,7 @@ struct SupabaseSubscriptionRow: Decodable, Equatable {
         reminderDaysBefore: Int?,
         isActive: Bool,
         isPaused: Bool,
+        currencyCode: String,
         createdAt: Date?,
         updatedAt: Date?,
         deletedAt: Date?
@@ -81,6 +84,7 @@ struct SupabaseSubscriptionRow: Decodable, Equatable {
         self.reminderDaysBefore = reminderDaysBefore
         self.isActive = isActive
         self.isPaused = isPaused
+        self.currencyCode = currencyCode
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.deletedAt = deletedAt
@@ -102,6 +106,7 @@ struct SupabaseSubscriptionRow: Decodable, Equatable {
         reminderDaysBefore = try container.decodeIfPresent(Int.self, forKey: .reminderDaysBefore)
         isActive = try container.decode(Bool.self, forKey: .isActive)
         isPaused = try container.decode(Bool.self, forKey: .isPaused)
+        currencyCode = try container.decode(String.self, forKey: .currencyCode)
         createdAt = try container.decodeTimestampIfPresent(forKey: .createdAt)
         updatedAt = try container.decodeTimestampIfPresent(forKey: .updatedAt)
         deletedAt = try container.decodeTimestampIfPresent(forKey: .deletedAt)
@@ -122,6 +127,7 @@ struct SupabaseSubscriptionUpsertPayload: Encodable {
     let reminderDaysBefore: Int?
     let isActive: Bool
     let isPaused: Bool
+    let currencyCode: String
     let createdAt: Date?
     let deletedAt: Date?
 
@@ -139,6 +145,7 @@ struct SupabaseSubscriptionUpsertPayload: Encodable {
         case reminderDaysBefore = "reminder_days_before"
         case isActive = "is_active"
         case isPaused = "is_paused"
+        case currencyCode = "currency_code"
         case createdAt = "created_at"
         case deletedAt = "deleted_at"
     }
@@ -158,6 +165,7 @@ struct SupabaseSubscriptionUpsertPayload: Encodable {
         try container.encodeIfPresent(reminderDaysBefore, forKey: .reminderDaysBefore)
         try container.encode(isActive, forKey: .isActive)
         try container.encode(isPaused, forKey: .isPaused)
+        try container.encode(currencyCode, forKey: .currencyCode)
         try container.encodeTimestampIfPresent(createdAt, forKey: .createdAt)
         try container.encodeTimestampIfPresent(deletedAt, forKey: .deletedAt)
     }
@@ -420,6 +428,7 @@ final class SupabaseSubscriptionSyncService: FinancialEntitySyncScheduling {
             reminderDaysBefore: Int(subscription.reminderDaysBefore),
             isActive: subscription.isActive,
             isPaused: subscription.isPaused,
+            currencyCode: RecordCurrencySupport.payloadCurrencyCode(storedCode: subscription.currencyCode),
             createdAt: subscription.createdAt,
             deletedAt: subscription.deletedAt
         )
@@ -453,6 +462,7 @@ final class SupabaseSubscriptionSyncService: FinancialEntitySyncScheduling {
         subscription.reminderDaysBefore = Int16(clamping: remoteRow.reminderDaysBefore ?? 3)
         subscription.isActive = remoteRow.isActive
         subscription.isPaused = remoteRow.isPaused
+        subscription.currencyCode = remoteRow.currencyCode
         subscription.createdAt = remoteRow.createdAt ?? subscription.createdAt ?? Date()
         subscription.lastModified = FinancialEntitySyncSupport.maxDate(
             subscription.lastModified,

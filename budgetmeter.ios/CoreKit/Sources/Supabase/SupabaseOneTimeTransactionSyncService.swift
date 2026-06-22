@@ -34,6 +34,7 @@ struct SupabaseOneTimeTransactionRow: Decodable, Equatable {
     let sourceType: String?
     let sourceClientRecordID: String?
     let notes: String?
+    let currencyCode: String
     let createdAt: Date?
     let updatedAt: Date?
     let deletedAt: Date?
@@ -52,6 +53,7 @@ struct SupabaseOneTimeTransactionRow: Decodable, Equatable {
         case sourceType = "source_type"
         case sourceClientRecordID = "source_client_record_id"
         case notes
+        case currencyCode = "currency_code"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
         case deletedAt = "deleted_at"
@@ -71,6 +73,7 @@ struct SupabaseOneTimeTransactionRow: Decodable, Equatable {
         sourceType: String?,
         sourceClientRecordID: String?,
         notes: String?,
+        currencyCode: String,
         createdAt: Date?,
         updatedAt: Date?,
         deletedAt: Date?
@@ -88,6 +91,7 @@ struct SupabaseOneTimeTransactionRow: Decodable, Equatable {
         self.sourceType = sourceType
         self.sourceClientRecordID = sourceClientRecordID
         self.notes = notes
+        self.currencyCode = currencyCode
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.deletedAt = deletedAt
@@ -108,6 +112,7 @@ struct SupabaseOneTimeTransactionRow: Decodable, Equatable {
         sourceType = try container.decodeIfPresent(String.self, forKey: .sourceType)
         sourceClientRecordID = try container.decodeIfPresent(String.self, forKey: .sourceClientRecordID)
         notes = try container.decodeIfPresent(String.self, forKey: .notes)
+        currencyCode = try container.decode(String.self, forKey: .currencyCode)
         createdAt = try container.decodeTimestampIfPresent(forKey: .createdAt)
         updatedAt = try container.decodeTimestampIfPresent(forKey: .updatedAt)
         deletedAt = try container.decodeTimestampIfPresent(forKey: .deletedAt)
@@ -127,6 +132,7 @@ struct SupabaseOneTimeTransactionUpsertPayload: Encodable {
     let sourceType: String?
     let sourceClientRecordID: String?
     let notes: String?
+    let currencyCode: String
     let createdAt: Date?
     let deletedAt: Date?
 
@@ -143,6 +149,7 @@ struct SupabaseOneTimeTransactionUpsertPayload: Encodable {
         case sourceType = "source_type"
         case sourceClientRecordID = "source_client_record_id"
         case notes
+        case currencyCode = "currency_code"
         case createdAt = "created_at"
         case deletedAt = "deleted_at"
     }
@@ -161,6 +168,7 @@ struct SupabaseOneTimeTransactionUpsertPayload: Encodable {
         try container.encodeIfPresent(sourceType, forKey: .sourceType)
         try container.encodeIfPresent(sourceClientRecordID, forKey: .sourceClientRecordID)
         try container.encodeIfPresent(notes, forKey: .notes)
+        try container.encode(currencyCode, forKey: .currencyCode)
         try container.encodeTimestampIfPresent(createdAt, forKey: .createdAt)
         try container.encodeTimestampIfPresent(deletedAt, forKey: .deletedAt)
     }
@@ -480,6 +488,7 @@ final class SupabaseOneTimeTransactionSyncService: OneTimeTransactionSyncSchedul
             sourceType: category.sourceType,
             sourceClientRecordID: OneTimeTransactionSyncMapper.normalizedSourceClientRecordID(from: category.sourceID),
             notes: nil,
+            currencyCode: RecordCurrencySupport.payloadCurrencyCode(storedCode: category.currencyCode),
             createdAt: category.createdAt,
             deletedAt: metadata.deletedAt
         )
@@ -517,6 +526,7 @@ final class SupabaseOneTimeTransactionSyncService: OneTimeTransactionSyncSchedul
         category.customColorHex = remoteRow.customColorHex
         category.sourceType = remoteRow.sourceType
         category.sourceID = remoteRow.sourceClientRecordID
+        category.currencyCode = remoteRow.currencyCode
         category.isCustom = true
         category.isActive = remoteRow.deletedAt == nil
         category.createdAt = remoteRow.createdAt ?? category.createdAt ?? Date()

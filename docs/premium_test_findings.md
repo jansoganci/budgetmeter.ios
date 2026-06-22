@@ -34,6 +34,16 @@
 | Daily encourage notification | ✅ Çözüldü | — |
 | İlk kurulumda bildirim izni | ✅ Karar verildi | — |
 | Cloud backup kavramı | ❓ Kafa karışıklığı | Ürün / UX |
+| Para birimi (row-level) | ✅ Kayıt bazlı `currencyCode` eklendi; dönüşüm yok | — |
+
+---
+
+## Para Birimi Notu (Haziran 2026)
+
+- Hesap tercihi (`preferred_currency_code`) yalnızca **yeni kayıtlar** için varsayılan.
+- Kayıtlı tutarların gerçek para birimi satır bazında `currencyCode` alanında saklanır.
+- Tercih sonradan değişse bile eski kayıtların para birimi **değiştirilmez**.
+- Kur dönüşümü veya geçmiş kur çıkarımı **yok**.
 
 ---
 

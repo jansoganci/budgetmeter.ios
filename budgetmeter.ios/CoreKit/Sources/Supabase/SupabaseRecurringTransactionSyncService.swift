@@ -24,6 +24,9 @@ struct SupabaseRecurringTransactionRow: Decodable, Equatable {
     let isActive: Bool
     let notes: String?
     let lastProcessedDate: Date?
+    let currencyCode: String
+    let sourceType: String?
+    let categoryKey: String?
     let createdAt: Date?
     let updatedAt: Date?
     let deletedAt: Date?
@@ -43,6 +46,9 @@ struct SupabaseRecurringTransactionRow: Decodable, Equatable {
         case isActive = "is_active"
         case notes
         case lastProcessedDate = "last_processed_date"
+        case currencyCode = "currency_code"
+        case sourceType = "source_type"
+        case categoryKey = "category_key"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
         case deletedAt = "deleted_at"
@@ -63,6 +69,9 @@ struct SupabaseRecurringTransactionRow: Decodable, Equatable {
         isActive: Bool,
         notes: String?,
         lastProcessedDate: Date?,
+        currencyCode: String,
+        sourceType: String? = nil,
+        categoryKey: String? = nil,
         createdAt: Date?,
         updatedAt: Date?,
         deletedAt: Date?
@@ -81,6 +90,9 @@ struct SupabaseRecurringTransactionRow: Decodable, Equatable {
         self.isActive = isActive
         self.notes = notes
         self.lastProcessedDate = lastProcessedDate
+        self.currencyCode = currencyCode
+        self.sourceType = sourceType
+        self.categoryKey = categoryKey
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.deletedAt = deletedAt
@@ -102,6 +114,9 @@ struct SupabaseRecurringTransactionRow: Decodable, Equatable {
         isActive = try container.decode(Bool.self, forKey: .isActive)
         notes = try container.decodeIfPresent(String.self, forKey: .notes)
         lastProcessedDate = try container.decodeDateOnlyIfPresent(forKey: .lastProcessedDate)
+        currencyCode = try container.decode(String.self, forKey: .currencyCode)
+        sourceType = try container.decodeIfPresent(String.self, forKey: .sourceType)
+        categoryKey = try container.decodeIfPresent(String.self, forKey: .categoryKey)
         createdAt = try container.decodeTimestampIfPresent(forKey: .createdAt)
         updatedAt = try container.decodeTimestampIfPresent(forKey: .updatedAt)
         deletedAt = try container.decodeTimestampIfPresent(forKey: .deletedAt)
@@ -122,6 +137,9 @@ struct SupabaseRecurringTransactionUpsertPayload: Encodable {
     let isActive: Bool
     let notes: String?
     let lastProcessedDate: Date?
+    let currencyCode: String
+    let sourceType: String?
+    let categoryKey: String?
     let createdAt: Date?
     let deletedAt: Date?
 
@@ -139,6 +157,9 @@ struct SupabaseRecurringTransactionUpsertPayload: Encodable {
         case isActive = "is_active"
         case notes
         case lastProcessedDate = "last_processed_date"
+        case currencyCode = "currency_code"
+        case sourceType = "source_type"
+        case categoryKey = "category_key"
         case createdAt = "created_at"
         case deletedAt = "deleted_at"
     }
@@ -158,6 +179,9 @@ struct SupabaseRecurringTransactionUpsertPayload: Encodable {
         try container.encode(isActive, forKey: .isActive)
         try container.encodeIfPresent(notes, forKey: .notes)
         try container.encodeDateOnlyIfPresent(lastProcessedDate, forKey: .lastProcessedDate)
+        try container.encode(currencyCode, forKey: .currencyCode)
+        try container.encodeIfPresent(sourceType, forKey: .sourceType)
+        try container.encodeIfPresent(categoryKey, forKey: .categoryKey)
         try container.encodeTimestampIfPresent(createdAt, forKey: .createdAt)
         try container.encodeTimestampIfPresent(deletedAt, forKey: .deletedAt)
     }
@@ -266,10 +290,11 @@ final class SupabaseRecurringTransactionSyncService: FinancialEntitySyncScheduli
 
         do {
             let remoteRows = try await remoteStore.fetchRecurringTransactions(userID: userID)
+            let automationRows = remoteRows.filter { RecurringCategoryPaceSyncMapper.isAutomationRemoteRow($0) }
             try await reconcile(
                 localContext: persistenceService.viewContext,
                 userID: userID,
-                remoteRows: remoteRows
+                remoteRows: automationRows
             )
         } catch {
             print("☁️ SupabaseRecurringTransactionSyncService: sync skipped (\(error))")
@@ -413,6 +438,9 @@ final class SupabaseRecurringTransactionSyncService: FinancialEntitySyncScheduli
             isActive: transaction.isActive,
             notes: transaction.notes,
             lastProcessedDate: transaction.lastProcessedDate,
+            currencyCode: RecordCurrencySupport.payloadCurrencyCode(storedCode: transaction.currencyCode),
+            sourceType: RecurringTransactionSourceType.automation,
+            categoryKey: nil,
             createdAt: transaction.createdAt,
             deletedAt: transaction.deletedAt
         )
@@ -446,6 +474,7 @@ final class SupabaseRecurringTransactionSyncService: FinancialEntitySyncScheduli
         transaction.isActive = remoteRow.isActive
         transaction.notes = remoteRow.notes
         transaction.lastProcessedDate = remoteRow.lastProcessedDate
+        transaction.currencyCode = remoteRow.currencyCode
         transaction.createdAt = remoteRow.createdAt ?? transaction.createdAt ?? Date()
         transaction.lastModified = FinancialEntitySyncSupport.maxDate(
             transaction.lastModified,
