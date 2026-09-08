@@ -1,4 +1,7 @@
 # BudgetMeter iOS
+
+> Now documented at [jansoganci.com/work/budgetmeter](https://jansoganci.com/work/budgetmeter) — part of my public build log.
+
 BudgetMeter is a privacy-first iOS app for people who want to track income, expenses, and savings goals with live financial feedback, and it is currently in active development (not publicly live yet).
 
 ## What it does
