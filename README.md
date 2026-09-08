@@ -2,7 +2,7 @@
 
 > Now documented at [jansoganci.com/work/budgetmeter](https://jansoganci.com/work/budgetmeter) — part of my public build log.
 
-BudgetMeter is a privacy-first iOS app for people who want to track income, expenses, and savings goals with live financial feedback, and it is currently in active development (not publicly live yet).
+BudgetMeter is a privacy-first iOS app for people who want to track income, expenses, and savings goals with live financial feedback. Development has stopped and it never went publicly live — this description reflects the state of the project while it was active, not its current status.
 
 ## What it does
 - Calculates your live money flow in real time while the app is open, so you can see how your budget changes moment by moment.
